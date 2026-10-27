@@ -1,0 +1,12 @@
+# pnpm settings for this project. It is a single package, not a workspace of several.
+
+# A flat node_modules, like npm's. Capacitor writes the paths of its native packages into the
+# committed native projects (android/capacitor.settings.gradle, and Package.swift for iOS plugins).
+# With pnpm's default layout these would point into node_modules/.pnpm/<package>@<version>…, change
+# with every version and break with a global virtual store.
+nodeLinker: hoisted
+
+allowBuilds:
+  # Its postinstall only checks that the native binding is there; pnpm installs it as an
+  # optional dependency for the current platform.
+  unrs-resolver: false
