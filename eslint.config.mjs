@@ -2,11 +2,9 @@ import { defineConfig, globalIgnores } from "eslint/config"
 import nextVitals from "eslint-config-next/core-web-vitals"
 import nextTs from "eslint-config-next/typescript"
 
-// The app is a static export: nothing runs on a server at request time (docs/architecture.md).
 const staticExport =
   "The app is a static export without a server at request time, see docs/architecture.md."
 
-/** Imports that don't work in the static export. Later rules add their own paths to this list. */
 const restrictedImports = [
   { name: "next/headers", message: staticExport },
   { name: "next/cache", message: staticExport },
@@ -14,7 +12,6 @@ const restrictedImports = [
   { name: "next/server", importNames: ["connection"], message: staticExport },
 ]
 
-/** The only files that may use dangerouslySetInnerHTML. */
 const rawHtmlFiles = []
 
 const eslintConfig = defineConfig([
