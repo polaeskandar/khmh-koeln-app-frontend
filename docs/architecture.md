@@ -72,6 +72,27 @@ development; `src/lib/env.ts` checks it, and a production build fails without it
   Inside the apps the origin is `capacitor://localhost` on iOS and `https://localhost` on Android, so the
   API will need them in its CORS allowlist then.
 
+### Data access
+
+- **One `api.ts` per feature** (`src/features/<area>/api.ts`) holds its response types, query options and
+  calls; screens never build URLs or call `apiRequest()` themselves.
+- **Query keys** are `["<resource>", "list" | "detail", params]`, e.g. `["services", "list", {status: "all"}]`
+  or `["sessions", "detail", id]`. A change invalidates by prefix (`["services"]`), so every list and detail
+  of that resource refetches.
+- **Changes** go through `useApiMutation(fn, {successMessage, invalidate, onSuccess, toastOnError})`
+  (`src/lib/api/use-api-mutation.ts`). `execute()` resolves `{ok: true, data}` or `{ok: false, problem}`
+  and never throws for an API problem, so a dialog stays open until it succeeds. Failures are never
+  retried.
+- **Problems in words:** `translateProblem()` shows `errors.<code>` with the problem's `params`, or the text
+  for its status when the catalog has no such code; `fieldErrorsOf()` does the same per field. A 422 with
+  field errors shows them on the fields, without a toast; a 401 `auth.unauthenticated` ends the session
+  instead (#14); everything else is a toast (`docs/ui-conventions.md`, #13).
+- **Codes:** `src/i18n/api-codes.json` lists every code of the backend's `docs/api.md` with its params, and
+  `api-codes.test.ts` checks that en, de and ar have `errors.<code>` with exactly those ICU arguments. A PR
+  that first consumes a new code adds it there with its three texts.
+- **No persisted cache:** the query cache lives in memory and is cleared on sign-out; nothing about people
+  is written to web storage.
+
 ### Capacitor 8
 
 - App ID `de.khmkkoeln.app`, app name "KHMK Köln". Changing the ID later means editing `capacitor.config.ts`,
