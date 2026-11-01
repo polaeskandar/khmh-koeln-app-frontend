@@ -7,12 +7,12 @@ tickets.
 
 ## Requirements
 
-| Tool | Version | Needed for |
-| --- | --- | --- |
-| Node.js | 22 or newer | Everything |
-| pnpm | 12, pinned in `package.json` | Everything. `brew install pnpm`; pnpm 11 switches to the pinned version by itself, pnpm 10 can't |
-| Xcode | 26 or newer, with its command line tools | The iOS app (macOS only) |
-| Android Studio | 2025.2.1 or newer; it brings its own JDK | The Android app |
+| Tool           | Version                                  | Needed for                                                                                       |
+| -------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Node.js        | 22 or newer                              | Everything                                                                                       |
+| pnpm           | 12, pinned in `package.json`             | Everything. `brew install pnpm`; pnpm 11 switches to the pinned version by itself, pnpm 10 can't |
+| Xcode          | 26 or newer, with its command line tools | The iOS app (macOS only)                                                                         |
+| Android Studio | 2025.2.1 or newer; it brings its own JDK | The Android app                                                                                  |
 
 ## Commands
 

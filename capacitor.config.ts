@@ -1,4 +1,4 @@
-import type { CapacitorConfig } from "@capacitor/cli";
+import type { CapacitorConfig } from "@capacitor/cli"
 
 /**
  * The iOS and Android apps bundle the static export in out/. After a change, run
@@ -8,6 +8,6 @@ const config: CapacitorConfig = {
   appId: "de.khmkkoeln.app",
   appName: "KHMK Köln",
   webDir: "out",
-};
+}
 
-export default config;
+export default config
