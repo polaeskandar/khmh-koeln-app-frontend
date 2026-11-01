@@ -73,11 +73,26 @@ The project uses pnpm 12, pinned in `package.json` (`packageManager` and `devEng
 
 ### Languages: English, German and Arabic
 
-The UI is in English, German and Arabic; Arabic is read right to left. The UI prototype has every text of
-the MVP in all three (`ui-prototype/messages/{en,de,ar}.json`, with a test that keeps them in step) and is
-the reference for wording and layout; its catalogs can be copied over feature by feature.
+The UI is in English, German and Arabic; Arabic is read right to left. The texts live in
+`messages/{en,de,ar}.json`, copied once from the UI prototype without its prototype-only texts; feature PRs
+only add keys. `test/i18n/messages.test.ts` keeps the three catalogs in step (same keys, same ICU arguments,
+no empty texts), and every `t()` call is type-checked against `messages/en.json` through the declaration
+next-intl generates (`messages/en.d.json.ts`, git-ignored).
 
-The plan for the product, to be settled in the first ticket that adds texts:
+**Two layouts.** `app/layout.tsx` is the only root layout: it renders `<html>` and `<body>` for every page,
+including the language-free ones (`/` and `out/404.html`). `app/[locale]/layout.tsx` prerenders each page
+under it once per language (`generateStaticParams` with `en`, `de`, `ar`, and `dynamicParams = false`), calls
+`setRequestLocale` and wraps the page in `NextIntlClientProvider`. `src/i18n/request.ts` takes the language
+from that segment only, never from cookies or headers, and sets the time zone to Europe/Berlin.
+
+**Adding a page:** create `app/[locale]/<path>/page.tsx`; read `locale` from `params`, call
+`setRequestLocale(locale)` before any next-intl call, and translate metadata with
+`getTranslations({ locale, namespace })`. Link with `Link`, `useRouter`, `usePathname` and `redirect` from
+`@/i18n/navigation`, which keep the language in the path; ESLint rejects `next/link` and those functions
+from `next/navigation`. Paths end in a slash (`trailingSlash`), so every page is a directory with an
+`index.html`.
+
+The decisions behind this:
 
 - **next-intl with the language in the path** (`/en/…`, `/de/…`, `/ar/…`), each page built three times with
   `generateStaticParams`. A static export can't choose a language per request, and rendering one language at
@@ -132,6 +147,4 @@ through `next/font`, which puts them into the build, so the apps don't load them
 
 - Sign-in method (see above), and how the apps keep a session: secure storage for tokens.
 - Who owns the Apple Developer and Google Play accounts, and how releases are signed and published.
-- The first feature ticket with texts sets up next-intl as planned above (language paths, the redirect at
-  `/`, saving the choice).
 - Whether the web app is hosted next to the API (same domain, no CORS for the browser) or separately.
