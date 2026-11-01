@@ -595,7 +595,6 @@
       "notOnSchedule": "{name} findet am {date} nicht mehr statt. Wählen Sie ein anderes Datum.",
       "canceled": "Das Treffen am {date} wurde abgesagt. Verschieben Sie die Lektion auf ein anderes Datum.",
       "canceledReason": "Das Treffen am {date} wurde abgesagt: <bdi>{reason}</bdi> Verschieben Sie die Lektion auf ein anderes Datum.",
-      "moved": "verschoben",
       "attendanceOpen": "Anwesenheit jetzt offen",
       "held": "stattgefunden"
     },
