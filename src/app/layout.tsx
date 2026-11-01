@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { Geist, Oxanium } from "next/font/google"
 
 import { QueryProvider } from "@/lib/api/query-provider"
+import { prePaintScript } from "@/i18n/locale-choice"
 import { apiBaseUrl } from "@/lib/env"
 import { cn } from "@/lib/utils"
 import { ApiMocking } from "@/mocks/api-mocking"
@@ -28,8 +29,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cn("h-full antialiased", fontSans.variable, fontHeading.variable, "font-sans")}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: prePaintScript }} />
+      </head>
       <body className="flex min-h-full flex-col">
         <QueryProvider>
           <ApiMocking>{children}</ApiMocking>
