@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import {
   createContext,
   type ReactNode,
@@ -16,9 +16,11 @@ import { toast } from "sonner"
 import { useRouter } from "@/i18n/navigation"
 import { onUnauthorized } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/problem"
+import { type ProblemTranslator, translateProblem } from "@/lib/api/translate-problem"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { routes } from "@/lib/routes"
 
+import { onLanguageSaveFailed } from "./account-language"
 import { areasOf, type Me, meQuery, signOutRequest } from "./api"
 
 export type Session =
@@ -97,6 +99,25 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
     return refetch()
   }, [refetch])
+
+  const locale = useLocale()
+  const tAll = useTranslations() as unknown as ProblemTranslator
+
+  useEffect(
+    () =>
+      onLanguageSaveFailed((language, error) => {
+        if (language !== locale) {
+          return false
+        }
+
+        toast.error(
+          error instanceof ApiError ? translateProblem(error, tAll) : tAll("errors.internal")
+        )
+
+        return true
+      }),
+    [locale, tAll]
+  )
 
   const { execute, pending } = useApiMutation(signOutRequest)
 
