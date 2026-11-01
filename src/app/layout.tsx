@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils"
 
 import "./globals.css"
 
-// Fonts of the shadcn preset b3a10z1gt0: Oxanium for text, Geist for headings.
 const fontSans = Oxanium({ subsets: ["latin", "latin-ext"], variable: "--font-sans" })
 const fontHeading = Geist({ subsets: ["latin", "latin-ext"], variable: "--font-heading" })
 
