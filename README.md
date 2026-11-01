@@ -46,6 +46,8 @@ live reload: `pnpm cap run ios -l --host <your computer's IP> --port 3000` (or `
 - `pnpm build` writes a static export to `out/`. Browsers get these files from any static web server, and
   the apps bundle the same files: `cap sync` copies them into `ios/` and `android/`. No Node.js server runs in
   production; data comes from the Symfony API in the `backend` repository.
+- `task package` turns `out/` into the deployable bundle; [docs/deployment.md](docs/deployment.md) has the
+  hosting rules and headers.
 - The apps are called "KHMK Köln" with the app ID `de.khmkkoeln.app` (`capacitor.config.ts` and the native
   projects). They need iOS 15 or Android 7.0 (API 24) or newer.
 - `ios/` and `android/` are ordinary native projects and are committed. Icons, permissions, signing and
