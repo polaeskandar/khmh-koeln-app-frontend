@@ -3,6 +3,9 @@ import { notFound } from "next/navigation"
 import { hasLocale, NextIntlClientProvider } from "next-intl"
 import { getTranslations, setRequestLocale } from "next-intl/server"
 
+import { Providers } from "@/components/providers"
+import { UnsupportedBrowser } from "@/components/unsupported-browser"
+import { directionOf } from "@/i18n/config"
 import { routing } from "@/i18n/routing"
 
 export function generateStaticParams() {
@@ -36,5 +39,12 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
 
   setRequestLocale(locale)
 
-  return <NextIntlClientProvider>{children}</NextIntlClientProvider>
+  return (
+    <NextIntlClientProvider>
+      <Providers dir={directionOf(locale)}>
+        <UnsupportedBrowser />
+        {children}
+      </Providers>
+    </NextIntlClientProvider>
+  )
 }
