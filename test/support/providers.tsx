@@ -1,9 +1,11 @@
 import { type QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render } from "@testing-library/react"
 import { type Messages, NextIntlClientProvider } from "next-intl"
+import { Direction } from "radix-ui"
 import type { ReactElement, ReactNode } from "react"
 
-import { type Locale } from "@/i18n/config"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { directionOf, type Locale } from "@/i18n/config"
 import { makeQueryClient } from "@/lib/api/query-provider"
 
 import ar from "../../messages/ar.json"
@@ -17,7 +19,11 @@ export function testProviders({ locale = "en" }: { locale?: Locale } = {}) {
   function Providers({ children }: { children: ReactNode }) {
     return (
       <NextIntlClientProvider locale={locale} messages={catalogs[locale]} timeZone="Europe/Berlin">
-        <QueryClientProvider client={client}>{children}</QueryClientProvider>
+        <QueryClientProvider client={client}>
+          <Direction.Provider dir={directionOf(locale)}>
+            <TooltipProvider>{children}</TooltipProvider>
+          </Direction.Provider>
+        </QueryClientProvider>
       </NextIntlClientProvider>
     )
   }
