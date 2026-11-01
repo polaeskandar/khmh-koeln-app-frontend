@@ -1,10 +1,7 @@
-import { setRequestLocale } from "next-intl/server"
-
-import type { Locale } from "@/i18n/config"
+import { pageLocale } from "@/i18n/page"
 
 export default async function Home({ params }: PageProps<"/[locale]">) {
-  const { locale } = await params
-  setRequestLocale(locale as Locale)
+  await pageLocale(params)
 
   return (
     <main className="flex flex-1 items-center justify-center p-8">
