@@ -1,14 +1,36 @@
-export type Id = string
+export type Uuid = string
+export type LocalDate = string
+export type LocalTime = string
+export type Instant = string
 
-export type ServiceRef = { id: Id; name: string; tone: number; archived: boolean }
+export const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const
+export type IsoWeekday = (typeof ISO_WEEKDAYS)[number]
+export type MonthWeek = 1 | 2 | 3 | 4 | -1
+export type Frequency = "weekly" | "monthly"
 
-export type StageRef = { id: Id; name: string; position: number; archived: boolean }
+export type Recurrence = {
+  frequency: Frequency
+  interval: number
+  weekdays: IsoWeekday[]
+  monthWeek: MonthWeek | null
+  startsOn: LocalDate
+  endsOn: LocalDate | null
+}
 
-export type AccountRef = { id: Id; name: string } | null
+export type ServiceRef = { id: Uuid; name: string; tone: number; archived: boolean }
 
-export type PersonRef = { id: Id; firstName: string; lastName: string; displayName: string | null }
+export type StageRef = { id: Uuid; name: string; position: number; archived: boolean }
 
-export type LessonRef = { id: Id; title: string; teachingDate: string }
+export type AccountRef = { id: Uuid; name: string } | null
+
+export type PersonRef = {
+  id: Uuid
+  firstName: string
+  lastName: string
+  displayName: string | null
+}
+
+export type LessonRef = { id: Uuid; title: string; teachingDate: LocalDate }
 
 export type Counts = {
   present: number

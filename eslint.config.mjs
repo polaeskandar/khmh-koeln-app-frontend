@@ -19,6 +19,17 @@ const restrictedImports = [
   },
 ]
 
+const localeFormatting = [
+  {
+    selector: "CallExpression[callee.property.name=/^toLocale.*String$/]",
+    message: "Format dates and numbers with useFormat() from @/i18n/format.",
+  },
+  {
+    selector: "MemberExpression[object.name='Intl'][property.name='DateTimeFormat']",
+    message: "Format dates with useFormat() from @/i18n/format.",
+  },
+]
+
 const rawHtmlFiles = []
 
 const toolDirective = /^\s*(eslint[- ]|@ts-expect-error|\/ <reference )/
@@ -76,8 +87,13 @@ const eslintConfig = defineConfig([
         "error",
         { name: "fetch", message: "Call the API through api and dataOf() from @/lib/api/client." },
       ],
+      "no-restricted-syntax": ["error", ...localeFormatting],
       "react/no-danger": "error",
     },
+  },
+  {
+    files: ["src/lib/domain/time.ts", "test/**/*.test.{ts,tsx}"],
+    rules: { "no-restricted-syntax": "off" },
   },
   {
     files: ["src/app/page.tsx"],
