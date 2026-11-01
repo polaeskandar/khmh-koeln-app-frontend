@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import { Geist, Oxanium } from "next/font/google"
+import { Geist, Noto_Kufi_Arabic, Oxanium } from "next/font/google"
 
 import { QueryProvider } from "@/lib/api/query-provider"
 import { prePaintScript } from "@/i18n/locale-choice"
@@ -9,8 +9,14 @@ import { ApiMocking } from "@/mocks/api-mocking"
 
 import "./globals.css"
 
-const fontSans = Oxanium({ subsets: ["latin", "latin-ext"], variable: "--font-sans" })
-const fontHeading = Geist({ subsets: ["latin", "latin-ext"], variable: "--font-heading" })
+const fontText = Oxanium({ subsets: ["latin", "latin-ext"], variable: "--font-oxanium" })
+const fontHeading = Geist({ subsets: ["latin", "latin-ext"], variable: "--font-geist" })
+
+const fontArabic = Noto_Kufi_Arabic({
+  subsets: ["arabic"],
+  variable: "--font-arabic",
+  adjustFontFallback: false,
+})
 
 apiBaseUrl()
 
@@ -30,7 +36,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("h-full antialiased", fontSans.variable, fontHeading.variable, "font-sans")}
+      className={cn(
+        "h-full antialiased",
+        fontText.variable,
+        fontHeading.variable,
+        fontArabic.variable,
+        "font-sans"
+      )}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: prePaintScript }} />
