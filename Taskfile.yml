@@ -1,0 +1,56 @@
+version: "3"
+
+tasks:
+  setup:
+    desc: Install the dependencies exactly as locked
+    cmds:
+      - pnpm install --frozen-lockfile
+
+  dev:
+    desc: Start the dev server on http://localhost:3000
+    cmds:
+      - pnpm dev
+
+  lint:
+    desc: Lint with ESLint
+    cmds:
+      - pnpm lint
+
+  format:
+    desc: Format with Prettier
+    cmds:
+      - pnpm format
+
+  format:check:
+    desc: Check the formatting without changing files
+    cmds:
+      - pnpm format:check
+
+  typecheck:
+    desc: Type-check with TypeScript
+    cmds:
+      - pnpm typecheck
+
+  test:
+    desc: Run the Vitest tests
+    cmds:
+      - pnpm test
+
+  build:
+    desc: Build the static export to out/
+    cmds:
+      - pnpm build
+
+  cap:sync:
+    desc: Build, then copy out/ and the plugins into ios/ and android/
+    cmds:
+      - pnpm cap:sync
+
+  check:
+    desc: Run CI's checks (lint, formatting, types, tests, build)
+    cmds:
+      - task: lint
+      - task: format:check
+      - task: typecheck
+      - task: test
+      - task: build

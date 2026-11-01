@@ -10,24 +10,33 @@ tickets.
 | Tool           | Version                                  | Needed for                                                                                       |
 | -------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | Node.js        | 22 or newer                              | Everything                                                                                       |
+| Task           | 3                                        | The commands below (`brew install go-task`)                                                      |
 | pnpm           | 12, pinned in `package.json`             | Everything. `brew install pnpm`; pnpm 11 switches to the pinned version by itself, pnpm 10 can't |
 | Xcode          | 26 or newer, with its command line tools | The iOS app (macOS only)                                                                         |
 | Android Studio | 2025.2.1 or newer; it brings its own JDK | The Android app                                                                                  |
 
 ## Commands
 
+[Task](https://taskfile.dev) is the entry point (`brew install go-task`); `task --list` shows every task.
+Each one only calls its pnpm script, so `pnpm <script>` works too.
+
 ```bash
-pnpm install
-pnpm dev               # http://localhost:3000
-pnpm lint
-pnpm format            # format with Prettier; pnpm format:check only checks
-pnpm typecheck
-pnpm test              # Vitest with Testing Library; pnpm test:watch reruns on changes
-pnpm build             # static export to out/
-pnpm cap:sync          # build, then copy out/ and the plugins into ios/ and android/
+task setup             # pnpm install --frozen-lockfile
+task dev               # http://localhost:3000
+task lint
+task format            # format with Prettier; task format:check only checks
+task typecheck
+task test              # Vitest with Testing Library; pnpm test:watch reruns on changes
+task build             # static export to out/
+task check             # CI's checks: lint, format:check, typecheck, test, build
+task cap:sync          # build, then copy out/ and the plugins into ios/ and android/
 pnpm cap:ios           # open the iOS project in Xcode
 pnpm cap:android       # open the Android project in Android Studio
 ```
+
+CI (`.github/workflows/ci.yml`) runs `task check` on every pull request and on `main`, plus `pnpm audit --prod
+--audit-level high` and a check that `pnpm exec cap sync android` leaves the committed native projects
+unchanged.
 
 To see changes on a phone or simulator without rebuilding, keep `pnpm dev` running and start the app with
 live reload: `pnpm cap run ios -l --host <your computer's IP> --port 3000` (or `android`).
