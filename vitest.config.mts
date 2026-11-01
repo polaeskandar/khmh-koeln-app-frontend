@@ -16,5 +16,6 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["test/support/setup.ts"],
     env: { TZ: "UTC" },
+    server: { deps: { inline: ["next-intl"] } },
   },
 })
