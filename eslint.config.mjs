@@ -56,6 +56,15 @@ const eslintConfig = defineConfig([
       "react/no-danger": "error",
     },
   },
+  {
+    files: ["src/app/page.tsx"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        { paths: restrictedImports.filter((path) => path.name !== "next/navigation") },
+      ],
+    },
+  },
   ...(rawHtmlFiles.length > 0
     ? [{ files: rawHtmlFiles, rules: { "react/no-danger": "off" } }]
     : []),
