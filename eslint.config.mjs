@@ -72,6 +72,10 @@ const eslintConfig = defineConfig([
     files: ["src/**", "test/**"],
     rules: {
       "no-restricted-imports": ["error", { paths: restrictedImports }],
+      "no-restricted-globals": [
+        "error",
+        { name: "fetch", message: "Call the API through apiRequest() from @/lib/api/client." },
+      ],
       "react/no-danger": "error",
     },
   },
@@ -84,6 +88,7 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  { files: ["src/lib/api/**"], rules: { "no-restricted-globals": "off" } },
   ...(rawHtmlFiles.length > 0
     ? [{ files: rawHtmlFiles, rules: { "react/no-danger": "off" } }]
     : []),

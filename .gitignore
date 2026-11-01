@@ -47,3 +47,6 @@ next-env.d.ts
 
 # next-intl generates the message declarations from messages/en.json
 messages/*.d.json.ts
+
+# The MSW worker for `pnpm dev:mock`, generated on demand and never built into out/
+/public/mockServiceWorker.js
