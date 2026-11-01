@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server"
 
 import { Providers } from "@/components/providers"
 import { UnsupportedBrowser } from "@/components/unsupported-browser"
+import { SessionProvider } from "@/features/auth/session"
 import { directionOf } from "@/i18n/config"
 import { HtmlLangDir } from "@/i18n/html-lang-dir"
 import { routing } from "@/i18n/routing"
@@ -45,7 +46,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
       <HtmlLangDir locale={locale} />
       <Providers dir={directionOf(locale)}>
         <UnsupportedBrowser />
-        {children}
+        <SessionProvider>{children}</SessionProvider>
       </Providers>
     </NextIntlClientProvider>
   )
