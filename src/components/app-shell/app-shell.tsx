@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/sidebar"
 import { useDirection } from "@/i18n/direction"
 
+import { MobileTabBar } from "./mobile-tab-bar"
 import { SidebarBrand, SidebarNav } from "./sidebar-parts"
 
 export function AppShell({ children, footer }: { children: ReactNode; footer?: ReactNode }) {
@@ -30,7 +31,10 @@ export function AppShell({ children, footer }: { children: ReactNode; footer?: R
         {footer ? <SidebarFooter>{footer}</SidebarFooter> : null}
         <SidebarRail />
       </Sidebar>
-      <SidebarInset className="min-w-0">{children}</SidebarInset>
+      <SidebarInset className="min-w-0 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
+        {children}
+      </SidebarInset>
+      <MobileTabBar />
     </SidebarProvider>
   )
 }

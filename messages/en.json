@@ -396,7 +396,15 @@
       "parentWaiting": "Parent, waiting for access",
       "none": "No role yet",
       "memberOf": "Member · {groups}",
-      "member": "Member"
+      "member": "Member",
+      "administrator": "Administrator",
+      "staff": "{role} · {scope}{more, plural, =0 {} other { +#}}"
+    },
+    "name": {
+      "administrator": "Administrator",
+      "service_leader": "Service leader",
+      "servant": "Servant",
+      "parent": "Parent"
     }
   },
   "dashboard": {
