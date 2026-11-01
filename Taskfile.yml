@@ -46,6 +46,12 @@ tasks:
     cmds:
       - pnpm build
 
+  package:
+    desc: Build, then package out/ as web-<sha>.tar.gz with its .sha256 (docs/deployment.md)
+    cmds:
+      - task: build
+      - pnpm package
+
   cap:sync:
     desc: Build, then copy out/ and the plugins into ios/ and android/
     cmds:
