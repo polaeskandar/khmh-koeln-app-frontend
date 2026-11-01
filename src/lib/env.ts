@@ -27,3 +27,5 @@ export const apiBaseUrl = () =>
   parseApiBaseUrl(process.env.NEXT_PUBLIC_API_BASE_URL, {
     production: process.env.NODE_ENV === "production",
   })
+
+export const registrationEnabled = () => process.env.NEXT_PUBLIC_REGISTRATION_ENABLED === "true"

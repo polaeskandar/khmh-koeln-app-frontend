@@ -16,4 +16,7 @@ export const meQuery = {
   queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/me", { signal })),
 }
 
+export const signInRequest = (credentials: { email: string; password: string }) =>
+  dataOf(api.POST("/auth/sign-in", { body: credentials }))
+
 export const signOutRequest = () => dataOf(api.POST("/auth/sign-out", { body: {} }))
