@@ -20,7 +20,9 @@ tickets.
 pnpm install
 pnpm dev               # http://localhost:3000
 pnpm lint
+pnpm format            # format with Prettier; pnpm format:check only checks
 pnpm typecheck
+pnpm test              # Vitest with Testing Library; pnpm test:watch reruns on changes
 pnpm build             # static export to out/
 pnpm cap:sync          # build, then copy out/ and the plugins into ios/ and android/
 pnpm cap:ios           # open the iOS project in Xcode
