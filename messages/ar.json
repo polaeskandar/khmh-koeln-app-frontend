@@ -556,7 +556,6 @@
   "history": {
     "createdFromSchedule": "أُنشئ من الاجتماع المتكرر في اليوم السابق",
     "createdByHand": "أُنشئ يدويًا كاجتماع لمرة واحدة",
-    "movedFrom": "كان {date} الساعة {time}",
     "created": "أُنشئ",
     "opened": "فُتح الحضور",
     "closed": "أُغلق الحضور",
