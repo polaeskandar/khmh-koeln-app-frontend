@@ -556,7 +556,6 @@
   "history": {
     "createdFromSchedule": "Created from the schedule, the day before",
     "createdByHand": "Created by hand as a one-off session",
-    "movedFrom": "Was {date} at {time}",
     "created": "Created",
     "opened": "Attendance opened",
     "closed": "Attendance closed",

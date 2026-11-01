@@ -556,7 +556,6 @@
   "history": {
     "createdFromSchedule": "Am Vortag aus dem Regeltermin angelegt",
     "createdByHand": "Von Hand als Einzeltermin angelegt",
-    "movedFrom": "War am {date} um {time}",
     "created": "Angelegt",
     "opened": "Anwesenheit geöffnet",
     "closed": "Anwesenheit abgeschlossen",
