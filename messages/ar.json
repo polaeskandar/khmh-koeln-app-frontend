@@ -396,7 +396,15 @@
       "parentWaiting": "ولي أمر، في انتظار الوصول",
       "none": "لا دور بعد",
       "memberOf": "مخدوم · {groups}",
-      "member": "مخدوم"
+      "member": "مخدوم",
+      "administrator": "مسؤول النظام",
+      "staff": "{role} · {scope}{more, plural, =0 {} other { +#}}"
+    },
+    "name": {
+      "administrator": "مسؤول النظام",
+      "service_leader": "أمين الخدمة",
+      "servant": "خادم",
+      "parent": "ولي أمر"
     }
   },
   "dashboard": {
