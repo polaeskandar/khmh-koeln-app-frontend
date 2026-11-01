@@ -595,7 +595,6 @@
       "notOnSchedule": "{name} no longer meets on {date}. Choose another date.",
       "canceled": "The meeting on {date} was canceled. Move the lesson to another date.",
       "canceledReason": "The meeting on {date} was canceled: <bdi>{reason}</bdi> Move the lesson to another date.",
-      "moved": "moved",
       "attendanceOpen": "attendance open now",
       "held": "held"
     },
