@@ -18,7 +18,7 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
-    files: ["src/**"],
+    files: ["src/**", "test/**"],
     rules: {
       "no-restricted-imports": ["error", { paths: restrictedImports }],
       "react/no-danger": "error",
@@ -27,14 +27,11 @@ const eslintConfig = defineConfig([
   ...(rawHtmlFiles.length > 0
     ? [{ files: rawHtmlFiles, rules: { "react/no-danger": "off" } }]
     : []),
-  // Override default ignores of eslint-config-next.
   globalIgnores([
-    // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Native projects of the iOS and Android apps, including the web build Capacitor copies into them.
     "android/**",
     "ios/**",
     "coverage/**",
