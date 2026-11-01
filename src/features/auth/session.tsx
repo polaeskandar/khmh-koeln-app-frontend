@@ -1,0 +1,108 @@
+"use client"
+
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useTranslations } from "next-intl"
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useRef } from "react"
+import { toast } from "sonner"
+
+import { useRouter } from "@/i18n/navigation"
+import { onUnauthorized } from "@/lib/api/client"
+import { ApiError } from "@/lib/api/problem"
+import { useApiMutation } from "@/lib/api/use-api-mutation"
+import { routes } from "@/lib/routes"
+
+import { areasOf, type Me, meQuery, signOutRequest } from "./api"
+
+export type Session =
+  | { status: "unknown" }
+  | { status: "anonymous" }
+  | { status: "authenticated"; me: Me; areas: ReturnType<typeof areasOf> }
+  | { status: "failed"; error: unknown }
+
+type SessionContext = {
+  session: Session
+  refresh: () => Promise<unknown>
+  signOut: () => Promise<void>
+  signingOut: boolean
+}
+
+const Context = createContext<SessionContext | null>(null)
+
+const currentPath = () => `${window.location.pathname}${window.location.search}`
+
+export function SessionProvider({ children }: { children: ReactNode }) {
+  const t = useTranslations("errors")
+  const router = useRouter()
+  const queryClient = useQueryClient()
+  const query = useQuery(meQuery)
+
+  const session: Session = query.data
+    ? { status: "authenticated", me: query.data, areas: areasOf(query.data) }
+    : query.error instanceof ApiError && query.error.status === 401
+      ? { status: "anonymous" }
+      : query.isError
+        ? { status: "failed", error: query.error }
+        : { status: "unknown" }
+
+  const signedIn = useRef(false)
+  const ended = useRef(false)
+
+  useEffect(() => {
+    signedIn.current = session.status === "authenticated"
+
+    if (signedIn.current) {
+      ended.current = false
+    }
+  }, [session.status])
+
+  const end = useCallback(
+    (next: string | undefined) => {
+      ended.current = true
+      queryClient.clear()
+      router.replace(routes.signIn(next))
+    },
+    [queryClient, router]
+  )
+
+  useEffect(
+    () =>
+      onUnauthorized(() => {
+        if (!signedIn.current || ended.current) {
+          return
+        }
+
+        toast.error(t("sessionExpired"))
+        end(currentPath())
+      }),
+    [end, t]
+  )
+
+  const { execute, pending } = useApiMutation(signOutRequest)
+
+  const signOut = useCallback(async () => {
+    ended.current = true
+    const result = await execute()
+
+    if (result.ok || result.problem.status === 401) {
+      end(undefined)
+    } else {
+      ended.current = false
+    }
+  }, [execute, end])
+
+  return (
+    <Context.Provider value={{ session, refresh: query.refetch, signOut, signingOut: pending }}>
+      {children}
+    </Context.Provider>
+  )
+}
+
+export function useSession(): SessionContext {
+  const context = useContext(Context)
+
+  if (!context) {
+    throw new Error("useSession() needs a SessionProvider above it.")
+  }
+
+  return context
+}
