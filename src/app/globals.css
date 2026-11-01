@@ -127,3 +127,90 @@
     @apply font-sans;
   }
 }
+
+:root {
+  --success: oklch(0.508 0.118 165.612);
+  --success-foreground: oklch(0.979 0.021 166.113);
+  --success-soft: oklch(0.979 0.021 166.113);
+  --info: oklch(0.5 0.134 242.749);
+  --info-foreground: oklch(0.977 0.013 236.62);
+  --info-soft: oklch(0.977 0.013 236.62);
+  --warning: oklch(0.555 0.163 48.998);
+  --warning-foreground: oklch(0.987 0.022 95.277);
+  --warning-soft: oklch(0.987 0.022 95.277);
+  --danger-soft: oklch(0.971 0.013 17.38);
+
+  --identity-1: #2a78d6;
+  --identity-2: #eb6834;
+  --identity-3: #1baf7a;
+  --identity-4: #eda100;
+  --identity-5: #e87ba4;
+  --identity-6: #008300;
+  --identity-7: #6250d6;
+  --identity-8: #e34948;
+}
+
+.dark {
+  --success: oklch(0.696 0.17 162.48);
+  --success-foreground: oklch(0.262 0.051 172.552);
+  --success-soft: oklch(0.262 0.051 172.552);
+  --info: oklch(0.746 0.16 232.661);
+  --info-foreground: oklch(0.293 0.066 243.157);
+  --info-soft: oklch(0.293 0.066 243.157);
+  --warning: oklch(0.828 0.189 84.429);
+  --warning-foreground: oklch(0.279 0.077 45.635);
+  --warning-soft: oklch(0.279 0.077 45.635);
+  --danger-soft: oklch(0.258 0.092 26.042);
+
+  --identity-1: #3987e5;
+  --identity-2: #d95926;
+  --identity-3: #199e70;
+  --identity-4: #c98500;
+  --identity-5: #d55181;
+  --identity-6: #008300;
+  --identity-7: #9085e9;
+  --identity-8: #e66767;
+}
+
+@theme inline {
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-soft: var(--success-soft);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-soft: var(--info-soft);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger-soft: var(--danger-soft);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes khmk-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@utility animate-live {
+  animation: khmk-pulse 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-live {
+    animation: none;
+  }
+}
