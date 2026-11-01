@@ -10,6 +10,12 @@ const restrictedImports = [
   { name: "next/cache", message: staticExport },
   { name: "server-only", message: staticExport },
   { name: "next/server", importNames: ["connection"], message: staticExport },
+  { name: "next/link", message: "Use Link from @/i18n/navigation." },
+  {
+    name: "next/navigation",
+    importNames: ["useRouter", "usePathname", "redirect"],
+    message: "Use the locale-aware version from @/i18n/navigation.",
+  },
 ]
 
 const rawHtmlFiles = []

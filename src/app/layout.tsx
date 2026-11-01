@@ -9,8 +9,8 @@ const fontSans = Oxanium({ subsets: ["latin", "latin-ext"], variable: "--font-sa
 const fontHeading = Geist({ subsets: ["latin", "latin-ext"], variable: "--font-heading" })
 
 export const metadata: Metadata = {
-  title: { default: "KHMK Köln", template: "%s · KHMK Köln" },
-  description: "KHMK Köln church application.",
+  title: "KHMK Köln",
+  robots: { index: false, follow: false },
 }
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

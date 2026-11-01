@@ -2,3 +2,5 @@ nodeLinker: hoisted
 
 allowBuilds:
   unrs-resolver: false
+  "@swc/core": false
+  "@parcel/watcher": false
