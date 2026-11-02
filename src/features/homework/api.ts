@@ -1,29 +1,11 @@
 import { useQuery } from "@tanstack/react-query"
 
 import { api, dataOf, type Schemas } from "@/lib/api/client"
-import type { Instant, LessonRef, LocalDate, Uuid } from "@/lib/api/types/common"
-import type { HomeworkStatus } from "@/lib/api/types/learning"
+import type { Uuid } from "@/lib/api/types/common"
 
-export type HomeworkCounts = { completed: number; assigned: number; withoutAccount: number }
-
-export type HomeworkRow = {
-  id: Uuid
-  title: string
-  status: HomeworkStatus
-  dueDate: LocalDate | null
-  publishedAt: Instant | null
-  lesson: LessonRef
-  counts: HomeworkCounts | null
-  can: {
-    edit: boolean
-    publish: boolean
-    unpublish: boolean
-    archive: boolean
-    restore: boolean
-    delete: boolean
-  }
-}
-
+export type HomeworkCounts = Schemas["AudienceCounts"]
+export type HomeworkFlags = Schemas["HomeworkItem"]["can"]
+export type HomeworkRow = Schemas["HomeworkItem"]
 export type StageHomework = Schemas["HomeworkList"]
 
 export const stageHomeworkQuery = (stage: Uuid) => ({
