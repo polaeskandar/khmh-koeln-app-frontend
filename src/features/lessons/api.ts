@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { LocalDate, Uuid } from "@/lib/api/types/common"
+import type { LessonStatus } from "@/lib/api/types/learning"
 
 export type Material = { label: string; url: string | null }
 
@@ -85,3 +86,12 @@ export function toLink(value: string, otherDate: LocalDate, options: MeetingOpti
     ? { teachingDate: option.date, scheduleId: option.scheduleId, sessionId: null }
     : { teachingDate: otherDate, scheduleId: null, sessionId: null }
 }
+
+export const changeLessonStatusRequest = (lesson: Uuid, status: LessonStatus) =>
+  dataOf(api.POST("/lessons/{id}/status", { params: { path: { id: lesson } }, body: { status } }))
+
+export const linesOf = (text: string | null) =>
+  (text ?? "")
+    .split("\n")
+    .map((line) => line.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, "").trim())
+    .filter(Boolean)
