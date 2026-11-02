@@ -34,3 +34,6 @@ export const meetingSessionQuery = (id: Uuid) => ({
 })
 
 export const useMeetingSession = (id: Uuid) => useQuery(meetingSessionQuery(id))
+
+export const cancelSessionRequest = (session: Uuid, reason: string | null) =>
+  dataOf(api.POST("/sessions/{id}/cancel", { params: { path: { id: session } }, body: { reason } }))
