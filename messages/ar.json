@@ -2084,7 +2084,8 @@
     },
     "groups": {
       "noSchedule": "لا توجد اجتماعات منتظمة حاليًا.",
-      "lastLesson": "آخر درس: «{title}»، {date}"
+      "lastLesson": "آخر درس: «{title}»، {date}",
+      "serviceLeader": "{name} (أمين الخدمة)"
     },
     "homework": {
       "description": "كل ما أعطاك إياه خدام مجموعاتك.",

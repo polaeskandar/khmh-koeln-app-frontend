@@ -10,7 +10,6 @@ import { DueLine } from "@/features/homework/homework-bits"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import type { LocalDate, Uuid } from "@/lib/api/types/common"
-import { routes } from "@/lib/routes"
 
 import type { ChildSummary, ParentTask } from "./api"
 
@@ -64,11 +63,11 @@ export function ChildSwitcher({
 export function TaskCard({
   task,
   today,
-  child,
+  href,
 }: {
   task: ParentTask
   today: LocalDate
-  child: Uuid
+  href: (task: ParentTask) => string
 }) {
   const t = useTranslations("parent.task")
   const f = useFormat()
@@ -76,7 +75,7 @@ export function TaskCard({
 
   return (
     <Link
-      href={routes.parentHomeworkTask(task.id, child)}
+      href={href(task)}
       className={cn(
         "flex items-center gap-4 border p-4 transition-colors hover:bg-muted/60",
         task.done && "bg-muted/30"
@@ -128,13 +127,13 @@ export function TaskList({
   title,
   tasks,
   today,
-  child,
+  href,
   empty,
 }: {
   title: string
   tasks: ParentTask[]
   today: LocalDate
-  child: Uuid
+  href: (task: ParentTask) => string
   empty?: React.ReactNode
 }) {
   return (
@@ -153,7 +152,7 @@ export function TaskList({
         <ul className="flex flex-col gap-2">
           {tasks.map((task) => (
             <li key={task.id}>
-              <TaskCard task={task} today={today} child={child} />
+              <TaskCard task={task} today={today} href={href} />
             </li>
           ))}
         </ul>

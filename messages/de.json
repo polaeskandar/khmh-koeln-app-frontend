@@ -2084,7 +2084,8 @@
     },
     "groups": {
       "noSchedule": "Derzeit keine regelmäßigen Treffen.",
-      "lastLesson": "Letzte Lektion: „{title}“, {date}"
+      "lastLesson": "Letzte Lektion: „{title}“, {date}",
+      "serviceLeader": "{name} (Dienstleitung)"
     },
     "homework": {
       "description": "Alles, was Ihnen die Diener Ihrer Gruppen aufgegeben haben.",

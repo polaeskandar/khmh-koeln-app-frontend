@@ -56,7 +56,7 @@ function ChildTasks({ child }: { child: ChildSummary }) {
             title={t("toDoFor", { name: child.name })}
             tasks={data.items}
             today={data.today}
-            child={child.id}
+            href={(task) => routes.parentHomeworkTask(task.id, child.id)}
             empty={t("emptyToDo")}
           />
         )}
@@ -66,7 +66,7 @@ function ChildTasks({ child }: { child: ChildSummary }) {
           title={t("doneRecently")}
           tasks={done.data.items.slice(0, DONE_RECENTLY)}
           today={done.data.today}
-          child={child.id}
+          href={(task) => routes.parentHomeworkTask(task.id, child.id)}
         />
       ) : null}
       {done.isError ? <QueryErrorState error={done.error} onRetry={() => done.refetch()} /> : null}
