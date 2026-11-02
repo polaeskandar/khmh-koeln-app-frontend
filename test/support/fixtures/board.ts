@@ -87,3 +87,65 @@ export const openRosterBoard = (): AttendanceBoard => ({
     { person: visitor, mark: mark(99, "19:40"), placements: [] },
   ],
 })
+
+const christine = { id: "a3", name: "Christine Adel" }
+
+export const closedFirstNovember = (): AttendanceBoard => {
+  const board = thirdClassBoard()
+  const at = (time: string) => `2026-11-01T${time}:00+01:00`
+
+  return {
+    ...board,
+    session: session({
+      date: "2026-11-01",
+      status: "completed",
+      closedAt: at("13:48"),
+      closedBy: christine,
+      can: { manage: true, record: true, reopen: true },
+      counts: { present: 11, rosterSize: 14, rosterPresent: 11, notMarked: 3, notOnRoster: 0 },
+    }),
+    counts: { present: 11, rosterSize: 14, rosterPresent: 11, notMarked: 3, notOnRoster: 0 },
+    roster: rosterPeople.map((p, i) => ({
+      person: p,
+      mark:
+        i < 11
+          ? {
+              id: `m${i}`,
+              recordedAt: at(`12:${String(10 + i).padStart(2, "0")}`),
+              recordedBy: christine,
+            }
+          : null,
+    })),
+    notOnRoster: [],
+    corrections: [
+      {
+        id: "c1",
+        person: rosterPeople[4],
+        recordedAt: at("12:04"),
+        recordedBy: christine,
+        removedAt: at("13:46"),
+        removedBy: christine,
+        reason: "Tapped the wrong name",
+      },
+    ],
+    history: [
+      {
+        type: "created",
+        at: "2026-10-31T12:00:00+01:00",
+        actor: null,
+        byGenerator: true,
+        note: null,
+      },
+      { type: "opened", at: at("12:00"), actor: christine, byGenerator: false, note: null },
+      { type: "closed", at: at("13:30"), actor: christine, byGenerator: false, note: null },
+      {
+        type: "reopened",
+        at: at("13:40"),
+        actor: christine,
+        byGenerator: false,
+        note: "Mina was not here",
+      },
+      { type: "closed", at: at("13:48"), actor: christine, byGenerator: false, note: null },
+    ],
+  }
+}
