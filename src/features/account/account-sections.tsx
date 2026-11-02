@@ -20,6 +20,7 @@ import { FieldGroup, FieldLabel } from "@/components/ui/field"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Spinner } from "@/components/ui/spinner"
 import { focusFirstInvalid } from "@/components/focus-first-invalid"
+import { AppearanceFields } from "@/components/theme-switch"
 import type { Me } from "@/features/auth/api"
 import { PasswordField } from "@/features/auth/password-field"
 import { isLocale, LOCALE_NAMES, LOCALES } from "@/i18n/config"
@@ -62,7 +63,7 @@ export function AccountDetails({ me }: { me: Me }) {
   )
 }
 
-export function PreferencesFields() {
+function LanguageFields() {
   const t = useTranslations("prefs")
   const locale = useLocale()
   const switchLocale = useSwitchLocale()
@@ -87,6 +88,15 @@ export function PreferencesFields() {
           </span>
         ))}
       </RadioGroup>
+    </div>
+  )
+}
+
+export function PreferencesFields() {
+  return (
+    <div className="flex flex-col gap-6">
+      <LanguageFields />
+      <AppearanceFields />
     </div>
   )
 }

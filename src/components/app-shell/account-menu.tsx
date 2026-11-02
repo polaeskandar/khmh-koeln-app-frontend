@@ -4,6 +4,7 @@ import { ChevronsUpDown, House, LogOut, ShieldCheck, UserRound } from "lucide-re
 import { useTranslations } from "next-intl"
 
 import { LanguageSubmenu } from "@/components/language-switch"
+import { AppearanceSubmenu } from "@/components/theme-switch"
 import { MemberAvatar } from "@/components/member-avatar"
 import {
   DropdownMenu,
@@ -34,6 +35,7 @@ export function AccountMenuItems() {
         </Link>
       </DropdownMenuItem>
       <LanguageSubmenu />
+      <AppearanceSubmenu />
       <DropdownMenuSeparator />
       {parent ? (
         <DropdownMenuItem asChild>

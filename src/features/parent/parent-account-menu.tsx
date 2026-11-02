@@ -4,6 +4,7 @@ import { House, LogOut, ShieldCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { LanguageSubmenu } from "@/components/language-switch"
+import { AppearanceSubmenu } from "@/components/theme-switch"
 import { MemberAvatar } from "@/components/member-avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -62,6 +63,7 @@ export function ParentAccountMenu() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <LanguageSubmenu />
+        <AppearanceSubmenu />
         <DropdownMenuSeparator />
         {areas.staff ? (
           <DropdownMenuItem asChild>
