@@ -184,3 +184,16 @@ test("Retry refetches after a failed request", async () => {
   await userEvent.click(retry)
   expect(await screen.findByRole("tab", { name: "Active (7)" })).toBeInTheDocument()
 }, 10000)
+
+test("there is no Leaders column on any screen size", async () => {
+  server.use(http.get(apiUrl("/services"), () => HttpResponse.json(services)))
+
+  renderWithProviders(
+    <SidebarProvider>
+      <ServicesOverview />
+    </SidebarProvider>
+  )
+
+  await screen.findAllByRole("link", { name: "Sunday School" })
+  expect(screen.queryByText(/Leaders/)).toBeNull()
+})
