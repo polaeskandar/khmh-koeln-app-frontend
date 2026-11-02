@@ -3,7 +3,7 @@ import { Geist, Noto_Kufi_Arabic, Oxanium } from "next/font/google"
 
 import { QueryProvider } from "@/lib/api/query-provider"
 import { prePaintScript } from "@/i18n/locale-choice"
-import { apiBaseUrl } from "@/lib/env"
+import { apiBaseUrl, impressumUrl } from "@/lib/env"
 import { cn } from "@/lib/utils"
 import { ApiMocking } from "@/mocks/api-mocking"
 
@@ -19,6 +19,7 @@ const fontArabic = Noto_Kufi_Arabic({
 })
 
 apiBaseUrl()
+impressumUrl()
 
 export const metadata: Metadata = {
   title: "KHMK Köln",

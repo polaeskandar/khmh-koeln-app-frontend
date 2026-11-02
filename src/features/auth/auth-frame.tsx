@@ -8,6 +8,7 @@ import { LanguageMenu } from "@/components/language-switch"
 import { useToday } from "@/hooks/use-today"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
+import { impressumUrl } from "@/lib/env"
 import { routes } from "@/lib/routes"
 
 export function AuthFrame({
@@ -50,7 +51,27 @@ export function AuthFrame({
           </aside>
         ) : null}
       </main>
+      <AuthFooter />
     </div>
+  )
+}
+
+function AuthFooter() {
+  const t = useTranslations("auth.footer")
+  const legalNotice = impressumUrl()
+  const link = "underline-offset-4 hover:text-foreground hover:underline"
+
+  return (
+    <footer className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-6 gap-y-2 border-t px-4 py-5 text-xs text-muted-foreground md:px-8">
+      <Link href={routes.privacy()} className={link}>
+        {t("privacy")}
+      </Link>
+      {legalNotice ? (
+        <a href={legalNotice} target="_blank" rel="noreferrer" className={link}>
+          {t("legal")}
+        </a>
+      ) : null}
+    </footer>
   )
 }
 
