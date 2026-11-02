@@ -1500,7 +1500,8 @@
     },
     "roster": {
       "open": "Offen für alle",
-      "size": "Liste: {count, plural, one {# Person} other {# Personen}}"
+      "size": "Liste: {count, plural, one {# Person} other {# Personen}}",
+      "ofGroup": "Die Liste von {group}"
     },
     "filter": {
       "allServices": "Alle Dienste"
