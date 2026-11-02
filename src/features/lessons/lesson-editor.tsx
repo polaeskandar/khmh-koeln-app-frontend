@@ -17,10 +17,12 @@ import { RecordPage } from "@/components/record-page"
 import { Button } from "@/components/ui/button"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
 import { useSession } from "@/features/auth/session"
 import { Link, useRouter } from "@/i18n/navigation"
-import type { LocalDate, ServiceRef, StageRef } from "@/lib/api/types/common"
+import type { ServiceRef, StageRef } from "@/lib/api/types/common"
+import { ApiError } from "@/lib/api/problem"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { routes } from "@/lib/routes"
 
@@ -28,12 +30,18 @@ import {
   createLessonRequest,
   type Lesson,
   type LessonInput,
+  type LessonOptions,
+  lessonOptionsQuery,
   lessonQuery,
+  OTHER_DATE,
+  optionValue,
+  toLink,
   type Material,
   stageLessonsQuery,
   updateLessonRequest,
 } from "./api"
 import { LessonStatusBadge } from "./lesson-bits"
+import { MeetingSelect } from "./meeting-select"
 import { type Audience, VisibilityNote } from "./visibility"
 
 const MAX_MATERIALS = 10
@@ -81,16 +89,45 @@ function useLessonCrumbs(service: ServiceRef, stage: StageRef, last: string): Cr
 
 type EditorProps = {
   stage: StageRef
-  today: LocalDate
   lesson?: Lesson
   viewNotes: boolean
+  choices: LessonOptions
 }
 
-function LessonForm({ stage, today, lesson, viewNotes }: EditorProps) {
+function initialMeeting(choices: LessonOptions, lesson?: Lesson) {
+  if (lesson) {
+    return lesson.scheduleId
+      ? optionValue({ scheduleId: lesson.scheduleId, date: lesson.teachingDate })
+      : OTHER_DATE
+  }
+
+  const free = choices.options.find(
+    (o) => o.date > choices.today && !o.takenBy && o.state !== "canceled"
+  )
+
+  return free ? optionValue(free) : OTHER_DATE
+}
+
+function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
   const t = useTranslations()
   const router = useRouter()
   const { session } = useSession()
   const viewerId = session.status === "authenticated" ? session.me.account.id : ""
+  const today = choices.today
+  const savedMeeting = lesson ? initialMeeting(choices, lesson) : null
+  const [meeting, setMeeting] = useState(() => initialMeeting(choices, lesson))
+  const [otherDate, setOtherDate] = useState(lesson?.teachingDate ?? today)
+  const listed = choices.servants.some((servant) => servant.id === viewerId)
+
+  const [responsibleId, setResponsibleId] = useState(
+    lesson?.responsible?.id ?? (listed ? viewerId : (choices.servants[0]?.id ?? ""))
+  )
+
+  const responsibles =
+    lesson?.responsible && !choices.servants.some((s) => s.id === lesson.responsible!.id)
+      ? [...choices.servants, lesson.responsible]
+      : choices.servants
+
   const formRef = useRef<HTMLFormElement>(null)
 
   const [fields, setFields] = useState({
@@ -102,7 +139,6 @@ function LessonForm({ stage, today, lesson, viewNotes }: EditorProps) {
     teachingPoints: lesson?.teachingPoints ?? "",
     activities: lesson?.activities ?? "",
     notes: lesson?.notes ?? "",
-    teachingDate: lesson?.teachingDate ?? today,
   })
 
   const set = (key: keyof typeof fields) => (event: { target: { value: string } }) =>
@@ -143,13 +179,14 @@ function LessonForm({ stage, today, lesson, viewNotes }: EditorProps) {
   }, [mutation.problem])
 
   function input(status: "draft" | "ready"): LessonInput {
-    const dateChanged = !lesson || fields.teachingDate !== lesson.teachingDate
+    const linkChanged =
+      !lesson ||
+      meeting !== savedMeeting ||
+      (meeting === OTHER_DATE && otherDate !== lesson.teachingDate)
 
     return {
       title: fields.title,
-      ...(dateChanged
-        ? { teachingDate: fields.teachingDate, scheduleId: null, sessionId: null }
-        : {}),
+      ...(linkChanged ? toLink(meeting, otherDate, choices.options) : {}),
       summary: text(fields.summary),
       passage: text(fields.passage),
       memoryVerse: text(fields.memoryVerse),
@@ -160,7 +197,7 @@ function LessonForm({ stage, today, lesson, viewNotes }: EditorProps) {
         .filter(filled)
         .map((m) => ({ label: m.label, url: m.url?.trim() ? m.url : null })),
       ...(viewNotes ? { notes: text(fields.notes) } : {}),
-      ...(lesson ? {} : { responsibleId: viewerId }),
+      ...(!lesson || responsibleId !== lesson.responsible?.id ? { responsibleId } : {}),
       ...(completed ? {} : { status }),
     }
   }
@@ -354,18 +391,33 @@ function LessonForm({ stage, today, lesson, viewNotes }: EditorProps) {
       </div>
       <aside className="flex min-w-0 flex-col gap-6 lg:sticky lg:top-20 lg:self-start">
         <FormPanel title={t("lessons.editor.when")}>
-          <Field data-invalid={errors.meeting || errors.teachingDate ? true : undefined}>
-            <FieldLabel htmlFor="lesson-date">{t("lessons.fields.teachingDate")}</FieldLabel>
-            <Input
-              id="lesson-date"
-              type="date"
-              value={fields.teachingDate}
-              aria-invalid={errors.meeting || errors.teachingDate ? true : undefined}
-              onChange={set("teachingDate")}
-            />
-            {errors.meeting || errors.teachingDate ? (
-              <FieldError>{errors.meeting ?? errors.teachingDate}</FieldError>
-            ) : null}
+          <MeetingSelect
+            options={choices.options}
+            today={today}
+            value={meeting}
+            saved={savedMeeting}
+            otherDate={otherDate}
+            onChange={setMeeting}
+            onOtherDateChange={setOtherDate}
+            error={errors.meeting ?? errors.teachingDate}
+          />
+        </FormPanel>
+        <FormPanel title={t("lessons.fields.servants")}>
+          <Field data-invalid={errors.responsibleId ? true : undefined}>
+            <FieldLabel htmlFor="lesson-responsible">{t("lessons.fields.responsible")}</FieldLabel>
+            <NativeSelect
+              id="lesson-responsible"
+              className="w-full"
+              value={responsibleId}
+              aria-invalid={errors.responsibleId ? true : undefined}
+              onChange={(event) => setResponsibleId(event.target.value)}
+            >
+              {responsibles.map((servant) => (
+                <NativeSelectOption key={servant.id} value={servant.id}>
+                  {servant.name}
+                </NativeSelectOption>
+              ))}
+            </NativeSelect>
             {errors.responsibleId ? <FieldError>{errors.responsibleId}</FieldError> : null}
           </Field>
         </FormPanel>
@@ -451,6 +503,30 @@ function NotFoundPage() {
   )
 }
 
+function WithOptions({
+  stage,
+  lesson,
+  children,
+}: {
+  stage: StageRef
+  lesson?: string
+  children: (choices: LessonOptions) => React.ReactNode
+}) {
+  const t = useTranslations("lessons")
+  const options = useQuery(lessonOptionsQuery(stage.id, lesson))
+  const forbidden = options.error instanceof ApiError && options.error.status === 403
+
+  if (forbidden) {
+    return (
+      <NoAccess title={t("noAccess.prepareTitle")}>
+        {t("noAccess.prepareBody", { stage: stage.name })}
+      </NoAccess>
+    )
+  }
+
+  return <QueryState query={options}>{children}</QueryState>
+}
+
 function NewLesson({ stageId }: { stageId: string }) {
   const t = useTranslations("lessons")
   const query = useQuery(stageLessonsQuery(stageId))
@@ -460,7 +536,9 @@ function NewLesson({ stageId }: { stageId: string }) {
       {(data) => (
         <EditorPage service={data.service} stage={data.stage} title={t("newLesson")}>
           {data.can.create ? (
-            <LessonForm stage={data.stage} today={data.today} viewNotes />
+            <WithOptions stage={data.stage}>
+              {(choices) => <LessonForm stage={data.stage} viewNotes choices={choices} />}
+            </WithOptions>
           ) : (
             <NoAccess title={t("noAccess.prepareTitle")}>
               {t("noAccess.prepareBody", { stage: data.stage.name })}
@@ -487,12 +565,16 @@ function EditLesson({ id }: { id: string }) {
               {t("noAccess.changeBody", { stage: data.stage.name })}
             </NoAccess>
           ) : (
-            <LessonForm
-              stage={data.stage}
-              today={data.today}
-              lesson={data.lesson}
-              viewNotes={data.can.viewNotes}
-            />
+            <WithOptions stage={data.stage} lesson={data.lesson.id}>
+              {(choices) => (
+                <LessonForm
+                  stage={data.stage}
+                  lesson={data.lesson}
+                  viewNotes={data.can.viewNotes}
+                  choices={choices}
+                />
+              )}
+            </WithOptions>
           )}
         </EditorPage>
       )}

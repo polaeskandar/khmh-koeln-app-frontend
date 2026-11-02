@@ -58,3 +58,30 @@ export const createLessonRequest = (stage: Uuid, input: LessonInput) =>
 
 export const updateLessonRequest = (lesson: Uuid, input: LessonInput) =>
   dataOf(api.PATCH("/lessons/{id}", { params: { path: { id: lesson } }, body: input }))
+
+export type MeetingOption = Schemas["LessonOption"]
+export type LessonOptions = Schemas["LessonOptions"]
+
+export const lessonOptionsQuery = (stage: Uuid, lesson?: Uuid) => ({
+  queryKey: ["lessons", "options", { stage, lesson }] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) =>
+    dataOf(
+      api.GET("/stages/{stageId}/lesson-options", {
+        params: { path: { stageId: stage }, query: lesson ? { lessonId: lesson } : {} },
+        signal,
+      })
+    ),
+})
+
+export const OTHER_DATE = "other"
+
+export const optionValue = (option: Pick<MeetingOption, "scheduleId" | "date">) =>
+  `${option.scheduleId}:${option.date}`
+
+export function toLink(value: string, otherDate: LocalDate, options: MeetingOption[]) {
+  const option = options.find((o) => optionValue(o) === value)
+
+  return option
+    ? { teachingDate: option.date, scheduleId: option.scheduleId, sessionId: null }
+    : { teachingDate: otherDate, scheduleId: null, sessionId: null }
+}
