@@ -63,7 +63,7 @@ const homework = (
           notCompleted: 14,
           completedAfterDueDate: 0,
           withoutParentAccount: 4,
-          withoutAccount: 0,
+          withoutAccount: 4,
           reportedTotal: 0,
         },
   can: homeworkFlags({ edit: status !== "archived", ...can }),
@@ -151,7 +151,7 @@ test("archiving says reported completions are kept, and posts {}", async () => {
         notCompleted: 13,
         completedAfterDueDate: 0,
         withoutParentAccount: 4,
-        withoutAccount: 0,
+        withoutAccount: 4,
         reportedTotal: 1,
       },
     }
@@ -205,7 +205,10 @@ test("restoring says it comes back published only when it was published", async 
   openList(homework("archived", { restore: true }))
   await menuItems()
   await userEvent.click(screen.getByRole("menuitem", { name: "Restore" }))
-  expect(await screen.findByRole("alertdialog")).toHaveTextContent(/It comes back published\./)
+
+  expect(await screen.findByRole("alertdialog")).toHaveTextContent(
+    "It comes back published. Parents and members of the class will see it again."
+  )
 })
 
 test("restoring a never-published task says it comes back as a draft", async () => {
