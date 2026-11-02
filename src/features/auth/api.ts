@@ -37,3 +37,6 @@ export const registerRequest = (body: Registration) => dataOf(api.POST("/auth/re
 
 export const setPasswordRequest = (body: { token: string; password: string }) =>
   dataOf(api.POST("/auth/password-links", { body }))
+
+export const forgotPasswordRequest = (email: string) =>
+  dataOf(api.POST("/auth/forgot-password", { body: { email } }))
