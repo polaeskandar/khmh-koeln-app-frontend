@@ -16,6 +16,7 @@ import { registrationEnabled } from "@/lib/env"
 import { routes } from "@/lib/routes"
 
 import { type Stage, stageQuery } from "./api"
+import { StageMembers } from "./stage-members"
 
 export type StageTab = "overview" | "lessons" | "homework"
 
@@ -169,5 +170,5 @@ export function StageLayout({
 }
 
 export function StageOverview() {
-  return <StageLayout tab="overview">{() => null}</StageLayout>
+  return <StageLayout tab="overview">{(stage) => <StageMembers stage={stage} />}</StageLayout>
 }
