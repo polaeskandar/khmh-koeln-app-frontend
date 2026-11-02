@@ -203,5 +203,6 @@ test("the waiting page promises no email", () => {
     screen.getByText("The church office tells you when the account is ready.")
   ).toBeInTheDocument()
 
+  expect(screen.getByText(/links the account to their own record/)).toBeInTheDocument()
   expect(document.body.textContent).not.toMatch(/email as soon|Prototype/)
 })
