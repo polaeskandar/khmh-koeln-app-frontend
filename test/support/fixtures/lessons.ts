@@ -1,4 +1,4 @@
-import type { Lesson, LessonDetail, StageLessons } from "@/features/lessons/api"
+import type { Lesson, LessonDetail, LessonOptions, StageLessons } from "@/features/lessons/api"
 
 import { thirdClass } from "@test/support/fixtures/stages"
 
@@ -62,5 +62,57 @@ export const stageLessons = (overrides: Partial<StageLessons> = {}): StageLesson
   servants: [],
   can: { create: true },
   items: [],
+  ...overrides,
+})
+
+const SCHEDULE_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f90"
+
+export const daniel = { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f01", name: "Mariam Fahmy" }
+
+export const lessonOptions = (overrides: Partial<LessonOptions> = {}): LessonOptions => ({
+  today: "2026-11-08",
+  options: [
+    {
+      scheduleId: SCHEDULE_ID,
+      date: "2026-11-01",
+      startTime: "12:00",
+      title: "Sunday class",
+      state: "completed",
+      takenBy: null,
+    },
+    {
+      scheduleId: SCHEDULE_ID,
+      date: "2026-11-08",
+      startTime: "12:00",
+      title: "Sunday class",
+      state: "active",
+      takenBy: null,
+    },
+    {
+      scheduleId: SCHEDULE_ID,
+      date: "2026-11-15",
+      startTime: "12:00",
+      title: "Sunday class",
+      state: "planned",
+      takenBy: { id: goodSamaritan.id, title: "The Good Samaritan" },
+    },
+    {
+      scheduleId: SCHEDULE_ID,
+      date: "2026-11-22",
+      startTime: "12:00",
+      title: "Sunday class",
+      state: "planned",
+      takenBy: null,
+    },
+    {
+      scheduleId: SCHEDULE_ID,
+      date: "2026-11-29",
+      startTime: "12:00",
+      title: "Sunday class",
+      state: "canceled",
+      takenBy: null,
+    },
+  ],
+  servants: [daniel, { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f02", name: "Bishoy Tadros" }],
   ...overrides,
 })
