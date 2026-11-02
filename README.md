@@ -7,12 +7,12 @@ tickets.
 
 ## Requirements
 
-| Tool | Version | Needed for |
-| --- | --- | --- |
-| Node.js | 22 or newer | Everything |
-| pnpm | 12, pinned in `package.json` | Everything. `brew install pnpm`; pnpm 11 switches to the pinned version by itself, pnpm 10 can't |
-| Xcode | 26 or newer, with its command line tools | The iOS app (macOS only) |
-| Android Studio | 2025.2.1 or newer; it brings its own JDK | The Android app |
+| Tool           | Version                                  | Needed for                                                                                       |
+| -------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Node.js        | 22 or newer                              | Everything                                                                                       |
+| pnpm           | 12, pinned in `package.json`             | Everything. `brew install pnpm`; pnpm 11 switches to the pinned version by itself, pnpm 10 can't |
+| Xcode          | 26 or newer, with its command line tools | The iOS app (macOS only)                                                                         |
+| Android Studio | 2025.2.1 or newer; it brings its own JDK | The Android app                                                                                  |
 
 ## Commands
 
@@ -20,7 +20,9 @@ tickets.
 pnpm install
 pnpm dev               # http://localhost:3000
 pnpm lint
+pnpm format            # format with Prettier; pnpm format:check only checks
 pnpm typecheck
+pnpm test              # Vitest with Testing Library; pnpm test:watch reruns on changes
 pnpm build             # static export to out/
 pnpm cap:sync          # build, then copy out/ and the plugins into ios/ and android/
 pnpm cap:ios           # open the iOS project in Xcode
