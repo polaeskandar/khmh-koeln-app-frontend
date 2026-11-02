@@ -18,3 +18,11 @@ export const stageAttendanceHistoryQuery = (id: Uuid) => ({
   queryFn: ({ signal }: { signal: AbortSignal }) =>
     dataOf(api.GET("/stages/{id}/attendance-history", { params: { path: { id } }, signal })),
 })
+
+export type StageFields = { name: string; description: string | null }
+
+export const addStageRequest = (service: Uuid, fields: StageFields) =>
+  dataOf(api.POST("/services/{id}/stages", { params: { path: { id: service } }, body: fields }))
+
+export const updateStageRequest = (stage: Uuid, changes: Partial<StageFields>) =>
+  dataOf(api.PATCH("/stages/{id}", { params: { path: { id: stage } }, body: changes }))
