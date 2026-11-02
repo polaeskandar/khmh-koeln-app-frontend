@@ -18,7 +18,7 @@ import {
   useParentChildren,
   useSelectedChild,
 } from "./api"
-import { ChildSwitcher, TaskList } from "./parent-bits"
+import { ChildSwitcher, ListSkeleton, TaskList } from "./parent-bits"
 
 const DONE_RECENTLY = 5
 
@@ -43,16 +43,6 @@ function HomeSkeleton() {
   )
 }
 
-function ListSkeleton() {
-  return (
-    <div aria-busy="true" className="flex flex-col gap-2">
-      <Skeleton className="h-5 w-40" />
-      <Skeleton className="h-20 w-full" />
-      <Skeleton className="h-20 w-full" />
-    </div>
-  )
-}
-
 function ChildTasks({ child }: { child: ChildSummary }) {
   const t = useTranslations("parent.home")
   const toDo = useChildHomework(child.id, "todo")
@@ -60,7 +50,7 @@ function ChildTasks({ child }: { child: ChildSummary }) {
 
   return (
     <div className="flex min-w-0 flex-col gap-8">
-      <QueryState query={toDo} loading={<ListSkeleton />}>
+      <QueryState query={toDo} loading={<ListSkeleton />} notFound={<ListSkeleton />}>
         {(data) => (
           <TaskList
             title={t("toDoFor", { name: child.name })}
