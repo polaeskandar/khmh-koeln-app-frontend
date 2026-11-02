@@ -973,7 +973,9 @@
         "placeholder": "z. B. Falschen Namen angetippt",
         "confirm": "Markierung entfernen",
         "person": "Person"
-      }
+      },
+      "saving": "Markierungen werden gespeichert… Schließen Sie die Anwesenheit, sobald sie gespeichert sind.",
+      "offline": "Keine Verbindung. Markierungen werden erst gespeichert, wenn sie wieder da ist."
     },
     "reopen": {
       "button": "Zur Korrektur wieder öffnen",
