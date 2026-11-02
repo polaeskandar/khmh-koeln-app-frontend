@@ -9,6 +9,7 @@ import { PageLoading } from "@/components/page-loading"
 import { useSession } from "@/features/auth/session"
 
 import { AccountDetails, PasswordSection, PreferencesFields } from "./account-sections"
+import { OwnData } from "./own-data"
 
 export function AccountPage() {
   const t = useTranslations("account")
@@ -29,6 +30,7 @@ export function AccountPage() {
             <PreferencesFields />
           </FormPanel>
           <PasswordSection />
+          <OwnData today={session.me.today} />
         </div>
       </PageBody>
     </>

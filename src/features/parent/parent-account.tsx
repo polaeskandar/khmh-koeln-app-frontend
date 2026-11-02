@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl"
 
 import { FormPanel } from "@/components/form-panel"
 import { PasswordSection, PreferencesFields } from "@/features/account/account-sections"
+import { OwnData } from "@/features/account/own-data"
 import { useSession } from "@/features/auth/session"
 import { useFormat } from "@/i18n/format"
 
@@ -63,6 +64,7 @@ export function ParentAccount() {
         </h2>
         <p className="text-muted-foreground">{t("parent.account.churchSees.body")}</p>
       </section>
+      <OwnData today={session.me.today} />
     </div>
   )
 }
