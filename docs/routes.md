@@ -52,7 +52,17 @@ stage by its own id, which already names its service.
 | P04, P05 Homework task | `/parent/homework/:homework?child=` | `/parent/homework/view/?id=&child=` | `parentHomeworkTask(id, child?)` |
 | P07 Account and data   | `/parent/account`                   | `/parent/account/`                  | `parentAccount()`                |
 
-The member portal (after the launch, #90) follows the same pattern under `/member/`.
+## Member portal (`app/[locale]/member`)
+
+| Screen        | Prototype route        | Product route                | Builder                  |
+| ------------- | ---------------------- | ---------------------------- | ------------------------ |
+| Home          | `/member`              | `/member/`                   | `memberHome()`           |
+| Homework      | `/member/homework`     | `/member/homework/`          | `memberHomework()`       |
+| Homework task | `/member/homework/:id` | `/member/homework/view/?id=` | `memberHomeworkTask(id)` |
+| Account       | `/member/account`      | `/member/account/`           | `memberAccount()`        |
+
+Accounts linked to a member record (`me.member`) may enter. Staff and parents get "My groups" in their
+account menu while `me.member.groupCount > 0`.
 
 ## Before signing in (`app/[locale]/(public)`)
 
@@ -78,7 +88,8 @@ The prototype's demo sign-in (`/sign-in/demo`) has no product route.
 - `/` picks the language (#8) and opens `/<locale>/`.
 - `/<locale>/` is the staff home. It will replace itself with `/<locale>/attendance/` once the attendance
   overview exists (#47), until the dashboard (#65) takes its place.
-- Parents start at `/<locale>/parent/`; the guards (#14) send each account to its area.
+- Parents start at `/<locale>/parent/`, and accounts with only a member record at `/<locale>/member/`.
+  The guards (#14, #90) send each account to its area; an account with none sees "No role yet".
 - Signed out, every guarded page sends people to `/<locale>/sign-in/?next=…`.
 
 ## A page for one record

@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronsUpDown, House, LogOut, ShieldCheck, UserRound } from "lucide-react"
+import { ChevronsUpDown, House, LogOut, ShieldCheck, UserRound, UsersRound } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { LanguageSubmenu } from "@/components/language-switch"
@@ -25,6 +25,7 @@ export function AccountMenuItems() {
   const t = useTranslations()
   const { session, signOut, signingOut } = useSession()
   const parent = session.status === "authenticated" && session.areas.parent
+  const member = session.status === "authenticated" && (session.me.member?.groupCount ?? 0) > 0
 
   return (
     <>
@@ -37,6 +38,14 @@ export function AccountMenuItems() {
       <LanguageSubmenu />
       <AppearanceSubmenu />
       <DropdownMenuSeparator />
+      {member ? (
+        <DropdownMenuItem asChild>
+          <Link href={routes.memberHome()}>
+            <UsersRound />
+            {t("shell.openMemberPortal")}
+          </Link>
+        </DropdownMenuItem>
+      ) : null}
       {parent ? (
         <DropdownMenuItem asChild>
           <Link href={routes.parentHome()}>
