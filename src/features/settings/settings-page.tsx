@@ -7,6 +7,7 @@ import { PageBody, PageHeader } from "@/components/page-header"
 import { RequirePermission } from "@/features/auth/guards"
 
 import { AccountRequests } from "./account-requests"
+import { ApproveButton } from "./approve-dialog"
 
 export function SettingsPage() {
   const t = useTranslations()
@@ -17,7 +18,11 @@ export function SettingsPage() {
       <PageBody>
         <PageHeader title={t("nav.settings")} description={t("settings.description")} />
         <RequirePermission action="read" resource="users">
-          <AccountRequests />
+          <AccountRequests
+            approve={(request) =>
+              request.registeredAs === "parent" ? <ApproveButton request={request} /> : null
+            }
+          />
         </RequirePermission>
       </PageBody>
     </>
