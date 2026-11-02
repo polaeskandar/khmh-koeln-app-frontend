@@ -49,6 +49,10 @@ export const routes = {
   parentHomework: (child?: Uuid) => href("/parent/homework/", { child }),
   parentHomeworkTask: (id: Uuid, child?: Uuid) => href("/parent/homework/view/", { id, child }),
   parentAccount: () => "/parent/account/",
+  memberHome: () => "/member/",
+  memberHomework: () => "/member/homework/",
+  memberHomeworkTask: (id: Uuid) => href("/member/homework/view/", { id }),
+  memberAccount: () => "/member/account/",
 
   signIn: (next?: string) => href("/sign-in/", { next }),
   signInPending: () => "/sign-in/pending/",
