@@ -24,6 +24,7 @@ beforeEach(() => {
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
   router.push.mockClear()
+  router.replace.mockClear()
 })
 
 afterEach(() => vi.restoreAllMocks())
@@ -452,4 +453,119 @@ test("fields follow the writing direction in Arabic", async () => {
   for (const box of screen.getAllByRole("textbox")) {
     expect(box).toHaveAttribute("dir", "auto")
   }
+})
+
+test("Publish on new homework saves it, publishes it and opens the Published tab", async () => {
+  const posted = openNew(list())
+  const published: unknown[] = []
+
+  server.use(
+    http.post(apiUrl(`/homework/${HOMEWORK_ID}/publish`), async ({ request }) => {
+      published.push(await request.json())
+
+      return HttpResponse.json({
+        id: HOMEWORK_ID,
+        status: "published",
+        publishedAt: "2026-11-10T12:00:00Z",
+      })
+    })
+  )
+
+  await lessonSelect()
+  await fill("Learn the verse", "Say it at bedtime.")
+  await userEvent.click(screen.getByRole("button", { name: "Publish" }))
+
+  await vi.waitFor(() =>
+    expect(router.push).toHaveBeenCalledWith(
+      `/stages/homework/?id=${THIRD_CLASS_ID}&status=published`
+    )
+  )
+
+  expect(posted).toHaveLength(1)
+  expect(published).toEqual([{}])
+
+  expect(toast.success).toHaveBeenCalledExactlyOnceWith(
+    "Published. Parents and members of the class can see it now."
+  )
+})
+
+test("a refused publish keeps the saved draft, and a retry creates no second task", async () => {
+  const posted = openNew(list())
+  const patched: unknown[] = []
+  let publishes = 0
+
+  server.use(
+    http.post(apiUrl(`/homework/${HOMEWORK_ID}/publish`), () => {
+      publishes++
+
+      return problem(409, "homework.lessonArchived")
+    }),
+    http.patch(apiUrl(`/homework/${HOMEWORK_ID}`), async ({ request }) => {
+      patched.push(await request.json())
+
+      return HttpResponse.json({ id: HOMEWORK_ID, status: "draft" })
+    })
+  )
+
+  await lessonSelect()
+  await fill("Learn the verse", "Say it.")
+  await userEvent.click(screen.getByRole("button", { name: "Publish" }))
+
+  await vi.waitFor(() =>
+    expect(toast.error).toHaveBeenCalledWith("The lesson is archived. Restore the lesson first.")
+  )
+
+  await vi.waitFor(() =>
+    expect(router.replace).toHaveBeenCalledWith(`/homework/edit/?id=${HOMEWORK_ID}`)
+  )
+
+  expect(router.push).not.toHaveBeenCalled()
+  await userEvent.click(screen.getByRole("button", { name: "Publish" }))
+  await vi.waitFor(() => expect(publishes).toBe(2))
+  expect(posted).toHaveLength(1)
+  expect(patched).toHaveLength(1)
+})
+
+test("a draft offers Publish only with can.publish", async () => {
+  const draft = { status: "draft" as const, publishedAt: null, counts: null }
+
+  openEdit(
+    detail({
+      ...draft,
+      can: {
+        edit: true,
+        publish: true,
+        unpublish: false,
+        archive: false,
+        restore: false,
+        delete: false,
+        viewProgress: true,
+      },
+    })
+  )
+
+  const status = within(await screen.findByRole("group", { name: "Status" }))
+  expect(status.getAllByRole("button").map((b) => b.textContent)).toEqual(["Publish", "Save draft"])
+})
+
+test("a draft without can.publish only saves", async () => {
+  const draft = { status: "draft" as const, publishedAt: null, counts: null }
+
+  openEdit(
+    detail({
+      ...draft,
+      can: {
+        edit: true,
+        publish: false,
+        unpublish: false,
+        archive: false,
+        restore: false,
+        delete: false,
+        viewProgress: true,
+      },
+    })
+  )
+
+  const status = within(await screen.findByRole("group", { name: "Status" }))
+  expect(status.getAllByRole("button").map((b) => b.textContent)).toEqual(["Save draft"])
 })
