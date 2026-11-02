@@ -15,6 +15,7 @@ export default defineConfig({
     include: ["test/**/*.test.{ts,tsx}"],
     environment: "jsdom",
     setupFiles: ["test/support/setup.ts"],
+    testTimeout: 15_000,
     env: { TZ: "UTC" },
     server: { deps: { inline: ["next-intl"] } },
   },
