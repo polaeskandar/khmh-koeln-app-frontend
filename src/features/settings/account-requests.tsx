@@ -107,8 +107,10 @@ function DeclineButton({ request }: { request: AccountRequest }) {
 
 export function AccountRequests({
   approve,
+  decide = true,
 }: {
   approve?: (request: AccountRequest, today: LocalDate) => React.ReactNode
+  decide?: boolean
 }) {
   const t = useTranslations("accountRequests")
   const query = useQuery(accountRequestsQuery)
@@ -135,10 +137,12 @@ export function AccountRequests({
                   request={request}
                   today={today}
                   actions={
-                    <>
-                      {approve?.(request, today)}
-                      <DeclineButton request={request} />
-                    </>
+                    decide ? (
+                      <>
+                        {approve?.(request, today)}
+                        <DeclineButton request={request} />
+                      </>
+                    ) : null
                   }
                 />
               ))}
