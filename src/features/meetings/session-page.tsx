@@ -21,6 +21,7 @@ import { groupOf, type SessionView } from "@/lib/api/types/meetings"
 import { routes } from "@/lib/routes"
 
 import { type MeetingSession, useMeetingSession } from "./api"
+import { SessionManageMenu } from "./session-dialogs"
 
 function AttendanceAction({ session, today }: { session: SessionView; today: LocalDate }) {
   const t = useTranslations()
@@ -105,6 +106,9 @@ function SessionDetail({ data, actions }: { data: MeetingSession; actions?: Reac
           actions={
             <>
               <AttendanceAction session={session} today={today} />
+              {session.status === "scheduled" && session.can.manage ? (
+                <SessionManageMenu session={session} />
+              ) : null}
               {actions}
             </>
           }
