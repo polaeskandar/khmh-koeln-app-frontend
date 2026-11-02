@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/input-group"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useFormat } from "@/i18n/format"
+import { isolate } from "@/lib/bidi"
 import type { PersonRef } from "@/lib/api/types/common"
 import { fullName, initials, matchesQuery, preferredName } from "@/lib/domain/names"
 
@@ -27,6 +28,7 @@ export type BoardActions = {
   onMark?: (person: PersonRef) => void
   onUndo?: (person: PersonRef, mark: Mark) => void
   onClose?: () => void
+  onCorrect?: () => void
   pending?: ReadonlySet<string>
   saving?: boolean
 }
@@ -103,6 +105,84 @@ export function PersonRow({
         <span className="text-xs text-muted-foreground">{t("notMarked")}</span>
       )}
     </li>
+  )
+}
+
+const firstName = (name: string) => name.split(" ")[0]
+
+function RecentlyMarked({ board, onCorrect }: { board: Board; onCorrect?: () => void }) {
+  const t = useTranslations("attendance.board")
+  const f = useFormat()
+
+  if (board.recentlyMarked.length === 0) {
+    return null
+  }
+
+  return (
+    <section className="flex flex-col gap-2" aria-label={t("recent")}>
+      <h2 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+        {t("recent")}
+      </h2>
+      <ul className="flex flex-col gap-1.5 text-sm">
+        {board.recentlyMarked
+          .flatMap(({ person, mark }) => (mark ? [{ person, mark }] : []))
+          .slice(0, 6)
+          .map(({ person, mark }) => (
+            <li key={mark.id} className="flex items-center justify-between gap-3">
+              <span className="truncate">{preferredName(person)}</span>
+              <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+                {f.instantTime(mark.recordedAt)}
+                {mark.recordedBy ? ` · ${firstName(mark.recordedBy.name)}` : ""}
+              </span>
+            </li>
+          ))}
+      </ul>
+      {onCorrect ? (
+        <button
+          type="button"
+          className="self-start text-xs text-muted-foreground underline underline-offset-4"
+          onClick={onCorrect}
+        >
+          {t("correctMistake")}
+        </button>
+      ) : null}
+    </section>
+  )
+}
+
+function Corrections({ board }: { board: Board }) {
+  const t = useTranslations("attendance.board")
+  const f = useFormat()
+
+  if (board.corrections.length === 0) {
+    return null
+  }
+
+  return (
+    <section className="flex flex-col gap-2" aria-label={t("corrections")}>
+      <h2 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+        {t("corrections")}
+      </h2>
+      <ul className="flex flex-col gap-1.5 text-sm text-muted-foreground">
+        {board.corrections
+          .slice(-4)
+          .reverse()
+          .map((correction) => {
+            const removal = {
+              name: preferredName(correction.person),
+              when: f.atLabel(correction.removedAt, board.today),
+            }
+
+            return (
+              <li key={correction.id}>
+                {correction.reason
+                  ? t("removedReason", { ...removal, reason: isolate(correction.reason) })
+                  : t("removed", removal)}
+              </li>
+            )
+          })}
+      </ul>
+    </section>
   )
 }
 
@@ -270,6 +350,8 @@ export function AttendanceBoard({
             <p className="text-xs text-muted-foreground">{t("viewOnly")}</p>
           )}
         </div>
+        <RecentlyMarked board={board} onCorrect={canRecord ? actions.onCorrect : undefined} />
+        <Corrections board={board} />
       </aside>
 
       <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-3 border-t bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">

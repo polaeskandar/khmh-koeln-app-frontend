@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
-import { type ReactNode, useEffect } from "react"
+import { type ReactNode, useEffect, useState } from "react"
 
 import { Topbar } from "@/components/app-shell/topbar"
 import { PageBody, PageHeader } from "@/components/page-header"
@@ -18,6 +18,7 @@ import { routes } from "@/lib/routes"
 
 import { type AttendanceBoard as Board, attendanceBoardQuery } from "./api"
 import { AttendanceBoard } from "./attendance-board"
+import { CloseDialog, CorrectionDialog } from "./board-dialogs"
 import { applyWrites, useMarkWrites, useOnline } from "./mark-writes"
 import { OpenAttendanceButton } from "./open-attendance-button"
 
@@ -81,6 +82,7 @@ function ActiveBoard({ board, boardAt }: { board: Board; boardAt: number }) {
   const online = useOnline()
   const writes = useMarkWrites(board.session.id)
   const shown = applyWrites(board, writes.writes, boardAt)
+  const [dialog, setDialog] = useState<"close" | "correct" | null>(null)
 
   return (
     <>
@@ -94,6 +96,8 @@ function ActiveBoard({ board, boardAt }: { board: Board; boardAt: number }) {
         actions={{
           onMark: writes.mark,
           onUndo: writes.undo,
+          onClose: () => setDialog("close"),
+          onCorrect: () => setDialog("correct"),
           pending: writes.pending,
           saving: writes.pending.size > 0,
         }}
@@ -107,6 +111,16 @@ function ActiveBoard({ board, boardAt }: { board: Board; boardAt: number }) {
             />
           ) : null
         }
+      />
+      <CloseDialog
+        board={shown}
+        open={dialog === "close"}
+        onOpenChange={(open) => setDialog(open ? "close" : null)}
+      />
+      <CorrectionDialog
+        board={shown}
+        open={dialog === "correct"}
+        onOpenChange={(open) => setDialog(open ? "correct" : null)}
       />
     </>
   )
