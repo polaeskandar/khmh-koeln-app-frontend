@@ -1500,7 +1500,8 @@
     },
     "roster": {
       "open": "مفتوح للجميع",
-      "size": "في القائمة: {count, number}"
+      "size": "في القائمة: {count, number}",
+      "ofGroup": "قائمة {group}"
     },
     "filter": {
       "allServices": "كل الخدمات"
