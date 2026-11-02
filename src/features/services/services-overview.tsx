@@ -40,6 +40,7 @@ import { localDateOf } from "@/lib/domain/time"
 import { routes } from "@/lib/routes"
 
 import { type ServiceRow, servicesQuery } from "./api"
+import { NewServiceButton, ServiceActionsMenu } from "./service-dialogs"
 
 type Tab = "active" | "archived" | "all"
 
@@ -57,7 +58,11 @@ export function ServicesOverview() {
     <>
       <Topbar crumbs={[{ label: t("nav.services") }]} />
       <PageBody>
-        <PageHeader title={t("nav.services")} description={t("services.description")} />
+        <PageHeader
+          title={t("nav.services")}
+          description={t("services.description")}
+          actions={query.data?.can.create ? <NewServiceButton /> : null}
+        />
         <QueryState query={query}>{(list) => <ServicesTable rows={list.items} />}</QueryState>
       </PageBody>
     </>
@@ -159,6 +164,13 @@ export function ServicesTable({ rows }: { rows: ServiceRow[] }) {
         cell: ({ row: { original: r } }) => <span className="tabular-nums">{r.memberCount}</span>,
         size: 100,
       },
+      {
+        id: "actions",
+        header: () => null,
+        cell: ({ row: { original: r } }) => <ServiceActionsMenu service={r} />,
+        enableSorting: false,
+        size: 48,
+      },
     ],
     [t, f]
   )
@@ -235,8 +247,11 @@ export function ServicesTable({ rows }: { rows: ServiceRow[] }) {
           <li>{empty}</li>
         ) : (
           table.getRowModel().rows.map(({ original: r }) => (
-            <li key={r.id}>
-              <Link href={routes.service(r.id)} className="flex min-w-0 items-start gap-3 py-3">
+            <li key={r.id} className="flex items-start gap-2">
+              <Link
+                href={routes.service(r.id)}
+                className="flex min-w-0 flex-1 items-start gap-3 py-3"
+              >
                 <ServiceSwatch tone={r.tone} className="mt-1.5 size-2.5" />
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className="flex min-w-0 flex-wrap items-center gap-2 font-medium">
@@ -249,6 +264,7 @@ export function ServicesTable({ rows }: { rows: ServiceRow[] }) {
                   </span>
                 </span>
               </Link>
+              <ServiceActionsMenu service={r} />
             </li>
           ))
         )}
