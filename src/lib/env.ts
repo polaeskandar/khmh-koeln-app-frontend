@@ -55,3 +55,5 @@ export const impressumUrl = () =>
   parseImpressumUrl(process.env.NEXT_PUBLIC_IMPRESSUM_URL, {
     production: process.env.NODE_ENV === "production",
   })
+
+export const resetByEmail = () => process.env.NEXT_PUBLIC_RESET_BY_EMAIL === "true"
