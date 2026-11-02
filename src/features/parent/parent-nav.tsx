@@ -1,17 +1,19 @@
 "use client"
 
 import { cn } from "cn"
-import { House, type LucideIcon, NotebookPen } from "lucide-react"
+import { House, type LucideIcon, NotebookPen, UserRound, UsersRound } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { Link, usePathname } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 
-type Item = { href: string; key: "home" | "homework"; icon: LucideIcon }
+type Item = { href: string; key: "home" | "children" | "homework" | "account"; icon: LucideIcon }
 
 export const PARENT_NAV: Item[] = [
   { href: routes.parentHome(), key: "home", icon: House },
+  { href: routes.parentChildren(), key: "children", icon: UsersRound },
   { href: routes.parentHomework(), key: "homework", icon: NotebookPen },
+  { href: routes.parentAccount(), key: "account", icon: UserRound },
 ]
 
 const trimSlash = (path: string) => (path.length > 1 ? path.replace(/\/+$/, "") : path)
@@ -75,7 +77,7 @@ export function ParentTabBar() {
             href={item.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium text-muted-foreground",
+              "flex min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 text-center text-[11px] font-medium text-muted-foreground",
               active && "text-foreground"
             )}
           >
