@@ -18,6 +18,7 @@ import { onUnauthorized } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/problem"
 import { type ProblemTranslator, translateProblem } from "@/lib/api/translate-problem"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
+import { can, type Can } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import { onLanguageSaveFailed } from "./account-language"
@@ -50,10 +51,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const session: Session = closed
     ? { status: "ended" }
-    : query.data
-      ? { status: "authenticated", me: query.data, areas: areasOf(query.data) }
-      : query.error instanceof ApiError && query.error.status === 401
-        ? { status: "anonymous" }
+    : query.error instanceof ApiError && query.error.status === 401
+      ? { status: "anonymous" }
+      : query.data
+        ? { status: "authenticated", me: query.data, areas: areasOf(query.data) }
         : query.isError
           ? { status: "failed", error: query.error }
           : { status: "unknown" }
@@ -147,4 +148,11 @@ export function useSession(): SessionContext {
   }
 
   return context
+}
+
+export function useCan(): Can {
+  const { session } = useSession()
+  const me = session.status === "authenticated" ? session.me : null
+
+  return (action, resource) => can(me, action, resource)
 }

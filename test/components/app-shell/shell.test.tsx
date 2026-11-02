@@ -63,7 +63,7 @@ describe("the sidebar", () => {
   test("lists the staff areas and marks the current one", async () => {
     navigation.pathname = "/services/view/"
     shell(me.servant)
-    await screen.findByText("Page")
+    await sidebar().findByRole("link", { name: "Members" })
 
     for (const name of ["Services", "Meetings", "Attendance", "Members"]) {
       expect(sidebar().getByRole("link", { name })).toBeInTheDocument()
@@ -83,15 +83,21 @@ describe("the sidebar", () => {
   })
 
   test.each([
-    ["an administrator with registration on", me.administrator, "true", true],
-    ["a servant with registration on", me.servant, "true", false],
-    ["an administrator with registration off", me.administrator, "", false],
-  ])("Settings for %s: %s", async (_, account, flag, shown) => {
-    vi.stubEnv("NEXT_PUBLIC_REGISTRATION_ENABLED", flag)
+    [
+      "an administrator",
+      me.administrator,
+      ["Settings", "Members", "Attendance", "Take attendance"],
+    ],
+    ["a servant", me.servant, ["Members", "Attendance", "Take attendance"]],
+    ["the church office", me.churchOffice, ["Settings", "Members"]],
+    ["attendance only", me.attendanceOnly, ["Attendance", "Take attendance"]],
+  ])("%s sees %s", async (_, account, shown) => {
     shell(account)
-    await screen.findByText("Page")
-    await sidebar().findByRole("link", { name: "Services" })
-    expect(sidebar().queryByRole("link", { name: "Settings" }) !== null).toBe(shown)
+    await sidebar().findByRole("link", { name: shown[shown.length - 1] })
+
+    for (const name of ["Settings", "Members", "Attendance", "Take attendance"]) {
+      expect(sidebar().queryByRole("link", { name }) !== null, name).toBe(shown.includes(name))
+    }
   })
 
   test("sits on the right in Arabic", async () => {

@@ -11,11 +11,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useSession } from "@/features/auth/session"
+import { useCan } from "@/features/auth/session"
 import { Link, usePathname } from "@/i18n/navigation"
 
 import { AccountMenuItems } from "./account-menu"
-import { isActive, NAV, type NavItem, SETTINGS, showsSettings, TAKE_ATTENDANCE } from "./nav"
+import { isActive, NAV, type NavItem, SETTINGS, TAKE_ATTENDANCE } from "./nav"
 
 const item = (key: NavItem["key"]) => NAV.find((i) => i.key === key)!
 
@@ -42,13 +42,14 @@ function Tab({ item, active }: { item: NavItem; active: boolean }) {
 export function MobileTabBar() {
   const t = useTranslations("nav")
   const pathname = usePathname()
-  const { session } = useSession()
+  const can = useCan()
 
   if (isActive(TAKE_SCREEN, pathname)) {
     return null
   }
 
-  const settings = session.status === "authenticated" && showsSettings(session.areas)
+  const settings = SETTINGS.allowed(can)
+  const members = item("members")
   const attendance = isActive(TAKE_ATTENDANCE.href, pathname)
 
   return (
@@ -58,26 +59,30 @@ export function MobileTabBar() {
     >
       <Tab item={item("services")} active={isActive(item("services").href, pathname)} />
       <Tab item={item("meetings")} active={isActive(item("meetings").href, pathname)} />
-      <div className="flex flex-1 flex-col items-center">
-        <Link
-          href={TAKE_ATTENDANCE.href}
-          aria-label={t("takeAttendance")}
-          aria-current={attendance ? "page" : undefined}
-          className="relative -mt-5 flex size-14 items-center justify-center bg-primary text-primary-foreground shadow-lg ring-4 ring-background"
-        >
-          <TAKE_ATTENDANCE.icon className="size-6" aria-hidden="true" />
-        </Link>
-        <span
-          className={cn(
-            "mt-0.5 text-[11px] font-medium text-muted-foreground",
-            attendance && "text-foreground"
-          )}
-          aria-hidden="true"
-        >
-          {t("attendance")}
-        </span>
-      </div>
-      <Tab item={item("members")} active={isActive(item("members").href, pathname)} />
+      {TAKE_ATTENDANCE.allowed(can) ? (
+        <div className="flex flex-1 flex-col items-center">
+          <Link
+            href={TAKE_ATTENDANCE.href}
+            aria-label={t("takeAttendance")}
+            aria-current={attendance ? "page" : undefined}
+            className="relative -mt-5 flex size-14 items-center justify-center bg-primary text-primary-foreground shadow-lg ring-4 ring-background"
+          >
+            <TAKE_ATTENDANCE.icon className="size-6" aria-hidden="true" />
+          </Link>
+          <span
+            className={cn(
+              "mt-0.5 text-[11px] font-medium text-muted-foreground",
+              attendance && "text-foreground"
+            )}
+            aria-hidden="true"
+          >
+            {t("attendance")}
+          </span>
+        </div>
+      ) : null}
+      {members.allowed(can) ? (
+        <Tab item={members} active={isActive(members.href, pathname)} />
+      ) : null}
       <DropdownMenu>
         <DropdownMenuTrigger
           className={cn(

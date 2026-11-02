@@ -10,16 +10,17 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { useSession } from "@/features/auth/session"
+import { useCan } from "@/features/auth/session"
 import { useInlineEnd } from "@/i18n/direction"
 import { Link, usePathname } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 
-import { isActive, NAV, SETTINGS, showsSettings, TAKE_ATTENDANCE } from "./nav"
+import { isActive, NAV, SETTINGS, TAKE_ATTENDANCE } from "./nav"
 
 export function SidebarBrand() {
   const t = useTranslations()
   const side = useInlineEnd()
+  const can = useCan()
 
   return (
     <SidebarMenu>
@@ -36,18 +37,20 @@ export function SidebarBrand() {
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton
-          asChild
-          tooltip={{ children: t("nav.takeAttendance"), side }}
-          className="h-10 bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
-        >
-          <Link href={TAKE_ATTENDANCE.href}>
-            <TAKE_ATTENDANCE.icon />
-            <span className="font-semibold">{t("nav.takeAttendance")}</span>
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
+      {TAKE_ATTENDANCE.allowed(can) ? (
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            asChild
+            tooltip={{ children: t("nav.takeAttendance"), side }}
+            className="h-10 bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
+          >
+            <Link href={TAKE_ATTENDANCE.href}>
+              <TAKE_ATTENDANCE.icon />
+              <span className="font-semibold">{t("nav.takeAttendance")}</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      ) : null}
     </SidebarMenu>
   )
 }
@@ -56,15 +59,15 @@ export function SidebarNav() {
   const t = useTranslations("nav")
   const side = useInlineEnd()
   const pathname = usePathname()
-  const { session } = useSession()
-  const settings = session.status === "authenticated" && showsSettings(session.areas)
+  const can = useCan()
+  const settings = SETTINGS.allowed(can)
 
   return (
     <>
       <SidebarGroup>
         <SidebarGroupContent>
           <SidebarMenu>
-            {NAV.map((item) => (
+            {NAV.filter((item) => item.allowed(can)).map((item) => (
               <SidebarMenuItem key={item.key}>
                 <SidebarMenuButton
                   asChild
