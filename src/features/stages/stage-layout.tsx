@@ -12,6 +12,7 @@ import { NotFoundState, QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { ServiceTag } from "@/components/service-tag"
 import { StatusBadge } from "@/components/status"
+import type { ServiceRef, StageRef } from "@/lib/api/types/common"
 import { registrationEnabled } from "@/lib/env"
 import { routes } from "@/lib/routes"
 
@@ -38,7 +39,11 @@ const TAB_ROUTES: Record<StageTab, (id: string) => string> = {
   homework: routes.stageHomework,
 }
 
-export function useStageCrumbs(stage: Stage, tab: StageTab, extra: Crumb[] = []): Crumb[] {
+export function useStageCrumbs(
+  stage: StageRef & { service: ServiceRef },
+  tab: StageTab,
+  extra: Crumb[] = []
+): Crumb[] {
   const t = useTranslations()
   const tabs = useTabLabels()
 
