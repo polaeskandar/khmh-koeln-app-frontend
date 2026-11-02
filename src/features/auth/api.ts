@@ -34,3 +34,6 @@ export const registrationServicesQuery = {
 }
 
 export const registerRequest = (body: Registration) => dataOf(api.POST("/auth/register", { body }))
+
+export const setPasswordRequest = (body: { token: string; password: string }) =>
+  dataOf(api.POST("/auth/password-links", { body }))
