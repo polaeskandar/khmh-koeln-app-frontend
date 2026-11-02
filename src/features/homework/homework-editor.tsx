@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 import { Link2, Plus, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useEffect, useId, useRef, useState } from "react"
+import { toast } from "sonner"
 
 import { Topbar } from "@/components/app-shell/topbar"
 import { focusFirstInvalid } from "@/components/focus-first-invalid"
@@ -46,6 +47,7 @@ import {
   stageHomeworkQuery,
   updateHomeworkRequest,
 } from "./api"
+import { usePublishHomework } from "./use-publish-homework"
 
 const MAX_RESOURCES = 10
 const EMPTY_RESOURCE: Resource = { label: "", url: null }
@@ -78,24 +80,22 @@ function HomeworkForm(props: FormProps) {
 
   const [resources, setResources] = useState<Resource[]>(homework?.resources ?? [])
   const [sent, setSent] = useState<number[]>([])
+  const [savedId, setSavedId] = useState<Uuid | null>(homework?.id ?? null)
+  const [intent, setIntent] = useState<"save" | "publish">("save")
+  const busy = useRef(false)
 
   const mutation = useApiMutation(
     (input: HomeworkInput) =>
-      homework ? updateHomeworkRequest(homework.id, input) : createHomeworkRequest(lessonId, input),
-    {
-      successMessage: (saved) =>
-        saved.status === "published"
-          ? t("toast.homeworkSavedPublished")
-          : homework
-            ? t("toast.homeworkSavedDraft")
-            : t("toast.homeworkDraftSaved"),
-      invalidate: [["homework"]],
-      onSuccess: (saved) => router.push(`${routes.stageHomework(stage.id)}&status=${saved.status}`),
-    }
+      savedId ? updateHomeworkRequest(savedId, input) : createHomeworkRequest(lessonId, input),
+    { invalidate: [["homework"]] }
   )
 
+  const publisher = usePublishHomework(t("toast.homeworkPublishedNew"))
   const errors = mutation.fieldErrors
   const published = homework?.status === "published"
+  const canPublish = homework ? homework.can.publish : true
+  const pending = mutation.pending || publisher.pending
+  const listOn = (status: string) => `${routes.stageHomework(stage.id)}&status=${status}`
   const lessonLabel = (l: LessonRef) => `${f.dayMonth(l.teachingDate)} · ${l.title}`
 
   useEffect(() => {
@@ -133,20 +133,59 @@ function HomeworkForm(props: FormProps) {
     setSent((list) => list.filter((i) => i !== row).map((i) => (i > row ? i - 1 : i)))
   }
 
-  function submit() {
-    const kept = resources.flatMap((r, i) => (isBlank(r) ? [] : [i]))
-    setSent(kept)
+  async function submit(next: "save" | "publish") {
+    if (busy.current) {
+      return
+    }
 
-    void mutation.execute({
-      title,
-      instructions,
-      dueDate: dueDate || null,
-      resources: kept.map((i) => {
-        const { label, url } = resources[i]!
+    busy.current = true
+    setIntent(next)
 
-        return { label, url: url?.trim() ? url : null }
-      }),
-    })
+    try {
+      const kept = resources.flatMap((r, i) => (isBlank(r) ? [] : [i]))
+      setSent(kept)
+
+      const saved = await mutation.execute({
+        title,
+        instructions,
+        dueDate: dueDate || null,
+        resources: kept.map((i) => {
+          const { label, url } = resources[i]!
+
+          return { label, url: url?.trim() ? url : null }
+        }),
+      })
+
+      if (!saved.ok) {
+        return
+      }
+
+      setSavedId(saved.data.id)
+
+      if (next === "save") {
+        toast.success(
+          saved.data.status === "published"
+            ? t("toast.homeworkSavedPublished")
+            : homework
+              ? t("toast.homeworkSavedDraft")
+              : t("toast.homeworkDraftSaved")
+        )
+
+        router.push(listOn(saved.data.status))
+
+        return
+      }
+
+      const result = await publisher.publish({ id: saved.data.id, title })
+
+      if (result?.ok) {
+        router.push(listOn("published"))
+      } else if (!homework) {
+        router.replace(routes.editHomework(saved.data.id))
+      }
+    } finally {
+      busy.current = false
+    }
   }
 
   return (
@@ -156,7 +195,7 @@ function HomeworkForm(props: FormProps) {
       className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,340px)]"
       onSubmit={(event) => {
         event.preventDefault()
-        submit()
+        void submit("save")
       }}
     >
       <div className="flex min-w-0 flex-col gap-6">
@@ -179,6 +218,7 @@ function HomeworkForm(props: FormProps) {
                 id={lessonSelectId}
                 className="w-full"
                 value={lessonId}
+                disabled={savedId !== null}
                 onChange={(event) => chooseLesson(event.target.value)}
               >
                 {lessons.map((l) => (
@@ -336,8 +376,18 @@ function HomeworkForm(props: FormProps) {
                 })}
           </p>
           <div className="flex flex-col gap-2">
-            <Button type="submit" disabled={mutation.pending}>
-              {mutation.pending ? <Spinner data-icon="inline-start" /> : null}
+            {!published && canPublish ? (
+              <Button type="button" disabled={pending} onClick={() => void submit("publish")}>
+                {pending && intent === "publish" ? <Spinner data-icon="inline-start" /> : null}
+                {t("homework.actions.publishToParents")}
+              </Button>
+            ) : null}
+            <Button
+              type="submit"
+              variant={!published && canPublish ? "outline" : "default"}
+              disabled={pending}
+            >
+              {pending && intent === "save" ? <Spinner data-icon="inline-start" /> : null}
               {published ? t("common.saveChanges") : t("homework.editor.saveDraft")}
             </Button>
             <Button type="button" variant="ghost" asChild>

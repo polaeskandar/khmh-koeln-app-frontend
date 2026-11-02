@@ -1,10 +1,11 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
+import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
-import { apiUrl } from "@test/support/api"
+import { apiUrl, problem } from "@test/support/api"
 import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
@@ -28,16 +29,6 @@ const lesson = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e9001",
   title: "The Good Samaritan",
   teachingDate: "2026-11-01",
-}
-
-const can = {
-  edit: true,
-  publish: true,
-  unpublish: false,
-  archive: false,
-  restore: false,
-  delete: false,
-  viewProgress: true,
 }
 
 const row = (
@@ -64,7 +55,15 @@ const row = (
           withoutAccount: 0,
           reportedTotal: 3,
         },
-  can,
+  can: {
+    edit: true,
+    publish: status === "draft",
+    unpublish: false,
+    archive: false,
+    restore: false,
+    delete: false,
+    viewProgress: true,
+  },
   ...extra,
 })
 
@@ -91,10 +90,12 @@ const prayer = row("0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea003", "Pray for a neighbour
   counts: null,
 })
 
-function open(body: StageHomework) {
+function open(body: StageHomework | (() => StageHomework)) {
   server.use(
     http.get(apiUrl(`/stages/${THIRD_CLASS_ID}`), () => HttpResponse.json(thirdClass)),
-    http.get(apiUrl(`/stages/${THIRD_CLASS_ID}/homework`), () => HttpResponse.json(body))
+    http.get(apiUrl(`/stages/${THIRD_CLASS_ID}/homework`), () =>
+      HttpResponse.json(typeof body === "function" ? body() : body)
+    )
   )
 
   renderWithProviders(
@@ -160,4 +161,121 @@ test("hides new homework from someone who cannot create it", async () => {
   await table()
   expect(screen.queryByRole("link", { name: "New homework" })).not.toBeInTheDocument()
   expect(screen.queryByRole("link", { name: "Prepare a lesson" })).not.toBeInTheDocument()
+})
+
+const publishToast = (title: string) =>
+  `Published “${title}”. Parents and members of the class can see it now.`
+
+test("publishes a draft row once, even on a double click, and it moves to Published", async () => {
+  vi.spyOn(toast, "success")
+  let current = data([drawing])
+  const posts: unknown[] = []
+  open(() => current)
+
+  server.use(
+    http.post(apiUrl(`/homework/${drawing.id}/publish`), async ({ request }) => {
+      posts.push(await request.json())
+      current = data([{ ...drawing, ...row(drawing.id, drawing.title, "published") }])
+
+      return HttpResponse.json({
+        id: drawing.id,
+        status: "published",
+        publishedAt: "2026-11-01T12:00:00Z",
+      })
+    })
+  )
+
+  const draftRow = (await table()).getAllByRole("row")[1]!
+  await userEvent.dblClick(within(draftRow).getByRole("button", { name: "Publish" }))
+  await vi.waitFor(() => expect(toast.success).toHaveBeenCalledWith(publishToast("Draw the inn")))
+
+  expect(
+    await screen.findByRole("tab", { name: "Published (1)", selected: true })
+  ).toBeInTheDocument()
+
+  const published = (await table()).getAllByRole("row")[1]!
+  expect(published).toHaveTextContent("3 of 12 reported done")
+  expect(within(published).queryByRole("button", { name: "Publish" })).not.toBeInTheDocument()
+  expect(posts).toEqual([{}])
+})
+
+test("the actions menu offers what each row's flags allow", async () => {
+  search.value = `id=${THIRD_CLASS_ID}&status=published`
+
+  const locked = row("0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea004", "Sing the hymn", "published", {
+    can: {
+      edit: false,
+      publish: false,
+      unpublish: false,
+      archive: false,
+      restore: false,
+      delete: false,
+      viewProgress: false,
+    },
+  })
+
+  open(data([verse, drawing, locked]))
+  const rows = (await table()).getAllByRole("row").slice(1)
+
+  await userEvent.click(
+    within(rows[0]!).getByRole("button", { name: "Actions for Learn the memory verse" })
+  )
+
+  const menu = await screen.findByRole("menu")
+
+  expect(
+    within(menu)
+      .getAllByRole("menuitem")
+      .map((i) => i.textContent)
+  ).toEqual(["Who reported it done", "Edit"])
+
+  expect(within(menu).getByRole("menuitem", { name: "Who reported it done" })).toHaveAttribute(
+    "href",
+    `/homework/view/?id=${verse.id}`
+  )
+
+  await userEvent.keyboard("{Escape}")
+  expect(within(rows[1]!).queryByRole("button")).not.toBeInTheDocument()
+})
+
+test("the draft menu offers Edit and Publish and works from the keyboard", async () => {
+  open(data([drawing]))
+  const draftRow = (await table()).getAllByRole("row")[1]!
+  const trigger = within(draftRow).getByRole("button", { name: "Actions for Draw the inn" })
+  trigger.focus()
+  await userEvent.keyboard("{Enter}")
+  const menu = await screen.findByRole("menu")
+  const items = within(menu).getAllByRole("menuitem")
+  expect(items.map((i) => i.textContent)).toEqual(["Edit", "Publish"])
+  expect(items[0]).toHaveAttribute("href", `/homework/edit/?id=${drawing.id}`)
+  await vi.waitFor(() => expect(items[0]).toHaveFocus())
+  await userEvent.keyboard("{ArrowDown}")
+  expect(items[1]).toHaveFocus()
+})
+
+test("a refused publish toasts and refetches the list", async () => {
+  vi.spyOn(toast, "error")
+  let reads = 0
+
+  open(() => {
+    reads++
+
+    return data([drawing])
+  })
+
+  server.use(
+    http.post(apiUrl(`/homework/${drawing.id}/publish`), () =>
+      problem(409, "homework.lessonArchived")
+    )
+  )
+
+  const draftRow = (await table()).getAllByRole("row")[1]!
+  await userEvent.click(within(draftRow).getByRole("button", { name: "Actions for Draw the inn" }))
+  await userEvent.click(await screen.findByRole("menuitem", { name: "Publish" }))
+
+  await vi.waitFor(() =>
+    expect(toast.error).toHaveBeenCalledWith("The lesson is archived. Restore the lesson first.")
+  )
+
+  await vi.waitFor(() => expect(reads).toBe(2))
 })
