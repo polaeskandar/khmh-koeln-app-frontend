@@ -231,3 +231,55 @@ test("the thank-you page promises no email and links back to sign-in", () => {
   expect(document.body).not.toHaveTextContent(/email|prototype/i)
   expect(screen.getByRole("link", { name: "Back to sign-in" })).toHaveAttribute("href", "/sign-in/")
 })
+
+describe("members", () => {
+  test("the options are Parent, Member and Servant, in that order", () => {
+    renderWithProviders(<RegisterPage />)
+
+    expect(
+      screen.getAllByRole("radio").map((radio) => radio.closest("label")?.textContent)
+    ).toEqual([
+      expect.stringMatching(/^Parent/),
+      expect.stringMatching(/^Member/),
+      expect.stringMatching(/^Servant/),
+    ])
+
+    expect(screen.getByText(/Children under 16 get an account of their own/)).toBeInTheDocument()
+  })
+
+  test("a member's registration sends their groups", async () => {
+    const bodies = backend()
+    renderWithProviders(<RegisterPage />)
+    const user = userEvent.setup()
+    await user.click(screen.getByRole("radio", { name: /Member/ }))
+    await user.type(screen.getByLabelText("First name"), "Mina")
+    await user.type(screen.getByLabelText("Last name"), "Hanna")
+    await user.type(screen.getByLabelText("Email address"), "mina.hanna@example.org")
+    await user.type(screen.getByLabelText("Password"), "correct horse battery")
+    await user.type(screen.getByLabelText("Your groups"), "Youth Meeting")
+    await user.click(screen.getByRole("checkbox"))
+    await user.click(screen.getByRole("button", { name: "Create account" }))
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/register/done/"))
+
+    expect(bodies[0].registration).toEqual({
+      registeredAs: "member",
+      note: "Youth Meeting",
+      serviceIds: [],
+    })
+  })
+
+  test("a missing note shows under Your groups and takes the focus", async () => {
+    backend(() =>
+      problem(422, "checkFields", {
+        fieldErrors: { "registration.note": { code: "accounts.groupsRequired", params: {} } },
+      })
+    )
+
+    renderWithProviders(<RegisterPage />)
+    await userEvent.click(screen.getByRole("radio", { name: /Member/ }))
+    await userEvent.click(screen.getByRole("button", { name: "Create account" }))
+    const groups = screen.getByLabelText("Your groups")
+    await waitFor(() => expect(groups).toHaveFocus())
+    expect(groups).toHaveAccessibleDescription(/Write which groups you take part in/)
+  })
+})
