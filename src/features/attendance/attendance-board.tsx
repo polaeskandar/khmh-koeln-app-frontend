@@ -31,10 +31,12 @@ export type BoardActions = {
   saving?: boolean
 }
 
-const placementText = (placements: Placement[]) =>
-  placements.map((p) => p.stage?.name ?? p.service.name).join(" · ")
+export const placementText = (placements: Placement[]) =>
+  placements
+    .map((p) => (p.stage ? `${p.service.name} · ${p.stage.name}` : p.service.name))
+    .join(", ")
 
-function PersonRow({
+export function PersonRow({
   person,
   mark,
   placements,
@@ -107,11 +109,11 @@ function PersonRow({
 export function AttendanceBoard({
   board,
   actions = {},
-  children,
+  below,
 }: {
   board: Board
   actions?: BoardActions
-  children?: ReactNode
+  below?: (query: string) => ReactNode
 }) {
   const t = useTranslations("attendance.board")
   const tc = useTranslations("common")
@@ -234,7 +236,7 @@ export function AttendanceBoard({
           </section>
         ) : null}
 
-        {children}
+        {below?.(q)}
       </div>
 
       <aside className="hidden min-w-0 flex-col gap-5 self-start lg:sticky lg:top-20 lg:flex">
