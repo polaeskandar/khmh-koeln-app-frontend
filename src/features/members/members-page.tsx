@@ -39,6 +39,7 @@ import { fullName, initials, preferredName } from "@/lib/domain/names"
 import { type PeopleList, peopleQuery, type PersonRow, type Placement } from "./api"
 import { AddPersonButton } from "./add-person-dialog"
 import { useGroupOptions } from "./groups"
+import { PersonSheet } from "./person-sheet"
 
 const PAGE_SIZE = 25
 const SEARCH_DELAY_MS = 300
@@ -112,7 +113,11 @@ function PeopleTable({
       {
         id: "name",
         header: () => t("members.name"),
-        cell: ({ row: { original } }) => <PersonName person={original} />,
+        cell: ({ row: { original } }) => (
+          <button type="button" className="min-w-0 text-start" onClick={() => onSelect?.(original)}>
+            <PersonName person={original} />
+          </button>
+        ),
       },
       {
         id: "belongsTo",
@@ -120,7 +125,7 @@ function PeopleTable({
         cell: ({ row: { original } }) => <BelongsTo person={original} />,
       },
     ],
-    [t]
+    [t, onSelect]
   )
 
   const { table } = useDataTable({
@@ -185,8 +190,9 @@ function PeopleTable({
   )
 }
 
-export function MembersScreen({ onSelect }: { onSelect?: (person: PersonRow) => void }) {
+export function MembersScreen() {
   const t = useTranslations()
+  const [selected, setSelected] = useState<string | null>(null)
   const groups = useGroupOptions()
   const [search, setSearch] = useState("")
   const [group, setGroup] = useState("")
@@ -256,10 +262,14 @@ export function MembersScreen({ onSelect }: { onSelect?: (person: PersonRow) => 
             query={q}
             onPage={setPage}
             onClear={() => setSearch("")}
-            onSelect={onSelect}
+            onSelect={(row) => setSelected(row.person.id)}
           />
         )}
       </QueryState>
+      <PersonSheet
+        person={people.data?.items.find((row) => row.person.id === selected) ?? null}
+        onOpenChange={(open) => !open && setSelected(null)}
+      />
     </>
   )
 }

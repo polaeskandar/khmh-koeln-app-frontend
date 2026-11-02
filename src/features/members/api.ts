@@ -46,3 +46,16 @@ export const addMembershipRequest = (person: Uuid, placement: PlacementInput) =>
   dataOf(
     api.POST("/people/{id}/memberships", { params: { path: { id: person } }, body: placement })
   )
+
+export type PersonNames = { firstName: string; lastName: string; displayName: string | null }
+
+export const renamePersonRequest = (person: Uuid, changes: Partial<PersonNames>) =>
+  dataOf(api.PATCH("/people/{id}", { params: { path: { id: person } }, body: changes }))
+
+export const joinRequest = (person: Uuid, placement: { serviceId: Uuid; stageId: Uuid | null }) =>
+  dataOf(
+    api.POST("/people/{id}/memberships", { params: { path: { id: person } }, body: placement })
+  )
+
+export const endMembershipRequest = (membership: Uuid) =>
+  dataOf(api.POST("/memberships/{id}/end", { params: { path: { id: membership } }, body: {} }))
