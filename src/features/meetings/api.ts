@@ -13,6 +13,12 @@ export const schedulesQuery = {
 
 export const useSchedules = () => useQuery(schedulesQuery)
 
+export const serviceSchedulesQuery = (serviceId: Uuid) => ({
+  queryKey: ["schedules", "list", { serviceId }] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) =>
+    dataOf(api.GET("/schedules", { params: { query: { serviceId } }, signal })),
+})
+
 export type Agenda = Omit<Schemas["Agenda"], "items"> & { items: AgendaItem[] }
 
 export type AgendaFilter = { from?: LocalDate; to?: LocalDate; serviceId?: Uuid }
