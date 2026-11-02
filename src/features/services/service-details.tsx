@@ -11,13 +11,21 @@ import { NotFoundState, QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { ServiceSwatch } from "@/components/service-tag"
 import { Button } from "@/components/ui/button"
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { serviceSchedulesQuery } from "@/features/meetings/api"
 import { ScheduleList } from "@/features/meetings/schedule-list"
 import { Link } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 
 import { type ServiceRow, type ServiceStages, serviceQuery, serviceStagesQuery } from "./api"
+import { AddStageButton } from "@/features/stages/stage-dialogs"
+
 import { ServiceFormDialog } from "./service-dialogs"
 
 function EditButton({ service }: { service: ServiceRow }) {
@@ -55,13 +63,18 @@ function Stages({ service, stages }: { service: ServiceRow; stages: ServiceStage
       title={t("services.detail.stats.stages")}
       description={t("services.detail.stages.description")}
       actions={
-        <Link
-          href={routes.serviceStages(service.id)}
-          className="inline-flex items-center gap-1 text-sm underline-offset-4 hover:underline"
-        >
-          {t("services.detail.stages.manage")}
-          <ArrowRight className="size-3.5" aria-hidden="true" />
-        </Link>
+        <span className="flex items-center gap-4">
+          {stages.can.manageStructure && stages.stages.length > 0 ? (
+            <AddStageButton service={stages.service} variant="outline" />
+          ) : null}
+          <Link
+            href={routes.serviceStages(service.id)}
+            className="inline-flex items-center gap-1 text-sm underline-offset-4 hover:underline"
+          >
+            {t("services.detail.stages.manage")}
+            <ArrowRight className="size-3.5" aria-hidden="true" />
+          </Link>
+        </span>
       }
     >
       {stages.stages.length === 0 ? (
@@ -75,6 +88,14 @@ function Stages({ service, stages }: { service: ServiceRow; stages: ServiceStage
               })}
             </EmptyDescription>
           </EmptyHeader>
+          {stages.can.manageStructure ? (
+            <EmptyContent>
+              <AddStageButton
+                service={stages.service}
+                label={t("services.detail.stages.addFirst")}
+              />
+            </EmptyContent>
+          ) : null}
         </Empty>
       ) : (
         <ul className="divide-y border-y">

@@ -468,7 +468,7 @@
       "add": "Add stage",
       "addTitle": "Add a stage to {service}",
       "editTitle": "Edit {name}",
-      "addDescription": "A stage is a group within the service, such as a class or a level. It is added at the end of the list; you can reorder stages afterwards.",
+      "addDescription": "A stage is a group within the service, such as a class or a level. It is added at the end of the list.",
       "editDescription": "The new name shows everywhere, including past sessions.",
       "name": "Name",
       "namePlaceholder": "e.g. 3rd Class",
