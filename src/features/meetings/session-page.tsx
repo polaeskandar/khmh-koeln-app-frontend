@@ -13,17 +13,20 @@ import { ServiceTag } from "@/components/service-tag"
 import { SessionBadges, SessionWhen } from "@/components/session-bits"
 import { Button } from "@/components/ui/button"
 import { useFormat } from "@/i18n/format"
-import { Link } from "@/i18n/navigation"
+import { Link, useRouter } from "@/i18n/navigation"
 import { isolate } from "@/lib/bidi"
 import { recurrenceOf } from "@/lib/domain/recurrence"
 import type { LocalDate } from "@/lib/api/types/common"
 import { groupOf, type SessionView } from "@/lib/api/types/meetings"
 import { routes } from "@/lib/routes"
 
+import { OpenAttendanceButton } from "@/features/attendance/open-attendance-button"
+
 import { type MeetingSession, useMeetingSession } from "./api"
 
 function AttendanceAction({ session, today }: { session: SessionView; today: LocalDate }) {
   const t = useTranslations()
+  const router = useRouter()
 
   if (!session.can.record) {
     return null
@@ -42,9 +45,10 @@ function AttendanceAction({ session, today }: { session: SessionView; today: Loc
 
   if (session.status === "scheduled" && session.date <= today) {
     return (
-      <Button asChild>
-        <Link href={routes.takeAttendance(session.id)}>{t("attendance.open")}</Link>
-      </Button>
+      <OpenAttendanceButton
+        session={session.id}
+        onOpened={() => router.push(routes.takeAttendance(session.id))}
+      />
     )
   }
 

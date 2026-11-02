@@ -75,10 +75,10 @@ describe("attendance by state", () => {
     expect(action("Open attendance")).toBeNull()
   })
 
-  test("a due scheduled session opens attendance on the board", async () => {
-    const { id } = open({ status: "scheduled" })
+  test("a due scheduled session offers to open attendance", async () => {
+    open({ status: "scheduled" })
     expect(await screen.findByText("Attendance isn’t open yet.")).toBeInTheDocument()
-    expect(action("Open attendance")).toHaveAttribute("href", `/attendance/take/?session=${id}`)
+    expect(screen.getByRole("button", { name: "Open attendance" })).toBeInTheDocument()
   })
 
   test("an active session takes attendance", async () => {

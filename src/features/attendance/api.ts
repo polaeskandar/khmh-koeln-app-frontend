@@ -44,3 +44,8 @@ export const attendanceBoardQuery = (session: Uuid) => ({
 })
 
 export const useAttendanceBoard = (session: Uuid) => useQuery(attendanceBoardQuery(session))
+
+export type SessionState = Schemas["SessionState"]
+
+export const openAttendanceRequest = (session: Uuid) =>
+  dataOf(api.POST("/sessions/{id}/open", { params: { path: { id: session } }, body: {} }))
