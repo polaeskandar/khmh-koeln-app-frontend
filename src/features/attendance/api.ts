@@ -49,3 +49,6 @@ export type SessionState = Schemas["SessionState"]
 
 export const openAttendanceRequest = (session: Uuid) =>
   dataOf(api.POST("/sessions/{id}/open", { params: { path: { id: session } }, body: {} }))
+
+export const reopenAttendanceRequest = (session: Uuid, reason: string | null) =>
+  dataOf(api.POST("/sessions/{id}/reopen", { params: { path: { id: session } }, body: { reason } }))
