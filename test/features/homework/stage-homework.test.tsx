@@ -7,6 +7,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { apiUrl, problem } from "@test/support/api"
 import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
+import { homeworkFlags } from "@test/support/fixtures/homework"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
@@ -55,15 +56,7 @@ const row = (
           withoutAccount: 0,
           reportedTotal: 3,
         },
-  can: {
-    edit: true,
-    publish: status === "draft",
-    unpublish: false,
-    archive: false,
-    restore: false,
-    delete: false,
-    viewProgress: true,
-  },
+  can: homeworkFlags({ edit: true, publish: status === "draft", viewProgress: true }),
   ...extra,
 })
 
@@ -203,7 +196,7 @@ test("the actions menu offers what each row's flags allow", async () => {
   search.value = `id=${THIRD_CLASS_ID}&status=published`
 
   const locked = row("0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea004", "Sing the hymn", "published", {
-    can: {
+    can: homeworkFlags({
       edit: false,
       publish: false,
       unpublish: false,
@@ -211,7 +204,7 @@ test("the actions menu offers what each row's flags allow", async () => {
       restore: false,
       delete: false,
       viewProgress: false,
-    },
+    }),
   })
 
   open(data([verse, drawing, locked]))
