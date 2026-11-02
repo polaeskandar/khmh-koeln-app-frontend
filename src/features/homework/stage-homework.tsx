@@ -16,28 +16,19 @@ import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 
-import { type HomeworkRow, type StageHomework, useStageHomework } from "./api"
+import { type StageHomework, useStageHomework } from "./api"
+import { HomeworkRowActions } from "./homework-actions"
 import { DueLine } from "./homework-bits"
 
 type Tab = "published" | "draft" | "archived"
 const TABS: Tab[] = ["published", "draft", "archived"]
 const TAB_LABEL = { published: "published", draft: "drafts", archived: "archived" } as const
 
-export type HomeworkActions = (row: HomeworkRow, data: StageHomework) => React.ReactNode
-
 function defaultTab(data: StageHomework): Tab {
   return data.tabs.published === 0 && data.tabs.draft > 0 ? "draft" : "published"
 }
 
-function Rows({
-  data,
-  tab,
-  actions,
-}: {
-  data: StageHomework
-  tab: Tab
-  actions?: HomeworkActions
-}) {
+function Rows({ data, tab }: { data: StageHomework; tab: Tab }) {
   const t = useTranslations("homework")
   const f = useFormat()
   const rows = data.items.filter((row) => row.status === tab)
@@ -118,7 +109,9 @@ function Rows({
                   <span className="text-xs text-muted-foreground">{t("hiddenFromParents")}</span>
                 )}
               </td>
-              <td className="px-3 py-3 text-end">{actions?.(row, data)}</td>
+              <td className="px-3 py-3 text-end">
+                <HomeworkRowActions row={row} />
+              </td>
             </tr>
           ))}
         </tbody>
@@ -127,7 +120,7 @@ function Rows({
   )
 }
 
-function Homework({ stage, actions }: { stage: Stage; actions?: HomeworkActions }) {
+function Homework({ stage }: { stage: Stage }) {
   const t = useTranslations("homework")
   const search = useSearchParams()
   const router = useRouter()
@@ -183,7 +176,7 @@ function Homework({ stage, actions }: { stage: Stage; actions?: HomeworkActions 
                 ))}
               </TabsList>
             </Tabs>
-            <Rows data={data} tab={tab} actions={actions} />
+            <Rows data={data} tab={tab} />
           </Section>
         )
       }}
@@ -191,10 +184,6 @@ function Homework({ stage, actions }: { stage: Stage; actions?: HomeworkActions 
   )
 }
 
-export function StageHomeworkPage({ actions }: { actions?: HomeworkActions }) {
-  return (
-    <StageLayout tab="homework">
-      {(stage) => <Homework stage={stage} actions={actions} />}
-    </StageLayout>
-  )
+export function StageHomeworkPage() {
+  return <StageLayout tab="homework">{(stage) => <Homework stage={stage} />}</StageLayout>
 }
