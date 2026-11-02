@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { screen, waitFor } from "@testing-library/react"
+
 import { http, HttpResponse } from "msw"
 import type { ReactNode } from "react"
 import { renderToString } from "react-dom/server"
@@ -15,11 +16,11 @@ import { renderWithProviders, testProviders } from "@test/support/providers"
 import type { Me } from "@/features/auth/api"
 import {
   RedirectIfSignedIn,
-  RequireAdministrator,
   RequireParent,
+  RequirePermission,
   RequireStaff,
 } from "@/features/auth/guards"
-import { SessionProvider } from "@/features/auth/session"
+import { SessionProvider, useCan } from "@/features/auth/session"
 
 vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
 
@@ -58,6 +59,8 @@ describe.each([
     ["servant", me.servant, home.staff],
     ["parent", me.parent, home.parent],
     ["staff and parent", me.staffAndParent, "page"],
+    ["church office", me.churchOffice, home.staff],
+    ["attendance only", me.attendanceOnly, home.staff],
     ["no roles", me.noRoles, "no role"],
   ] as const)("%s → %s", async (_, account, outcome) => {
     window.history.replaceState(null, "", "/en/members/")
@@ -77,18 +80,77 @@ describe.each([
   })
 })
 
-test.each([
-  ["administrator", me.administrator, "page"],
-  ["servant", me.servant, "/"],
-] as const)("RequireAdministrator: %s → %s", async (_, account, outcome) => {
-  answerMe(account)
-  guarded(RequireAdministrator)
+describe("RequirePermission", () => {
+  function MembersList() {
+    const people = useQuery({
+      queryKey: ["people"],
+      queryFn: () => dataOf(api.GET("/people")),
+    })
 
-  if (outcome === "page") {
-    expect(await screen.findByText("Guarded page")).toBeInTheDocument()
-  } else {
-    await waitFor(() => expect(router.replace).toHaveBeenCalledExactlyOnceWith(outcome))
+    return <p>{people.data ? "Members" : "Loading members"}</p>
   }
+
+  function membersPage() {
+    let requests = 0
+
+    server.use(
+      http.get(apiUrl("/people"), () => {
+        requests++
+
+        return HttpResponse.json({ items: [] })
+      })
+    )
+
+    renderWithProviders(
+      <SessionProvider>
+        <RequireStaff>
+          <RequirePermission action="read" resource="members">
+            <MembersList />
+          </RequirePermission>
+        </RequireStaff>
+      </SessionProvider>
+    )
+
+    return () => requests
+  }
+
+  test("shows the page with the permission", async () => {
+    answerMe(me.churchOffice)
+    membersPage()
+    expect(await screen.findByText("Members")).toBeInTheDocument()
+  })
+
+  test("shows NoAccess without it and never asks for the list", async () => {
+    answerMe(me.attendanceOnly)
+    const requests = membersPage()
+    expect(await screen.findByText("Not allowed")).toBeInTheDocument()
+    expect(screen.getByText("Your roles don’t allow this.")).toBeInTheDocument()
+    expect(requests()).toBe(0)
+    expect(router.replace).not.toHaveBeenCalled()
+  })
+})
+
+test("useCan is false once a 401 has ended the session", async () => {
+  answerMe(me.administrator)
+  function Probe() {
+    const can = useCan()
+
+    return <p>{can("update", "roles") ? "may update roles" : "may not update roles"}</p>
+  }
+
+  const page = () => (
+    <SessionProvider>
+      <Probe />
+    </SessionProvider>
+  )
+
+  const { rerender } = renderWithProviders(page())
+  expect(await screen.findByText("may update roles")).toBeInTheDocument()
+  answerMe(null)
+  server.use(http.get(apiUrl("/services"), () => problem(401, "auth.unauthenticated")))
+  await dataOf(api.GET("/services")).catch(() => {})
+  rerender(page())
+  expect(await screen.findByText("may not update roles")).toBeInTheDocument()
 })
 
 test.each([

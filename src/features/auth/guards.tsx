@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl"
 import { type ReactNode, useEffect } from "react"
 
 import { KhmkMark } from "@/components/brand/logo"
+import { NoAccess } from "@/components/no-access"
 import { QueryErrorState } from "@/components/page-states"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,11 +18,12 @@ import {
 } from "@/components/ui/empty"
 import type { Locale } from "@/i18n/config"
 import { useRouter } from "@/i18n/navigation"
+import type { Action, Resource } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import type { areasOf } from "./api"
 import { safeNext } from "./safe-next"
-import { useSession } from "./session"
+import { useCan, useSession } from "./session"
 
 type Areas = ReturnType<typeof areasOf>
 
@@ -113,9 +115,26 @@ export const RequireParent = ({ children }: { children: ReactNode }) => (
   <Guard allows={(areas) => areas.parent}>{children}</Guard>
 )
 
-export const RequireAdministrator = ({ children }: { children: ReactNode }) => (
-  <Guard allows={(areas) => areas.administrator}>{children}</Guard>
-)
+export function RequirePermission({
+  action,
+  resource,
+  fallback,
+  children,
+}: {
+  action: Action
+  resource: Resource
+  fallback?: ReactNode
+  children: ReactNode
+}) {
+  const t = useTranslations("errors")
+  const can = useCan()
+
+  if (can(action, resource)) {
+    return children
+  }
+
+  return fallback ?? <NoAccess title={t("title.forbidden")}>{t("forbidden")}</NoAccess>
+}
 
 export function RedirectIfSignedIn({ children }: { children: ReactNode }) {
   const { session } = useSession()
