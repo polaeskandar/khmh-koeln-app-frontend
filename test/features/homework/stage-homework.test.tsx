@@ -33,10 +33,11 @@ const lesson = {
 const can = {
   edit: true,
   publish: true,
-  unpublish: true,
-  archive: true,
-  restore: true,
-  delete: true,
+  unpublish: false,
+  archive: false,
+  restore: false,
+  delete: false,
+  viewProgress: true,
 }
 
 const row = (
@@ -51,7 +52,18 @@ const row = (
   dueDate: "2026-11-08",
   publishedAt: status === "draft" ? null : "2026-11-01T10:00:00Z",
   lesson,
-  counts: status === "draft" ? null : { completed: 3, assigned: 12, withoutAccount: 2 },
+  counts:
+    status === "draft"
+      ? null
+      : {
+          assigned: 12,
+          completed: 3,
+          notCompleted: 9,
+          completedAfterDueDate: 0,
+          withoutParentAccount: 2,
+          withoutAccount: 0,
+          reportedTotal: 3,
+        },
   can,
   ...extra,
 })

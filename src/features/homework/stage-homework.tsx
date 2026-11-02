@@ -108,9 +108,9 @@ function Rows({
                       completed={row.counts.completed}
                       assigned={row.counts.assigned}
                     />
-                    {row.counts.withoutAccount > 0 ? (
+                    {row.counts.withoutParentAccount > 0 ? (
                       <span className="text-xs text-muted-foreground">
-                        {t("childrenWithoutAccount", { count: row.counts.withoutAccount })}
+                        {t("childrenWithoutAccount", { count: row.counts.withoutParentAccount })}
                       </span>
                     ) : null}
                   </span>
