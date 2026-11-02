@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import { Geist, Noto_Kufi_Arabic, Oxanium } from "next/font/google"
+import { ThemeProvider } from "next-themes"
 
 import { QueryProvider } from "@/lib/api/query-provider"
 import { prePaintScript } from "@/i18n/locale-choice"
@@ -29,6 +30,10 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0c0a09" },
+  ],
 }
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -48,9 +53,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: prePaintScript }} />
       </head>
       <body className="flex min-h-full flex-col">
-        <QueryProvider>
-          <ApiMocking>{children}</ApiMocking>
-        </QueryProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <QueryProvider>
+            <ApiMocking>{children}</ApiMocking>
+          </QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
