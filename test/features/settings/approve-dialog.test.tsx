@@ -77,12 +77,12 @@ const child = (n: number, firstName: string, lastName: string): DirectoryPerson 
 const demiana = child(1, "Demiana", "Fanous")
 const mina = child(2, "Mina", "Hanna")
 
-function open(approve?: () => Response) {
+function open(approve?: () => Response, account = me.administrator) {
   const queries: string[] = []
   const sent: unknown[] = []
 
   server.use(
-    http.get(apiUrl("/me"), () => HttpResponse.json(me.administrator)),
+    http.get(apiUrl("/me"), () => HttpResponse.json(account)),
     http.get(apiUrl("/account-requests"), () =>
       HttpResponse.json({ items: [sandra, fady], today: "2026-11-08" })
     ),
@@ -113,16 +113,16 @@ function open(approve?: () => Response) {
   return { queries, sent }
 }
 
-const openApprove = async () => {
-  await userEvent.click(await screen.findByRole("button", { name: "Approve…" }))
+const openApprove = async (row = 0) => {
+  await userEvent.click((await screen.findAllByRole("button", { name: "Approve…" }))[row])
 
   return within(await screen.findByRole("dialog"))
 }
 
-test("only parents get Approve… here; servants get theirs with the roles (#103)", async () => {
+test("parents and servants both get Approve…", async () => {
   open()
   await screen.findByRole("heading", { name: "Account requests (2)" })
-  expect(screen.getAllByRole("button", { name: "Approve…" })).toHaveLength(1)
+  expect(screen.getAllByRole("button", { name: "Approve…" })).toHaveLength(2)
 })
 
 test("children are found from two letters and kept across searches; both are sent with the Parent role", async () => {
@@ -198,4 +198,57 @@ test("a 409 closes the dialog and refetches", async () => {
   await userEvent.click(dialog.getByRole("button", { name: "Approve account" }))
   await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull())
   expect(toast.error).toHaveBeenCalled()
+})
+
+test("a parent starts with the Parent role ticked", async () => {
+  open()
+  const dialog = await openApprove()
+  expect(await dialog.findByRole("checkbox", { name: /Parent/ })).toBeChecked()
+  expect(dialog.getByRole("checkbox", { name: /Servant/ })).not.toBeChecked()
+})
+
+test("a servant says where they serve, starts with nothing ticked and sends the ticked role once", async () => {
+  const { sent } = open()
+
+  server.use(
+    http.get(apiUrl("/account-requests"), () =>
+      HttpResponse.json({
+        items: [
+          { ...fady, services: [{ id: "y", name: "Youth Meeting", tone: 2, archived: false }] },
+        ],
+        today: "2026-11-08",
+      })
+    )
+  )
+
+  const dialog = await openApprove()
+  expect(dialog.getByText("Says they serve in Youth Meeting.")).toBeInTheDocument()
+  const submit = dialog.getByRole("button", { name: "Approve account" })
+  expect(submit).toBeDisabled()
+  await userEvent.click(await dialog.findByRole("checkbox", { name: /Servant/ }))
+  await userEvent.dblClick(submit)
+  await waitFor(() => expect(sent).toEqual([{ as: "servant", roleIds: [servantRole.id] }]))
+})
+
+test("a 422 roles.unknown shows under the roles with the dialog open", async () => {
+  open(() =>
+    problem(422, "checkFields", { fieldErrors: { roleIds: { code: "roles.unknown", params: {} } } })
+  )
+
+  const dialog = await openApprove(1)
+  await userEvent.click(await dialog.findByRole("checkbox", { name: /Servant/ }))
+  await userEvent.click(dialog.getByRole("button", { name: "Approve account" }))
+
+  expect(
+    await dialog.findByText(/./, { selector: "[data-slot='field-error']" })
+  ).toBeInTheDocument()
+
+  expect(screen.getByRole("dialog")).toBeInTheDocument()
+})
+
+test("with users:read only the requests show without Approve… or Decline", async () => {
+  open(undefined, me.churchOffice)
+  await screen.findByRole("heading", { name: "Account requests (2)" })
+  expect(screen.queryByRole("button", { name: "Approve…" })).toBeNull()
+  expect(screen.queryByRole("button", { name: "Decline" })).toBeNull()
 })
