@@ -22,6 +22,7 @@ export const routes = {
   stage: (id: Uuid) => href("/stages/view/", { id }),
   stageLessons: (stage: Uuid) => href("/stages/lessons/", { id: stage }),
   stageHomework: (stage: Uuid) => href("/stages/homework/", { id: stage }),
+  stageAttendance: (stage: Uuid) => href("/stages/attendance/", { id: stage }),
   meetings: () => "/meetings/",
   schedules: () => "/meetings/schedules/",
   schedule: (id: Uuid) => href("/meetings/schedules/view/", { id }),

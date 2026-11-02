@@ -37,6 +37,7 @@ stage by its own id, which already names its service.
 | S02 Lesson editor, edit   | `…/lessons/:lesson/edit`           | `/lessons/edit/?id=`                  | `editLesson(id)`              |
 | S03 Lesson                | `…/lessons/:lesson`                | `/lessons/view/?id=`                  | `lesson(id)`                  |
 | S04 Homework              | `…/stages/:stage/homework`         | `/stages/homework/?id=` (the stage)   | `stageHomework(stage)`        |
+| Stage attendance          | `…/stages/:stage/attendance`       | `/stages/attendance/?id=` (the stage) | `stageAttendance(stage)`      |
 | S05 Homework editor, new  | `…/homework/new?lesson=`           | `/homework/new/?stage=&lesson=`       | `newHomework(stage, lesson?)` |
 | S05 Homework editor, edit | `…/homework/:homework/edit`        | `/homework/edit/?id=`                 | `editHomework(id)`            |
 | S06 Homework progress     | `…/homework/:homework`             | `/homework/view/?id=`                 | `homework(id)`                |
