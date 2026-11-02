@@ -9,6 +9,7 @@ export type GroupOption = {
   value: string
   label: string
   filter: { serviceId: Uuid } | { stageId: Uuid }
+  placement: { serviceId: Uuid; stageId: Uuid | null }
 }
 
 export function useGroupOptions(): GroupOption[] {
@@ -17,13 +18,19 @@ export function useGroupOptions(): GroupOption[] {
   return (services.data?.items ?? [])
     .filter((service) => !service.archived && service.can.manageMembers)
     .flatMap((service) => [
-      { value: `service:${service.id}`, label: service.name, filter: { serviceId: service.id } },
+      {
+        value: `service:${service.id}`,
+        label: service.name,
+        filter: { serviceId: service.id },
+        placement: { serviceId: service.id, stageId: null },
+      },
       ...service.stages
         .filter((stage) => stage.can.manageMembers)
         .map((stage) => ({
           value: `stage:${stage.id}`,
           label: `${service.name} · ${stage.name}`,
           filter: { stageId: stage.id },
+          placement: { serviceId: service.id, stageId: stage.id },
         })),
     ])
 }
