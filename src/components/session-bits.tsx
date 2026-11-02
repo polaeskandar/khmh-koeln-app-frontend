@@ -163,16 +163,17 @@ export function SessionCardView({
   session,
   today,
   action,
+  href = agendaHref({ ...session, kind: "session" }),
   className,
 }: {
   session: SessionView
   today: LocalDate
   action?: React.ReactNode
+  href?: string | null
   className?: string
 }) {
   const lines = useSessionLines()
   const canceled = session.status === "canceled"
-  const href = agendaHref({ ...session, kind: "session" })
 
   return (
     <article
@@ -248,18 +249,19 @@ export function AgendaRow({
   item,
   today,
   trailing,
+  href = agendaHref(item),
   compact = false,
   className,
 }: {
   item: AgendaItem
   today: LocalDate
   trailing?: React.ReactNode
+  href?: string | null
   compact?: boolean
   className?: string
 }) {
   const f = useFormat()
   const lines = useSessionLines()
-  const href = agendaHref(item)
   const planned = item.kind === "planned"
   const canceled = !planned && item.status === "canceled"
 
