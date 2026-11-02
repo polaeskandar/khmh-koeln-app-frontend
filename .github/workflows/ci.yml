@@ -47,6 +47,7 @@ jobs:
       - run: task build
         env:
           NEXT_PUBLIC_API_BASE_URL: /api
+          NEXT_PUBLIC_IMPRESSUM_URL: ${{ vars.NEXT_PUBLIC_IMPRESSUM_URL || 'https://example.org/impressum' }}
           NEXT_TELEMETRY_DISABLED: 1
 
       - run: pnpm exec cap sync android

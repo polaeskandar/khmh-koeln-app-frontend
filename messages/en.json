@@ -1696,7 +1696,8 @@
   },
   "auth": {
     "footer": {
-      "privacy": "Privacy notice"
+      "privacy": "Privacy notice",
+      "legal": "Legal notice"
     },
     "password": {
       "show": "Show password",
@@ -1801,53 +1802,7 @@
     "title": "Privacy notice",
     "back": "Back",
     "version": "Version {version}",
-    "draft": "Draft for the prototype. The church’s data protection adviser checks and completes this text, including the parts in brackets, before the app is used.",
-    "intro": "The app of the Coptic Orthodox Church KHMK Köln helps servants organise meetings, attendance, lessons and homework, shows parents their children’s homework, and shows members their own groups and homework. This notice explains which personal data the app stores, why, who can see it, and what rights you have.",
-    "responsible": {
-      "title": "Who is responsible",
-      "text": "Coptic Orthodox Church KHMK Köln, [address of the church office]. Questions about data protection: [email address of the church office or the data protection adviser]."
-    },
-    "data": {
-      "title": "What the app stores",
-      "items": {
-        "accounts": "Accounts: name, email address, password (only in a form that can’t be read back), language, roles, and when you accepted this notice.",
-        "members": "Members: first and last name, a preferred name, and the services and classes they belong to, from when to when.",
-        "attendance": "Attendance: who was marked present at which meeting, and by whom. The app records presence only, never absence.",
-        "homework": "Homework: which homework was reported as done for whom, by which account, and when.",
-        "links": "Parent access: which parent accounts may see which children.",
-        "registration": "When you register: what you write about your children or your service, until the church office has decided on your account.",
-        "memberAccounts": "Member accounts: which member record an account belongs to, and for members under 16, that and how a parent or guardian agreed."
-      },
-      "text": "The app stores nothing else: no photos, no addresses, no birthdays, no grades."
-    },
-    "why": {
-      "title": "Why",
-      "text": "To run the church’s services: to know who belongs to which group, to prepare meetings, and to look after the children entrusted to us. Because the data shows that people belong to our church, we treat all of it as sensitive: it stays within the church, and only the people who need it can see it."
-    },
-    "who": {
-      "title": "Who can see it",
-      "items": {
-        "servants": "Servants and service leaders see what their roles allow, in every service of the church: for example people’s details, attendance, lessons and homework.",
-        "leaders": "The church office decides which role allows what and who has which role, and keeps this to what each person’s service needs.",
-        "admins": "Administrators in the church office manage accounts, roles and parent access.",
-        "parents": "Parents see only their own children’s published homework: never attendance, notes or other families.",
-        "members": "Members with their own account see their own groups and meeting times, the passage and memory verse of their lessons, and their homework: never attendance, notes or other members."
-      },
-      "text": "The app is hosted by [hosting provider in the EU] under a data processing agreement. No data is sold or passed on."
-    },
-    "howLong": {
-      "title": "How long it is kept",
-      "items": {
-        "accounts": "Accounts: until you or the church office delete them.",
-        "declined": "Registrations that are declined: deleted at once.",
-        "members": "Members who leave: [period decided by the church], then deleted."
-      },
-      "text": "When data is deleted, the numbers of past meetings stay right, but nobody can tell who was there."
-    },
-    "rights": {
-      "title": "Your rights",
-      "text": "You can ask for a copy of your data, have it corrected or deleted, restrict its use or object to it. You can also complain to a data protection authority; in North Rhine-Westphalia that is the Landesbeauftragte für Datenschutz und Informationsfreiheit (LDI NRW).\n\nIn the app, open your account and go to “Your data” to download a copy or to ask for your account to be deleted. Or ask the church office. We answer within one month."
-    }
+    "draft": "Draft. The church’s data protection adviser checks and completes this text, including the parts in brackets."
   },
   "account": {
     "title": "Your account",

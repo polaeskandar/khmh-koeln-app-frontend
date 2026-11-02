@@ -29,3 +29,29 @@ export const apiBaseUrl = () =>
   })
 
 export const registrationEnabled = () => process.env.NEXT_PUBLIC_REGISTRATION_ENABLED === "true"
+
+export function parseImpressumUrl(
+  value: string | undefined,
+  { production }: { production: boolean }
+) {
+  if (!value) {
+    if (production) {
+      throw new Error(
+        "NEXT_PUBLIC_IMPRESSUM_URL is required in production builds: the church's legal notice, an absolute https URL (see .env.example)."
+      )
+    }
+
+    return null
+  }
+
+  if (/^https:\/\/[^/\s]+(\/\S*)?$/.test(value)) {
+    return value
+  }
+
+  throw new Error(`NEXT_PUBLIC_IMPRESSUM_URL must be an absolute https URL, not "${value}".`)
+}
+
+export const impressumUrl = () =>
+  parseImpressumUrl(process.env.NEXT_PUBLIC_IMPRESSUM_URL, {
+    production: process.env.NODE_ENV === "production",
+  })
