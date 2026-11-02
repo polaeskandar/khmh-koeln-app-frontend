@@ -68,3 +68,12 @@ export async function dataOf<Data>(request: Promise<{ data?: Data }>): Promise<D
 
   return data as Data
 }
+
+export async function apiDownload(request: Promise<{ data?: Blob }>, filename: string) {
+  const url = URL.createObjectURL(await dataOf(request))
+  const link = document.createElement("a")
+  link.href = url
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(url)
+}
