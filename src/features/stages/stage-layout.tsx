@@ -18,13 +18,14 @@ import { routes } from "@/lib/routes"
 import { type Stage, stageQuery } from "./api"
 import { StageMembers } from "./stage-members"
 
-export type StageTab = "overview" | "lessons" | "homework"
+export type StageTab = "overview" | "attendance" | "lessons" | "homework"
 
 function useTabLabels(): Record<StageTab, string> {
   const t = useTranslations()
 
   return {
     overview: t("stages.tabs.overview"),
+    attendance: t("nav.attendance"),
     lessons: t("stages.tabs.lessons"),
     homework: t("stages.tabs.homework"),
   }
@@ -32,6 +33,7 @@ function useTabLabels(): Record<StageTab, string> {
 
 const TAB_ROUTES: Record<StageTab, (id: string) => string> = {
   overview: routes.stage,
+  attendance: routes.stageAttendance,
   lessons: routes.stageLessons,
   homework: routes.stageHomework,
 }
@@ -59,8 +61,8 @@ function StageHeader({ stage, tab }: { stage: Stage; tab: StageTab }) {
   const tabs = useTabLabels()
 
   const shown: StageTab[] = registrationEnabled()
-    ? ["overview", "lessons", "homework"]
-    : ["overview"]
+    ? ["overview", "attendance", "lessons", "homework"]
+    : ["overview", "attendance"]
 
   return (
     <div className="flex flex-col gap-5">

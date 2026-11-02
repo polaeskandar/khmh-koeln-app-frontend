@@ -80,7 +80,7 @@ describe("the header", () => {
 })
 
 describe("the tabs", () => {
-  test("link to the three routes with registration on; only Overview is current", async () => {
+  test("link to the four routes with registration on; only Overview is current", async () => {
     vi.stubEnv("NEXT_PUBLIC_REGISTRATION_ENABLED", "true")
     answer(() => HttpResponse.json(thirdClass))
     renderPage()
@@ -89,6 +89,11 @@ describe("the tabs", () => {
     expect(tabs.getByRole("link", { name: "Overview" })).toHaveAttribute(
       "href",
       `/stages/view/?id=${ID}`
+    )
+
+    expect(tabs.getByRole("link", { name: "Attendance" })).toHaveAttribute(
+      "href",
+      `/stages/attendance/?id=${ID}`
     )
 
     expect(tabs.getByRole("link", { name: "Lessons" })).toHaveAttribute(
@@ -106,11 +111,15 @@ describe("the tabs", () => {
     ])
   })
 
-  test("show only Overview with registration off", async () => {
+  test("show only Overview and Attendance with registration off", async () => {
     answer(() => HttpResponse.json(thirdClass))
     renderPage()
     const tabs = within(await screen.findByRole("navigation", { name: "3rd Class sections" }))
-    expect(tabs.getAllByRole("link").map((link) => link.textContent)).toEqual(["Overview"])
+
+    expect(tabs.getAllByRole("link").map((link) => link.textContent)).toEqual([
+      "Overview",
+      "Attendance",
+    ])
   })
 })
 
