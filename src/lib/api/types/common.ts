@@ -14,8 +14,7 @@ export type Recurrence = {
   interval: number
   weekdays: IsoWeekday[]
   monthWeek: MonthWeek | null
-  startsOn: LocalDate
-  endsOn: LocalDate | null
+  span: { startsOn: LocalDate; endsOn: LocalDate | null }
 }
 
 export type ServiceRef = Schemas["ServiceRef"]

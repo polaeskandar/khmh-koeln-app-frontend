@@ -57,14 +57,14 @@ describe("dates are spelled out the same on server and client", () => {
 })
 
 describe("schedule patterns", () => {
-  const dates = { startsOn: "2026-09-06", endsOn: null }
+  const span = { startsOn: "2026-09-06", endsOn: null }
 
   const weekly: Recurrence = {
     frequency: "weekly",
     interval: 1,
     weekdays: [7],
     monthWeek: null,
-    ...dates,
+    span,
   }
 
   const fortnightly: Recurrence = { ...weekly, interval: 2 }
@@ -74,7 +74,7 @@ describe("schedule patterns", () => {
     interval: 1,
     weekdays: [6],
     monthWeek: 1,
-    ...dates,
+    span,
   }
 
   const lastFriday: Recurrence = { ...monthly, weekdays: [5], monthWeek: -1 }
