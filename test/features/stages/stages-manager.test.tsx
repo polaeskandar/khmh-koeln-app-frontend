@@ -1,0 +1,179 @@
+import { screen, waitFor, within } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
+import { http, HttpResponse } from "msw"
+import { afterEach, beforeEach, expect, test, vi } from "vitest"
+
+import { SidebarProvider } from "@/components/ui/sidebar"
+import type { ServiceStages } from "@/features/services/api"
+import { apiUrl, problem } from "@test/support/api"
+import { stageRef } from "@test/support/fixtures/sessions"
+import { SUNDAY_SCHOOL_ID, thirdClass } from "@test/support/fixtures/stages"
+import { server } from "@test/support/msw"
+import { router } from "@test/support/navigation"
+import { renderWithProviders } from "@test/support/providers"
+
+import { StagesManager } from "@/features/stages/stages-manager"
+
+const search = vi.hoisted(() => ({ value: "" }))
+vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
+vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
+
+beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => {}))
+
+afterEach(() => {
+  vi.restoreAllMocks()
+  router.push.mockReset()
+})
+
+const service = { id: SUNDAY_SCHOOL_ID, name: "Sunday School", tone: 1, archived: false }
+
+const noImpact = { activeSchedules: 0, upcomingSessions: 0 }
+
+const stagesData = (manage = true): ServiceStages => ({
+  service,
+  stages: [
+    { ...stageRef("3rd Class", 2), description: "Ages 8 to 9", memberCount: 14, impact: noImpact },
+    { ...stageRef("Kindergarten", 0), description: null, memberCount: 9, impact: noImpact },
+    { ...stageRef("1st Class", 1), description: null, memberCount: 11, impact: noImpact },
+  ],
+  archivedStages: [],
+  can: { manageStructure: manage },
+})
+
+function open(data: ServiceStages, write?: () => Response) {
+  search.value = `id=${SUNDAY_SCHOOL_ID}`
+  const sent: { method: string; body: unknown }[] = []
+
+  server.use(
+    http.get(apiUrl(`/services/${SUNDAY_SCHOOL_ID}/stages`), () => HttpResponse.json(data)),
+    http.post(apiUrl(`/services/${SUNDAY_SCHOOL_ID}/stages`), async ({ request }) => {
+      sent.push({ method: "POST", body: await request.json() })
+
+      return (
+        write?.() ??
+        HttpResponse.json(
+          { ...thirdClass, id: "0192f3a4-7b1c-7d2e-8f3a-0000000000a5", name: "4th Class" },
+          { status: 201 }
+        )
+      )
+    }),
+    http.patch(apiUrl("/stages/:id"), async ({ request }) => {
+      sent.push({ method: "PATCH", body: await request.json() })
+
+      return write?.() ?? HttpResponse.json(thirdClass)
+    })
+  )
+
+  renderWithProviders(
+    <SidebarProvider>
+      <StagesManager />
+    </SidebarProvider>
+  )
+
+  return sent
+}
+
+const dialog = () => within(screen.getByRole("dialog"))
+
+test("rows follow position with member counts and links", async () => {
+  open(stagesData())
+
+  expect(
+    await screen.findByRole("heading", { level: 1, name: "Stages of Sunday School" })
+  ).toBeInTheDocument()
+
+  const rows = within(screen.getByRole("table")).getAllByRole("row").slice(1)
+
+  expect(rows.map((row) => row.textContent)).toEqual([
+    expect.stringMatching(/^1Kindergarten9/),
+    expect.stringMatching(/^21st Class11/),
+    expect.stringMatching(/^33rd ClassAges 8 to 914/),
+  ])
+
+  expect(within(rows[2]).getByRole("link", { name: "3rd Class" })).toHaveAttribute(
+    "href",
+    `/stages/view/?id=${stageRef("3rd Class", 2).id}`
+  )
+})
+
+test("Rename pre-fills the dialog and sends a PATCH", async () => {
+  const sent = open(stagesData())
+  await userEvent.click(await screen.findByRole("button", { name: "Actions for 3rd Class" }))
+  await userEvent.click(screen.getByRole("menuitem", { name: "Rename" }))
+  expect(dialog().getByLabelText("Name")).toHaveValue("3rd Class")
+  await userEvent.clear(dialog().getByLabelText("Name"))
+  await userEvent.type(dialog().getByLabelText("Name"), "Third Class")
+  await userEvent.click(dialog().getByRole("button", { name: "Save changes" }))
+  await waitFor(() => expect(sent).toEqual([{ method: "PATCH", body: { name: "Third Class" } }]))
+})
+
+test("adding sends a POST and opens the new stage; nameTaken shows under Name", async () => {
+  let answer: (() => Response) | undefined = () =>
+    problem(422, "checkFields", {
+      fieldErrors: { name: { code: "stages.nameTaken", params: { name: "3rd Class" } } },
+    })
+
+  const sent = open(stagesData(), () => answer!())
+  await userEvent.click(await screen.findByRole("button", { name: "Add stage" }))
+  await userEvent.type(dialog().getByLabelText("Name"), "3rd Class")
+  await userEvent.click(dialog().getByRole("button", { name: "Add stage" }))
+
+  await waitFor(() =>
+    expect(dialog().getByLabelText("Name")).toHaveAccessibleDescription(
+      "This service already has a stage called “3rd Class”."
+    )
+  )
+
+  answer = () =>
+    HttpResponse.json(
+      { ...thirdClass, id: "0192f3a4-7b1c-7d2e-8f3a-0000000000a5", name: "4th Class" },
+      { status: 201 }
+    )
+
+  await userEvent.clear(dialog().getByLabelText("Name"))
+  await userEvent.type(dialog().getByLabelText("Name"), "4th Class")
+  await userEvent.click(dialog().getByRole("button", { name: "Add stage" }))
+
+  await waitFor(() =>
+    expect(router.push).toHaveBeenCalledWith(
+      "/stages/view/?id=0192f3a4-7b1c-7d2e-8f3a-0000000000a5"
+    )
+  )
+
+  expect(sent.at(-1)).toEqual({ method: "POST", body: { name: "4th Class", description: null } })
+})
+
+test("409 archivedNoStageChanges keeps the dialog open", async () => {
+  open(stagesData(), () =>
+    problem(409, "services.archivedNoStageChanges", { params: { name: "Sunday School" } })
+  )
+
+  await userEvent.click(await screen.findByRole("button", { name: "Add stage" }))
+  await userEvent.type(dialog().getByLabelText("Name"), "4th Class")
+  await userEvent.click(dialog().getByRole("button", { name: "Add stage" }))
+  expect(await dialog().findByRole("alert")).toBeInTheDocument()
+  expect(screen.getByRole("dialog")).toBeInTheDocument()
+})
+
+test("without manageStructure there is no Add stage and no menu", async () => {
+  open(stagesData(false))
+  await screen.findByRole("table")
+  expect(screen.queryByRole("button", { name: "Add stage" })).toBeNull()
+  expect(screen.queryByRole("button", { name: /^Actions for/ })).toBeNull()
+})
+
+test("an unknown id shows not found", async () => {
+  search.value = `id=${SUNDAY_SCHOOL_ID}`
+
+  server.use(
+    http.get(apiUrl(`/services/${SUNDAY_SCHOOL_ID}/stages`), () => problem(404, "notFound.service"))
+  )
+
+  renderWithProviders(
+    <SidebarProvider>
+      <StagesManager />
+    </SidebarProvider>
+  )
+
+  expect(await screen.findByText("This page doesn’t exist")).toBeInTheDocument()
+})
