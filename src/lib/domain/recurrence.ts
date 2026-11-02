@@ -1,3 +1,4 @@
+import type { Schemas } from "@/lib/api/client"
 import type { IsoWeekday, LocalDate, MonthWeek, Recurrence } from "@/lib/api/types/common"
 
 import { addDays, daysBetween, daysInMonth, isoWeekday, mondayOf } from "./time"
@@ -116,4 +117,14 @@ export function nextOccurrence(r: Recurrence, onOrAfter: LocalDate): LocalDate |
   }
 
   return null
+}
+
+const MONTH_WEEKS: MonthWeek[] = [1, 2, 3, 4, -1]
+
+export function recurrenceOf(view: Schemas["RecurrenceView"]): Recurrence {
+  return {
+    ...view,
+    weekdays: normalizeWeekdays(view.weekdays),
+    monthWeek: MONTH_WEEKS.find((week) => week === view.monthWeek) ?? null,
+  }
 }
