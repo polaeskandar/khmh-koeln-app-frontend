@@ -53,7 +53,7 @@ const row = (
           notCompleted: 9,
           completedAfterDueDate: 0,
           withoutParentAccount: 2,
-          withoutAccount: 0,
+          withoutAccount: 2,
           reportedTotal: 3,
         },
   can: homeworkFlags({ edit: true, publish: status === "draft", viewProgress: true }),
@@ -271,4 +271,21 @@ test("a refused publish toasts and refetches the list", async () => {
   )
 
   await vi.waitFor(() => expect(reads).toBe(2))
+})
+
+test("counts people without any account, not only without parents", async () => {
+  const members = row("0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea005", "Write the letters", "published", {
+    counts: {
+      assigned: 9,
+      completed: 1,
+      notCompleted: 8,
+      completedAfterDueDate: 0,
+      withoutParentAccount: 9,
+      withoutAccount: 6,
+      reportedTotal: 1,
+    },
+  })
+
+  open(data([members]))
+  expect((await table()).getAllByRole("row")[1]).toHaveTextContent("6 people without an account")
 })

@@ -99,9 +99,9 @@ function Rows({ data, tab }: { data: StageHomework; tab: Tab }) {
                       completed={row.counts.completed}
                       assigned={row.counts.assigned}
                     />
-                    {row.counts.withoutParentAccount > 0 ? (
+                    {row.counts.withoutAccount > 0 ? (
                       <span className="text-xs text-muted-foreground">
-                        {t("childrenWithoutAccount", { count: row.counts.withoutParentAccount })}
+                        {t("childrenWithoutAccount", { count: row.counts.withoutAccount })}
                       </span>
                     ) : null}
                   </span>

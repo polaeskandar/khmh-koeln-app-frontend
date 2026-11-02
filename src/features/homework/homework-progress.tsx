@@ -21,6 +21,7 @@ import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
 import { ApiError } from "@/lib/api/problem"
 import type { Uuid } from "@/lib/api/types/common"
+import { isolate } from "@/lib/bidi"
 import { initials, matchesQuery, preferredName } from "@/lib/domain/names"
 import { routes } from "@/lib/routes"
 
@@ -34,7 +35,7 @@ const FILTERS: Record<Tab, (row: ProgressRow) => boolean> = {
   all: () => true,
   done: (row) => row.done,
   open: (row) => !row.done,
-  noAccount: (row) => row.parentAccounts.length === 0,
+  noAccount: (row) => !row.ownAccount && row.parentAccounts.length === 0,
 }
 
 const TAB_LABEL = {
@@ -79,7 +80,7 @@ function Figures({ data }: { data: HomeworkProgress }) {
       <Figure label={t("notYet")} value={data.counts.notCompleted} />
       <Figure
         label={t("progress.withoutAccount")}
-        value={data.counts.withoutParentAccount}
+        value={data.counts.withoutAccount}
         note={t("progress.cantReportOnline")}
       />
     </dl>
@@ -99,11 +100,28 @@ function Reported({ row, today }: { row: ProgressRow; today: string }) {
       <span className="font-medium text-success">{t("homework.completion.done")}</span>
       <span className="text-xs text-muted-foreground">
         {f.instantLabel(row.completedAt, today)} ·{" "}
-        <bdi>{row.completedBy?.name ?? t("common.formerAccount")}</bdi>
+        {row.reportedBySelf && row.completedBy ? (
+          t("homework.completion.bySelf", { name: isolate(row.completedBy.name) })
+        ) : (
+          <bdi>{row.completedBy?.name ?? t("common.formerAccount")}</bdi>
+        )}
         {row.completedAfterDueDate ? <> · {t("homework.completion.afterDue")}</> : null}
       </span>
     </span>
   )
+}
+
+function Accounts({ row }: { row: ProgressRow }) {
+  const t = useTranslations()
+
+  const accounts = [
+    row.ownAccount ? t("homework.completion.ownAccount") : null,
+    row.parentAccounts.length > 0
+      ? t("counts.parents", { count: row.parentAccounts.length })
+      : null,
+  ].filter(Boolean)
+
+  return accounts.length > 0 ? accounts.join(" · ") : t("homework.completion.noAccount")
 }
 
 function Completion({ data }: { data: HomeworkProgress }) {
@@ -194,9 +212,7 @@ function Completion({ data }: { data: HomeworkProgress }) {
                       <Reported row={row} today={data.today} />
                     </td>
                     <td className="px-3 py-2.5 text-muted-foreground">
-                      {row.parentAccounts.length > 0
-                        ? t("counts.parents", { count: row.parentAccounts.length })
-                        : t("homework.completion.noAccount")}
+                      <Accounts row={row} />
                     </td>
                   </tr>
                 )

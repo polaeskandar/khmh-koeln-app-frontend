@@ -84,7 +84,7 @@ const detail = (extra: Partial<HomeworkDetail> = {}): HomeworkDetail => ({
     notCompleted: 11,
     completedAfterDueDate: 0,
     withoutParentAccount: 2,
-    withoutAccount: 0,
+    withoutAccount: 2,
     reportedTotal: 3,
   },
   can: homeworkFlags({
