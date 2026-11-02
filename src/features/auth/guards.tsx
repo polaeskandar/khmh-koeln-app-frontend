@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl"
 import { type ReactNode, useEffect, useState } from "react"
 
 import { KhmkMark } from "@/components/brand/logo"
+import { NoAccess } from "@/components/no-access"
 import { QueryErrorState } from "@/components/page-states"
 import { Button } from "@/components/ui/button"
 import {
@@ -19,12 +20,13 @@ import {
 import { isLocale, type Locale } from "@/i18n/config"
 import { storeLocale } from "@/i18n/locale-choice"
 import { usePathname, useRouter } from "@/i18n/navigation"
+import type { Action, Resource } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import { LANGUAGE_APPLIED_KEY, markLanguageApplied } from "./account-language"
 import type { areasOf, Me } from "./api"
 import { safeNext } from "./safe-next"
-import { useSession } from "./session"
+import { useCan, useSession } from "./session"
 
 type Areas = ReturnType<typeof areasOf>
 
@@ -144,9 +146,26 @@ export const RequireParent = ({ children }: { children: ReactNode }) => (
   <Guard allows={(areas) => areas.parent}>{children}</Guard>
 )
 
-export const RequireAdministrator = ({ children }: { children: ReactNode }) => (
-  <Guard allows={(areas) => areas.administrator}>{children}</Guard>
-)
+export function RequirePermission({
+  action,
+  resource,
+  fallback,
+  children,
+}: {
+  action: Action
+  resource: Resource
+  fallback?: ReactNode
+  children: ReactNode
+}) {
+  const t = useTranslations("errors")
+  const can = useCan()
+
+  if (can(action, resource)) {
+    return children
+  }
+
+  return fallback ?? <NoAccess title={t("title.forbidden")}>{t("forbidden")}</NoAccess>
+}
 
 export function RedirectIfSignedIn({ children }: { children: ReactNode }) {
   const { session } = useSession()

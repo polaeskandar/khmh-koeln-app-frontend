@@ -396,15 +396,7 @@
       "parentWaiting": "Elternteil, wartet auf Zugang",
       "none": "Noch keine Rolle",
       "memberOf": "Mitglied · {groups}",
-      "member": "Mitglied",
-      "administrator": "Administrator",
-      "staff": "{role} · {scope}{more, plural, =0 {} other { +#}}"
-    },
-    "name": {
-      "administrator": "Administrator",
-      "service_leader": "Dienstleiter/in",
-      "servant": "Diener/in",
-      "parent": "Elternteil"
+      "member": "Mitglied"
     }
   },
   "dashboard": {

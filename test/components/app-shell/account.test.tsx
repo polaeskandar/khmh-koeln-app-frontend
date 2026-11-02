@@ -99,6 +99,7 @@ describe("the phone's tab bar", () => {
     navigation.pathname = "/meetings/"
     shell(me.servant)
     const bar = await screen.findByRole("navigation", { name: "Main" })
+    await within(bar).findByRole("link", { name: "Members" })
     expect(bar).toHaveClass("md:hidden")
 
     expect(within(bar).getByRole("link", { name: "Meetings" })).toHaveAttribute(
@@ -119,6 +120,20 @@ describe("the phone's tab bar", () => {
     const bar = await screen.findByRole("navigation", { name: "Main" })
     await userEvent.click(within(bar).getByRole("button", { name: "More" }))
     expect(screen.getByRole("menuitem", { name: "Sign out" })).toBeInTheDocument()
+  })
+
+  test("leaves out Members and Take attendance without their permissions", async () => {
+    shell(me.churchOffice)
+    const bar = await screen.findByRole("navigation", { name: "Main" })
+    expect(await within(bar).findByRole("link", { name: "Members" })).toBeInTheDocument()
+    expect(within(bar).queryByRole("link", { name: "Take attendance" })).toBeNull()
+  })
+
+  test("leaves out Members without members:read", async () => {
+    shell(me.attendanceOnly)
+    const bar = await screen.findByRole("navigation", { name: "Main" })
+    expect(await within(bar).findByRole("link", { name: "Take attendance" })).toBeInTheDocument()
+    expect(within(bar).queryByRole("link", { name: "Members" })).toBeNull()
   })
 
   test("is absent on the attendance screen", async () => {
