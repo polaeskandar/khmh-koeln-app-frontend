@@ -37,3 +37,11 @@ export const useMeetingSession = (id: Uuid) => useQuery(meetingSessionQuery(id))
 
 export const cancelSessionRequest = (session: Uuid, reason: string | null) =>
   dataOf(api.POST("/sessions/{id}/cancel", { params: { path: { id: session } }, body: { reason } }))
+
+export const cancelOccurrenceRequest = (schedule: Uuid, date: LocalDate, reason: string | null) =>
+  dataOf(
+    api.POST("/schedules/{id}/occurrences/{date}/cancel", {
+      params: { path: { id: schedule, date } },
+      body: { reason },
+    })
+  )
