@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { AgendaItem } from "@/lib/api/types/meetings"
-import type { LocalDate, Uuid } from "@/lib/api/types/common"
+import type { LocalDate, Recurrence, Uuid } from "@/lib/api/types/common"
 
 export type ScheduleList = Schemas["ScheduleList"]
 
@@ -51,3 +51,25 @@ export const cancelOccurrenceRequest = (schedule: Uuid, date: LocalDate, reason:
       body: { reason },
     })
   )
+
+export type ScheduleInput = {
+  serviceId: Uuid
+  stageId: Uuid | null
+  name: string
+  description: string | null
+  location: string | null
+  recurrence: Recurrence
+  startTime: string
+  endTime: string | null
+  rosterMode: "expected" | "open"
+}
+
+export type ScheduleSaved = Schemas["ScheduleWritten"]
+
+export const createScheduleRequest = (input: ScheduleInput) =>
+  dataOf(api.POST("/schedules", { body: input }))
+
+export const updateScheduleRequest = (
+  id: Uuid,
+  changes: Omit<ScheduleInput, "serviceId" | "stageId">
+) => dataOf(api.PATCH("/schedules/{id}", { params: { path: { id } }, body: changes }))
