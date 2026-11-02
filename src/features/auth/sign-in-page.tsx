@@ -58,6 +58,7 @@ export function PendingPage() {
       </AuthHeading>
       <ul className="flex max-w-prose list-disc flex-col gap-2 ps-5 text-sm">
         <li>{t("parents")}</li>
+        <li>{t("members")}</li>
         <li>{t("servants")}</li>
         <li>{t("email")}</li>
       </ul>

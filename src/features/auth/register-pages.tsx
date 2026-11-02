@@ -32,6 +32,7 @@ export function RegisterPage() {
               </li>
             ))}
           </ol>
+          <p className="text-muted-foreground">{t("childrenNoAccounts")}</p>
         </>
       }
     >

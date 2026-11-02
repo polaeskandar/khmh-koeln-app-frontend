@@ -23,7 +23,7 @@ export const signOutRequest = () => dataOf(api.POST("/auth/sign-out", { body: {}
 
 export const MIN_PASSWORD_LENGTH = 10
 
-export type RegisteredAs = "parent" | "servant"
+export type RegisteredAs = "parent" | "member" | "servant"
 
 export type Registration = Schemas["RegisterAccountCommand"]
 
