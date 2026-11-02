@@ -17,7 +17,7 @@ import { Link, useRouter } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 
 import { type StageHomework, useStageHomework } from "./api"
-import { HomeworkRowActions } from "./homework-actions"
+import { HomeworkActions } from "./homework-actions"
 import { DueLine } from "./homework-bits"
 
 type Tab = "published" | "draft" | "archived"
@@ -110,7 +110,7 @@ function Rows({ data, tab }: { data: StageHomework; tab: Tab }) {
                 )}
               </td>
               <td className="px-3 py-3 text-end">
-                <HomeworkRowActions row={row} />
+                <HomeworkActions homework={row} place="list" />
               </td>
             </tr>
           ))}

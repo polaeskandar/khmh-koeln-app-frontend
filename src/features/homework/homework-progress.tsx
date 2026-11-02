@@ -18,13 +18,14 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CompletionMeter, HomeworkStatusBadge } from "@/features/lessons/lesson-bits"
 import { useStageCrumbs } from "@/features/stages/stage-layout"
 import { useFormat } from "@/i18n/format"
-import { Link } from "@/i18n/navigation"
+import { Link, useRouter } from "@/i18n/navigation"
 import { ApiError } from "@/lib/api/problem"
 import type { Uuid } from "@/lib/api/types/common"
 import { initials, matchesQuery, preferredName } from "@/lib/domain/names"
 import { routes } from "@/lib/routes"
 
 import { type HomeworkProgress, homeworkProgressQuery, type ProgressRow } from "./api"
+import { HomeworkActions } from "./homework-actions"
 import { DueLine } from "./homework-bits"
 
 type Tab = "all" | "done" | "open" | "noAccount"
@@ -249,6 +250,7 @@ function WhatParentsRead({ data }: { data: HomeworkProgress }) {
 function ProgressView({ data }: { data: HomeworkProgress }) {
   const t = useTranslations()
   const f = useFormat()
+  const router = useRouter()
   const { homework, lesson } = data
 
   return (
@@ -277,14 +279,21 @@ function ProgressView({ data }: { data: HomeworkProgress }) {
             ),
           })}
           actions={
-            homework.can.edit ? (
-              <Button variant="outline" asChild>
-                <Link href={routes.editHomework(homework.id)}>
-                  <Pencil data-icon="inline-start" />
-                  {t("common.edit")}
-                </Link>
-              </Button>
-            ) : null
+            <>
+              {homework.can.edit ? (
+                <Button variant="outline" asChild>
+                  <Link href={routes.editHomework(homework.id)}>
+                    <Pencil data-icon="inline-start" />
+                    {t("common.edit")}
+                  </Link>
+                </Button>
+              ) : null}
+              <HomeworkActions
+                homework={homework}
+                place="page"
+                onDeleted={() => router.push(routes.stageHomework(data.stage.id))}
+              />
+            </>
           }
         />
         <Figures data={data} />

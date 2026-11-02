@@ -6,6 +6,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { apiUrl, problem } from "@test/support/api"
 import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
+import { homeworkFlags } from "@test/support/fixtures/homework"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
@@ -98,7 +99,7 @@ const progress = (extra: Partial<HomeworkProgress> = {}): HomeworkProgress => ({
       withoutAccount: 0,
       reportedTotal: 1,
     },
-    can: {
+    can: homeworkFlags({
       edit: true,
       publish: false,
       unpublish: false,
@@ -106,7 +107,7 @@ const progress = (extra: Partial<HomeworkProgress> = {}): HomeworkProgress => ({
       restore: false,
       delete: false,
       viewProgress: true,
-    },
+    }),
     instructions: "Say it once a day.\nAt bedtime is easiest.",
     resources: [
       { label: "The story as a video", url: "https://example.org/story" },
@@ -262,7 +263,7 @@ test("a draft shows its note instead of figures, and no Edit without the flag", 
     ...data.homework,
     status: "draft",
     counts: null,
-    can: {
+    can: homeworkFlags({
       edit: false,
       publish: false,
       unpublish: false,
@@ -270,7 +271,7 @@ test("a draft shows its note instead of figures, and no Edit without the flag", 
       restore: false,
       delete: false,
       viewProgress: true,
-    },
+    }),
   }
 
   open(data)

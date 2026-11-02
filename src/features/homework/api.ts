@@ -59,3 +59,24 @@ export const homeworkProgressQuery = (id: Uuid) => ({
   queryFn: ({ signal }: { signal: AbortSignal }) =>
     dataOf(api.GET("/homework/{id}/progress", { params: { path: { id } }, signal })),
 })
+
+export type HomeworkTransition = "unpublish" | "archive" | "restore"
+
+export type HomeworkLifecycle = Schemas["HomeworkStatusChanged"]
+
+export const transitionHomeworkRequest = (id: Uuid, transition: HomeworkTransition) => {
+  const params = { path: { id } }
+
+  if (transition === "unpublish") {
+    return dataOf(api.POST("/homework/{id}/unpublish", { params, body: {} }))
+  }
+
+  if (transition === "archive") {
+    return dataOf(api.POST("/homework/{id}/archive", { params, body: {} }))
+  }
+
+  return dataOf(api.POST("/homework/{id}/restore", { params, body: {} }))
+}
+
+export const deleteHomeworkRequest = (id: Uuid) =>
+  dataOf(api.DELETE("/homework/{id}", { params: { path: { id } } }))
