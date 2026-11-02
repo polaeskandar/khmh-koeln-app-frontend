@@ -13,6 +13,7 @@ import { ServiceSwatch } from "@/components/service-tag"
 import { Button } from "@/components/ui/button"
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 import { serviceSchedulesQuery } from "@/features/meetings/api"
+import { NewScheduleButton } from "@/features/meetings/schedule-dialog"
 import { ScheduleList } from "@/features/meetings/schedule-list"
 import { Link } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
@@ -120,7 +121,14 @@ function Details({ service }: { service: ServiceRow }) {
           }
           title={service.name}
           description={service.description ? <span dir="auto">{service.description}</span> : null}
-          actions={service.can.edit ? <EditButton service={service} /> : null}
+          actions={
+            <>
+              {service.can.manageSessions && !service.archived && schedules.data ? (
+                <NewScheduleButton today={schedules.data.today} fixedServiceId={service.id} />
+              ) : null}
+              {service.can.edit ? <EditButton service={service} /> : null}
+            </>
+          }
         />
         <div className="grid gap-3 sm:grid-cols-3">
           <Stat label={t("services.detail.stats.stages")} value={stages.data?.stages.length ?? 0} />
