@@ -37,7 +37,7 @@ function Tasks({ child, state }: { child: ChildSummary; state: TaskState }) {
           title={state === "todo" ? t("toDo") : t("done")}
           tasks={data.items}
           today={data.today}
-          child={child.id}
+          href={(task) => routes.parentHomeworkTask(task.id, child.id)}
           empty={state === "todo" ? t("emptyToDo", { name: child.name }) : t("emptyDone")}
         />
       )}
