@@ -2123,7 +2123,8 @@
     },
     "groups": {
       "noSchedule": "No regular meetings at the moment.",
-      "lastLesson": "Last lesson: “{title}”, {date}"
+      "lastLesson": "Last lesson: “{title}”, {date}",
+      "serviceLeader": "{name} (Service leader)"
     },
     "homework": {
       "description": "Everything the servants of your groups gave you.",
