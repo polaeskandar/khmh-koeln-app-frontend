@@ -13,7 +13,6 @@ import { StatusBadge } from "@/components/status"
 import { Button } from "@/components/ui/button"
 import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty"
 import { initialsOf } from "@/features/auth/role-summary"
-import { useCan } from "@/features/auth/session"
 import { LOCALE_NAMES } from "@/i18n/config"
 import { useFormat } from "@/i18n/format"
 import type { LocalDate } from "@/lib/api/types/common"
@@ -108,12 +107,13 @@ function DeclineButton({ request }: { request: AccountRequest }) {
 
 export function AccountRequests({
   approve,
+  decide = true,
 }: {
   approve?: (request: AccountRequest, today: LocalDate) => React.ReactNode
+  decide?: boolean
 }) {
   const t = useTranslations("accountRequests")
   const query = useQuery(accountRequestsQuery)
-  const decides = useCan()("create", "users")
 
   return (
     <Section
@@ -137,10 +137,12 @@ export function AccountRequests({
                   request={request}
                   today={today}
                   actions={
-                    <>
-                      {approve?.(request, today)}
-                      {decides ? <DeclineButton request={request} /> : null}
-                    </>
+                    decide ? (
+                      <>
+                        {approve?.(request, today)}
+                        <DeclineButton request={request} />
+                      </>
+                    ) : null
                   }
                 />
               ))}
