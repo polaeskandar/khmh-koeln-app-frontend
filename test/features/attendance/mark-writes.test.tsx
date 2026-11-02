@@ -186,7 +186,7 @@ describe("marking on the board", () => {
         within(ramyRow()).getByRole("button", { name: "Mark Ramy Fanous present" })
       ).toBeInTheDocument()
 
-      const [message, options] = vi.mocked(toast.error).mock.calls[0] as [
+      const [message, options] = vi.mocked(toast.error).mock.calls[0] as unknown as [
         string,
         { action: { onClick: () => void } },
       ]

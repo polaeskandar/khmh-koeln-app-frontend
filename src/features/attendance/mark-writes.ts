@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { useCallback, useReducer, useSyncExternalStore } from "react"
 import { toast } from "sonner"
 
-import { apiRequest } from "@/lib/api/client"
+import { api, dataOf, type Schemas } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/problem"
 import type { PersonRef, Uuid } from "@/lib/api/types/common"
 import { type ProblemTranslator, translateProblem } from "@/lib/api/translate-problem"
@@ -137,8 +137,6 @@ export async function withRetries<T>(write: (signal: AbortSignal) => Promise<T>)
   }
 }
 
-type MarkResponse = { id: Uuid; recordedAt: string; recordedBy: Mark["recordedBy"] }
-
 export function useMarkWrites(sessionId: Uuid) {
   const t = useTranslations()
   const queryClient = useQueryClient()
@@ -149,49 +147,54 @@ export function useMarkWrites(sessionId: Uuid) {
     [queryClient]
   )
 
-  const send = useCallback(
-    async (person: PersonRef, present: boolean) => {
-      dispatch({ type: "start", personId: person.id, present })
-      const path = `/sessions/${sessionId}/attendance/${person.id}`
+  async function send(person: PersonRef, present: boolean) {
+    dispatch({ type: "start", personId: person.id, present })
+    const params = { path: { sessionId, personId: person.id } }
 
-      try {
-        const saved = await withRetries<MarkResponse | void>((signal) =>
-          present
-            ? apiRequest<MarkResponse>(path, { method: "PUT", signal })
-            : apiRequest<void>(path, { method: "DELETE", signal })
-        )
+    try {
+      const saved = await withRetries<Schemas["MarkView"] | void>((signal) =>
+        present
+          ? dataOf(
+              api.PUT("/sessions/{sessionId}/attendance/{personId}", { params, body: {}, signal })
+            )
+          : dataOf(
+              api.DELETE("/sessions/{sessionId}/attendance/{personId}", {
+                params,
+                body: {},
+                signal,
+              })
+            )
+      )
 
-        dispatch({
-          type: "confirm",
-          personId: person.id,
-          mark: saved
-            ? { id: saved.id, recordedAt: saved.recordedAt, recordedBy: saved.recordedBy }
-            : null,
-          at: Date.now(),
+      dispatch({
+        type: "confirm",
+        personId: person.id,
+        mark: saved
+          ? { id: saved.id, recordedAt: saved.recordedAt, recordedBy: saved.recordedBy }
+          : null,
+        at: Date.now(),
+      })
+
+      void refetchBoard()
+    } catch (error) {
+      dispatch({ type: "fail", personId: person.id })
+
+      if (retryable(error)) {
+        toast.error(t("errors.notSaved"), {
+          action: { label: t("common.retry"), onClick: () => void send(person, present) },
         })
 
-        void refetchBoard()
-      } catch (error) {
-        dispatch({ type: "fail", personId: person.id })
-
-        if (retryable(error)) {
-          toast.error(t("errors.notSaved"), {
-            action: { label: t("common.retry"), onClick: () => void send(person, present) },
-          })
-
-          return
-        }
-
-        const problem = error as ApiError
-        toast.error(translateProblem(problem, t as unknown as ProblemTranslator))
-
-        if (problem.code && REFETCH_CODES.has(problem.code)) {
-          void refetchBoard()
-        }
+        return
       }
-    },
-    [sessionId, refetchBoard, t]
-  )
+
+      const problem = error as ApiError
+      toast.error(translateProblem(problem, t as unknown as ProblemTranslator))
+
+      if (problem.code && REFETCH_CODES.has(problem.code)) {
+        void refetchBoard()
+      }
+    }
+  }
 
   const pending = new Set(
     Object.entries(writes)
