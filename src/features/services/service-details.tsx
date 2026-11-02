@@ -1,20 +1,177 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
+import { ArrowRight, PencilLine } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useState } from "react"
 
+import { Topbar } from "@/components/app-shell/topbar"
+import { PageBody, PageHeader, Section } from "@/components/page-header"
+import { NotFoundState, QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
+import { ServiceSwatch } from "@/components/service-tag"
+import { Button } from "@/components/ui/button"
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
+import { serviceSchedulesQuery } from "@/features/meetings/api"
+import { ScheduleList } from "@/features/meetings/schedule-list"
+import { Link } from "@/i18n/navigation"
+import { routes } from "@/lib/routes"
 
-export function ServiceDetails() {
+import { type ServiceRow, type ServiceStages, serviceQuery, serviceStagesQuery } from "./api"
+import { ServiceFormDialog } from "./service-dialogs"
+
+function EditButton({ service }: { service: ServiceRow }) {
+  const t = useTranslations("common")
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <Button variant="outline" onClick={() => setOpen(true)}>
+        <PencilLine data-icon="inline-start" />
+        {t("edit")}
+      </Button>
+      <ServiceFormDialog service={service} open={open} onOpenChange={setOpen} />
+    </>
+  )
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex flex-col gap-1 border p-4">
+      <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+        {label}
+      </span>
+      <span className="font-heading text-2xl font-semibold tabular-nums">{value}</span>
+    </div>
+  )
+}
+
+function Stages({ service, stages }: { service: ServiceRow; stages: ServiceStages }) {
   const t = useTranslations()
 
   return (
-    <RecordPage notFound={<h1 className="p-8 font-heading text-xl">{t("notFound.title")}</h1>}>
-      {(id) => (
-        <main className="flex flex-col gap-2 p-8">
-          <h1 className="font-heading text-xl">{t("nav.services")}</h1>
-          <p className="text-sm text-muted-foreground">{id}</p>
-        </main>
+    <Section
+      id="stages"
+      title={t("services.detail.stats.stages")}
+      description={t("services.detail.stages.description")}
+      actions={
+        <Link
+          href={routes.serviceStages(service.id)}
+          className="inline-flex items-center gap-1 text-sm underline-offset-4 hover:underline"
+        >
+          {t("services.detail.stages.manage")}
+          <ArrowRight className="size-3.5" aria-hidden="true" />
+        </Link>
+      }
+    >
+      {stages.stages.length === 0 ? (
+        <Empty className="border border-dashed">
+          <EmptyHeader>
+            <EmptyTitle>{t("services.detail.stages.empty")}</EmptyTitle>
+            <EmptyDescription>
+              {t("services.detail.stages.emptyDescription", {
+                name: service.name,
+                count: service.serviceLevelMemberCount ?? service.memberCount,
+              })}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      ) : (
+        <ul className="divide-y border-y">
+          {[...stages.stages]
+            .sort((a, b) => a.position - b.position)
+            .map((stage) => (
+              <li key={stage.id}>
+                <Link
+                  href={routes.stage(stage.id)}
+                  className="-mx-2 flex items-center justify-between gap-3 px-2 py-3 hover:bg-muted/60"
+                >
+                  <span className="truncate font-medium">{stage.name}</span>
+                  <span className="shrink-0 text-sm text-muted-foreground tabular-nums">
+                    {t("counts.members", { count: stage.memberCount })}
+                  </span>
+                </Link>
+              </li>
+            ))}
+        </ul>
       )}
-    </RecordPage>
+    </Section>
   )
+}
+
+function Details({ service }: { service: ServiceRow }) {
+  const t = useTranslations()
+  const stages = useQuery(serviceStagesQuery(service.id))
+  const schedules = useQuery(serviceSchedulesQuery(service.id))
+  const activeSchedules = schedules.data?.items.filter((schedule) => schedule.active).length ?? 0
+
+  return (
+    <>
+      <Topbar
+        crumbs={[{ label: t("nav.services"), href: routes.services() }, { label: service.name }]}
+      />
+      <PageBody>
+        <PageHeader
+          meta={
+            <span className="inline-flex items-center gap-2 text-muted-foreground">
+              <ServiceSwatch tone={service.tone} />
+              {t("services.kind")}
+            </span>
+          }
+          title={service.name}
+          description={service.description ? <span dir="auto">{service.description}</span> : null}
+          actions={service.can.edit ? <EditButton service={service} /> : null}
+        />
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Stat label={t("services.detail.stats.stages")} value={stages.data?.stages.length ?? 0} />
+          <Stat label={t("services.detail.stats.members")} value={service.memberCount} />
+          <Stat label={t("services.detail.stats.activeSchedules")} value={activeSchedules} />
+        </div>
+        <QueryState query={stages}>
+          {(data) => <Stages service={service} stages={data} />}
+        </QueryState>
+        <Section
+          id="schedules"
+          title={t("services.detail.schedules.title")}
+          description={t("services.detail.schedules.description")}
+        >
+          <QueryState query={schedules}>
+            {(list) => (
+              <ScheduleList
+                schedules={list.items}
+                today={list.today}
+                showService={false}
+                emptyText={t("services.detail.schedules.empty")}
+              />
+            )}
+          </QueryState>
+        </Section>
+      </PageBody>
+    </>
+  )
+}
+
+function NotFoundPage() {
+  const t = useTranslations("nav")
+
+  return (
+    <>
+      <Topbar crumbs={[{ label: t("services"), href: routes.services() }]} />
+      <NotFoundState home={routes.services()} />
+    </>
+  )
+}
+
+function LoadedService({ id }: { id: string }) {
+  const query = useQuery(serviceQuery(id))
+
+  return (
+    <QueryState query={query} notFound={<NotFoundPage />}>
+      {(service) => <Details service={service} />}
+    </QueryState>
+  )
+}
+
+export function ServiceDetails() {
+  return <RecordPage notFound={<NotFoundPage />}>{(id) => <LoadedService id={id} />}</RecordPage>
 }
