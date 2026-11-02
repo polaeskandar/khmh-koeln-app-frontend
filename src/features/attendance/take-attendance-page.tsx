@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import type { ReactNode } from "react"
+import { type ReactNode, useEffect } from "react"
 
 import { Topbar } from "@/components/app-shell/topbar"
 import { PageBody, PageHeader } from "@/components/page-header"
@@ -11,12 +11,13 @@ import { ServiceTag } from "@/components/service-tag"
 import { SessionBadges, SessionWhen } from "@/components/session-bits"
 import { Button } from "@/components/ui/button"
 import { useFormat } from "@/i18n/format"
-import { Link } from "@/i18n/navigation"
+import { Link, useRouter } from "@/i18n/navigation"
 import { groupOf } from "@/lib/api/types/meetings"
 import { routes } from "@/lib/routes"
 
 import { type AttendanceBoard as Board, useAttendanceBoard } from "./api"
 import { AttendanceBoard } from "./attendance-board"
+import { OpenAttendanceButton } from "./open-attendance-button"
 
 export function BoardFrame({ board, children }: { board: Board; children: ReactNode }) {
   const t = useTranslations()
@@ -71,6 +72,46 @@ function NotFoundPage() {
   )
 }
 
+function NotOpen({ board }: { board: Board }) {
+  const t = useTranslations("attendance.session")
+  const f = useFormat()
+  const { session, today } = board
+  const due = session.date <= today
+
+  return (
+    <div className="flex flex-col items-start gap-3 border border-dashed p-6">
+      <h2 className="font-heading text-lg font-semibold">{t("notOpen")}</h2>
+      <p className="max-w-prose text-sm text-muted-foreground">
+        {!due
+          ? t("opensOn", { date: f.longDate(session.date) })
+          : session.can.record
+            ? t("openWhenStarts")
+            : t("servantsOpen")}
+      </p>
+      {due && session.can.record ? <OpenAttendanceButton session={session.id} /> : null}
+    </div>
+  )
+}
+
+function Canceled({ board }: { board: Board }) {
+  const t = useTranslations("attendance.session")
+
+  return (
+    <div className="flex flex-col gap-2 border border-destructive/30 bg-destructive/5 p-4 text-sm">
+      <p className="font-medium text-destructive">{t("canceled")}</p>
+      {board.session.cancelReason ? <p dir="auto">{board.session.cancelReason}</p> : null}
+      <p className="text-muted-foreground">{t("noAttendance")}</p>
+    </div>
+  )
+}
+
+function ToSummary({ session }: { session: string }) {
+  const router = useRouter()
+  useEffect(() => router.replace(routes.attendanceSummary(session)), [router, session])
+
+  return null
+}
+
 function LoadedBoard({ id }: { id: string }) {
   const query = useAttendanceBoard(id)
 
@@ -78,7 +119,15 @@ function LoadedBoard({ id }: { id: string }) {
     <QueryState query={query} notFound={<NotFoundPage />}>
       {(board) => (
         <BoardFrame board={board}>
-          {board.session.status === "active" ? <AttendanceBoard board={board} /> : null}
+          {board.session.status === "active" ? (
+            <AttendanceBoard board={board} />
+          ) : board.session.status === "scheduled" ? (
+            <NotOpen board={board} />
+          ) : board.session.status === "canceled" ? (
+            <Canceled board={board} />
+          ) : (
+            <ToSummary session={board.session.id} />
+          )}
         </BoardFrame>
       )}
     </QueryState>
