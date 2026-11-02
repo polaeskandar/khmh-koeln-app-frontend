@@ -1516,7 +1516,9 @@
       "planned": "{count, plural, other {# planned, created the day before}}",
       "emptyTitle": "No meetings on this day",
       "emptyFiltered": "Try all services, or pick another day.",
-      "emptyOtherDay": "Pick another day above."
+      "emptyOtherDay": "Pick another day above.",
+      "earlier": "Earlier",
+      "later": "Later"
     },
     "days": {
       "label": "Days",

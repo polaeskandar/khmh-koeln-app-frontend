@@ -1516,7 +1516,9 @@
       "planned": "{count, plural, one {# geplant, wird am Vortag angelegt} other {# geplant, werden am Vortag angelegt}}",
       "emptyTitle": "Keine Treffen an diesem Tag",
       "emptyFiltered": "Wählen Sie alle Dienste oder einen anderen Tag.",
-      "emptyOtherDay": "Wählen Sie oben einen anderen Tag."
+      "emptyOtherDay": "Wählen Sie oben einen anderen Tag.",
+      "earlier": "Früher",
+      "later": "Später"
     },
     "days": {
       "label": "Tage",
