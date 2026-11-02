@@ -176,7 +176,11 @@ function HomeworkForm(props: FormProps) {
         return
       }
 
-      const result = await publisher.publish({ id: saved.data.id, title })
+      const result = await publisher.publish({
+        id: saved.data.id,
+        title,
+        publishedAt: homework?.publishedAt ?? null,
+      })
 
       if (result?.ok) {
         router.push(listOn("published"))
