@@ -89,21 +89,19 @@ test("a leader's six cards keep the API's order and offer the next step", async 
   expect(all[4]).toHaveTextContent(/Retreat weekend/)
 })
 
-test("a 3rd Class servant sees every card, but only 3rd Class has an action or link", async () => {
+test("with global roles a servant sees every session and each open one offers its action", async () => {
   answer({
-    sessions: today.map((s) => ({
-      ...s,
-      can: { ...s.can, record: s.stage?.id === thirdClassRef.id },
-    })),
+    sessions: today.map((s) => ({ ...s, can: { manage: false, record: true, reopen: false } })),
   })
 
   const all = await cards()
   expect(all).toHaveLength(6)
-  expect(within(all[0]).getAllByRole("link").length).toBeGreaterThan(0)
 
-  for (const card of all.slice(1)) {
-    expect(within(card).queryAllByRole("link")).toEqual([])
+  for (const card of all.filter((card) => !/Retreat weekend/.test(card.textContent ?? ""))) {
+    expect(within(card).queryAllByRole("link").length).toBeGreaterThan(1)
   }
+
+  expect(screen.queryByRole("button", { name: /Cancel|Move/ })).toBeNull()
 })
 
 test("earlier sessions are marked Not taken or Not closed and link to the board", async () => {

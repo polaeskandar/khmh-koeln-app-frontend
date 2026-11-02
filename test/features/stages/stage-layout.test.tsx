@@ -69,6 +69,7 @@ describe("the header", () => {
     expect(screen.getByText("· Stage").parentElement).toHaveTextContent("Sunday School· Stage")
     expect(screen.getByText("14 members")).toBeInTheDocument()
     expect(screen.queryByText("Archived")).toBeNull()
+    expect(screen.queryByText(/Servants:/)).toBeNull()
   })
 
   test("reads in German and shows an archived stage's badge", async () => {
