@@ -28,6 +28,7 @@ export type BoardActions = {
   onUndo?: (person: PersonRef, mark: Mark) => void
   onClose?: () => void
   pending?: ReadonlySet<string>
+  saving?: boolean
 }
 
 const placementText = (placements: Placement[]) =>
@@ -69,7 +70,9 @@ function PersonRow({
             <Check className="size-4" aria-hidden="true" />
             <span>
               {t("present")}
-              <span className="hidden sm:inline"> · {f.instantTime(mark.recordedAt)}</span>
+              {mark.recordedAt ? (
+                <span className="hidden sm:inline"> · {f.instantTime(mark.recordedAt)}</span>
+              ) : null}
             </span>
           </span>
           {canRecord ? (
@@ -251,9 +254,16 @@ export function AttendanceBoard({
             </p>
           ) : null}
           {canRecord ? (
-            <Button onClick={actions.onClose} disabled={!actions.onClose}>
-              {t("close")}
-            </Button>
+            <>
+              <Button onClick={actions.onClose} disabled={!actions.onClose || actions.saving}>
+                {t("close")}
+              </Button>
+              {actions.saving ? (
+                <p role="status" className="text-xs text-muted-foreground">
+                  {t("saving")}
+                </p>
+              ) : null}
+            </>
           ) : (
             <p className="text-xs text-muted-foreground">{t("viewOnly")}</p>
           )}
@@ -263,7 +273,7 @@ export function AttendanceBoard({
       <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-3 border-t bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
         <p className="flex-1 leading-tight">{counter}</p>
         {canRecord ? (
-          <Button onClick={actions.onClose} disabled={!actions.onClose}>
+          <Button onClick={actions.onClose} disabled={!actions.onClose || actions.saving}>
             {t("closeShort")}
           </Button>
         ) : null}
