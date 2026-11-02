@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronsUpDown, House, LogOut, ShieldCheck } from "lucide-react"
+import { ChevronsUpDown, House, LogOut, ShieldCheck, UserRound } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { LanguageSubmenu } from "@/components/language-switch"
@@ -27,6 +27,12 @@ export function AccountMenuItems() {
 
   return (
     <>
+      <DropdownMenuItem asChild>
+        <Link href={routes.account()}>
+          <UserRound />
+          {t("shell.yourAccount")}
+        </Link>
+      </DropdownMenuItem>
       <LanguageSubmenu />
       <DropdownMenuSeparator />
       {parent ? (
