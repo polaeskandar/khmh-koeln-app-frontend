@@ -18,3 +18,17 @@ export const createServiceRequest = (fields: ServiceFields) =>
 
 export const updateServiceRequest = (id: Uuid, changes: Partial<ServiceFields>) =>
   dataOf(api.PATCH("/services/{id}", { params: { path: { id } }, body: changes }))
+
+export const serviceQuery = (id: Uuid) => ({
+  queryKey: ["services", "detail", id] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) =>
+    dataOf(api.GET("/services/{id}", { params: { path: { id } }, signal })),
+})
+
+export type ServiceStages = Schemas["StageList"]
+
+export const serviceStagesQuery = (id: Uuid) => ({
+  queryKey: ["services", "stages", id] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) =>
+    dataOf(api.GET("/services/{id}/stages", { params: { path: { id } }, signal })),
+})
