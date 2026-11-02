@@ -51,7 +51,7 @@ export const homeworkOf = {
   [MINA_ID]: {
     todo: [
       task("Draw the shepherd and his sheep"),
-      task("Learn the memory verse", { dueDate: "2026-11-15" }),
+      task("Learn the memory verse", { dueDate: "2026-11-22" }),
       task("Pray together", { dueDate: null }),
     ],
     done: [
