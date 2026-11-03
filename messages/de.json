@@ -122,6 +122,7 @@
       "notArchived": "{name} ist nicht archiviert.",
       "takingAttendance": "In {name} wird gerade Anwesenheit erfasst. Schließen Sie zuerst die offenen Termine ab.",
       "hasHistory": "{name} hat schon Termine ({count, plural, one {# Termin} other {# Termine}}). Archivieren Sie den Dienst, statt ihn zu löschen.",
+      "hasMembers": "{count, plural, one {# Person ist} other {# Personen sind}} noch in {name}. Archivieren Sie den Dienst stattdessen oder entfernen Sie die Personen zuerst.",
       "archivedNoStageChanges": "{name} ist archiviert. Stellen Sie den Dienst wieder her, bevor Sie seine Stufen ändern.",
       "hasLessons": "{name} hat Lektionen ({count, plural, one {# Lektion} other {# Lektionen}}). Archivieren Sie den Dienst, statt ihn zu löschen."
     },
