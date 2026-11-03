@@ -269,7 +269,8 @@
       "adminOnlyGrant": "Sie können Eltern keinen Zugang zu Kindern geben.",
       "alreadyHasAccess": "{parent} hat bereits Zugang zu {child}.",
       "adminOnlyApprove": "Sie können den Elternzugang nicht freigeben.",
-      "adminOnlyRemove": "Sie können den Elternzugang nicht entfernen."
+      "adminOnlyRemove": "Sie können den Elternzugang nicht entfernen.",
+      "accountNotActive": "Dieses Konto ist nicht aktiv. Bestätigen oder aktivieren Sie es zuerst."
     },
     "accounts": {
       "firstNameRequired": "Geben Sie Ihren Vornamen ein.",

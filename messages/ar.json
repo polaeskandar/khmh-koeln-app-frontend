@@ -269,7 +269,8 @@
       "adminOnlyGrant": "لا يمكنك منح أولياء الأمور الوصول إلى الأطفال.",
       "alreadyHasAccess": "لدى {parent} وصول إلى {child} بالفعل.",
       "adminOnlyApprove": "لا يمكنك الموافقة على وصول أولياء الأمور.",
-      "adminOnlyRemove": "لا يمكنك إزالة وصول أولياء الأمور."
+      "adminOnlyRemove": "لا يمكنك إزالة وصول أولياء الأمور.",
+      "accountNotActive": "هذا الحساب غير نشط. وافق عليه أو أعد تفعيله أولًا."
     },
     "accounts": {
       "firstNameRequired": "أدخل اسمك الأول.",
