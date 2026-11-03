@@ -95,3 +95,12 @@ export const linesOf = (text: string | null) =>
     .split("\n")
     .map((line) => line.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, "").trim())
     .filter(Boolean)
+
+export const archiveLessonRequest = (id: Uuid) =>
+  dataOf(api.POST("/lessons/{id}/archive", { params: { path: { id } }, body: {} }))
+
+export const restoreLessonRequest = (id: Uuid) =>
+  dataOf(api.POST("/lessons/{id}/restore", { params: { path: { id } }, body: {} }))
+
+export const deleteLessonRequest = (id: Uuid) =>
+  dataOf(api.DELETE("/lessons/{id}", { params: { path: { id } } }))
