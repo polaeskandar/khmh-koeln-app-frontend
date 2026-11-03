@@ -64,3 +64,9 @@ export const moveMembershipRequest = (membership: Uuid, stageId: Uuid) =>
   dataOf(
     api.POST("/memberships/{id}/move", { params: { path: { id: membership } }, body: { stageId } })
   )
+
+export const deactivatePersonRequest = (person: Uuid) =>
+  dataOf(api.POST("/people/{id}/deactivate", { params: { path: { id: person } }, body: {} }))
+
+export const reactivatePersonRequest = (person: Uuid) =>
+  dataOf(api.POST("/people/{id}/reactivate", { params: { path: { id: person } }, body: {} }))

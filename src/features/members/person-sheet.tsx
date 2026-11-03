@@ -10,6 +10,7 @@ import { ConfirmDialog } from "@/components/confirm-dialog"
 import { TextField } from "@/components/form-fields"
 import { MemberAvatar } from "@/components/member-avatar"
 import { ServiceSwatch } from "@/components/service-tag"
+import { StatusBadge } from "@/components/status"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -26,6 +27,7 @@ import {
   Sheet,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
@@ -33,14 +35,17 @@ import { servicesQuery } from "@/features/services/api"
 import { useInlineEnd } from "@/i18n/direction"
 import { useFormat } from "@/i18n/format"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
+import { isolate } from "@/lib/bidi"
 import { fullName, initials, preferredName } from "@/lib/domain/names"
 
 import {
+  deactivatePersonRequest,
   endMembershipRequest,
   joinRequest,
   type PersonNames,
   type PersonRow,
   type Placement,
+  reactivatePersonRequest,
   renamePersonRequest,
   moveMembershipRequest,
 } from "./api"
@@ -255,11 +260,13 @@ function Placements({ person, onGone }: { person: PersonRow; onGone: () => void 
                   </span>
                 </span>
               </span>
-              <MembershipMenu
-                person={person}
-                placement={placement}
-                onRemove={() => setEnding(placement)}
-              />
+              {person.can.edit && person.person.status === "active" ? (
+                <MembershipMenu
+                  person={person}
+                  placement={placement}
+                  onRemove={() => setEnding(placement)}
+                />
+              ) : null}
             </li>
           ))}
         </ul>
@@ -378,6 +385,64 @@ function Earlier({ placements }: { placements: Placement[] }) {
   )
 }
 
+export function InactiveBadge() {
+  const t = useTranslations("common")
+
+  return (
+    <StatusBadge tone="muted" className="shrink-0">
+      {t("inactive")}
+    </StatusBadge>
+  )
+}
+
+function StatusAction({ person }: { person: PersonRow }) {
+  const t = useTranslations()
+  const [confirming, setConfirming] = useState(false)
+
+  const deactivate = useApiMutation(deactivatePersonRequest, {
+    successMessage: t("toast.personInactive"),
+    invalidate: [["people"]],
+  })
+
+  const reactivate = useApiMutation(reactivatePersonRequest, {
+    successMessage: t("toast.personReactivated"),
+    invalidate: [["people"]],
+  })
+
+  if (person.person.status === "inactive") {
+    return (
+      <Button
+        variant="outline"
+        disabled={reactivate.pending}
+        onClick={() => void reactivate.execute(person.person.id)}
+      >
+        {t("members.sheet.reactivate")}
+      </Button>
+    )
+  }
+
+  return (
+    <>
+      <Button variant="outline" onClick={() => setConfirming(true)}>
+        {t("members.sheet.markInactive")}
+      </Button>
+      <ConfirmDialog
+        open={confirming}
+        onOpenChange={setConfirming}
+        title={t("members.sheet.inactiveTitle", { name: isolate(preferredName(person.person)) })}
+        description={t("members.sheet.inactiveDescription")}
+        consequences={[
+          t("members.sheet.inactiveConsequences.rosters"),
+          t("members.sheet.inactiveConsequences.history"),
+          t("members.sheet.inactiveConsequences.reactivate"),
+        ]}
+        confirmLabel={t("members.sheet.markInactive")}
+        onConfirm={async () => (await deactivate.execute(person.person.id)).ok}
+      />
+    </>
+  )
+}
+
 export function PersonSheet({
   person,
   onOpenChange,
@@ -401,7 +466,10 @@ export function PersonSheet({
                 className="size-10"
               />
               <span className="flex min-w-0 flex-col">
-                <SheetTitle className="truncate">{preferredName(person.person)}</SheetTitle>
+                <span className="flex min-w-0 items-center gap-2">
+                  <SheetTitle className="truncate">{preferredName(person.person)}</SheetTitle>
+                  {person.person.status === "inactive" ? <InactiveBadge /> : null}
+                </span>
                 <SheetDescription className="truncate">
                   {person.person.displayName ? fullName(person.person) : t("member")}
                 </SheetDescription>
@@ -410,9 +478,16 @@ export function PersonSheet({
             <div className="flex flex-col gap-6 px-4 pb-6">
               {person.can.edit ? <NameForm key={person.person.id} person={person.person} /> : null}
               <Placements person={person} onGone={() => onOpenChange(false)} />
-              {person.can.edit ? <AddTo person={person} /> : null}
+              {person.can.edit && person.person.status === "active" ? (
+                <AddTo person={person} />
+              ) : null}
               <Earlier placements={person.pastPlacements} />
             </div>
+            {person.can.edit ? (
+              <SheetFooter className="border-t">
+                <StatusAction person={person} />
+              </SheetFooter>
+            ) : null}
           </>
         ) : null}
       </SheetContent>

@@ -198,7 +198,8 @@
       "addOutsideServices": "You can only add people to the services and stages you serve in.",
       "chooseJoinService": "Choose the service this person joins.",
       "membershipOutsideServices": "You can only change memberships in the services and stages you serve in.",
-      "moveOutsideStages": "You can only move people into stages you serve in."
+      "moveOutsideStages": "You can only move people into stages you serve in.",
+      "personInactive": "{name} is inactive. Reactivate them first."
     },
     "roles": {
       "adminOnly": "You can’t give or remove roles.",
