@@ -1,6 +1,15 @@
 "use client"
 
-import { Archive, ArchiveRestore, Ellipsis, PencilLine, Plus, Trash2 } from "lucide-react"
+import {
+  Archive,
+  ArchiveRestore,
+  ArrowDown,
+  ArrowUp,
+  Ellipsis,
+  PencilLine,
+  Plus,
+  Trash2,
+} from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useEffect, useRef, useState } from "react"
 
@@ -213,12 +222,16 @@ export function AddStageButton({
   )
 }
 
+type Move = { up: boolean; down: boolean; onMove: (direction: -1 | 1) => void }
+
 export function StageActionsMenu({
   service,
   stage,
+  move,
 }: {
   service: ServiceRef
   stage: EditableStage & { memberCount?: number }
+  move?: Move
 }) {
   const t = useTranslations()
   const [open, setOpen] = useState<"edit" | "archive" | "delete" | null>(null)
@@ -242,6 +255,18 @@ export function StageActionsMenu({
             <PencilLine />
             {t("stages.actions.rename")}
           </DropdownMenuItem>
+          {move ? (
+            <>
+              <DropdownMenuItem disabled={!move.up} onSelect={() => move.onMove(-1)}>
+                <ArrowUp />
+                {t("stages.actions.moveUp")}
+              </DropdownMenuItem>
+              <DropdownMenuItem disabled={!move.down} onSelect={() => move.onMove(1)}>
+                <ArrowDown />
+                {t("stages.actions.moveDown")}
+              </DropdownMenuItem>
+            </>
+          ) : null}
           <DropdownMenuItem onSelect={() => setOpen("archive")}>
             <Archive />
             {t("common.archive")}
