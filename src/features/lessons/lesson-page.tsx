@@ -1,10 +1,12 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Ellipsis, PencilLine, Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useState } from "react"
 
 import { Topbar } from "@/components/app-shell/topbar"
+import { ConfirmDialog } from "@/components/confirm-dialog"
 import { PageBody, PageHeader } from "@/components/page-header"
 import { NotFoundState, QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
@@ -13,15 +15,25 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useFormat } from "@/i18n/format"
-import { Link } from "@/i18n/navigation"
+import { Link, useRouter } from "@/i18n/navigation"
 import type { LessonStatus } from "@/lib/api/types/learning"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
+import { isolate } from "@/lib/bidi"
 import { routes } from "@/lib/routes"
 
-import { changeLessonStatusRequest, type LessonDetail, lessonQuery, linesOf } from "./api"
+import {
+  archiveLessonRequest,
+  changeLessonStatusRequest,
+  deleteLessonRequest,
+  type LessonDetail,
+  lessonQuery,
+  linesOf,
+  restoreLessonRequest,
+} from "./api"
 import { LessonStatusBadge, MeetingLine } from "./lesson-bits"
 import { LessonPanel } from "./visibility"
 
@@ -34,47 +46,100 @@ const STATUS_TOAST: Record<
   completed: "toast.lessonTaught",
 }
 
+function useLessonChange<A extends unknown[], T>(
+  fn: (...args: A) => Promise<T>,
+  successMessage: string,
+  onSuccess?: () => void
+) {
+  const queryClient = useQueryClient()
+
+  const mutation = useApiMutation(fn, {
+    successMessage,
+    invalidate: [["lessons"], ["homework"]],
+    onSuccess,
+  })
+
+  return {
+    pending: mutation.pending,
+    execute: async (...args: A) => {
+      const result = await mutation.execute(...args)
+
+      if (!result.ok) {
+        void queryClient.invalidateQueries({ queryKey: ["lessons"] })
+      }
+
+      return result.ok
+    },
+  }
+}
+
 function StatusActions({ data }: { data: LessonDetail }) {
   const t = useTranslations()
-  const { lesson, can } = data
+  const router = useRouter()
+  const { lesson, stage, homework, can } = data
+  const [dialog, setDialog] = useState<"archive" | "delete" | null>(null)
+  const title = isolate(lesson.title)
 
   const change = useApiMutation(changeLessonStatusRequest, {
     successMessage: (saved) => t(STATUS_TOAST[saved.status]),
     invalidate: [["lessons"]],
   })
 
-  if (!can.manage) {
-    return null
+  const archive = useLessonChange(
+    archiveLessonRequest,
+    t("toast.archivedTitle", { title: lesson.title })
+  )
+
+  const restore = useLessonChange(
+    restoreLessonRequest,
+    t("toast.restoredTitle", { title: lesson.title })
+  )
+
+  const remove = useLessonChange(
+    deleteLessonRequest,
+    t("toast.deletedTitle", { title: lesson.title }),
+    () => router.push(routes.stageLessons(stage.id))
+  )
+
+  if (lesson.archivedAt) {
+    return can.restore ? (
+      <Button disabled={restore.pending} onClick={() => void restore.execute(lesson.id)}>
+        {t("common.restore")}
+      </Button>
+    ) : null
   }
 
-  const set = (status: LessonStatus) => void change.execute(lesson.id, status)
-
   const back =
-    lesson.status === "ready"
+    can.manage && lesson.status === "ready"
       ? { label: t("lessons.actions.backToDraft"), status: "draft" as const }
-      : lesson.status === "completed"
+      : can.manage && lesson.status === "completed"
         ? { label: t("lessons.actions.notTaughtYet"), status: "ready" as const }
         : null
 
+  const set = (status: LessonStatus) => void change.execute(lesson.id, status)
+  const menu = back || can.archive || can.delete
+
   return (
     <>
-      <Button variant="outline" asChild>
-        <Link href={routes.editLesson(lesson.id)}>
-          <PencilLine data-icon="inline-start" />
-          {t("common.edit")}
-        </Link>
-      </Button>
-      {lesson.status === "draft" ? (
+      {can.manage ? (
+        <Button variant="outline" asChild>
+          <Link href={routes.editLesson(lesson.id)}>
+            <PencilLine data-icon="inline-start" />
+            {t("common.edit")}
+          </Link>
+        </Button>
+      ) : null}
+      {can.manage && lesson.status === "draft" ? (
         <Button disabled={change.pending} onClick={() => set("ready")}>
           {t("lessons.actions.markReady")}
         </Button>
       ) : null}
-      {lesson.status === "ready" && can.markCompleted ? (
+      {can.manage && lesson.status === "ready" && can.markCompleted ? (
         <Button disabled={change.pending} onClick={() => set("completed")}>
           {t("lessons.actions.markTaught")}
         </Button>
       ) : null}
-      {back ? (
+      {menu ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" aria-label={t("common.moreActions")}>
@@ -82,10 +147,48 @@ function StatusActions({ data }: { data: LessonDetail }) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={() => set(back.status)}>{back.label}</DropdownMenuItem>
+            {back ? (
+              <DropdownMenuItem onSelect={() => set(back.status)}>{back.label}</DropdownMenuItem>
+            ) : null}
+            {back && (can.archive || can.delete) ? <DropdownMenuSeparator /> : null}
+            {can.archive ? (
+              <DropdownMenuItem onSelect={() => setDialog("archive")}>
+                {t("common.archive")}
+              </DropdownMenuItem>
+            ) : null}
+            {can.delete ? (
+              <DropdownMenuItem variant="destructive" onSelect={() => setDialog("delete")}>
+                {t("lessons.actions.deleteDraft")}
+              </DropdownMenuItem>
+            ) : null}
           </DropdownMenuContent>
         </DropdownMenu>
       ) : null}
+      <ConfirmDialog
+        open={dialog === "archive"}
+        onOpenChange={(open) => !open && setDialog(null)}
+        title={t("lessons.actions.archiveTitle", { title })}
+        description={t("lessons.actions.archiveDescription")}
+        consequences={
+          homework.published > 0
+            ? [
+                t("lessons.actions.archiveHomework", { count: homework.published }),
+                t("lessons.actions.archiveKept"),
+              ]
+            : undefined
+        }
+        confirmLabel={t("common.archive")}
+        onConfirm={() => archive.execute(lesson.id)}
+      />
+      <ConfirmDialog
+        open={dialog === "delete"}
+        onOpenChange={(open) => !open && setDialog(null)}
+        title={t("lessons.actions.deleteTitle", { title })}
+        description={t("lessons.actions.deleteDescription")}
+        confirmLabel={t("lessons.actions.deleteDraft")}
+        tone="destructive"
+        onConfirm={() => remove.execute(lesson.id)}
+      />
     </>
   )
 }
