@@ -1302,6 +1302,7 @@
       "next": "Nächstes Treffen",
       "attendance": "Anwesenheit, 4 Wo.",
       "attendanceHint": "Anteil der Liste, der in den letzten vier Wochen als anwesend markiert wurde",
+      "leaders": "Dienstleitung",
       "actions": "Aktionen",
       "onAverage": "{count, number} <muted>im Schnitt</muted>",
       "noSessions": "Keine Termine",

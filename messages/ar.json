@@ -1302,6 +1302,7 @@
       "next": "الاجتماع القادم",
       "attendance": "الحضور، 4 أسابيع",
       "attendanceHint": "نسبة من سُجِّل حضورهم من القائمة خلال الأسابيع الأربعة الأخيرة",
+      "leaders": "أمناء الخدمة",
       "actions": "الإجراءات",
       "onAverage": "{count, number} <muted>في المتوسط</muted>",
       "noSessions": "لا اجتماعات",

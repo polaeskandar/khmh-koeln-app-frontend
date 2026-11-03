@@ -40,6 +40,7 @@ import { localDateOf } from "@/lib/domain/time"
 import { routes } from "@/lib/routes"
 
 import { type ServiceRow, servicesQuery } from "./api"
+import { AttendanceCell, NextMeetingCell, useNextAt } from "./service-bits"
 import { NewServiceButton, ServiceActionsMenu } from "./service-dialogs"
 
 type Tab = "active" | "archived" | "all"
@@ -91,6 +92,7 @@ function ArchivedBadge({ row }: { row: ServiceRow }) {
 export function ServicesTable({ rows }: { rows: ServiceRow[] }) {
   const t = useTranslations()
   const f = useFormat()
+  const nextAt = useNextAt()
   const [tab, setTab] = useState<Tab>("active")
   const [search, setSearch] = useState("")
   const counts = countByTab(rows, TABS)
@@ -163,6 +165,24 @@ export function ServicesTable({ rows }: { rows: ServiceRow[] }) {
         ),
         cell: ({ row: { original: r } }) => <span className="tabular-nums">{r.memberCount}</span>,
         size: 100,
+      },
+      {
+        id: "next",
+        accessorFn: (r) => (r.next ? `${r.next.date}T${r.next.startTime}` : "9999"),
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t("services.table.next")} />
+        ),
+        cell: ({ row: { original: r } }) => <NextMeetingCell service={r} />,
+        size: 150,
+      },
+      {
+        id: "attendance",
+        accessorFn: (r) => r.trend?.rate ?? -1,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t("services.table.attendance")} />
+        ),
+        cell: ({ row: { original: r } }) => <AttendanceCell service={r} />,
+        size: 130,
       },
       {
         id: "actions",
@@ -259,8 +279,13 @@ export function ServicesTable({ rows }: { rows: ServiceRow[] }) {
                     {r.archived ? <ArchivedBadge row={r} /> : null}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    {t("counts.stages", { count: r.stages.length })} ·{" "}
-                    {t("counts.members", { count: r.memberCount })}
+                    {[
+                      t("counts.stages", { count: r.stages.length }),
+                      t("counts.members", { count: r.memberCount }),
+                      nextAt(r),
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
                   </span>
                 </span>
               </Link>
