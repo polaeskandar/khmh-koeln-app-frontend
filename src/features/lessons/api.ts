@@ -10,6 +10,7 @@ export type HomeworkCounts = { total: number; published: number; drafts: number 
 
 export type LessonRow = Schemas["LessonRow"]
 export type Lesson = Schemas["LessonView"]
+
 export type LessonDetail = Schemas["LessonDetail"]
 
 export type LessonTab = "upcoming" | "previous" | "archived"
@@ -49,6 +50,7 @@ export type LessonInput = {
   materials: Material[]
   notes?: string | null
   responsibleId?: Uuid
+  collaboratorIds?: Uuid[]
   status?: "draft" | "ready"
 }
 

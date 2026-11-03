@@ -122,6 +122,7 @@ test("Mark ready posts ready, two materials, null for empty texts and no empty r
     ],
     notes: null,
     responsibleId: me.administrator.account.id,
+    collaboratorIds: [],
     status: "ready",
   })
 
