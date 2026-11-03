@@ -13,6 +13,8 @@ import { ParentAccess } from "./parent-access"
 
 import { MemberAccounts } from "./member-accounts"
 
+import { StaffAccounts } from "./staff-accounts"
+
 export function SettingsPage() {
   const t = useTranslations()
   const can = useCan()
@@ -33,6 +35,9 @@ export function SettingsPage() {
         </RequirePermission>
         <RequirePermission action="update" resource="users" fallback={null}>
           <MemberAccounts />
+        </RequirePermission>
+        <RequirePermission action="update" resource="users" fallback={null}>
+          <StaffAccounts />
         </RequirePermission>
       </PageBody>
     </>

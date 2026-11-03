@@ -736,7 +736,15 @@
         "roleHint": "Was jede Rolle erlaubt, sehen Sie unter <link>Rollen</link>.",
         "choose": "Rolle wählen"
       },
-      "description": "Geben Sie jedem Konto die Rollen, die es braucht. Rollen gelten überall in der Gemeinde."
+      "description": "Geben Sie jedem Konto die Rollen, die es braucht. Rollen gelten überall in der Gemeinde.",
+      "passwordLink": {
+        "action": "Passwort-Link…",
+        "title": "Passwort-Link für {name}",
+        "description": "{name} bekommt per E-Mail einen Einmal-Link, um ein neues Passwort zu wählen. Ein älterer, unbenutzter Link gilt dann nicht mehr.",
+        "sent": "An {email} gesendet.",
+        "expires": "Gültig bis {when}.",
+        "creating": "Link wird gesendet…"
+      }
     },
     "parents": {
       "title": "Elternzugang",
