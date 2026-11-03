@@ -198,7 +198,8 @@
       "addOutsideServices": "Sie können Personen nur zu den Diensten und Stufen hinzufügen, in denen Sie dienen.",
       "chooseJoinService": "Wählen Sie den Dienst, dem diese Person beitritt.",
       "membershipOutsideServices": "Sie können Zugehörigkeiten nur in den Diensten und Stufen ändern, in denen Sie dienen.",
-      "moveOutsideStages": "Sie können Personen nur in Stufen verschieben, in denen Sie dienen."
+      "moveOutsideStages": "Sie können Personen nur in Stufen verschieben, in denen Sie dienen.",
+      "personInactive": "{name} ist inaktiv. Aktivieren Sie die Person zuerst wieder."
     },
     "roles": {
       "adminOnly": "Sie können keine Rollen vergeben oder entziehen.",
