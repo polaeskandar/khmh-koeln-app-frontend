@@ -7,8 +7,6 @@ export type Resource = Schemas["Resource"]
 export const ACTIONS: Action[] = ["read", "create", "update", "delete"]
 
 export const RESOURCES: Resource[] = [
-  "users",
-  "roles",
   "services",
   "stages",
   "sessions",
@@ -17,7 +15,11 @@ export const RESOURCES: Resource[] = [
   "lessons",
   "homework",
   "parentPortal",
+  "users",
+  "roles",
 ]
+
+export const SENSITIVE: Resource[] = ["members", "users", "roles"]
 
 export const PERMISSION_COUNT = ACTIONS.length * RESOURCES.length
 
