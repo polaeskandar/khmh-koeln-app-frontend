@@ -7,6 +7,8 @@ import { PageBody, PageHeader } from "@/components/page-header"
 import { RequirePermission } from "@/features/auth/guards"
 import { useCan } from "@/features/auth/session"
 
+import { DataProtectionSummary } from "@/features/privacy/data-requests-page"
+
 import { AccountRequests } from "./account-requests"
 import { ApproveButton } from "./approve-dialog"
 import { ParentAccess } from "./parent-access"
@@ -43,6 +45,9 @@ export function SettingsPage() {
         </RequirePermission>
         <RequirePermission action="read" resource="roles" fallback={null}>
           <RolesOverview />
+        </RequirePermission>
+        <RequirePermission action="delete" resource="users" fallback={null}>
+          <DataProtectionSummary />
         </RequirePermission>
       </PageBody>
     </>
