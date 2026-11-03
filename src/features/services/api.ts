@@ -1,5 +1,14 @@
 import { api, dataOf, type Schemas } from "@/lib/api/client"
-import type { Uuid } from "@/lib/api/types/common"
+import type { LocalDate, LocalTime, StageRef, Uuid } from "@/lib/api/types/common"
+
+export type NextMeeting = {
+  date: LocalDate
+  startTime: LocalTime
+  stage: StageRef | null
+  status: "scheduled" | "active" | "planned"
+}
+
+export type Trend = { sessions: number; rate: number | null; averagePresent: number | null }
 
 export type ServiceRow = Schemas["ServiceView"]
 
