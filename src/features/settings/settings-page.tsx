@@ -20,7 +20,7 @@ export function SettingsPage() {
         <RequirePermission action="read" resource="users">
           <AccountRequests
             approve={(request) =>
-              request.registeredAs === "parent" ? <ApproveButton request={request} /> : null
+              request.registeredAs === "servant" ? null : <ApproveButton request={request} />
             }
           />
         </RequirePermission>
