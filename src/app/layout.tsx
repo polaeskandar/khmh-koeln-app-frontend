@@ -7,6 +7,8 @@ import { QueryProvider } from "@/lib/api/query-provider"
 import { prePaintScript } from "@/i18n/locale-choice"
 import { apiBaseUrl, impressumUrl } from "@/lib/env"
 import { THEME_COLORS } from "@/lib/theme-colors"
+
+import { fontStack } from "@/lib/font-stack"
 import { cn } from "@/lib/utils"
 import { ApiMocking } from "@/mocks/api-mocking"
 
@@ -20,6 +22,11 @@ const fontArabic = Vazirmatn({
   variable: "--font-arabic",
   adjustFontFallback: false,
 })
+
+const fontStacks = {
+  "--font-sans": fontStack(fontText, fontArabic),
+  "--font-heading": fontStack(fontHeading, fontArabic),
+} as React.CSSProperties
 
 apiBaseUrl()
 impressumUrl()
@@ -51,6 +58,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         fontArabic.variable,
         "font-sans"
       )}
+      style={fontStacks}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: prePaintScript }} />
