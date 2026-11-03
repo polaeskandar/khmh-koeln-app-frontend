@@ -10,7 +10,7 @@ import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { AttendanceOverview as Overview, OverviewSession } from "@/features/attendance/api"
-import { AttendanceOverview, StaffHome } from "@/features/attendance/attendance-overview"
+import { AttendanceOverview } from "@/features/attendance/attendance-overview"
 
 vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
 
@@ -152,9 +152,4 @@ test("an empty day links to Meetings, and nothing closed says so", async () => {
 test("a 403 shows the no-access state", async () => {
   answer(() => problem(403, "forbidden"))
   expect(await screen.findByText("Not allowed")).toBeInTheDocument()
-})
-
-test("the staff home replaces itself with the attendance overview", () => {
-  renderWithProviders(<StaffHome />)
-  expect(router.replace).toHaveBeenCalledExactlyOnceWith("/attendance/")
 })

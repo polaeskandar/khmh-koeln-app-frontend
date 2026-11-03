@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "cn"
-import { Menu } from "lucide-react"
+import { Menu, Layers } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useId } from "react"
 
@@ -61,7 +61,7 @@ export function MobileTabBar() {
       aria-label={t("main")}
       className="fixed inset-x-0 bottom-0 z-30 flex h-[calc(4rem+env(safe-area-inset-bottom))] items-stretch border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
     >
-      <Tab item={item("services")} active={isActive(item("services").href, pathname)} />
+      <Tab item={item("dashboard")} active={isActive(item("dashboard").href, pathname)} />
       <Tab item={item("meetings")} active={isActive(item("meetings").href, pathname)} />
       {TAKE_ATTENDANCE.allowed(can) ? (
         <div className="flex flex-1 flex-col items-center">
@@ -95,13 +95,21 @@ export function MobileTabBar() {
         <DropdownMenuTrigger
           className={cn(
             "flex flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium text-muted-foreground outline-none",
-            settings && isActive(SETTINGS.href, pathname) && "text-foreground"
+            ((settings && isActive(SETTINGS.href, pathname)) ||
+              isActive(item("services").href, pathname)) &&
+              "text-foreground"
           )}
         >
           <Menu className="size-5" aria-hidden="true" />
           {t("more")}
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-72" side="top" align="end">
+          <DropdownMenuItem asChild>
+            <Link href={item("services").href}>
+              <Layers />
+              {t("services")}
+            </Link>
+          </DropdownMenuItem>
           {settings ? (
             <>
               <DropdownMenuItem asChild>
