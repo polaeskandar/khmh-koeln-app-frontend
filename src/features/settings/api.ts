@@ -23,10 +23,14 @@ export const staffAccountsQuery = {
 
 export type Role = Schemas["RoleRow"]
 
+export type RoleRow = Role
+
 export const rolesQuery = {
   queryKey: ["roles", "list"] as const,
   queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/roles", { signal })),
 }
+
+export const roleListQuery = rolesQuery
 
 export const parentPortalOnly = (role: Role) =>
   role.permissions.length > 0 && role.permissions.every((p) => p.resource === "parentPortal")
@@ -99,3 +103,6 @@ export type PasswordLink = Schemas["PasswordLink"]
 
 export const passwordLinkRequest = (account: Uuid) =>
   dataOf(api.POST("/accounts/{id}/password-link", { params: { path: { id: account } }, body: {} }))
+
+export const deleteRoleRequest = (role: Uuid) =>
+  dataOf(api.DELETE("/roles/{id}", { params: { path: { id: role } }, body: {} }))
