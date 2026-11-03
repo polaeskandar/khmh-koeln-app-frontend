@@ -92,7 +92,9 @@ export function ScheduleList({
                   <UsersRound className="size-3 shrink-0" aria-hidden="true" />
                   {schedule.rosterMode === "open"
                     ? t("roster.open")
-                    : t("roster.ofGroup", { group: groupOf(schedule) })}
+                    : schedule.rosterSize === null
+                      ? t("roster.ofGroup", { group: groupOf(schedule) })
+                      : t("roster.size", { count: schedule.rosterSize })}
                 </span>
               </span>
             </span>
