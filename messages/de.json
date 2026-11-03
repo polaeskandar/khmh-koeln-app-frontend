@@ -148,6 +148,7 @@
       "serviceArchivedRestoreFirst": "{name} ist archiviert. Stellen Sie den Dienst zuerst wieder her.",
       "stageArchivedRestoreFirst": "{name} ist archiviert. Stellen Sie zuerst die Stufe wieder her.",
       "scheduleHasSessions": "Aus diesem Regeltermin {count, plural, one {wurde schon # Termin} other {wurden schon # Termine}} angelegt. Deaktivieren Sie ihn stattdessen: Es entstehen keine neuen Termine und der Verlauf bleibt erhalten.",
+      "scheduleHasLessons": "Mit diesem Regeltermin {count, plural, one {ist # Lektion} other {sind # Lektionen}} verknüpft. Deaktivieren Sie ihn stattdessen: Es entstehen keine neuen Termine und der Verlauf bleibt erhalten.",
       "sessionCanceled": "Dieser Termin wurde abgesagt.",
       "attendanceClosed": "Die Anwesenheit für diesen Termin ist abgeschlossen. Öffnen Sie sie erneut, um etwas zu korrigieren.",
       "opensOnTheDay": "Die Anwesenheit kann erst am Tag des Termins geöffnet werden.",

@@ -21,7 +21,7 @@ export const serviceSchedulesQuery = (serviceId: Uuid) => ({
 
 export type Agenda = Omit<Schemas["Agenda"], "items"> & { items: AgendaItem[] }
 
-export type AgendaFilter = { from?: LocalDate; to?: LocalDate; serviceId?: Uuid }
+export type AgendaFilter = { from?: LocalDate; to?: LocalDate; serviceId?: Uuid; scheduleId?: Uuid }
 
 export const agendaQuery = (filter: AgendaFilter) => ({
   queryKey: ["agenda", "list", filter] as const,
@@ -73,3 +73,18 @@ export const updateScheduleRequest = (
   id: Uuid,
   changes: Omit<ScheduleInput, "serviceId" | "stageId">
 ) => dataOf(api.PATCH("/schedules/{id}", { params: { path: { id } }, body: changes }))
+
+export const scheduleQuery = (id: Uuid) => ({
+  queryKey: ["schedules", "detail", id] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) =>
+    dataOf(api.GET("/schedules/{id}", { params: { path: { id } }, signal })),
+})
+
+export const activateScheduleRequest = (id: Uuid) =>
+  dataOf(api.POST("/schedules/{id}/activate", { params: { path: { id } }, body: {} }))
+
+export const deactivateScheduleRequest = (id: Uuid) =>
+  dataOf(api.POST("/schedules/{id}/deactivate", { params: { path: { id } }, body: {} }))
+
+export const deleteScheduleRequest = (id: Uuid) =>
+  dataOf(api.DELETE("/schedules/{id}", { params: { path: { id } } }))

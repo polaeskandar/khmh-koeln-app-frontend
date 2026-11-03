@@ -148,6 +148,7 @@
       "serviceArchivedRestoreFirst": "{name} is archived. Restore it first.",
       "stageArchivedRestoreFirst": "{name} is archived. Restore the stage first.",
       "scheduleHasSessions": "{count, plural, one {# session was} other {# sessions were}} already created from this schedule. Deactivate it instead: no new sessions are created and the history stays.",
+      "scheduleHasLessons": "{count, plural, one {# lesson is} other {# lessons are}} linked to this schedule. Deactivate it instead: no new sessions are created and the history stays.",
       "sessionCanceled": "This session was canceled.",
       "attendanceClosed": "Attendance for this session is closed. Reopen it to make corrections.",
       "opensOnTheDay": "Attendance opens on the day of the session.",
