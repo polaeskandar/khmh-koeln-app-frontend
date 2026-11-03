@@ -102,7 +102,11 @@ test("Remove ends the membership once after confirming and moves it under Earlie
   const sheet = await openSheet("Mina Hanna")
 
   await userEvent.click(
-    sheet.getByRole("button", { name: "Remove from 3rd Class (Sunday School)" })
+    sheet.getByRole("button", { name: "Actions for 3rd Class (Sunday School)" })
+  )
+
+  await userEvent.click(
+    await screen.findByRole("menuitem", { name: "Remove from 3rd Class (Sunday School)" })
   )
 
   const confirm = within(screen.getByRole("alertdialog"))
