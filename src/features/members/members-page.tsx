@@ -16,6 +16,7 @@ import { MemberAvatar } from "@/components/member-avatar"
 import { NoAccess } from "@/components/no-access"
 import { PageBody, PageHeader } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ServiceSwatch } from "@/components/service-tag"
 import { Button } from "@/components/ui/button"
 import {
@@ -38,7 +39,7 @@ import { fullName, initials, preferredName } from "@/lib/domain/names"
 
 import { type PeopleList, peopleQuery, type PersonRow, type Placement } from "./api"
 import { useGroupOptions } from "./groups"
-import { PersonSheet } from "./person-sheet"
+import { InactiveBadge, PersonSheet } from "./person-sheet"
 
 const PAGE_SIZE = 25
 const SEARCH_DELAY_MS = 300
@@ -63,7 +64,10 @@ function PersonName({ person: { person } }: { person: PersonRow }) {
     <span className="flex min-w-0 items-center gap-3">
       <MemberAvatar name={preferredName(person)} initials={initials(person)} seed={person.id} />
       <span className="flex min-w-0 flex-col">
-        <span className="truncate font-medium">{preferredName(person)}</span>
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="truncate font-medium">{preferredName(person)}</span>
+          {person.status === "inactive" ? <InactiveBadge /> : null}
+        </span>
         {person.displayName ? (
           <span className="truncate text-xs text-muted-foreground">{fullName(person)}</span>
         ) : null}
@@ -189,21 +193,35 @@ function PeopleTable({
   )
 }
 
+type Status = "active" | "inactive" | "all"
+
 export function MembersScreen() {
   const t = useTranslations()
-  const [selected, setSelected] = useState<string | null>(null)
+  const [selected, setSelected] = useState<{ id: string; key: string } | null>(null)
   const groups = useGroupOptions()
   const [search, setSearch] = useState("")
   const [group, setGroup] = useState("")
   const q = useDebounced(search.trim(), SEARCH_DELAY_MS)
-  const filterKey = `${q}|${group}`
+  const [status, setStatus] = useState<Status>("active")
+  const filterKey = `${q}|${group}|${status}`
   const [paging, setPaging] = useState({ key: filterKey, page: 1 })
   const page = paging.key === filterKey ? paging.page : 1
   const setPage = (next: number) => setPaging({ key: filterKey, page: next })
   const filter = groups.find((option) => option.value === group)?.filter ?? {}
+  const scope = { ...filter, ...(q ? { q } : {}) }
 
   const people = useQuery({
-    ...peopleQuery({ ...filter, ...(q ? { q } : {}), page }),
+    ...peopleQuery({ ...scope, status, page }),
+    placeholderData: keepPreviousData,
+  })
+
+  const active = useQuery({
+    ...peopleQuery({ ...scope, status: "active", page: 1 }),
+    placeholderData: keepPreviousData,
+  })
+
+  const inactive = useQuery({
+    ...peopleQuery({ ...scope, status: "inactive", page: 1 }),
     placeholderData: keepPreviousData,
   })
 
@@ -246,6 +264,17 @@ export function MembersScreen() {
           ))}
         </NativeSelect>
       </div>
+      <Tabs value={status} onValueChange={(value) => setStatus(value as Status)}>
+        <TabsList>
+          <TabsTrigger value="active">
+            {t("members.tabs.active", { count: active.data?.total ?? 0 })}
+          </TabsTrigger>
+          <TabsTrigger value="inactive">
+            {t("members.tabs.inactive", { count: inactive.data?.total ?? 0 })}
+          </TabsTrigger>
+          <TabsTrigger value="all">{t("members.tabs.all")}</TabsTrigger>
+        </TabsList>
+      </Tabs>
       <QueryState query={people}>
         {(list) => (
           <PeopleTable
@@ -253,12 +282,16 @@ export function MembersScreen() {
             query={q}
             onPage={setPage}
             onClear={() => setSearch("")}
-            onSelect={(row) => setSelected(row.person.id)}
+            onSelect={(row) => setSelected({ id: row.person.id, key: filterKey })}
           />
         )}
       </QueryState>
       <PersonSheet
-        person={people.data?.items.find((row) => row.person.id === selected) ?? null}
+        person={
+          selected?.key === filterKey
+            ? (people.data?.items.find((row) => row.person.id === selected.id) ?? null)
+            : null
+        }
         onOpenChange={(open) => !open && setSelected(null)}
       />
     </>

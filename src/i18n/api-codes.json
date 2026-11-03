@@ -92,6 +92,7 @@
   "people.firstNameRequired": [],
   "people.lastNameRequired": [],
   "people.editOutsideServices": ["name"],
+  "people.personInactive": ["name"],
   "people.addOutsideServices": [],
   "people.chooseJoinService": [],
   "people.duplicate": ["count", "name"],
