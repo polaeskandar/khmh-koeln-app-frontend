@@ -23,9 +23,7 @@ export function SettingsPage() {
         <RequirePermission action="read" resource="users">
           <AccountRequests
             decide={can("create", "users")}
-            approve={(request) =>
-              request.registeredAs === "member" ? null : <ApproveButton request={request} />
-            }
+            approve={(request) => <ApproveButton request={request} />}
           />
         </RequirePermission>
         <RequirePermission action="update" resource="users" fallback={null}>
