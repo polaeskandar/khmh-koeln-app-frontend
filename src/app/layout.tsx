@@ -4,6 +4,7 @@ import { Geist, Oxanium, Vazirmatn } from "next/font/google"
 import { QueryProvider } from "@/lib/api/query-provider"
 import { prePaintScript } from "@/i18n/locale-choice"
 import { apiBaseUrl } from "@/lib/env"
+import { fontStack } from "@/lib/font-stack"
 import { cn } from "@/lib/utils"
 import { ApiMocking } from "@/mocks/api-mocking"
 
@@ -17,6 +18,11 @@ const fontArabic = Vazirmatn({
   variable: "--font-arabic",
   adjustFontFallback: false,
 })
+
+const fontStacks = {
+  "--font-sans": fontStack(fontText, fontArabic),
+  "--font-heading": fontStack(fontHeading, fontArabic),
+} as React.CSSProperties
 
 apiBaseUrl()
 
@@ -43,6 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         fontArabic.variable,
         "font-sans"
       )}
+      style={fontStacks}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: prePaintScript }} />
