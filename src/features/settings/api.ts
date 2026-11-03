@@ -71,3 +71,13 @@ export const memberCandidatesQuery = (q: string) => ({
   queryFn: ({ signal }: { signal: AbortSignal }) =>
     dataOf(api.GET("/account-requests/member-candidates", { params: { query: { q } }, signal })),
 })
+
+export type MemberAccount = Schemas["MemberAccountItem"]
+
+export const memberAccountsQuery = {
+  queryKey: ["member-accounts"] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/member-accounts", { signal })),
+}
+
+export const unlinkMemberRequest = (account: Uuid) =>
+  dataOf(api.POST("/member-accounts/{id}/unlink", { params: { path: { id: account } }, body: {} }))
