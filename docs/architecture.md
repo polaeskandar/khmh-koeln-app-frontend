@@ -165,10 +165,13 @@ The decisions behind this:
   `side`) follow the direction. Text people typed (a lesson title, a cancel reason, a note) gets
   `dir="auto"` on its own block or list, `<bdi>` in a heading, or is isolated inside sentences, so a
   question mark at its end stays at its end.
-- **Arabic letters** come from Noto Kufi Arabic, a square Kufi face that suits Oxanium. It goes after
-  Oxanium and Geist in the font stack: the Latin fonts have no Arabic letters, so the browser takes those
-  from Noto Kufi letter by letter, while Latin text keeps the preset's fonts. Arabic text is set without
-  the preset's letter spacing, which would pull the joined letters apart.
+- **Arabic letters** come from Vazirmatn, an open, modern Arabic sans that reads well at the app's small
+  sizes and sits well next to Oxanium. It goes after Oxanium and Geist in the font stack: the Latin fonts
+  have no Arabic letters, so the browser takes those from Vazirmatn letter by letter, while Latin text and
+  the Western digits keep the preset's fonts. Only its Arabic subset is preloaded. Arabic text is set
+  without the preset's letter spacing, which would pull the joined letters apart. Readex Pro was tried
+  too: in Chrome's text fields (and so in the Android app) it draws the final ي without its dots, so
+  «علي» reads «على».
 - German is formal ("Sie"). The prototype's catalogs follow a glossary of the church's terms (Dienst, Stufe,
   Diener/in, Termin; خدمة، مرحلة، خادم، اجتماع).
 
