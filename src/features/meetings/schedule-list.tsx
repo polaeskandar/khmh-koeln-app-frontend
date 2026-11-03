@@ -87,9 +87,9 @@ export function ScheduleList({
               ) : null}
               <span className="inline-flex items-center gap-1">
                 <UsersRound className="size-3 shrink-0" aria-hidden="true" />
-                {schedule.rosterMode === "open"
+                {schedule.rosterMode === "open" || schedule.rosterSize === null
                   ? t("roster.open")
-                  : t("roster.ofGroup", { group: groupOf(schedule) })}
+                  : t("roster.size", { count: schedule.rosterSize })}
               </span>
             </span>
           </span>
