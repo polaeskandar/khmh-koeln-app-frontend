@@ -13,3 +13,13 @@ export const declineRequest = (account: Uuid) =>
   dataOf(
     api.POST("/account-requests/{id}/decline", { params: { path: { id: account } }, body: {} })
   )
+
+export type RoleRow = Schemas["RoleRow"]
+
+export const roleListQuery = {
+  queryKey: ["roles", "list"] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/roles", { signal })),
+}
+
+export const deleteRoleRequest = (role: Uuid) =>
+  dataOf(api.DELETE("/roles/{id}", { params: { path: { id: role } }, body: {} }))

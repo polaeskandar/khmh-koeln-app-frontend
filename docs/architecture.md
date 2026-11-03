@@ -53,6 +53,8 @@ development; `src/lib/env.ts` checks it, and a production build fails without it
   bodies and the data are checked against the document; types of API data are `Schemas["…"]`, never written
   by hand. To follow a backend change, copy its `docs/openapi.json` over `openapi/openapi.json` and run
   `pnpm api:types`.
+  `openapi/pending.json` holds the endpoints the frontend uses before the backend has them (the roles API
+  of backend #81); `pnpm api:types` merges them in, and each goes once the backend's document has it.
 - **Cookie session (D1).** Signing in sets an HttpOnly session cookie. The client sends every call with
   `credentials: "include"` and `cache: "no-store"`; the app never sends an `Authorization` header, never sees
   a token and keeps nothing about the session in web storage. Writes always send a JSON body (`{}` when the
