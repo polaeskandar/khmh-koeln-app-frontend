@@ -106,3 +106,18 @@ export const passwordLinkRequest = (account: Uuid) =>
 
 export const deleteRoleRequest = (role: Uuid) =>
   dataOf(api.DELETE("/roles/{id}", { params: { path: { id: role } }, body: {} }))
+
+export type RoleDetail = Schemas["RoleDetail"]
+
+export const roleQuery = (id: Uuid) => ({
+  queryKey: ["roles", "detail", id] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) =>
+    dataOf(api.GET("/roles/{id}", { params: { path: { id } }, signal })),
+})
+
+export type RoleInput = Schemas["RoleInput"]
+
+export const createRoleRequest = (input: RoleInput) => dataOf(api.POST("/roles", { body: input }))
+
+export const updateRoleRequest = (id: Uuid, input: RoleInput) =>
+  dataOf(api.PUT("/roles/{id}", { params: { path: { id } }, body: input }))
