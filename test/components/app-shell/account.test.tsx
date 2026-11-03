@@ -107,7 +107,7 @@ describe("the phone's tab bar", () => {
       "page"
     )
 
-    expect(within(bar).getByRole("link", { name: "Services" })).not.toHaveAttribute("aria-current")
+    expect(within(bar).getByRole("link", { name: "Dashboard" })).not.toHaveAttribute("aria-current")
 
     expect(within(bar).getByRole("link", { name: "Take attendance" })).toHaveAttribute(
       "href",
@@ -120,6 +120,7 @@ describe("the phone's tab bar", () => {
     const bar = await screen.findByRole("navigation", { name: "Main" })
     await userEvent.click(within(bar).getByRole("button", { name: "More" }))
     expect(screen.getByRole("menuitem", { name: "Sign out" })).toBeInTheDocument()
+    expect(screen.getByRole("menuitem", { name: "Services" })).toHaveAttribute("href", "/services/")
   })
 
   test("leaves out Members and Take attendance without their permissions", async () => {

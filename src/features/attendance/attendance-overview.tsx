@@ -2,7 +2,6 @@
 
 import { CircleAlert, ClipboardCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect } from "react"
 
 import { Topbar } from "@/components/app-shell/topbar"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
@@ -11,7 +10,7 @@ import { AgendaRow, SessionCardView } from "@/components/session-bits"
 import { Button } from "@/components/ui/button"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { useFormat } from "@/i18n/format"
-import { Link, useRouter } from "@/i18n/navigation"
+import { Link } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
 import { routes } from "@/lib/routes"
 
@@ -21,7 +20,7 @@ import {
   useAttendanceOverview,
 } from "./api"
 
-function CardAction({ session, today }: { session: OverviewSession; today: LocalDate }) {
+export function CardAction({ session, today }: { session: OverviewSession; today: LocalDate }) {
   const t = useTranslations("attendance")
 
   if (!session.can.record || session.status === "canceled") {
@@ -181,11 +180,4 @@ export function AttendanceOverview() {
       </PageBody>
     </>
   )
-}
-
-export function StaffHome() {
-  const router = useRouter()
-  useEffect(() => router.replace(routes.attendance()), [router])
-
-  return null
 }
