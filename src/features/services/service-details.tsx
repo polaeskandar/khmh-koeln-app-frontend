@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { ArrowRight, PencilLine } from "lucide-react"
+import { Archive, ArrowRight, PencilLine } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
@@ -10,6 +10,7 @@ import { PageBody, PageHeader, Section } from "@/components/page-header"
 import { NotFoundState, QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { ServiceSwatch } from "@/components/service-tag"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -21,13 +22,14 @@ import {
 import { serviceSchedulesQuery } from "@/features/meetings/api"
 import { NewScheduleButton } from "@/features/meetings/schedule-dialog"
 import { ScheduleList } from "@/features/meetings/schedule-list"
+import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 
 import { type ServiceRow, type ServiceStages, serviceQuery, serviceStagesQuery } from "./api"
 import { AddStageButton } from "@/features/stages/stage-dialogs"
 
-import { ServiceFormDialog } from "./service-dialogs"
+import { ServiceActionsMenu, ServiceFormDialog } from "./service-dialogs"
 
 function EditButton({ service }: { service: ServiceRow }) {
   const t = useTranslations("common")
@@ -57,6 +59,7 @@ function Stat({ label, value }: { label: string; value: number }) {
 
 function Stages({ service, stages }: { service: ServiceRow; stages: ServiceStages }) {
   const t = useTranslations()
+  const f = useFormat()
 
   return (
     <Section
@@ -117,12 +120,28 @@ function Stages({ service, stages }: { service: ServiceRow; stages: ServiceStage
             ))}
         </ul>
       )}
+      {stages.archivedStages.length > 0 ? (
+        <p className="text-sm text-muted-foreground">
+          {t.rich("services.detail.stages.archived", {
+            names: f.list(stages.archivedStages.map((stage) => stage.name)),
+            link: (chunks) => (
+              <Link
+                href={routes.serviceStages(service.id)}
+                className="underline underline-offset-4"
+              >
+                {chunks}
+              </Link>
+            ),
+          })}
+        </p>
+      ) : null}
     </Section>
   )
 }
 
 function Details({ service }: { service: ServiceRow }) {
   const t = useTranslations()
+  const f = useFormat()
   const stages = useQuery(serviceStagesQuery(service.id))
   const schedules = useQuery(serviceSchedulesQuery(service.id))
   const activeSchedules = schedules.data?.items.filter((schedule) => schedule.active).length ?? 0
@@ -147,10 +166,22 @@ function Details({ service }: { service: ServiceRow }) {
               {service.can.manageSessions && !service.archived && schedules.data ? (
                 <NewScheduleButton today={schedules.data.today} fixedServiceId={service.id} />
               ) : null}
-              {service.can.edit ? <EditButton service={service} /> : null}
+              {service.can.edit && !service.archived ? <EditButton service={service} /> : null}
+              <ServiceActionsMenu service={service} />
             </>
           }
         />
+        {service.archived && service.archivedAt ? (
+          <Alert>
+            <Archive />
+            <AlertTitle>
+              {t("services.detail.archivedOn", {
+                date: f.mediumDate(f.instantDate(service.archivedAt)),
+              })}
+            </AlertTitle>
+            <AlertDescription>{t("services.detail.archivedNote")}</AlertDescription>
+          </Alert>
+        ) : null}
         <div className="grid gap-3 sm:grid-cols-3">
           <Stat label={t("services.detail.stats.stages")} value={stages.data?.stages.length ?? 0} />
           <Stat label={t("services.detail.stats.members")} value={service.memberCount} />

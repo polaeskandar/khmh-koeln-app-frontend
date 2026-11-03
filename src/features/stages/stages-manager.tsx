@@ -4,18 +4,20 @@ import { useQuery } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
 
 import { Topbar } from "@/components/app-shell/topbar"
-import { PageBody, PageHeader } from "@/components/page-header"
+import { PageBody, PageHeader, Section } from "@/components/page-header"
 import { NotFoundState, QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty"
 import { type ServiceStages, serviceStagesQuery } from "@/features/services/api"
 import { Link } from "@/i18n/navigation"
+import { useFormat } from "@/i18n/format"
 import { routes } from "@/lib/routes"
 
-import { AddStageButton, StageActionsMenu } from "./stage-dialogs"
+import { AddStageButton, RestoreStageButton, StageActionsMenu } from "./stage-dialogs"
 
 function Manager({ data }: { data: ServiceStages }) {
   const t = useTranslations()
+  const f = useFormat()
   const { service } = data
   const stages = [...data.stages].sort((a, b) => a.position - b.position)
   const manage = data.can.manageStructure
@@ -92,6 +94,29 @@ function Manager({ data }: { data: ServiceStages }) {
             </tbody>
           </table>
         )}
+        {data.archivedStages.length > 0 ? (
+          <Section id="archived-stages" title={t("stages.manager.archived")}>
+            <ul className="divide-y border-y">
+              {data.archivedStages.map((stage) => (
+                <li key={stage.id} className="flex items-center justify-between gap-3 py-3">
+                  <span className="flex min-w-0 flex-col gap-0.5">
+                    <span className="truncate font-medium text-muted-foreground">
+                      <bdi>{stage.name}</bdi>
+                    </span>
+                    {stage.archivedAt ? (
+                      <span className="text-xs text-muted-foreground">
+                        {t("services.detail.archivedOn", {
+                          date: f.mediumDate(f.instantDate(stage.archivedAt)),
+                        })}
+                      </span>
+                    ) : null}
+                  </span>
+                  {manage ? <RestoreStageButton stage={stage} /> : null}
+                </li>
+              ))}
+            </ul>
+          </Section>
+        ) : null}
       </PageBody>
     </>
   )

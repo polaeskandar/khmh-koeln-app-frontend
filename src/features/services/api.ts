@@ -1,6 +1,8 @@
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { Uuid } from "@/lib/api/types/common"
 
+export type Impact = Schemas["StructureImpact"]
+
 export type ServiceRow = Schemas["ServiceView"]
 
 export type ServiceList = Schemas["ServiceList"]
@@ -32,3 +34,20 @@ export const serviceStagesQuery = (id: Uuid) => ({
   queryFn: ({ signal }: { signal: AbortSignal }) =>
     dataOf(api.GET("/services/{id}/stages", { params: { path: { id } }, signal })),
 })
+
+type Structure = "services" | "stages"
+
+export const archiveRequest = (kind: Structure, id: Uuid) =>
+  kind === "services"
+    ? dataOf(api.POST("/services/{id}/archive", { params: { path: { id } }, body: {} }))
+    : dataOf(api.POST("/stages/{id}/archive", { params: { path: { id } }, body: {} }))
+
+export const restoreRequest = (kind: Structure, id: Uuid) =>
+  kind === "services"
+    ? dataOf(api.POST("/services/{id}/restore", { params: { path: { id } }, body: {} }))
+    : dataOf(api.POST("/stages/{id}/restore", { params: { path: { id } }, body: {} }))
+
+export const deleteRequest = (kind: Structure, id: Uuid) =>
+  kind === "services"
+    ? dataOf(api.DELETE("/services/{id}", { params: { path: { id } } }))
+    : dataOf(api.DELETE("/stages/{id}", { params: { path: { id } } }))

@@ -122,6 +122,7 @@
       "notArchived": "«{name}» ليست مؤرشفة.",
       "takingAttendance": "يجري تسجيل الحضور في «{name}» الآن. أغلق الاجتماعات المفتوحة أولًا.",
       "hasHistory": "لدى «{name}» سجل اجتماعات ({count, plural, one {اجتماع واحد} two {اجتماعان} few {# اجتماعات} many {# اجتماعًا} other {# اجتماع}}). أرشفها بدلًا من حذفها.",
+      "hasMembers": "ما زال في «{name}» {count, plural, one {شخص واحد} two {شخصان} few {# أشخاص} many {# شخصًا} other {# شخص}}. أرشف الخدمة بدلًا من ذلك، أو أزلهم منها أولًا.",
       "archivedNoStageChanges": "«{name}» مؤرشفة. استعدها قبل تغيير مراحلها.",
       "hasLessons": "لدى «{name}» دروس ({count, plural, one {درس واحد} two {درسان} few {# دروس} many {# درسًا} other {# درس}}). أرشفها بدلًا من حذفها."
     },

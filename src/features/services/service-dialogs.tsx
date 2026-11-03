@@ -1,6 +1,6 @@
 "use client"
 
-import { Ellipsis, PencilLine, Plus } from "lucide-react"
+import { Archive, ArchiveRestore, Ellipsis, PencilLine, Plus, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useEffect, useRef, useState } from "react"
 
@@ -25,14 +25,19 @@ import { FieldGroup } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { useRouter } from "@/i18n/navigation"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
+import { isolate } from "@/lib/bidi"
 import { routes } from "@/lib/routes"
 
 import {
+  archiveRequest,
   createServiceRequest,
+  deleteRequest,
+  restoreRequest,
   type ServiceFields,
   type ServiceRow,
   updateServiceRequest,
 } from "./api"
+import { StructureChangeDialog } from "./structure-change"
 
 const SERVICE_QUERIES = [["services"]]
 
@@ -202,11 +207,17 @@ export function NewServiceButton() {
 
 export function ServiceActionsMenu({ service }: { service: ServiceRow }) {
   const t = useTranslations()
-  const [editing, setEditing] = useState(false)
+  const router = useRouter()
+  const [open, setOpen] = useState<"edit" | "archive" | "restore" | "delete" | null>(null)
+  const edit = service.can.edit && !service.archived
 
-  if (!service.can.edit) {
+  if (!edit && !service.can.archive) {
     return null
   }
+
+  const name = isolate(service.name)
+  const impact = service.impact ?? { activeSchedules: 0, upcomingSessions: 0 }
+  const close = (next: boolean) => !next && setOpen(null)
 
   return (
     <>
@@ -221,13 +232,79 @@ export function ServiceActionsMenu({ service }: { service: ServiceRow }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onSelect={() => setEditing(true)}>
-            <PencilLine />
-            {t("services.actions.editDetails")}
-          </DropdownMenuItem>
+          {edit ? (
+            <DropdownMenuItem onSelect={() => setOpen("edit")}>
+              <PencilLine />
+              {t("services.actions.editDetails")}
+            </DropdownMenuItem>
+          ) : null}
+          {service.can.archive && !service.archived ? (
+            <DropdownMenuItem onSelect={() => setOpen("archive")}>
+              <Archive />
+              {t("common.archive")}
+            </DropdownMenuItem>
+          ) : null}
+          {service.can.archive && service.archived ? (
+            <DropdownMenuItem onSelect={() => setOpen("restore")}>
+              <ArchiveRestore />
+              {t("common.restore")}
+            </DropdownMenuItem>
+          ) : null}
+          {service.can.archive ? (
+            <DropdownMenuItem variant="destructive" onSelect={() => setOpen("delete")}>
+              <Trash2 />
+              {t("common.delete")}
+            </DropdownMenuItem>
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
-      <ServiceFormDialog service={service} open={editing} onOpenChange={setEditing} />
+      {edit ? (
+        <ServiceFormDialog service={service} open={open === "edit"} onOpenChange={close} />
+      ) : null}
+      <StructureChangeDialog
+        open={open === "archive"}
+        onOpenChange={close}
+        title={t("services.archive.title", { name })}
+        description={t("services.archive.description")}
+        consequences={[
+          impact.activeSchedules > 0
+            ? t("services.archive.schedules", { count: impact.activeSchedules })
+            : t("services.archive.noSchedules"),
+          ...(impact.upcomingSessions > 0
+            ? [t("services.archive.upcoming", { count: impact.upcomingSessions })]
+            : []),
+          t("services.archive.kept"),
+        ]}
+        confirmLabel={t("common.archive")}
+        successMessage={t("toast.serviceArchived", { name: service.name })}
+        run={() => archiveRequest("services", service.id)}
+      />
+      <StructureChangeDialog
+        open={open === "restore"}
+        onOpenChange={close}
+        title={t("services.restore.title", { name })}
+        description={t("services.restore.description")}
+        confirmLabel={t("common.restore")}
+        successMessage={t("toast.restored", { name: service.name })}
+        run={() => restoreRequest("services", service.id)}
+      />
+      <StructureChangeDialog
+        open={open === "delete"}
+        onOpenChange={close}
+        tone="destructive"
+        title={t("services.delete.title", { name })}
+        description={t("services.delete.description")}
+        consequences={[
+          service.stages.length > 0
+            ? t("services.delete.removesStages", { stages: service.stages.length })
+            : t("services.delete.removes"),
+          t("services.delete.cantUndo"),
+        ]}
+        confirmLabel={t("common.delete")}
+        successMessage={t("toast.deleted", { name: service.name })}
+        onSuccess={() => router.push(routes.services())}
+        run={() => deleteRequest("services", service.id)}
+      />
     </>
   )
 }
