@@ -15,6 +15,8 @@ import { MemberAccounts } from "./member-accounts"
 
 import { StaffAccounts } from "./staff-accounts"
 
+import { RolesOverview } from "./roles-overview"
+
 export function SettingsPage() {
   const t = useTranslations()
   const can = useCan()
@@ -38,6 +40,9 @@ export function SettingsPage() {
         </RequirePermission>
         <RequirePermission action="read" resource="users" fallback={null}>
           <StaffAccounts />
+        </RequirePermission>
+        <RequirePermission action="read" resource="roles" fallback={null}>
+          <RolesOverview />
         </RequirePermission>
       </PageBody>
     </>
