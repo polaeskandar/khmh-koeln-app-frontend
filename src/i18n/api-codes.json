@@ -152,6 +152,7 @@
   "guardians.adminOnlyApprove": [],
   "guardians.adminOnlyRemove": [],
   "guardians.accountNotActive": [],
+  "accounts.notLinked": [],
   "accounts.firstNameRequired": [],
   "accounts.lastNameRequired": [],
   "accounts.nameRequired": [],

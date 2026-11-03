@@ -11,6 +11,8 @@ import { AccountRequests } from "./account-requests"
 import { ApproveButton } from "./approve-dialog"
 import { ParentAccess } from "./parent-access"
 
+import { MemberAccounts } from "./member-accounts"
+
 export function SettingsPage() {
   const t = useTranslations()
   const can = useCan()
@@ -28,6 +30,9 @@ export function SettingsPage() {
         </RequirePermission>
         <RequirePermission action="update" resource="users" fallback={null}>
           <ParentAccess />
+        </RequirePermission>
+        <RequirePermission action="update" resource="users" fallback={null}>
+          <MemberAccounts />
         </RequirePermission>
       </PageBody>
     </>
