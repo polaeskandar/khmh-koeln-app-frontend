@@ -151,6 +151,7 @@
   "guardians.alreadyHasAccess": ["parent", "child"],
   "guardians.adminOnlyApprove": [],
   "guardians.adminOnlyRemove": [],
+  "guardians.accountNotActive": [],
   "accounts.firstNameRequired": [],
   "accounts.lastNameRequired": [],
   "accounts.nameRequired": [],

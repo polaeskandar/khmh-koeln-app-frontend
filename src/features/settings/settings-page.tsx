@@ -9,6 +9,7 @@ import { useCan } from "@/features/auth/session"
 
 import { AccountRequests } from "./account-requests"
 import { ApproveButton } from "./approve-dialog"
+import { ParentAccess } from "./parent-access"
 
 export function SettingsPage() {
   const t = useTranslations()
@@ -26,6 +27,9 @@ export function SettingsPage() {
               request.registeredAs === "member" ? null : <ApproveButton request={request} />
             }
           />
+        </RequirePermission>
+        <RequirePermission action="update" resource="users" fallback={null}>
+          <ParentAccess />
         </RequirePermission>
       </PageBody>
     </>
