@@ -1,6 +1,6 @@
 "use client"
 
-import { Ellipsis, PencilLine, Plus } from "lucide-react"
+import { Archive, ArchiveRestore, Ellipsis, PencilLine, Plus, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useEffect, useRef, useState } from "react"
 
@@ -26,7 +26,11 @@ import { Spinner } from "@/components/ui/spinner"
 import { useRouter } from "@/i18n/navigation"
 import type { ServiceRef } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
+import { isolate } from "@/lib/bidi"
 import { routes } from "@/lib/routes"
+
+import { archiveRequest, deleteRequest, restoreRequest } from "@/features/services/api"
+import { StructureChangeDialog } from "@/features/services/structure-change"
 
 import { addStageRequest, type StageFields, updateStageRequest } from "./api"
 
@@ -214,10 +218,12 @@ export function StageActionsMenu({
   stage,
 }: {
   service: ServiceRef
-  stage: EditableStage
+  stage: EditableStage & { memberCount?: number }
 }) {
   const t = useTranslations()
-  const [editing, setEditing] = useState(false)
+  const [open, setOpen] = useState<"edit" | "archive" | "delete" | null>(null)
+  const name = isolate(stage.name)
+  const close = (next: boolean) => !next && setOpen(null)
 
   return (
     <>
@@ -232,13 +238,73 @@ export function StageActionsMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onSelect={() => setEditing(true)}>
+          <DropdownMenuItem onSelect={() => setOpen("edit")}>
             <PencilLine />
             {t("stages.actions.rename")}
           </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setOpen("archive")}>
+            <Archive />
+            {t("common.archive")}
+          </DropdownMenuItem>
+          <DropdownMenuItem variant="destructive" onSelect={() => setOpen("delete")}>
+            <Trash2 />
+            {t("common.delete")}
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <StageFormDialog service={service} stage={stage} open={editing} onOpenChange={setEditing} />
+      <StageFormDialog
+        service={service}
+        stage={stage}
+        open={open === "edit"}
+        onOpenChange={close}
+      />
+      <StructureChangeDialog
+        open={open === "archive"}
+        onOpenChange={close}
+        title={t("stages.archive.title", { name })}
+        description={t("stages.archive.description", { service: isolate(service.name) })}
+        consequences={[
+          t("stages.archive.schedules"),
+          ...(stage.memberCount ? [t("stages.archive.members", { count: stage.memberCount })] : []),
+        ]}
+        confirmLabel={t("common.archive")}
+        successMessage={t("toast.archived", { name: stage.name })}
+        run={() => archiveRequest("stages", stage.id)}
+      />
+      <StructureChangeDialog
+        open={open === "delete"}
+        onOpenChange={close}
+        tone="destructive"
+        title={t("stages.delete.title", { name })}
+        description={t("stages.delete.description")}
+        consequences={[t("stages.delete.schedules"), t("stages.delete.cantUndo")]}
+        confirmLabel={t("common.delete")}
+        successMessage={t("toast.deleted", { name: stage.name })}
+        run={() => deleteRequest("stages", stage.id)}
+      />
+    </>
+  )
+}
+
+export function RestoreStageButton({ stage }: { stage: { id: string; name: string } }) {
+  const t = useTranslations()
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+        <ArchiveRestore data-icon="inline-start" />
+        {t("common.restore")}
+      </Button>
+      <StructureChangeDialog
+        open={open}
+        onOpenChange={setOpen}
+        title={t("stages.restore.title", { name: isolate(stage.name) })}
+        description={t("stages.restore.description")}
+        confirmLabel={t("common.restore")}
+        successMessage={t("toast.restored", { name: stage.name })}
+        run={() => restoreRequest("stages", stage.id)}
+      />
     </>
   )
 }
