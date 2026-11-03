@@ -20,7 +20,7 @@ export function SettingsPage() {
         <RequirePermission action="read" resource="users">
           <AccountRequests />
         </RequirePermission>
-        <RequirePermission action="update" resource="users" fallback={null}>
+        <RequirePermission action="read" resource="users" fallback={null}>
           <StaffAccounts />
         </RequirePermission>
       </PageBody>

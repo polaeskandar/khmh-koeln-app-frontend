@@ -22,6 +22,7 @@ import {
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
+import { useCan } from "@/features/auth/session"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import { ApiError } from "@/lib/api/problem"
@@ -210,9 +211,11 @@ function PasswordLinkDialog({
 function RoleChip({
   account,
   role,
+  canChange,
 }: {
   account: StaffAccount
   role: StaffAccount["roles"][number]
+  canChange: boolean
 }) {
   const t = useTranslations()
   const [removing, setRemoving] = useState(false)
@@ -225,34 +228,46 @@ function RoleChip({
   return (
     <li className="inline-flex items-center gap-1 border px-2 py-0.5 text-xs">
       <bdi>{role.name}</bdi>
-      <button
-        type="button"
-        className="text-muted-foreground hover:text-foreground"
-        aria-label={t("settings.users.removeRoleLabel", {
-          role: role.name,
-          name: account.displayName,
-        })}
-        onClick={() => setRemoving(true)}
-      >
-        <X className="size-3" />
-      </button>
-      <ConfirmDialog
-        open={removing}
-        onOpenChange={setRemoving}
-        title={t("settings.users.removeTitle", {
-          role: isolate(role.name),
-          name: isolate(account.displayName),
-        })}
-        description={t("settings.users.removeDescription")}
-        confirmLabel={t("settings.users.remove")}
-        tone="destructive"
-        onConfirm={async () => (await remove.execute()).ok}
-      />
+      {canChange ? (
+        <>
+          <button
+            type="button"
+            className="text-muted-foreground hover:text-foreground"
+            aria-label={t("settings.users.removeRoleLabel", {
+              role: role.name,
+              name: account.displayName,
+            })}
+            onClick={() => setRemoving(true)}
+          >
+            <X className="size-3" />
+          </button>
+          <ConfirmDialog
+            open={removing}
+            onOpenChange={setRemoving}
+            title={t("settings.users.removeTitle", {
+              role: isolate(role.name),
+              name: isolate(account.displayName),
+            })}
+            description={t("settings.users.removeDescription")}
+            confirmLabel={t("settings.users.remove")}
+            tone="destructive"
+            onConfirm={async () => (await remove.execute()).ok}
+          />
+        </>
+      ) : null}
     </li>
   )
 }
 
-function AccountRow({ account, roles }: { account: StaffAccount; roles: Role[] }) {
+function AccountRow({
+  account,
+  roles,
+  canChange,
+}: {
+  account: StaffAccount
+  roles: Role[]
+  canChange: boolean
+}) {
   const t = useTranslations()
   const [dialog, setDialog] = useState<"role" | "link" | null>(null)
   const left = roles.filter((role) => !account.roles.some((had) => had.id === role.id))
@@ -274,9 +289,11 @@ function AccountRow({ account, roles }: { account: StaffAccount; roles: Role[] }
           {account.roles.length === 0 ? (
             <li className="text-xs text-muted-foreground">{t("roles.summary.none")}</li>
           ) : (
-            account.roles.map((role) => <RoleChip key={role.id} account={account} role={role} />)
+            account.roles.map((role) => (
+              <RoleChip key={role.id} account={account} role={role} canChange={canChange} />
+            ))
           )}
-          {left.length > 0 ? (
+          {canChange && left.length > 0 ? (
             <li>
               <Button variant="ghost" size="xs" onClick={() => setDialog("role")}>
                 <Plus data-icon="inline-start" />
@@ -286,16 +303,18 @@ function AccountRow({ account, roles }: { account: StaffAccount; roles: Role[] }
           ) : null}
         </ul>
       </span>
-      <Button
-        variant="outline"
-        size="sm"
-        className="self-start"
-        disabled={account.disabled}
-        onClick={() => setDialog("link")}
-      >
-        <KeyRound data-icon="inline-start" />
-        {t("settings.users.passwordLink.action")}
-      </Button>
+      {canChange ? (
+        <Button
+          variant="outline"
+          size="sm"
+          className="self-start"
+          disabled={account.disabled}
+          onClick={() => setDialog("link")}
+        >
+          <KeyRound data-icon="inline-start" />
+          {t("settings.users.passwordLink.action")}
+        </Button>
+      ) : null}
       {dialog === "role" ? (
         <GiveRoleDialog account={account} roles={left} onOpenChange={close} />
       ) : null}
@@ -306,16 +325,26 @@ function AccountRow({ account, roles }: { account: StaffAccount; roles: Role[] }
 
 export function StaffAccounts() {
   const t = useTranslations("settings.users")
+  const canChange = useCan()("update", "users")
   const accounts = useQuery(staffAccountsQuery)
-  const roles = useQuery(rolesQuery)
+  const roles = useQuery({ ...rolesQuery, enabled: canChange })
 
   return (
-    <Section id="users" title={t("title")} description={t("description")}>
+    <Section
+      id="users"
+      title={t("title")}
+      description={canChange ? t("description") : t("descriptionReadOnly")}
+    >
       <QueryState query={accounts}>
         {(data) => (
           <ul className="flex flex-col divide-y border-y">
             {data.items.map((account) => (
-              <AccountRow key={account.id} account={account} roles={roles.data?.items ?? []} />
+              <AccountRow
+                key={account.id}
+                account={account}
+                roles={roles.data?.items ?? []}
+                canChange={canChange}
+              />
             ))}
           </ul>
         )}
