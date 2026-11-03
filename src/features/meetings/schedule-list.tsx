@@ -7,6 +7,8 @@ import { useTranslations } from "next-intl"
 import { ServiceSwatch } from "@/components/service-tag"
 import { StatusBadge } from "@/components/status"
 import { useFormat } from "@/i18n/format"
+import { Link } from "@/i18n/navigation"
+import { routes } from "@/lib/routes"
 import type { LocalDate } from "@/lib/api/types/common"
 import { groupOf, type ScheduleSummary } from "@/lib/api/types/meetings"
 import { recurrenceOf } from "@/lib/domain/recurrence"
@@ -63,8 +65,15 @@ export function ScheduleList({
                 >
                   {groupOf(schedule)}
                 </span>
-                <span dir="auto" className="truncate text-sm text-muted-foreground">
-                  · {schedule.name}
+                <span className="truncate text-sm text-muted-foreground">
+                  ·{" "}
+                  <Link
+                    href={routes.schedule(schedule.id)}
+                    dir="auto"
+                    className="hover:text-foreground hover:underline hover:underline-offset-4"
+                  >
+                    {schedule.name}
+                  </Link>
                 </span>
               </span>
               {showService && schedule.stage ? (

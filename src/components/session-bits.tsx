@@ -23,7 +23,7 @@ import { routes } from "@/lib/routes"
 
 export function agendaHref(item: AgendaItem): string | undefined {
   if (item.kind === "planned") {
-    return undefined
+    return routes.schedule(item.scheduleId)
   }
 
   if (item.status === "active") {

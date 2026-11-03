@@ -121,8 +121,9 @@ describe("agendaHref", () => {
     expect(agendaHref(session({ status }))).toBe(href)
   })
 
-  test("a planned date has no link yet", () => {
-    expect(agendaHref(planned("2026-11-15"))).toBeUndefined()
+  test("a planned date opens its schedule", () => {
+    const item = planned("2026-11-15")
+    expect(agendaHref(item)).toBe(`/meetings/schedules/view/?id=${item.scheduleId}`)
   })
 })
 

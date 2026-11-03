@@ -209,7 +209,10 @@ describe("a day's meetings", () => {
       `/meetings/sessions/view/?id=${canceled.id}`
     )
 
-    expect(within(link("4th Class")).queryByRole("link")).toBeNull()
+    expect(within(link("4th Class")).getByRole("link")).toHaveAttribute(
+      "href",
+      "/meetings/schedules/view/?id=0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f90"
+    )
   })
 
   test.each([

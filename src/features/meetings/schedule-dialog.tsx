@@ -33,6 +33,8 @@ import { Spinner } from "@/components/ui/spinner"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { type ServiceRow, servicesQuery } from "@/features/services/api"
 import { useFormat } from "@/i18n/format"
+import { useRouter } from "@/i18n/navigation"
+import { routes } from "@/lib/routes"
 import type { IsoWeekday, LocalDate, MonthWeek, Recurrence, Uuid } from "@/lib/api/types/common"
 import { groupOf, type RosterMode, type ScheduleSummary } from "@/lib/api/types/meetings"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -194,6 +196,7 @@ function ScheduleForm({
 }) {
   const t = useTranslations()
   const f = useFormat()
+  const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
   const [d, setD] = useState<Draft>(() => initialDraft(today, services, fixedServiceId, schedule))
 
@@ -210,7 +213,10 @@ function ScheduleForm({
   const create = useApiMutation(createScheduleRequest, {
     successMessage: (saved) => t("toast.scheduleCreated", { created: saved.createdSessions }),
     invalidate: MEETING_QUERIES,
-    onSuccess: onDone,
+    onSuccess: (saved) => {
+      onDone()
+      router.push(routes.schedule(saved.id))
+    },
   })
 
   const update = useApiMutation(
