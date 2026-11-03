@@ -1302,6 +1302,7 @@
       "next": "Next meeting",
       "attendance": "Attendance, 4 wk",
       "attendanceHint": "Share of the roster marked present over the last four weeks",
+      "leaders": "Leaders",
       "actions": "Actions",
       "onAverage": "{count, number} <muted>on average</muted>",
       "noSessions": "No sessions",

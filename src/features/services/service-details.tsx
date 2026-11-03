@@ -29,6 +29,7 @@ import { routes } from "@/lib/routes"
 import { type ServiceRow, type ServiceStages, serviceQuery, serviceStagesQuery } from "./api"
 import { AddStageButton } from "@/features/stages/stage-dialogs"
 
+import { trendText } from "./service-bits"
 import { ServiceActionsMenu, ServiceFormDialog } from "./service-dialogs"
 
 function EditButton({ service }: { service: ServiceRow }) {
@@ -46,7 +47,7 @@ function EditButton({ service }: { service: ServiceRow }) {
   )
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1 border p-4">
       <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
@@ -182,10 +183,11 @@ function Details({ service }: { service: ServiceRow }) {
             <AlertDescription>{t("services.detail.archivedNote")}</AlertDescription>
           </Alert>
         ) : null}
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Stat label={t("services.detail.stats.stages")} value={stages.data?.stages.length ?? 0} />
           <Stat label={t("services.detail.stats.members")} value={service.memberCount} />
           <Stat label={t("services.detail.stats.activeSchedules")} value={activeSchedules} />
+          <Stat label={t("services.detail.stats.attendance")} value={trendText(service, f)} />
         </div>
         <QueryState query={stages}>
           {(data) => <Stages service={service} stages={data} />}
