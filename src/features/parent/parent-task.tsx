@@ -19,8 +19,10 @@ import {
   parentChildrenQuery,
   type ParentTaskDetail,
   parentTaskQuery,
+  reportDoneRequest,
+  undoReportRequest,
 } from "./api"
-import { CompletionControl } from "./completion-control"
+import { CompletionControl, reportOf } from "./completion-control"
 import { ListSkeleton } from "./parent-bits"
 import { ParentNotAvailable } from "./parent-shell"
 
@@ -42,18 +44,30 @@ function BackLink({ child }: { child: ParentTaskDetail["child"] }) {
   )
 }
 
-function TaskView({ data }: { data: ParentTaskDetail }) {
+type TaskContent = Pick<ParentTaskDetail, "task" | "lesson" | "today">
+
+export function HomeworkTaskView({
+  data,
+  back,
+  forText,
+  children,
+}: {
+  data: TaskContent
+  back: React.ReactNode
+  forText: string
+  children: React.ReactNode
+}) {
   const t = useTranslations("parent.view")
   const f = useFormat()
-  const { task, lesson, today, child } = data
+  const { task, lesson, today } = data
   const { resources } = task
 
   return (
     <article className="flex max-w-2xl flex-col gap-6">
-      <BackLink child={child} />
+      {back}
       <header className="flex flex-col gap-2">
         <span className="text-sm text-muted-foreground">
-          {t("forChild", { name: isolate(child.name) })}
+          {forText}
           {" · "}
           <bdi>{task.stage}</bdi>
         </span>
@@ -123,18 +137,31 @@ function TaskView({ data }: { data: ParentTaskDetail }) {
           </ul>
         </section>
       ) : null}
-      <CompletionControl
-        homeworkId={task.id}
-        child={child}
-        today={today}
-        initial={{
-          done: task.done,
-          completedAt: task.completedAt,
-          completedBy: task.completedBy,
-          completedByYou: task.completedByYou,
-        }}
-      />
+      {children}
     </article>
+  )
+}
+
+function TaskView({ data }: { data: ParentTaskDetail }) {
+  const t = useTranslations("parent")
+  const { task, today, child } = data
+
+  return (
+    <HomeworkTaskView
+      data={data}
+      back={<BackLink child={child} />}
+      forText={t("view.forChild", { name: isolate(child.name) })}
+    >
+      <CompletionControl
+        today={today}
+        initial={reportOf(task)}
+        hint={t("completion.hint", { name: child.name })}
+        undone={t("completion.undone", { name: child.name })}
+        reportDone={() => reportDoneRequest(child.id, task.id)}
+        undoReport={() => undoReportRequest(child.id, task.id)}
+        invalidate={[["parent"]]}
+      />
+    </HomeworkTaskView>
   )
 }
 
