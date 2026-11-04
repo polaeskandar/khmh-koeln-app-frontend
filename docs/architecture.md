@@ -44,11 +44,19 @@ no cross-origin calls and needs no CORS. `NEXT_PUBLIC_API_BASE_URL` is `/api` in
 absolute URL only if the API ever has to move to its own origin) and `http://localhost:8000/api` in
 development; `src/lib/env.ts` checks it, and a production build fails without it.
 
-- **Cookie session (D1).** Signing in sets an HttpOnly session cookie. Every call goes through
-  `apiRequest()` in `src/lib/api/client.ts` with `credentials: "include"` and `cache: "no-store"`; the app
-  never sends an `Authorization` header, never sees a token and keeps nothing about the session in web
-  storage. Unsafe methods always send a JSON body (`{}` when empty), as the API requires. ESLint allows
-  `fetch` only under `src/lib/api`.
+- **Generated client.** The types come from the backend's OpenAPI document. `openapi/openapi.json` is a copy
+  of the backend's `docs/openapi.json`, and `pnpm api:types` turns it into `src/lib/api/schema.d.ts` with
+  [openapi-typescript](https://openapi-ts.dev), dropping the `/api` prefix that `NEXT_PUBLIC_API_BASE_URL`
+  already holds. CI fails when the generated file is stale. Calls go through `api` from
+  `src/lib/api/client.ts`, an [openapi-fetch](https://openapi-ts.dev/openapi-fetch/) client, wrapped in
+  `dataOf()`: `dataOf(api.GET("/stages/{id}", { params: { path: { id } }, signal }))`. Paths, parameters,
+  bodies and the data are checked against the document; types of API data are `Schemas["…"]`, never written
+  by hand. To follow a backend change, copy its `docs/openapi.json` over `openapi/openapi.json` and run
+  `pnpm api:types`.
+- **Cookie session (D1).** Signing in sets an HttpOnly session cookie. The client sends every call with
+  `credentials: "include"` and `cache: "no-store"`; the app never sends an `Authorization` header, never sees
+  a token and keeps nothing about the session in web storage. Writes always send a JSON body (`{}` when the
+  operation has none), as the API requires. ESLint allows `fetch` only under `src/lib/api`.
 - **Problems.** A failed call rejects with an `ApiError` (`src/lib/api/problem.ts`): the status, the
   problem's `code` and `params`, `fieldErrors` by dot path, `retryAfter` from `Retry-After`, and documented
   extension members such as `candidates`. A response that isn't a problem (a proxy's HTML page) has

@@ -27,3 +27,9 @@ blank lines (`eslint --fix`, then Prettier).
 Tests live in `test/`, mirroring `src/`: `test/lib/api/client.test.ts` tests `src/lib/api/client.ts`. Shared
 helpers (the setup file, MSW, render helpers, fixtures) live in `test/support/` and are imported as
 `@test/support/…`; tests import the code under test as `@/…`.
+
+## API
+
+Call the API only through `api` and `dataOf()` from `@/lib/api/client`, the client generated from the backend's
+OpenAPI document (`openapi/openapi.json`, `pnpm api:types`). Types of API data are `Schemas["…"]` from the
+same module; don't write them by hand.
