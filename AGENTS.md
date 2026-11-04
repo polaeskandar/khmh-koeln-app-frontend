@@ -14,3 +14,9 @@ No comments. Names, types and small functions explain the code. What a reader st
 for a library bug or a constraint from outside the code, goes into `docs/`. ESLint's `local/no-comments` rejects
 every comment in TypeScript and JavaScript except tool directives (`eslint-…`, `@ts-expect-error`,
 `/// <reference …>`). CSS, YAML and shell files follow the same rule.
+
+## Tests
+
+Tests live in `test/`, mirroring `src/`: `test/lib/api/client.test.ts` tests `src/lib/api/client.ts`. Shared
+helpers (the setup file, MSW, render helpers, fixtures) live in `test/support/` and are imported as
+`@test/support/…`; tests import the code under test as `@/…`.
