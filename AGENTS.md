@@ -15,6 +15,13 @@ for a library bug or a constraint from outside the code, goes into `docs/`. ESLi
 every comment in TypeScript and JavaScript except tool directives (`eslint-…`, `@ts-expect-error`,
 `/// <reference …>`). CSS, YAML and shell files follow the same rule.
 
+Blocks get braces and blank lines, as in the backend (its `docs/code-style.md`, 4a): every `if`, `for`, `while`,
+`do`, `switch` and `try` has braces and a blank line before and after it; `return`, `throw`, `break` and
+`continue` have a blank line before them; a statement that spans several lines has a blank line before and
+after it; except where the statement opens or closes its block. No `else` after a `return`. ESLint enforces
+this (`curly`, `no-else-return`, `@stylistic/padding-line-between-statements`), and `pnpm format` adds the
+blank lines (`eslint --fix`, then Prettier).
+
 ## Tests
 
 Tests live in `test/`, mirroring `src/`: `test/lib/api/client.test.ts` tests `src/lib/api/client.ts`. Shared

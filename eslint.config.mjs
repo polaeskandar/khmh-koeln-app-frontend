@@ -1,6 +1,7 @@
 import { defineConfig, globalIgnores } from "eslint/config"
 import nextVitals from "eslint-config-next/core-web-vitals"
 import nextTs from "eslint-config-next/typescript"
+import stylistic from "@stylistic/eslint-plugin"
 
 const staticExport =
   "The app is a static export without a server at request time, see docs/architecture.md."
@@ -42,9 +43,27 @@ const noComments = {
   }),
 }
 
+const blocks = ["if", "for", "while", "do", "switch", "try"]
+const jumps = ["return", "throw", "break", "continue"]
+const multiline = ["multiline-const", "multiline-let", "multiline-expression", "multiline-export"]
+
+const codeStyle = {
+  plugins: { "@stylistic": stylistic },
+  rules: {
+    curly: ["error", "all"],
+    "no-else-return": ["error", { allowElseIf: false }],
+    "@stylistic/padding-line-between-statements": [
+      "error",
+      { blankLine: "always", prev: "*", next: [...blocks, ...jumps, ...multiline] },
+      { blankLine: "always", prev: [...blocks, ...multiline], next: "*" },
+    ],
+  },
+}
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  codeStyle,
   {
     plugins: { local: { rules: { "no-comments": noComments } } },
     rules: { "local/no-comments": "error" },
