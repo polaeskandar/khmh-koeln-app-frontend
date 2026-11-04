@@ -1,15 +1,13 @@
+import createClient, { type Middleware } from "openapi-fetch"
+
 import { apiBaseUrl } from "@/lib/env"
 
 import { networkError, problemOf } from "./problem"
+import type { components, paths } from "./schema"
 
-export type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
+export type Schemas = components["schemas"]
 
-export type RequestOptions = {
-  method?: Method
-  body?: unknown
-  query?: Record<string, string | number | boolean | null | undefined>
-  signal?: AbortSignal
-}
+const WRITES = new Set(["POST", "PUT", "PATCH", "DELETE"])
 
 const unauthorizedListeners = new Set<() => void>()
 
@@ -21,57 +19,52 @@ export function onUnauthorized(listener: () => void) {
   }
 }
 
-function urlOf(path: string, query: RequestOptions["query"]) {
-  const search = new URLSearchParams()
-
-  for (const [name, value] of Object.entries(query ?? {})) {
-    if (value !== null && value !== undefined) {
-      search.set(name, String(value))
+const writesSendJson: Middleware = {
+  onRequest({ request }) {
+    if (!WRITES.has(request.method) || request.body !== null) {
+      return undefined
     }
-  }
 
-  const qs = search.toString()
+    const headers = new Headers(request.headers)
+    headers.set("Content-Type", "application/json")
 
-  return `${apiBaseUrl()}${path}${qs ? `?${qs}` : ""}`
+    return new Request(request, { body: "{}", headers })
+  },
 }
 
-export async function apiRequest<T>(
-  path: string,
-  { method = "GET", body, query, signal }: RequestOptions = {}
-): Promise<T> {
-  const unsafe = method !== "GET"
-  let response: Response
-
-  try {
-    response = await fetch(urlOf(path, query), {
-      method,
-      credentials: "include",
-      cache: "no-store",
-      headers: unsafe
-        ? { Accept: "application/json", "Content-Type": "application/json" }
-        : { Accept: "application/json" },
-      body: unsafe ? JSON.stringify(body ?? {}) : undefined,
-      signal,
-    })
-  } catch (error) {
-    if (signal?.aborted || (error instanceof Error && error.name === "AbortError")) {
-      throw error
+const problems: Middleware = {
+  async onResponse({ response }) {
+    if (response.ok) {
+      return undefined
     }
 
-    throw networkError()
-  }
+    const problem = await problemOf(response)
 
-  if (response.ok) {
-    return (response.status === 204 ? undefined : await response.json()) as T
-  }
-
-  const problem = await problemOf(response)
-
-  if (problem.status === 401 && problem.code === "auth.unauthenticated") {
-    for (const listener of [...unauthorizedListeners]) {
-      listener()
+    if (problem.status === 401 && problem.code === "auth.unauthenticated") {
+      for (const listener of [...unauthorizedListeners]) {
+        listener()
+      }
     }
-  }
 
-  throw problem
+    throw problem
+  },
+  onError({ error }) {
+    return error instanceof Error && error.name === "AbortError" ? error : networkError()
+  },
+}
+
+export const api = createClient<paths>({
+  baseUrl: apiBaseUrl(),
+  credentials: "include",
+  cache: "no-store",
+  headers: { Accept: "application/json" },
+  fetch: (request) => globalThis.fetch(request),
+})
+
+api.use(writesSendJson, problems)
+
+export async function dataOf<Data>(request: Promise<{ data?: Data }>): Promise<Data> {
+  const { data } = await request
+
+  return data as Data
 }
