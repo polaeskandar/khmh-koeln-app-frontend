@@ -10,6 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Code style
 
-Avoid comments: names, types and small functions explain the code. Write one only when the reason can't be
-said in code, such as a workaround for a library bug or a constraint the reader couldn't infer from the code
-around it.
+No comments. Names, types and small functions explain the code. What a reader still needs, such as a workaround
+for a library bug or a constraint from outside the code, goes into `docs/`. ESLint's `local/no-comments` rejects
+every comment in TypeScript and JavaScript except tool directives (`eslint-…`, `@ts-expect-error`,
+`/// <reference …>`). CSS, YAML and shell files follow the same rule.
