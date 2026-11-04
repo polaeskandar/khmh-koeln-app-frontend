@@ -18,7 +18,7 @@
     "dev": "next dev",
     "build": "next build",
     "lint": "eslint",
-    "format": "prettier --write .",
+    "format": "eslint --fix && prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
@@ -45,6 +45,7 @@
   "devDependencies": {
     "@capacitor/cli": "^8.5.3",
     "@formatjs/icu-messageformat-parser": "3.5.22",
+    "@stylistic/eslint-plugin": "5.10.0",
     "@tailwindcss/turbopack": "^4",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",

@@ -237,6 +237,9 @@ importers:
       '@formatjs/icu-messageformat-parser':
         specifier: 3.5.22
         version: 3.5.22
+      '@stylistic/eslint-plugin':
+        specifier: 5.10.0
+        version: 5.10.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))
       '@tailwindcss/turbopack':
         specifier: ^4
         version: 4.3.3
@@ -1832,6 +1835,12 @@ packages:
   '@sindresorhus/merge-streams@4.0.0':
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
     engines: {node: '>=18'}
+
+  '@stylistic/eslint-plugin@5.10.0':
+    resolution: {integrity: sha512-nPK52ZHvot8Ju/0A4ucSX1dcPV2/1clx0kLcH5wDmrE4naKso7TUC/voUyU1O9OTKTrR6MYip6LP0ogEMQ9jPQ==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    peerDependencies:
+      eslint: ^9.0.0 || ^10.0.0
 
   '@swc/core-darwin-arm64@1.16.21':
     resolution: {integrity: sha512-VRreJpbRygpSD1hj3HBEOIA1xjXYnhB+IfcKsxZRhCIBGRP4UkqxZH4/ipFh/heIRp7EKQ56E8ygwEftLNCWXw==}
@@ -6612,6 +6621,16 @@ snapshots:
       - supports-color
 
   '@sindresorhus/merge-streams@4.0.0': {}
+
+  '@stylistic/eslint-plugin@5.10.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))':
+    dependencies:
+      '@eslint-community/eslint-utils': 4.10.1(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))
+      '@typescript-eslint/types': 8.72.0
+      eslint: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
+      eslint-visitor-keys: 4.2.1
+      espree: 10.4.0
+      estraverse: 5.3.0
+      picomatch: 4.0.7
 
   '@swc/core-darwin-arm64@1.16.21':
     optional: true
