@@ -5,3 +5,4 @@ ios/
 coverage/
 node_modules/
 pnpm-lock.yaml
+openapi/openapi.json

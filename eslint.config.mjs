@@ -74,7 +74,7 @@ const eslintConfig = defineConfig([
       "no-restricted-imports": ["error", { paths: restrictedImports }],
       "no-restricted-globals": [
         "error",
-        { name: "fetch", message: "Call the API through apiRequest() from @/lib/api/client." },
+        { name: "fetch", message: "Call the API through api and dataOf() from @/lib/api/client." },
       ],
       "react/no-danger": "error",
     },
@@ -97,6 +97,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "messages/*.d.json.ts",
+    "src/lib/api/schema.d.ts",
     "android/**",
     "ios/**",
     "coverage/**",
