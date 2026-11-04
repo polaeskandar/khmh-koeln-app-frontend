@@ -14,9 +14,35 @@ const restrictedImports = [
 
 const rawHtmlFiles = []
 
+const toolDirective = /^\s*(eslint[- ]|@ts-expect-error|\/ <reference )/
+
+const noComments = {
+  meta: {
+    type: "suggestion",
+    schema: [],
+    messages: {
+      comment:
+        "No comments: names, types and small functions explain the code; what a reader still needs belongs in docs/ (AGENTS.md, Code style).",
+    },
+  },
+  create: (context) => ({
+    Program: () => {
+      for (const comment of context.sourceCode.getAllComments()) {
+        if (comment.type !== "Shebang" && !toolDirective.test(comment.value)) {
+          context.report({ loc: comment.loc, messageId: "comment" })
+        }
+      }
+    },
+  }),
+}
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  {
+    plugins: { local: { rules: { "no-comments": noComments } } },
+    rules: { "local/no-comments": "error" },
+  },
   {
     files: ["src/**", "test/**"],
     rules: {
