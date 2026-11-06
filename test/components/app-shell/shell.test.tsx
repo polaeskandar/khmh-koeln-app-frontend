@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react"
+import { screen, within } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
 import { renderToString } from "react-dom/server"
 import { afterEach, describe, expect, test, vi } from "vitest"
@@ -57,6 +57,8 @@ function shell(account: Me, locale: Locale = "en") {
   )
 }
 
+const sidebar = () => within(document.querySelector("[data-slot='sidebar']") as HTMLElement)
+
 describe("the sidebar", () => {
   test("lists the staff areas and marks the current one", async () => {
     navigation.pathname = "/services/view/"
@@ -64,17 +66,20 @@ describe("the sidebar", () => {
     await screen.findByText("Page")
 
     for (const name of ["Services", "Meetings", "Attendance", "Members"]) {
-      expect(screen.getByRole("link", { name })).toBeInTheDocument()
+      expect(sidebar().getByRole("link", { name })).toBeInTheDocument()
     }
 
-    expect(screen.getByRole("link", { name: "Services" })).toHaveAttribute("data-active", "true")
+    expect(sidebar().getByRole("link", { name: "Services" })).toHaveAttribute("data-active", "true")
 
-    expect(screen.getByRole("link", { name: "Take attendance" })).toHaveAttribute(
+    expect(sidebar().getByRole("link", { name: "Take attendance" })).toHaveAttribute(
       "href",
       "/attendance/"
     )
 
-    expect(screen.getByRole("link", { name: "Attendance" })).toHaveAttribute("href", "/attendance/")
+    expect(sidebar().getByRole("link", { name: "Attendance" })).toHaveAttribute(
+      "href",
+      "/attendance/"
+    )
   })
 
   test.each([
@@ -85,8 +90,8 @@ describe("the sidebar", () => {
     vi.stubEnv("NEXT_PUBLIC_REGISTRATION_ENABLED", flag)
     shell(account)
     await screen.findByText("Page")
-    await screen.findByRole("link", { name: "Services" })
-    expect(screen.queryByRole("link", { name: "Settings" }) !== null).toBe(shown)
+    await sidebar().findByRole("link", { name: "Services" })
+    expect(sidebar().queryByRole("link", { name: "Settings" }) !== null).toBe(shown)
   })
 
   test("sits on the right in Arabic", async () => {
