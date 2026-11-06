@@ -468,7 +468,7 @@
       "add": "Stufe hinzufügen",
       "addTitle": "Stufe zu {service} hinzufügen",
       "editTitle": "{name} bearbeiten",
-      "addDescription": "Eine Stufe ist eine Gruppe innerhalb des Dienstes, etwa eine Klasse oder ein Niveau. Sie wird am Ende der Liste hinzugefügt; die Reihenfolge können Sie danach ändern.",
+      "addDescription": "Eine Stufe ist eine Gruppe innerhalb des Dienstes, etwa eine Klasse oder ein Niveau. Sie wird am Ende der Liste hinzugefügt.",
       "editDescription": "Der neue Name erscheint überall, auch bei vergangenen Terminen.",
       "name": "Name",
       "namePlaceholder": "z. B. 3. Klasse",
