@@ -96,7 +96,7 @@ const progress = (extra: Partial<HomeworkProgress> = {}): HomeworkProgress => ({
       notCompleted: 13,
       completedAfterDueDate: 0,
       withoutParentAccount: 4,
-      withoutAccount: 0,
+      withoutAccount: 4,
       reportedTotal: 1,
     },
     can: homeworkFlags({
@@ -121,7 +121,7 @@ const progress = (extra: Partial<HomeworkProgress> = {}): HomeworkProgress => ({
     notCompleted: 13,
     completedAfterDueDate: 0,
     withoutParentAccount: 4,
-    withoutAccount: 0,
+    withoutAccount: 4,
     reportedTotal: 1,
   },
   rows,
@@ -293,4 +293,71 @@ test("names follow their own writing direction", async () => {
   open(progress())
   const cells = await tableRows()
   expect(cells[0]!.querySelector("[dir=auto]")).toHaveTextContent("Adel Aziz")
+})
+
+test("members with their own account report it themselves", async () => {
+  const own = { parentAccounts: [], ownAccount: true }
+
+  const nevine = child("Nevine", "Boulos", {
+    ...own,
+    done: true,
+    completedAt: "2026-11-08T11:08:00Z",
+    completedBy: { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7eb009", name: "Nevine Boulos" },
+    reportedBySelf: true,
+  })
+
+  const level1 = [
+    child("Hoda", "Farag", own),
+    child("Nadia", "Gerges", own),
+    nevine,
+    ...["Abanoub", "Bola", "Demiana", "Fady", "Mariam", "Rafael"].map((n) =>
+      child(n, "Kamel", { parentAccounts: [] })
+    ),
+  ]
+
+  const counts = {
+    assigned: 9,
+    completed: 1,
+    notCompleted: 8,
+    completedAfterDueDate: 0,
+    withoutParentAccount: 9,
+    withoutAccount: 6,
+    reportedTotal: 1,
+  }
+
+  const data = progress({ counts, rows: level1 })
+  data.homework = { ...data.homework, title: "Write the first eight letters", counts }
+  open(data)
+  const figures = (await screen.findByText("In 3rd Class")).closest("dl")!
+
+  expect([...figures.querySelectorAll("dt + dd")].map((dd) => dd.textContent)).toEqual([
+    "9",
+    "1",
+    "8",
+    "6",
+  ])
+
+  for (const name of ["All (9)", "Reported done (1)", "Not yet (8)", "No account (6)"]) {
+    expect(screen.getByRole("tab", { name })).toBeInTheDocument()
+  }
+
+  const row = screen.getByText("Nevine Boulos").closest("tr")!
+  expect(row).toHaveTextContent("Done")
+  expect(row).toHaveTextContent(/Today 12:08 · ⁨Nevine Boulos⁩ \(own account\)/)
+  expect(row.lastElementChild).toHaveTextContent(/^Own account$/)
+
+  expect(screen.getByText("Abanoub Kamel").closest("tr")!.lastElementChild).toHaveTextContent(
+    /^No account$/
+  )
+})
+
+test("someone with their own account and parents shows both", async () => {
+  const both = child("Marc", "Habib", {
+    ownAccount: true,
+    parentAccounts: [parentAccount(1), parentAccount(2)],
+  })
+
+  open(progress({ rows: [both] }))
+  const row = (await screen.findByText("Marc Habib")).closest("tr")!
+  expect(row.lastElementChild).toHaveTextContent(/^Own account · 2 parents$/)
 })
