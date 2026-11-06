@@ -21,6 +21,15 @@ vi.stubGlobal(
   }))
 )
 
+vi.stubGlobal(
+  "ResizeObserver",
+  class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+)
+
 beforeAll(() => server.listen({ onUnhandledFrame: "error" }))
 
 afterEach(() => {
