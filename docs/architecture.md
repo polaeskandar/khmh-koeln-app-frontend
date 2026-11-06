@@ -38,11 +38,39 @@ added with that ticket.
 
 ### Talking to the API
 
-The browser and the apps call the API cross-origin. Inside the apps the origin is `capacitor://localhost` on
-iOS and `https://localhost` on Android (Capacitor's defaults). The API needs a CORS allowlist with these
-origins and the web app's own, and a sign-in method that doesn't rely on third-party cookies: bearer tokens
-work the same everywhere; session cookies would need Capacitor's native HTTP (`CapacitorHttp`, which replaces
-`fetch` in the apps). The sign-in ticket decides; the backend's architecture notes have the same point.
+The contract is the backend's `docs/api.md`. The web app is served from the same origin as the API:
+`https://app.khmk-koeln.com` serves the static files at `/` and the API at `/api` (D2), so the browser makes
+no cross-origin calls and needs no CORS. `NEXT_PUBLIC_API_BASE_URL` is `/api` in production builds (an
+absolute URL only if the API ever has to move to its own origin) and `http://localhost:8000/api` in
+development; `src/lib/env.ts` checks it, and a production build fails without it.
+
+- **Generated client.** The types come from the backend's OpenAPI document. `openapi/openapi.json` is a copy
+  of the backend's `docs/openapi.json`, and `pnpm api:types` turns it into `src/lib/api/schema.d.ts` with
+  [openapi-typescript](https://openapi-ts.dev), dropping the `/api` prefix that `NEXT_PUBLIC_API_BASE_URL`
+  already holds. CI fails when the generated file is stale. Calls go through `api` from
+  `src/lib/api/client.ts`, an [openapi-fetch](https://openapi-ts.dev/openapi-fetch/) client, wrapped in
+  `dataOf()`: `dataOf(api.GET("/stages/{id}", { params: { path: { id } }, signal }))`. Paths, parameters,
+  bodies and the data are checked against the document; types of API data are `Schemas["…"]`, never written
+  by hand. To follow a backend change, copy its `docs/openapi.json` over `openapi/openapi.json` and run
+  `pnpm api:types`.
+- **Cookie session (D1).** Signing in sets an HttpOnly session cookie. The client sends every call with
+  `credentials: "include"` and `cache: "no-store"`; the app never sends an `Authorization` header, never sees
+  a token and keeps nothing about the session in web storage. Writes always send a JSON body (`{}` when the
+  operation has none), as the API requires. ESLint allows `fetch` only under `src/lib/api`.
+- **Problems.** A failed call rejects with an `ApiError` (`src/lib/api/problem.ts`): the status, the
+  problem's `code` and `params`, `fieldErrors` by dot path, `retryAfter` from `Retry-After`, and documented
+  extension members such as `candidates`. A response that isn't a problem (a proxy's HTML page) has
+  `code: null`; a request that never reached the API is status 0 with the code `network`. A 401
+  `auth.unauthenticated` also notifies `onUnauthorized()` listeners, which end the session in the app.
+- **TanStack Query** caches reads in memory only, for 30 seconds before refetching. Reads are retried at
+  most twice, and only after status 0 or a 5xx; 4xx answers and mutations are never retried.
+- **MSW** answers the API in tests (`test/support/msw.ts`, with `problem()` and `renderWithQuery()` in
+  `test/support/api.tsx`); a request without a handler fails the test. `pnpm dev:mock` starts the dev server
+  with the same handlers in the browser (`src/mocks/handlers.ts`), for screens whose endpoints don't exist
+  yet; its worker file is generated into `public/` on demand, git-ignored and deleted before every build.
+- **The apps** will use bearer tokens after the MVP (backend #83); the cookie session is for the browser.
+  Inside the apps the origin is `capacitor://localhost` on iOS and `https://localhost` on Android, so the
+  API will need them in its CORS allowlist then.
 
 ### Capacitor 8
 
@@ -145,6 +173,5 @@ through `next/font`, which puts them into the build, so the apps don't load them
 
 ## Open questions for tickets
 
-- Sign-in method (see above), and how the apps keep a session: secure storage for tokens.
+- How the apps keep a session after the MVP: bearer tokens in secure storage (backend #83).
 - Who owns the Apple Developer and Google Play accounts, and how releases are signed and published.
-- Whether the web app is hosted next to the API (same domain, no CORS for the browser) or separately.
