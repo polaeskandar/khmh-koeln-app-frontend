@@ -47,6 +47,13 @@ function Row({ lesson, today }: { lesson: LessonRow; today: string }) {
   const t = useTranslations()
   const f = useFormat()
   const { total, drafts } = lesson.homework
+  const helpers = lesson.collaborators.flatMap((helper) => (helper ? [helper.name] : []))
+  const responsible = lesson.responsible?.name ?? t("common.formerAccount")
+
+  const servantsLine = () =>
+    helpers.length > 0
+      ? t("lessons.list.withHelpers", { name: responsible, helpers: f.list(helpers) })
+      : responsible
 
   return (
     <li>
@@ -80,7 +87,7 @@ function Row({ lesson, today }: { lesson: LessonRow; today: string }) {
           <MeetingLine meeting={lesson.meeting} today={today} />
           <span className="text-xs text-muted-foreground">
             {[
-              lesson.responsible?.name ?? t("common.formerAccount"),
+              servantsLine(),
               total > 0
                 ? [
                     t("counts.homework", { count: total }),
@@ -118,7 +125,10 @@ function LessonList({
 
   const rows = data.items.filter(
     (lesson) =>
-      (!status || lesson.status === status) && (!servant || lesson.responsible?.id === servant)
+      (!status || lesson.status === status) &&
+      (!servant ||
+        lesson.responsible?.id === servant ||
+        lesson.collaborators.some((helper) => helper?.id === servant))
   )
 
   if (rows.length === 0) {

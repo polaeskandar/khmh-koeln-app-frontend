@@ -5,6 +5,7 @@ import { Ellipsis, PencilLine, Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { Topbar } from "@/components/app-shell/topbar"
+import { MemberAvatar } from "@/components/member-avatar"
 import { PageBody, PageHeader } from "@/components/page-header"
 import { NotFoundState, QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
@@ -19,6 +20,7 @@ import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import type { LessonStatus } from "@/lib/api/types/learning"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
+import { initialsOf } from "@/features/auth/role-summary"
 import { routes } from "@/lib/routes"
 
 import { changeLessonStatusRequest, type LessonDetail, lessonQuery, linesOf } from "./api"
@@ -87,6 +89,18 @@ function StatusActions({ data }: { data: LessonDetail }) {
         </DropdownMenu>
       ) : null}
     </>
+  )
+}
+
+function ServantLine({ name, seed, role }: { name: string; seed?: string; role: string }) {
+  return (
+    <li className="flex items-center gap-2.5">
+      <MemberAvatar name={name} initials={initialsOf(name)} seed={seed} className="size-7" />
+      <span className="flex min-w-0 flex-col leading-tight">
+        <bdi className="font-medium">{name}</bdi>
+        <span className="text-xs text-muted-foreground">{role}</span>
+      </span>
+    </li>
   )
 }
 
@@ -261,10 +275,21 @@ function LessonView({ data }: { data: LessonDetail }) {
               </div>
             </LessonPanel>
             <LessonPanel title={t("lessons.fields.servants")}>
-              <p className="text-sm">
-                {t("lessons.fields.responsible")}:{" "}
-                {lesson.responsible?.name ?? t("common.formerAccount")}
-              </p>
+              <ul className="flex flex-col gap-2 text-sm">
+                <ServantLine
+                  name={lesson.responsible?.name ?? t("common.formerAccount")}
+                  seed={lesson.responsible?.id}
+                  role={t("lessons.fields.responsible")}
+                />
+                {lesson.collaborators.map((helper, index) => (
+                  <ServantLine
+                    key={helper?.id ?? index}
+                    name={helper?.name ?? t("common.formerAccount")}
+                    seed={helper?.id}
+                    role={t("lessons.detail.helping")}
+                  />
+                ))}
+              </ul>
               {lesson.meeting.kind === "session" ? (
                 <Button variant="outline" size="sm" asChild className="self-start">
                   <Link href={routes.session(lesson.meeting.id)}>

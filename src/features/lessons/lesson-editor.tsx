@@ -15,7 +15,15 @@ import { PageBody, PageHeader } from "@/components/page-header"
 import { NotFoundState, QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { Button } from "@/components/ui/button"
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
@@ -126,6 +134,24 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
       ? [...choices.servants, lesson.responsible]
       : choices.servants
 
+  const savedHelpers = (lesson?.collaborators ?? []).filter((helper) => helper !== null)
+  const [helperIds, setHelperIds] = useState(() => savedHelpers.map((helper) => helper.id))
+
+  const helpers = [
+    ...choices.servants,
+    ...savedHelpers.filter((saved) => !choices.servants.some((s) => s.id === saved.id)),
+  ].filter((servant) => servant.id !== responsibleId)
+
+  const helpersChanged =
+    !lesson ||
+    helperIds.length !== savedHelpers.length ||
+    helperIds.some((id) => !savedHelpers.some((saved) => saved.id === id))
+
+  const chooseResponsible = (id: string) => {
+    setResponsibleId(id)
+    setHelperIds((ids) => ids.filter((helper) => helper !== id))
+  }
+
   const formRef = useRef<HTMLFormElement>(null)
 
   const [fields, setFields] = useState({
@@ -196,6 +222,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
         .map((m) => ({ label: m.label, url: m.url?.trim() ? m.url : null })),
       ...(viewNotes ? { notes: text(fields.notes) } : {}),
       ...(!lesson || responsibleId !== lesson.responsible?.id ? { responsibleId } : {}),
+      ...(helpersChanged ? { collaboratorIds: helperIds } : {}),
       ...(completed ? {} : { status }),
     }
   }
@@ -403,7 +430,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
               className="w-full"
               value={responsibleId}
               aria-invalid={errors.responsibleId ? true : undefined}
-              onChange={(event) => setResponsibleId(event.target.value)}
+              onChange={(event) => chooseResponsible(event.target.value)}
             >
               {responsibles.map((servant) => (
                 <NativeSelectOption key={servant.id} value={servant.id}>
@@ -413,6 +440,33 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
             </NativeSelect>
             {errors.responsibleId ? <FieldError>{errors.responsibleId}</FieldError> : null}
           </Field>
+          {choices.servants.length > 1 ? (
+            <FieldSet data-invalid={errors.collaboratorIds ? true : undefined}>
+              <FieldLegend variant="label">{t("lessons.editor.helping")}</FieldLegend>
+              <div className="flex flex-col gap-2">
+                {helpers.map((servant) => (
+                  <Field key={servant.id} orientation="horizontal">
+                    <Checkbox
+                      id={`lesson-helper-${servant.id}`}
+                      checked={helperIds.includes(servant.id)}
+                      aria-invalid={errors.collaboratorIds ? true : undefined}
+                      onCheckedChange={(checked) =>
+                        setHelperIds((ids) =>
+                          checked === true
+                            ? [...ids, servant.id]
+                            : ids.filter((id) => id !== servant.id)
+                        )
+                      }
+                    />
+                    <FieldLabel htmlFor={`lesson-helper-${servant.id}`} className="font-normal">
+                      <bdi>{servant.name}</bdi>
+                    </FieldLabel>
+                  </Field>
+                ))}
+              </div>
+              {errors.collaboratorIds ? <FieldError>{errors.collaboratorIds}</FieldError> : null}
+            </FieldSet>
+          ) : null}
         </FormPanel>
         <FormPanel
           title={t("lessons.fields.status")}
