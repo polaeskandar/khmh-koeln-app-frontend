@@ -137,7 +137,14 @@ function SessionDetail({ data, actions }: { data: MeetingSession; actions?: Reac
                   {t.rich("meetings.session.fromSchedule", {
                     name: schedule.name,
                     pattern: f.recurrence(recurrenceOf(schedule.recurrence)),
-                    link: (chunks) => <span className="font-medium text-foreground">{chunks}</span>,
+                    link: (chunks) => (
+                      <Link
+                        href={routes.schedule(schedule.id)}
+                        className="font-medium text-foreground underline underline-offset-4"
+                      >
+                        {chunks}
+                      </Link>
+                    ),
                   })}
                 </span>
               </p>

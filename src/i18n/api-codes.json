@@ -66,6 +66,7 @@
   "meetings.serviceArchivedRestoreFirst": ["name"],
   "meetings.stageArchivedRestoreFirst": ["name"],
   "meetings.scheduleHasSessions": ["count"],
+  "meetings.scheduleHasLessons": ["count"],
   "meetings.sessionCanceled": [],
   "meetings.attendanceClosed": [],
   "meetings.opensOnTheDay": [],
