@@ -2,14 +2,15 @@
 
 import { Check, CircleCheck, Undo2 } from "lucide-react"
 import { useTranslations } from "next-intl"
+import type { QueryKey } from "@tanstack/react-query"
 import { useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { useFormat } from "@/i18n/format"
-import type { LocalDate, Uuid } from "@/lib/api/types/common"
+import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
-import { type Report, reportDoneRequest, undoReportRequest } from "./api"
+import type { Report } from "./api"
 
 const NOT_DONE: Report = {
   done: false,
@@ -20,29 +21,35 @@ const NOT_DONE: Report = {
 
 const SAVING: Report = { done: true, completedAt: null, completedBy: null, completedByYou: true }
 
+export function reportOf(task: Report): Report {
+  const { done, completedAt, completedBy, completedByYou } = task
+
+  return { done, completedAt, completedBy, completedByYou }
+}
+
 export function CompletionControl({
-  homeworkId,
-  child,
   today,
   initial,
+  hint,
+  undone,
+  reportDone,
+  undoReport,
+  invalidate,
 }: {
-  homeworkId: Uuid
-  child: { id: Uuid; name: string }
   today: LocalDate
   initial: Report
+  hint: string
+  undone: string
+  reportDone: () => Promise<Report>
+  undoReport: () => Promise<void>
+  invalidate: QueryKey[]
 }) {
   const t = useTranslations("parent.completion")
   const f = useFormat()
   const [report, setReport] = useState(initial)
   const busy = useRef(false)
-  const invalidate = [["parent"]]
-  const markDone = useApiMutation(() => reportDoneRequest(child.id, homeworkId), { invalidate })
-
-  const undo = useApiMutation(() => undoReportRequest(child.id, homeworkId), {
-    invalidate,
-    successMessage: t("undone", { name: child.name }),
-  })
-
+  const markDone = useApiMutation(reportDone, { invalidate })
+  const undo = useApiMutation(undoReport, { invalidate, successMessage: undone })
   const pending = markDone.pending || undo.pending
 
   async function change(next: Report, run: () => Promise<Report | null>) {
@@ -79,7 +86,7 @@ export function CompletionControl({
           <Check data-icon="inline-start" />
           {t("markDone")}
         </Button>
-        <p className="text-xs text-muted-foreground">{t("hint", { name: child.name })}</p>
+        <p className="text-xs text-muted-foreground">{hint}</p>
       </div>
     )
   }

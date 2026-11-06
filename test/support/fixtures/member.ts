@@ -161,7 +161,7 @@ export const nevineHomework: { todo: MemberTask[]; done: MemberTask[] } = {
       stage: "Level 1",
       dueDate: "2026-11-02",
       done: true,
-      completedAt: "2026-11-01T17:00:00Z",
+      completedAt: "2026-10-29T19:15:00Z",
       completedByYou: true,
       completedBy: "Nevine Boulos",
     },
