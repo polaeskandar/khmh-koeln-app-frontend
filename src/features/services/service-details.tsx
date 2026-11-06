@@ -14,10 +14,12 @@ import { Button } from "@/components/ui/button"
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 import { serviceSchedulesQuery } from "@/features/meetings/api"
 import { ScheduleList } from "@/features/meetings/schedule-list"
+import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 
 import { type ServiceRow, type ServiceStages, serviceQuery, serviceStagesQuery } from "./api"
+import { LeadersText, trendText } from "./service-bits"
 import { ServiceFormDialog } from "./service-dialogs"
 
 function EditButton({ service }: { service: ServiceRow }) {
@@ -35,7 +37,7 @@ function EditButton({ service }: { service: ServiceRow }) {
   )
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1 border p-4">
       <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
@@ -101,6 +103,7 @@ function Stages({ service, stages }: { service: ServiceRow; stages: ServiceStage
 
 function Details({ service }: { service: ServiceRow }) {
   const t = useTranslations()
+  const f = useFormat()
   const stages = useQuery(serviceStagesQuery(service.id))
   const schedules = useQuery(serviceSchedulesQuery(service.id))
   const activeSchedules = schedules.data?.items.filter((schedule) => schedule.active).length ?? 0
@@ -122,14 +125,20 @@ function Details({ service }: { service: ServiceRow }) {
           description={service.description ? <span dir="auto">{service.description}</span> : null}
           actions={service.can.edit ? <EditButton service={service} /> : null}
         />
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Stat label={t("services.detail.stats.stages")} value={stages.data?.stages.length ?? 0} />
           <Stat label={t("services.detail.stats.members")} value={service.memberCount} />
           <Stat label={t("services.detail.stats.activeSchedules")} value={activeSchedules} />
+          <Stat label={t("services.detail.stats.attendance")} value={trendText(service, f)} />
         </div>
         <QueryState query={stages}>
           {(data) => <Stages service={service} stages={data} />}
         </QueryState>
+        <Section id="leaders" title={t("services.table.leaders")}>
+          <p className="text-sm">
+            <LeadersText service={service} />
+          </p>
+        </Section>
         <Section
           id="schedules"
           title={t("services.detail.schedules.title")}
