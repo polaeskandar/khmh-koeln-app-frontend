@@ -22,7 +22,7 @@ What this rules out, because no Next.js server runs in production:
   mode" when `cacheComponents` is on, so it is off. The UI prototype runs on a Next.js server and renders
   every page per request, because its account and language come from cookies; the product can't.
 - Dynamic routes without `generateStaticParams`. Pages for one record (a session, a lesson) read their id
-  from the query string or from client state instead, e.g. `/sessions/view?id=…`.
+  from the query string instead, e.g. `/meetings/sessions/view/?id=…`; see [routes.md](routes.md).
 - The default image optimizer (`images.unoptimized` is set).
 
 Server components still run, at build time, for anything static. Everything that depends on the signed-in
