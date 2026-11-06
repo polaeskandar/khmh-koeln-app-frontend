@@ -10,6 +10,7 @@ import { apiUrl, problem } from "@test/support/api"
 import {
   goodSamaritan,
   lessonDetail,
+  lessonOptions,
   lessonStage,
   stageLessons,
 } from "@test/support/fixtures/lessons"
@@ -20,6 +21,8 @@ import { renderWithProviders } from "@test/support/providers"
 
 import type { LessonDetail } from "@/features/lessons/api"
 import { EditLessonPage, NewLessonPage } from "@/features/lessons/lesson-editor"
+
+const SCHEDULE_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f90"
 
 const search = vi.hoisted(() => ({ value: "" }))
 vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
@@ -41,6 +44,9 @@ function render(page: React.ReactNode, write?: () => Response) {
   server.use(
     http.get(apiUrl("/me"), () => HttpResponse.json(me.administrator)),
     http.get(apiUrl(`/stages/${lessonStage.id}/lessons`), () => HttpResponse.json(stageLessons())),
+    http.get(apiUrl(`/stages/${lessonStage.id}/lesson-options`), () =>
+      HttpResponse.json(lessonOptions())
+    ),
     http.post(apiUrl(`/stages/${lessonStage.id}/lessons`), async ({ request }) => {
       sent.push((await request.json()) as Record<string, unknown>)
 
@@ -101,8 +107,8 @@ test("Mark ready posts ready, two materials, null for empty texts and no empty r
 
   expect(sent[0]).toEqual({
     title: "The Good Samaritan",
-    teachingDate: "2026-11-08",
-    scheduleId: null,
+    teachingDate: "2026-11-22",
+    scheduleId: SCHEDULE_ID,
     sessionId: null,
     summary: null,
     passage: "Luke 10:25–37",
@@ -137,7 +143,7 @@ test("422s show in place, focus the first and keep the input", async () => {
   await user.click(screen.getByRole("button", { name: "Save draft" }))
   await waitFor(() => expect(screen.getByLabelText("Title")).toHaveFocus())
   expect(screen.getByLabelText("Link for material 2")).toHaveAttribute("aria-invalid", "true")
-  expect(screen.getByLabelText("Teaching date")).toHaveAttribute("aria-invalid", "true")
+  expect(screen.getByLabelText("Meeting")).toHaveAttribute("aria-invalid", "true")
   expect(screen.getByLabelText("Material 2")).toHaveValue("Bandages")
 })
 
