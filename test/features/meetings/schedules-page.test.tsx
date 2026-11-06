@@ -158,7 +158,7 @@ test("labels the next date, the open session and inactive rows", async () => {
   const row = (name: string) => rows(sunday).find((item) => item.textContent?.startsWith(name))
   expect(row("1st Class")).toHaveTextContent("Next: Today, 12:00")
   expect(row("3rd Class")).toHaveTextContent("Now: attendance open")
-  expect(row("3rd Class")).toHaveTextContent("The roster of 3rd Class")
+  expect(row("3rd Class")).toHaveTextContent("Roster: 9 people")
   expect(row("Sunday School")).toHaveTextContent("No upcoming date")
   expect(row("Kindergarten")).toHaveTextContent("Inactive")
   expect(rows(youthGroup)[0]).toHaveTextContent("Next: Wed 18 Nov, 19:30")
