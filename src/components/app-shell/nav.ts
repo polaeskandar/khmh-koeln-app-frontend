@@ -1,6 +1,7 @@
 import {
   CalendarDays,
   ClipboardCheck,
+  LayoutDashboard,
   Layers,
   type LucideIcon,
   Settings,
@@ -10,7 +11,7 @@ import {
 import type { Can } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-export type NavKey = "services" | "meetings" | "attendance" | "members" | "settings"
+export type NavKey = "dashboard" | "services" | "meetings" | "attendance" | "members" | "settings"
 
 export type NavItem = {
   href: string
@@ -22,6 +23,7 @@ export type NavItem = {
 const always = () => true
 
 export const NAV: NavItem[] = [
+  { href: routes.home(), key: "dashboard", icon: LayoutDashboard, allowed: always },
   { href: routes.services(), key: "services", icon: Layers, allowed: always },
   { href: routes.meetings(), key: "meetings", icon: CalendarDays, allowed: always },
   {
