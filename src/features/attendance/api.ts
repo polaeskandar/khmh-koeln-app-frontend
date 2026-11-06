@@ -44,3 +44,14 @@ export const attendanceBoardQuery = (session: Uuid) => ({
 })
 
 export const useAttendanceBoard = (session: Uuid) => useQuery(attendanceBoardQuery(session))
+
+export const closeAttendanceRequest = (session: Uuid) =>
+  dataOf(api.POST("/sessions/{id}/close", { params: { path: { id: session } }, body: {} }))
+
+export const removeMarkRequest = (session: Uuid, person: Uuid, reason: string | null) =>
+  dataOf(
+    api.DELETE("/sessions/{sessionId}/attendance/{personId}", {
+      params: { path: { sessionId: session, personId: person } },
+      body: reason ? { reason } : {},
+    })
+  )
