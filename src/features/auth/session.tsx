@@ -9,6 +9,7 @@ import { useRouter } from "@/i18n/navigation"
 import { onUnauthorized } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/problem"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
+import { can, type Can } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import { areasOf, type Me, meQuery, signOutRequest } from "./api"
@@ -36,13 +37,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient()
   const query = useQuery(meQuery)
 
-  const session: Session = query.data
-    ? { status: "authenticated", me: query.data, areas: areasOf(query.data) }
-    : query.error instanceof ApiError && query.error.status === 401
+  const session: Session =
+    query.error instanceof ApiError && query.error.status === 401
       ? { status: "anonymous" }
-      : query.isError
-        ? { status: "failed", error: query.error }
-        : { status: "unknown" }
+      : query.data
+        ? { status: "authenticated", me: query.data, areas: areasOf(query.data) }
+        : query.isError
+          ? { status: "failed", error: query.error }
+          : { status: "unknown" }
 
   const signedIn = useRef(false)
   const ended = useRef(false)
@@ -105,4 +107,11 @@ export function useSession(): SessionContext {
   }
 
   return context
+}
+
+export function useCan(): Can {
+  const { session } = useSession()
+  const me = session.status === "authenticated" ? session.me : null
+
+  return (action, resource) => can(me, action, resource)
 }

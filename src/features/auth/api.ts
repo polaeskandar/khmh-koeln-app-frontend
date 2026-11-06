@@ -7,7 +7,6 @@ export function areasOf(me: Me) {
   return {
     staff: me.permissions.some((p) => p.resource !== "parentPortal"),
     parent: can(me, "read", "parentPortal"),
-    administrator: can(me, "update", "roles"),
   }
 }
 
