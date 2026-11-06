@@ -45,3 +45,8 @@ export const createHomeworkRequest = (lesson: Uuid, input: HomeworkInput) =>
 
 export const updateHomeworkRequest = (id: Uuid, input: HomeworkInput) =>
   dataOf(api.PATCH("/homework/{id}", { params: { path: { id } }, body: input }))
+
+export type PublishedHomework = Schemas["HomeworkStatusChanged"]
+
+export const publishHomeworkRequest = (id: Uuid) =>
+  dataOf(api.POST("/homework/{id}/publish", { params: { path: { id } }, body: {} }))
