@@ -1,5 +1,5 @@
 import { api, dataOf, type Schemas } from "@/lib/api/client"
-import type { Uuid } from "@/lib/api/types/common"
+import type { PersonRef, ServiceRef, StageRef, Uuid } from "@/lib/api/types/common"
 
 export type AccountRequest = Schemas["AccountRequest"]
 
@@ -13,3 +13,34 @@ export const declineRequest = (account: Uuid) =>
   dataOf(
     api.POST("/account-requests/{id}/decline", { params: { path: { id: account } }, body: {} })
   )
+
+export type Role = Schemas["RoleRow"]
+
+export const rolesQuery = {
+  queryKey: ["roles", "list"] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/roles", { signal })),
+}
+
+export const parentPortalOnly = (role: Role) =>
+  role.permissions.length > 0 && role.permissions.every((p) => p.resource === "parentPortal")
+
+export type Approval =
+  { as: "parent"; childIds: Uuid[]; roleIds: Uuid[] } | { as: "servant"; roleIds: Uuid[] }
+
+export const approveRequest = (account: Uuid, approval: Approval) =>
+  dataOf(
+    api.POST("/account-requests/{id}/approve", {
+      params: { path: { id: account } },
+      body: approval,
+    })
+  )
+
+export type DirectoryPerson = PersonRef & {
+  groups: { service: ServiceRef; stage: StageRef | null }[]
+}
+
+export const directorySearchQuery = (q: string) => ({
+  queryKey: ["people", "directory", q] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) =>
+    dataOf(api.GET("/people/directory", { params: { query: { q } }, signal })),
+})

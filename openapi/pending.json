@@ -1,0 +1,161 @@
+{
+  "paths": {
+    "/api/roles": {
+      "get": {
+        "operationId": "pending_roles_list",
+        "summary": "Roles with their permissions and how many accounts hold them (backend #81).",
+        "responses": {
+          "200": {
+            "description": "The roles.",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/RoleList" } }
+            }
+          },
+          "default": { "$ref": "#/components/responses/Problem" }
+        }
+      },
+      "post": {
+        "operationId": "pending_roles_create",
+        "summary": "Create a role (backend #81).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/RoleInput" } }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The new role.",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/RoleCreated" } }
+            }
+          },
+          "default": { "$ref": "#/components/responses/Problem" }
+        }
+      }
+    },
+    "/api/roles/{id}": {
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+      ],
+      "get": {
+        "operationId": "pending_roles_show",
+        "summary": "A role with its holders (backend #81).",
+        "responses": {
+          "200": {
+            "description": "The role.",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/RoleDetail" } }
+            }
+          },
+          "default": { "$ref": "#/components/responses/Problem" }
+        }
+      },
+      "put": {
+        "operationId": "pending_roles_update",
+        "summary": "Rename a role and set its permissions (backend #81).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/RoleInput" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The role.",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/RoleDetail" } }
+            }
+          },
+          "default": { "$ref": "#/components/responses/Problem" }
+        }
+      },
+      "delete": {
+        "operationId": "pending_roles_delete",
+        "summary": "Delete a role nobody holds (backend #81).",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object" } } }
+        },
+        "responses": {
+          "204": { "description": "Deleted." },
+          "default": { "$ref": "#/components/responses/Problem" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RoleRow": {
+        "type": "object",
+        "required": ["id", "name", "permissions", "holderCount"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "permissions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PermissionGrant" }
+          },
+          "holderCount": { "type": "integer" }
+        }
+      },
+      "RoleList": {
+        "type": "object",
+        "required": ["items"],
+        "properties": {
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/RoleRow" } }
+        }
+      },
+      "RoleInput": {
+        "type": "object",
+        "required": ["name", "permissions"],
+        "properties": {
+          "name": { "type": "string" },
+          "permissions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PermissionGrant" }
+          }
+        }
+      },
+      "RoleCreated": {
+        "type": "object",
+        "required": ["id"],
+        "properties": { "id": { "type": "string" } }
+      },
+      "RoleHolder": {
+        "type": "object",
+        "required": ["id", "displayName", "email", "disabled"],
+        "properties": {
+          "id": { "type": "string" },
+          "displayName": { "type": "string" },
+          "email": { "type": "string" },
+          "disabled": { "type": "boolean" }
+        }
+      },
+      "RoleDetail": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "permissions",
+          "createdAt",
+          "updatedAt",
+          "holders",
+          "onlyWayToChangeRoles"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "permissions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PermissionGrant" }
+          },
+          "createdAt": { "type": "string" },
+          "updatedAt": { "type": "string" },
+          "holders": { "type": "array", "items": { "$ref": "#/components/schemas/RoleHolder" } },
+          "onlyWayToChangeRoles": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}
