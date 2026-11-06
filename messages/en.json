@@ -973,7 +973,9 @@
         "placeholder": "e.g. Tapped the wrong name",
         "confirm": "Remove mark",
         "person": "Person"
-      }
+      },
+      "saving": "Saving marks… Close attendance once they are saved.",
+      "offline": "No connection. Marks can’t be saved until it’s back."
     },
     "reopen": {
       "button": "Reopen for corrections",

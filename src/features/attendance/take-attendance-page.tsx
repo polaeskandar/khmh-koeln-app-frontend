@@ -1,5 +1,6 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
 import type { ReactNode } from "react"
 
@@ -15,8 +16,9 @@ import { Link } from "@/i18n/navigation"
 import { groupOf } from "@/lib/api/types/meetings"
 import { routes } from "@/lib/routes"
 
-import { type AttendanceBoard as Board, useAttendanceBoard } from "./api"
+import { type AttendanceBoard as Board, attendanceBoardQuery } from "./api"
 import { AttendanceBoard } from "./attendance-board"
+import { applyWrites, useMarkWrites, useOnline } from "./mark-writes"
 
 export function BoardFrame({ board, children }: { board: Board; children: ReactNode }) {
   const t = useTranslations()
@@ -71,14 +73,46 @@ function NotFoundPage() {
   )
 }
 
+function ActiveBoard({ board, boardAt }: { board: Board; boardAt: number }) {
+  const t = useTranslations("attendance.board")
+  const online = useOnline()
+  const writes = useMarkWrites(board.session.id)
+
+  return (
+    <>
+      {online ? null : (
+        <p role="alert" className="border border-warning/40 bg-warning-soft p-3 text-sm">
+          {t("offline")}
+        </p>
+      )}
+      <AttendanceBoard
+        board={applyWrites(board, writes.writes, boardAt)}
+        actions={{
+          onMark: writes.mark,
+          onUndo: writes.undo,
+          pending: writes.pending,
+          saving: writes.pending.size > 0,
+        }}
+      />
+    </>
+  )
+}
+
 function LoadedBoard({ id }: { id: string }) {
-  const query = useAttendanceBoard(id)
+  const query = useQuery({
+    ...attendanceBoardQuery(id),
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+  })
 
   return (
     <QueryState query={query} notFound={<NotFoundPage />}>
       {(board) => (
         <BoardFrame board={board}>
-          {board.session.status === "active" ? <AttendanceBoard board={board} /> : null}
+          {board.session.status === "active" ? (
+            <ActiveBoard board={board} boardAt={query.dataUpdatedAt} />
+          ) : null}
         </BoardFrame>
       )}
     </QueryState>
