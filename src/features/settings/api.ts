@@ -24,8 +24,12 @@ export const rolesQuery = {
 export const parentPortalOnly = (role: Role) =>
   role.permissions.length > 0 && role.permissions.every((p) => p.resource === "parentPortal")
 
+export type AgeCheck = "sixteenOrOlder" | "guardianConsent"
+
 export type Approval =
-  { as: "parent"; childIds: Uuid[]; roleIds: Uuid[] } | { as: "servant"; roleIds: Uuid[] }
+  | { as: "parent"; childIds: Uuid[]; roleIds: Uuid[] }
+  | { as: "servant"; roleIds: Uuid[] }
+  | { as: "member"; personId: Uuid; ageCheck: AgeCheck; guardianConsentNote: string | null }
 
 export const approveRequest = (account: Uuid, approval: Approval) =>
   dataOf(
@@ -43,4 +47,12 @@ export const directorySearchQuery = (q: string) => ({
   queryKey: ["people", "directory", q] as const,
   queryFn: ({ signal }: { signal: AbortSignal }) =>
     dataOf(api.GET("/people/directory", { params: { query: { q } }, signal })),
+})
+
+export type MemberCandidate = DirectoryPerson & { hasAccount: boolean }
+
+export const memberCandidatesQuery = (q: string) => ({
+  queryKey: ["accountRequests", "memberCandidates", q] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) =>
+    dataOf(api.GET("/account-requests/member-candidates", { params: { query: { q } }, signal })),
 })
