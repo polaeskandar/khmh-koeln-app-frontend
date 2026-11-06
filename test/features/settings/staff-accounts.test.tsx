@@ -4,7 +4,10 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
+import type { Me } from "@/features/auth/api"
+import { SessionProvider } from "@/features/auth/session"
 import { apiUrl, problem } from "@test/support/api"
+import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { testProviders } from "@test/support/providers"
 
@@ -50,11 +53,16 @@ const rebecca = account(2, "Rebecca Girgis", [servant])
 const sara = account(3, "Sara Wissa", [office])
 const samuel = account(4, "Samuel Rizk", [servant], true)
 
-function open({ remove, link }: { remove?: () => Response; link?: () => Response } = {}) {
+function open({
+  remove,
+  link,
+  who = me.administrator,
+}: { remove?: () => Response; link?: () => Response; who?: Me } = {}) {
   let items = [mariam, rebecca, sara, samuel]
   const sent: string[] = []
 
   server.use(
+    http.get(apiUrl("/me"), () => HttpResponse.json(who)),
     http.get(apiUrl("/staff-accounts"), () => HttpResponse.json({ today: "2026-11-08", items })),
     http.get(apiUrl("/roles"), () => HttpResponse.json({ items: roles })),
     http.post(apiUrl("/accounts/:id/roles"), async ({ params, request }) => {
@@ -82,7 +90,13 @@ function open({ remove, link }: { remove?: () => Response; link?: () => Response
   )
 
   const { client, wrapper } = testProviders()
-  render(<StaffAccounts />, { wrapper })
+
+  render(
+    <SessionProvider>
+      <StaffAccounts />
+    </SessionProvider>,
+    { wrapper }
+  )
 
   return { sent, client }
 }
@@ -111,7 +125,7 @@ test("rows keep the API order, the disabled account last with its badge", async 
 test("giving a role offers the ones not held, and sends it once", async () => {
   const { sent } = open()
   const rebeccaRow = within(await rowOf("Rebecca Girgis"))
-  await userEvent.click(rebeccaRow.getByRole("button", { name: "Role" }))
+  await userEvent.click(await rebeccaRow.findByRole("button", { name: "Role" }))
   const dialog = within(await screen.findByRole("dialog"))
   const select = dialog.getByRole("combobox", { name: "Role" })
 
@@ -137,7 +151,7 @@ test("removing asks first; the last role manager keeps the role", async () => {
   const row = within(await rowOf("Mariam Fahmy"))
 
   await userEvent.click(
-    row.getByRole("button", { name: "Remove role Administrator from Mariam Fahmy" })
+    await row.findByRole("button", { name: "Remove role Administrator from Mariam Fahmy" })
   )
 
   const dialog = within(await screen.findByRole("alertdialog"))
@@ -156,7 +170,7 @@ test("removing asks first; the last role manager keeps the role", async () => {
 test("a password link is emailed to the account and never shown", async () => {
   const { sent } = open()
   const row = within(await rowOf("Sara Wissa"))
-  await userEvent.click(row.getByRole("button", { name: "Password link…" }))
+  await userEvent.click(await row.findByRole("button", { name: "Password link…" }))
   const dialog = within(await screen.findByRole("dialog"))
   expect(await dialog.findByText(/^Sent to sara@example\.org\. Works until /)).toBeInTheDocument()
   expect(dialog.queryByRole("textbox")).not.toBeInTheDocument()
@@ -168,7 +182,7 @@ test("a password link is emailed to the account and never shown", async () => {
 test("a disabled account's link refusal shows its text", async () => {
   open({ link: () => problem(409, "auth.disabled") })
   const row = within(await rowOf("Rebecca Girgis"))
-  await userEvent.click(row.getByRole("button", { name: "Password link…" }))
+  await userEvent.click(await row.findByRole("button", { name: "Password link…" }))
 
   expect(await within(await screen.findByRole("dialog")).findByRole("alert")).toHaveTextContent(
     "This account can no longer sign in."
@@ -179,6 +193,38 @@ test("a disabled account can't get a link", async () => {
   open()
 
   expect(
-    within(await rowOf("Samuel Rizk")).getByRole("button", { name: "Password link…" })
+    await within(await rowOf("Samuel Rizk")).findByRole("button", { name: "Password link…" })
   ).toBeDisabled()
+})
+
+test("with users: read only there is nothing to change, and the description says so", async () => {
+  open({ who: me.churchOffice })
+  const row = within(await rowOf("Sara Wissa"))
+  expect(row.getByText("Church office")).toBeInTheDocument()
+
+  expect(
+    screen.getByText("Who has which role. Your roles let you see this, not change it.")
+  ).toBeInTheDocument()
+
+  expect(screen.queryByRole("button", { name: "Role" })).not.toBeInTheDocument()
+  expect(screen.queryByRole("button", { name: /^Remove role/ })).not.toBeInTheDocument()
+  expect(screen.queryByRole("button", { name: "Password link…" })).not.toBeInTheDocument()
+})
+
+test("Sara's dialog gives Attendance helper once and shows the chip", async () => {
+  const { sent } = open()
+
+  await userEvent.click(
+    await within(await rowOf("Sara Wissa")).findByRole("button", { name: "Role" })
+  )
+
+  const dialog = within(await screen.findByRole("dialog"))
+  await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Role" }), helper.id)
+  await userEvent.dblClick(dialog.getByRole("button", { name: "Give role" }))
+
+  expect(
+    await within(await rowOf("Sara Wissa")).findByText("Attendance helper")
+  ).toBeInTheDocument()
+
+  expect(sent).toEqual([`give ${sara.id} ${helper.id}`])
 })
