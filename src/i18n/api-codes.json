@@ -107,6 +107,7 @@
   "roles.lastAdministrator": [],
   "roles.nameRequired": [],
   "roles.unknown": [],
+  "roles.lastRoleManager": [],
   "materials.labelTooLong": [],
   "materials.url": [],
   "materials.tooMany": [],

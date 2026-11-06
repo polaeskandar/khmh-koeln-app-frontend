@@ -4,6 +4,23 @@ export type Action = Schemas["Action"]
 
 export type Resource = Schemas["Resource"]
 
+export const ACTIONS: Action[] = ["read", "create", "update", "delete"]
+
+export const RESOURCES: Resource[] = [
+  "users",
+  "roles",
+  "services",
+  "stages",
+  "sessions",
+  "attendance",
+  "members",
+  "lessons",
+  "homework",
+  "parentPortal",
+]
+
+export const PERMISSION_COUNT = ACTIONS.length * RESOURCES.length
+
 export type Permission = Schemas["PermissionGrant"]
 
 export type Can = (action: Action, resource: Resource) => boolean
