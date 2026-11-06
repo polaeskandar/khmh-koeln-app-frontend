@@ -191,6 +191,36 @@
   }
 }
 
+:root {
+  --font-sans: var(--font-oxanium), var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-geist), var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
+}
+
+:lang(ar),
+:lang(ar) * {
+  letter-spacing: normal !important;
+}
+
+[dir="rtl"]
+  :is(
+    .lucide-arrow-left,
+    .lucide-arrow-right,
+    .lucide-chevron-left,
+    .lucide-chevron-right,
+    .lucide-chevrons-left,
+    .lucide-chevrons-right,
+    .lucide-move-left,
+    .lucide-move-right,
+    .lucide-log-in,
+    .lucide-log-out,
+    .lucide-external-link,
+    .lucide-send,
+    .lucide-undo-2,
+    .lucide-redo-2
+  ):not([class*="rtl:"]) {
+  transform: scaleX(-1);
+}
+
 @utility tabular {
   font-variant-numeric: tabular-nums;
 }
