@@ -8,6 +8,7 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
 import { SUNDAY_SCHOOL_ID, THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
+import { homeworkFlags } from "@test/support/fixtures/homework"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
@@ -86,7 +87,7 @@ const detail = (extra: Partial<HomeworkDetail> = {}): HomeworkDetail => ({
     withoutAccount: 0,
     reportedTotal: 3,
   },
-  can: {
+  can: homeworkFlags({
     edit: true,
     publish: false,
     unpublish: false,
@@ -94,7 +95,7 @@ const detail = (extra: Partial<HomeworkDetail> = {}): HomeworkDetail => ({
     restore: false,
     delete: false,
     viewProgress: true,
-  },
+  }),
   ...extra,
 })
 
@@ -352,7 +353,7 @@ test("archived homework shows its notice instead of the form", async () => {
   openEdit(
     detail({
       status: "archived",
-      can: {
+      can: homeworkFlags({
         edit: false,
         publish: false,
         unpublish: false,
@@ -360,7 +361,7 @@ test("archived homework shows its notice instead of the form", async () => {
         restore: false,
         delete: false,
         viewProgress: true,
-      },
+      }),
     })
   )
 
@@ -377,7 +378,7 @@ test("archived homework shows its notice instead of the form", async () => {
 test("without edit rights there is no form", async () => {
   openEdit(
     detail({
-      can: {
+      can: homeworkFlags({
         edit: false,
         publish: false,
         unpublish: false,
@@ -385,7 +386,7 @@ test("without edit rights there is no form", async () => {
         restore: false,
         delete: false,
         viewProgress: false,
-      },
+      }),
     })
   )
 
@@ -489,7 +490,7 @@ test("a draft offers Publish only with can.publish", async () => {
   openEdit(
     detail({
       ...draft,
-      can: {
+      can: homeworkFlags({
         edit: true,
         publish: true,
         unpublish: false,
@@ -497,7 +498,7 @@ test("a draft offers Publish only with can.publish", async () => {
         restore: false,
         delete: false,
         viewProgress: true,
-      },
+      }),
     })
   )
 
@@ -511,7 +512,7 @@ test("a draft without can.publish only saves", async () => {
   openEdit(
     detail({
       ...draft,
-      can: {
+      can: homeworkFlags({
         edit: true,
         publish: false,
         unpublish: false,
@@ -519,7 +520,7 @@ test("a draft without can.publish only saves", async () => {
         restore: false,
         delete: false,
         viewProgress: true,
-      },
+      }),
     })
   )
 
