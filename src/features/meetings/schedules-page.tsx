@@ -20,6 +20,7 @@ import { routes } from "@/lib/routes"
 
 import { type ScheduleList as Schedules, useSchedules } from "./api"
 import { MeetingsTabs, ServiceFilter, withQuery } from "./meetings-nav"
+import { EditScheduleButton, NewScheduleButton } from "./schedule-dialog"
 import { ScheduleList } from "./schedule-list"
 
 type Status = "active" | "inactive" | "all"
@@ -131,6 +132,11 @@ function Schedules({
                 today={list.today}
                 showService={false}
                 emptyText={t("emptyService")}
+                trailing={(schedule) =>
+                  schedule.can.manage ? (
+                    <EditScheduleButton schedule={schedule} today={list.today} />
+                  ) : null
+                }
               />
             </section>
           ))}
@@ -158,7 +164,15 @@ function SchedulesScreen() {
         ]}
       />
       <PageBody>
-        <PageHeader title={t("nav.meetings")} description={t("meetings.schedules.description")} />
+        <PageHeader
+          title={t("nav.meetings")}
+          description={t("meetings.schedules.description")}
+          actions={
+            schedules.data && active.some((service) => service.can.manageSessions) ? (
+              <NewScheduleButton today={schedules.data.today} />
+            ) : null
+          }
+        />
         <MeetingsTabs active="schedules" />
         <div className="flex justify-end">
           <ServiceFilter

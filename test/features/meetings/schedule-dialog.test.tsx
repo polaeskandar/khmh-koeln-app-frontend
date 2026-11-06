@@ -1,0 +1,230 @@
+import { screen, waitFor, within } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
+import { http, HttpResponse } from "msw"
+import { toast } from "sonner"
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+
+import { SidebarProvider } from "@/components/ui/sidebar"
+import type { ServiceList } from "@/features/services/api"
+import { apiUrl, problem } from "@test/support/api"
+import { schedule } from "@test/support/fixtures/schedules"
+import { services } from "@test/support/fixtures/services"
+import { server } from "@test/support/msw"
+import { renderWithProviders } from "@test/support/providers"
+
+import { SchedulesPage } from "@/features/meetings/schedules-page"
+
+const search = vi.hoisted(() => ({ value: "" }))
+vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
+vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
+
+beforeEach(() => {
+  search.value = ""
+  vi.spyOn(console, "error").mockImplementation(() => {})
+  vi.spyOn(toast, "success")
+})
+
+afterEach(() => vi.restoreAllMocks())
+
+const sundaySchool = services.items[0]
+
+const existing = schedule({
+  service: { id: sundaySchool.id, name: "Sunday School", tone: 1, archived: false },
+})
+
+function open({
+  list = services,
+  write = () => HttpResponse.json({ id: "s-new", createdSessions: 1 }, { status: 201 }),
+  schedules = [existing],
+}: {
+  list?: ServiceList
+  write?: () => Response
+  schedules?: ReturnType<typeof schedule>[]
+} = {}) {
+  const sent: { method: string; body: Record<string, unknown> }[] = []
+
+  server.use(
+    http.get(apiUrl("/schedules"), () =>
+      HttpResponse.json({ today: "2026-11-08", items: schedules })
+    ),
+    http.get(apiUrl("/services"), () => HttpResponse.json(list)),
+    http.post(apiUrl("/schedules"), async ({ request }) => {
+      sent.push({ method: "POST", body: (await request.json()) as Record<string, unknown> })
+
+      return write()
+    }),
+    http.patch(apiUrl(`/schedules/${existing.id}`), async ({ request }) => {
+      sent.push({ method: "PATCH", body: (await request.json()) as Record<string, unknown> })
+
+      return HttpResponse.json({ id: existing.id, createdSessions: 0 })
+    })
+  )
+
+  renderWithProviders(
+    <SidebarProvider>
+      <SchedulesPage />
+    </SidebarProvider>
+  )
+
+  return sent
+}
+
+const newDialog = async () => {
+  await userEvent.click(await screen.findByRole("button", { name: "New schedule" }))
+
+  return within(await screen.findByRole("dialog"))
+}
+
+const preview = () => screen.getByTestId("schedule-preview")
+const weekday = (name: string) => screen.getByRole("button", { name })
+
+describe("the preview", () => {
+  test("every Sunday from today lists 8 to 29 Nov and is created right away", async () => {
+    open()
+    await newDialog()
+
+    await waitFor(() =>
+      expect(preview()).toHaveTextContent("Next: Sun 8 Nov, Sun 15 Nov, Sun 22 Nov, Sun 29 Nov.")
+    )
+
+    expect(preview()).toHaveTextContent("The first session is created right away.")
+  })
+
+  test("every other Monday lists 16 and 30 Nov, 14 and 28 Dec, created on Sun 15 Nov", async () => {
+    open()
+    const dialog = await newDialog()
+
+    await userEvent.selectOptions(
+      dialog.getByRole("combobox", { name: "Every how many weeks" }),
+      "2"
+    )
+
+    await userEvent.click(weekday("Sunday"))
+    await userEvent.click(weekday("Monday"))
+
+    await waitFor(() =>
+      expect(preview()).toHaveTextContent("Next: Mon 16 Nov, Mon 30 Nov, Mon 14 Dec, Mon 28 Dec.")
+    )
+
+    expect(preview()).toHaveTextContent("The first session is created on Sun 15 Nov.")
+  })
+
+  test("no weekday or an end before the start blocks submit", async () => {
+    open()
+    const dialog = await newDialog()
+    await userEvent.click(weekday("Sunday"))
+    expect(preview()).toHaveTextContent("Choose at least one weekday.")
+    expect(dialog.getByRole("button", { name: "Create schedule" })).toBeDisabled()
+    await userEvent.click(weekday("Sunday"))
+    await userEvent.type(dialog.getByLabelText("Last date (optional)"), "2026-11-01")
+    expect(dialog.getByRole("button", { name: "Create schedule" })).toBeDisabled()
+  })
+})
+
+describe("saving", () => {
+  test("a weekly schedule sends monthWeek null and empty optionals as null, then toasts", async () => {
+    const sent = open()
+    const dialog = await newDialog()
+    await userEvent.type(dialog.getByLabelText("Name"), "Sunday class")
+    await userEvent.click(dialog.getByRole("button", { name: "Create schedule" }))
+    await waitFor(() => expect(sent).toHaveLength(1))
+
+    expect(sent[0].body).toEqual({
+      serviceId: sundaySchool.id,
+      stageId: null,
+      name: "Sunday class",
+      description: null,
+      location: null,
+      recurrence: {
+        frequency: "weekly",
+        interval: 1,
+        weekdays: [7],
+        monthWeek: null,
+        span: { startsOn: "2026-11-08", endsOn: null },
+      },
+      startTime: "18:00",
+      endTime: "19:30",
+      rosterMode: "expected",
+    })
+
+    await waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith(
+        "Schedule created. 1 session was created for today and tomorrow."
+      )
+    )
+  })
+
+  test("the last Friday monthly sends weekdays [5] and monthWeek -1", async () => {
+    const sent = open()
+    const dialog = await newDialog()
+    await userEvent.type(dialog.getByLabelText("Name"), "Family evening")
+    await userEvent.click(dialog.getByRole("radio", { name: "Monthly" }))
+    await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Week of the month" }), "-1")
+    await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Weekday" }), "5")
+    await userEvent.click(dialog.getByRole("button", { name: "Create schedule" }))
+    await waitFor(() => expect(sent).toHaveLength(1))
+
+    expect(sent[0].body.recurrence).toMatchObject({
+      frequency: "monthly",
+      weekdays: [5],
+      monthWeek: -1,
+    })
+  })
+
+  test("422s show on their controls and focus the first; a 409 keeps the dialog open", async () => {
+    let answer = () =>
+      problem(422, "checkFields", {
+        fieldErrors: {
+          name: { code: "meetings.scheduleNameRequired", params: {} },
+          endTime: { code: "meetings.endAfterStart", params: {} },
+          "recurrence.weekdays": { code: "recurrence.weekdays", params: {} },
+        },
+      })
+
+    open({ write: () => answer() })
+    const dialog = await newDialog()
+    await userEvent.click(dialog.getByRole("button", { name: "Create schedule" }))
+    const name = dialog.getByLabelText("Name")
+    await waitFor(() => expect(name).toHaveFocus())
+    expect(name).toHaveAttribute("aria-invalid", "true")
+    expect(dialog.getByLabelText("Ends at (optional)")).toHaveAttribute("aria-invalid", "true")
+    expect(dialog.getByText("Choose at least one weekday.")).toBeInTheDocument()
+
+    answer = () =>
+      problem(409, "meetings.serviceArchivedRestoreFirst", { params: { name: "Sunday School" } })
+
+    await userEvent.click(dialog.getByRole("button", { name: "Create schedule" }))
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    expect(screen.getByRole("dialog")).toBeInTheDocument()
+  })
+
+  test("editing sends a PATCH without serviceId or stageId", async () => {
+    const sent = open()
+    await userEvent.click(await screen.findByRole("button", { name: "Edit schedule" }))
+    const dialog = within(await screen.findByRole("dialog"))
+
+    expect(
+      dialog.getByText("You are changing the whole schedule", { exact: false })
+    ).toBeInTheDocument()
+
+    await userEvent.click(dialog.getByRole("button", { name: "Save schedule" }))
+    await waitFor(() => expect(sent).toHaveLength(1))
+    expect(sent[0].method).toBe("PATCH")
+    expect(sent[0].body).not.toHaveProperty("serviceId")
+    expect(sent[0].body).not.toHaveProperty("stageId")
+  })
+})
+
+test("a servant sees neither New schedule nor Edit", async () => {
+  open({
+    list: {
+      ...services,
+      items: services.items.map((s) => ({ ...s, can: { ...s.can, manageSessions: false } })),
+    },
+    schedules: [{ ...existing, can: { manage: false } }],
+  })
+
+  await screen.findByText(/Sunday class/)
+  expect(screen.queryByRole("button", { name: "New schedule" })).toBeNull()
+  expect(screen.queryByRole("button", { name: "Edit schedule" })).toBeNull()
+})
