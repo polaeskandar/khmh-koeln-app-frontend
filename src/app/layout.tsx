@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Geist, Oxanium } from "next/font/google"
 
 import { QueryProvider } from "@/lib/api/query-provider"
@@ -16,6 +16,12 @@ apiBaseUrl()
 export const metadata: Metadata = {
   title: "KHMK Köln",
   robots: { index: false, follow: false },
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 }
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
