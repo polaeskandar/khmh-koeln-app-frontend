@@ -12,8 +12,10 @@ import en from "../../messages/en.json"
 
 const catalogs = { en, de, ar } as unknown as Record<Locale, Messages>
 
-export function testProviders({ locale = "en" }: { locale?: Locale } = {}) {
-  const client: QueryClient = makeQueryClient()
+export function testProviders({
+  locale = "en",
+  client = makeQueryClient(),
+}: { locale?: Locale; client?: QueryClient } = {}) {
   function Providers({ children }: { children: ReactNode }) {
     return (
       <NextIntlClientProvider locale={locale} messages={catalogs[locale]} timeZone="Europe/Berlin">
@@ -25,7 +27,10 @@ export function testProviders({ locale = "en" }: { locale?: Locale } = {}) {
   return { client, wrapper: Providers }
 }
 
-export function renderWithProviders(ui: ReactElement, options: { locale?: Locale } = {}) {
+export function renderWithProviders(
+  ui: ReactElement,
+  options: { locale?: Locale; client?: QueryClient } = {}
+) {
   const { client, wrapper } = testProviders(options)
 
   return { client, ...render(ui, { wrapper }) }
