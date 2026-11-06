@@ -24,3 +24,13 @@ export const agendaQuery = (filter: AgendaFilter) => ({
 })
 
 export const useAgenda = (filter: AgendaFilter) => useQuery(agendaQuery(filter))
+
+export type MeetingSession = Schemas["SessionDetail"]
+
+export const meetingSessionQuery = (id: Uuid) => ({
+  queryKey: ["sessions", "detail", id] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) =>
+    dataOf(api.GET("/sessions/{id}", { params: { path: { id } }, signal })),
+})
+
+export const useMeetingSession = (id: Uuid) => useQuery(meetingSessionQuery(id))
