@@ -50,6 +50,12 @@ const SHOWN_FIELDS = [
   "privacy.accepted",
 ]
 
+const NOTE = {
+  parent: { label: "children", hint: "childrenHint" },
+  member: { label: "yourGroups", hint: "yourGroupsHint" },
+  servant: { label: "whereYouServe", hint: "whereYouServeHint" },
+} as const
+
 function ServiceSelect({
   value,
   onChange,
@@ -170,6 +176,7 @@ export function RegisterForm() {
 
   const kinds = [
     { value: "parent", title: t("asParent"), description: t("asParentHint") },
+    { value: "member", title: t("asMember"), description: t("asMemberHint") },
     { value: "servant", title: t("asServant"), description: t("asServantHint") },
   ] as const
 
@@ -265,8 +272,8 @@ export function RegisterForm() {
           />
         ) : null}
         <TextAreaField
-          label={servant ? t("whereYouServe") : t("children")}
-          description={servant ? t("whereYouServeHint") : t("childrenHint")}
+          label={t(NOTE[form.registeredAs].label)}
+          description={t(NOTE[form.registeredAs].hint)}
           rows={3}
           value={form.note}
           onChange={(event) => set("note", event.target.value)}

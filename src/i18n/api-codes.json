@@ -154,6 +154,7 @@
   "accounts.emailTaken": [],
   "accounts.passwordTooShort": ["min"],
   "accounts.childrenRequired": [],
+  "accounts.groupsRequired": [],
   "accounts.serviceDetailsRequired": [],
   "accounts.chooseService": [],
   "accounts.chooseServiceForRole": [],
