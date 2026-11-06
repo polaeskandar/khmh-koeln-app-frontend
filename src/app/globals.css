@@ -191,11 +191,6 @@
   }
 }
 
-:root {
-  --font-sans: var(--font-oxanium), var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-geist), var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
-}
-
 :lang(ar),
 :lang(ar) * {
   letter-spacing: normal !important;

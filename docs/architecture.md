@@ -172,6 +172,14 @@ The decisions behind this:
   without the preset's letter spacing, which would pull the joined letters apart. Readex Pro was tried
   too: in Chrome's text fields (and so in the Android app) it draws the final ي without its dots, so
   «علي» reads «على».
+- **Font stand-ins go after the Arabic font.** next/font gives Oxanium and Geist a stand-in made from the
+  device's Arial (`'Oxanium', 'Oxanium Fallback'`) to keep the layout steady while the fonts load. On Macs
+  and Windows, Arial has Arabic letters: in `Oxanium, Oxanium Fallback, Vazirmatn` the stand-in would draw
+  every Arabic letter and Vazirmatn would never be used. `adjustFontFallback: false` doesn't remove the
+  stand-ins. So the root layout builds both stacks with `fontStack` (`src/lib/font-stack.ts`), every
+  font's own face before any stand-in, and sets them on `<html>`: `'Oxanium', 'Vazirmatn', 'Oxanium
+Fallback', 'Vazirmatn Fallback', ui-sans-serif, system-ui, sans-serif`. Android and Linux have no Arial
+  with Arabic letters, so the bug doesn't show there.
 - German is formal ("Sie"). The prototype's catalogs follow a glossary of the church's terms (Dienst, Stufe,
   Diener/in, Termin; خدمة، مرحلة، خادم، اجتماع).
 
