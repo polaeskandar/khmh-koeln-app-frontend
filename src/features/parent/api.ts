@@ -54,3 +54,34 @@ export function useSelectedChild(items: ChildSummary[]): ChildSummary | null {
 
   return items.find((child) => child.id === wanted) ?? items[0] ?? null
 }
+
+export type Report = Pick<ParentTask, "done" | "completedAt" | "completedBy" | "completedByYou">
+
+export type ParentTaskDetail = Schemas["ChildHomeworkDetail"]
+const taskParams = (child: Uuid, id: Uuid) => ({ path: { childId: child, homeworkId: id } })
+
+export const parentTaskQuery = (child: Uuid, id: Uuid) => ({
+  queryKey: ["parent", "task", child, id] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) =>
+    dataOf(
+      api.GET("/parent/children/{childId}/homework/{homeworkId}", {
+        params: taskParams(child, id),
+        signal,
+      })
+    ),
+})
+
+export const reportDoneRequest = (child: Uuid, id: Uuid) =>
+  dataOf(
+    api.PUT("/parent/children/{childId}/homework/{homeworkId}/completion", {
+      params: taskParams(child, id),
+      body: {},
+    })
+  )
+
+export const undoReportRequest = (child: Uuid, id: Uuid) =>
+  dataOf(
+    api.DELETE("/parent/children/{childId}/homework/{homeworkId}/completion", {
+      params: taskParams(child, id),
+    })
+  )
