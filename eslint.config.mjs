@@ -30,7 +30,7 @@ const localeFormatting = [
   },
 ]
 
-const rawHtmlFiles = []
+const rawHtmlFiles = ["src/app/layout.tsx"]
 
 const toolDirective = /^\s*(eslint[- ]|@ts-expect-error|\/ <reference )/
 
