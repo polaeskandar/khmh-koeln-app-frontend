@@ -133,7 +133,11 @@ export function RequirePermission({
     return children
   }
 
-  return fallback ?? <NoAccess title={t("title.forbidden")}>{t("forbidden")}</NoAccess>
+  if (fallback !== undefined) {
+    return fallback
+  }
+
+  return <NoAccess title={t("title.forbidden")}>{t("forbidden")}</NoAccess>
 }
 
 export function RedirectIfSignedIn({ children }: { children: ReactNode }) {

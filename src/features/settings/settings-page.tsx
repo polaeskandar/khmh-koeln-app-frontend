@@ -8,6 +8,7 @@ import { RequirePermission } from "@/features/auth/guards"
 
 import { AccountRequests } from "./account-requests"
 import { ApproveButton } from "./approve-dialog"
+import { ParentAccess } from "./parent-access"
 
 export function SettingsPage() {
   const t = useTranslations()
@@ -23,6 +24,9 @@ export function SettingsPage() {
               request.registeredAs === "parent" ? <ApproveButton request={request} /> : null
             }
           />
+        </RequirePermission>
+        <RequirePermission action="update" resource="users" fallback={null}>
+          <ParentAccess />
         </RequirePermission>
       </PageBody>
     </>

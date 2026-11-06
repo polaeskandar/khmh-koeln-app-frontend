@@ -265,7 +265,8 @@
       "adminOnlyGrant": "You can’t give parents access to children.",
       "alreadyHasAccess": "{parent} already has access to {child}.",
       "adminOnlyApprove": "You can’t approve parent access.",
-      "adminOnlyRemove": "You can’t remove parent access."
+      "adminOnlyRemove": "You can’t remove parent access.",
+      "accountNotActive": "This account isn’t active. Approve or reactivate it first."
     },
     "accounts": {
       "firstNameRequired": "Enter your first name.",
