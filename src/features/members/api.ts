@@ -33,3 +33,9 @@ export const joinRequest = (person: Uuid, placement: { serviceId: Uuid; stageId:
 
 export const endMembershipRequest = (membership: Uuid) =>
   dataOf(api.POST("/memberships/{id}/end", { params: { path: { id: membership } }, body: {} }))
+
+export const deactivatePersonRequest = (person: Uuid) =>
+  dataOf(api.POST("/people/{id}/deactivate", { params: { path: { id: person } }, body: {} }))
+
+export const reactivatePersonRequest = (person: Uuid) =>
+  dataOf(api.POST("/people/{id}/reactivate", { params: { path: { id: person } }, body: {} }))
