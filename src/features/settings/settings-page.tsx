@@ -7,6 +7,7 @@ import { PageBody, PageHeader } from "@/components/page-header"
 import { RequirePermission } from "@/features/auth/guards"
 
 import { AccountRequests } from "./account-requests"
+import { StaffAccounts } from "./staff-accounts"
 
 export function SettingsPage() {
   const t = useTranslations()
@@ -18,6 +19,9 @@ export function SettingsPage() {
         <PageHeader title={t("nav.settings")} description={t("settings.description")} />
         <RequirePermission action="read" resource="users">
           <AccountRequests />
+        </RequirePermission>
+        <RequirePermission action="update" resource="users" fallback={null}>
+          <StaffAccounts />
         </RequirePermission>
       </PageBody>
     </>

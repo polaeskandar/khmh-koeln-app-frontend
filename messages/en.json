@@ -731,7 +731,15 @@
         "roleHint": "See what each role allows under <link>Roles</link>.",
         "choose": "Choose a role"
       },
-      "description": "Give each account the roles it needs. Roles hold everywhere in the church."
+      "description": "Give each account the roles it needs. Roles hold everywhere in the church.",
+      "passwordLink": {
+        "action": "Password link…",
+        "title": "Password link for {name}",
+        "description": "This emails {name} a one-time link to choose a new password. An older unused link stops working.",
+        "sent": "Sent to {email}.",
+        "expires": "Works until {when}.",
+        "creating": "Sending the link…"
+      }
     },
     "parents": {
       "title": "Parent access",
