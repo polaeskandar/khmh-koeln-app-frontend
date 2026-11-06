@@ -1,7 +1,9 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useSearchParams } from "next/navigation"
+import { useEffect } from "react"
 
 import { api, dataOf, type Schemas } from "@/lib/api/client"
+import { ApiError } from "@/lib/api/problem"
 import type { Uuid } from "@/lib/api/types/common"
 
 export type ChildSummary = Schemas["ChildSummary"]
@@ -30,8 +32,22 @@ export const childHomeworkQuery = (child: Uuid, state: TaskState) => ({
 
 export const useParentChildren = () => useQuery(parentChildrenQuery())
 
-export const useChildHomework = (child: Uuid, state: TaskState) =>
-  useQuery(childHomeworkQuery(child, state))
+export function useChildHomework(child: Uuid, state: TaskState) {
+  const queryClient = useQueryClient()
+  const query = useQuery(childHomeworkQuery(child, state))
+  const unlinked = query.error instanceof ApiError && query.error.status === 404
+
+  useEffect(() => {
+    if (unlinked) {
+      void queryClient.invalidateQueries(
+        { queryKey: ["parent", "children"] },
+        { cancelRefetch: false }
+      )
+    }
+  }, [unlinked, queryClient])
+
+  return query
+}
 
 export function useSelectedChild(items: ChildSummary[]): ChildSummary | null {
   const wanted = useSearchParams().get("child")

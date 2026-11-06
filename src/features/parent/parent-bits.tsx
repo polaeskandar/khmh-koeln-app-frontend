@@ -5,6 +5,7 @@ import { Check, ChevronRight } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { MemberAvatar } from "@/components/member-avatar"
+import { Skeleton } from "@/components/ui/skeleton"
 import { DueLine } from "@/features/homework/homework-bits"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
@@ -158,5 +159,15 @@ export function TaskList({
         </ul>
       )}
     </section>
+  )
+}
+
+export function ListSkeleton() {
+  return (
+    <div aria-busy="true" className="flex flex-col gap-2">
+      <Skeleton className="h-5 w-40" />
+      <Skeleton className="h-20 w-full" />
+      <Skeleton className="h-20 w-full" />
+    </div>
   )
 }
