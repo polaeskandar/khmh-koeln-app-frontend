@@ -45,7 +45,17 @@ function answer(stage: () => Response) {
       requests++
 
       return stage()
-    })
+    }),
+    http.get(apiUrl("/people"), () =>
+      HttpResponse.json({
+        today: "2026-11-08",
+        items: [],
+        page: 1,
+        pageSize: 25,
+        total: 0,
+        can: { add: false },
+      })
+    )
   )
 
   return () => requests
