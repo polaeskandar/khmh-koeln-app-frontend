@@ -20,3 +20,8 @@ export const signInRequest = (credentials: { email: string; password: string }) 
   dataOf(api.POST("/auth/sign-in", { body: credentials }))
 
 export const signOutRequest = () => dataOf(api.POST("/auth/sign-out", { body: {} }))
+
+export const MIN_PASSWORD_LENGTH = 10
+
+export const setPasswordRequest = (body: { token: string; password: string }) =>
+  dataOf(api.POST("/auth/password-links", { body }))
