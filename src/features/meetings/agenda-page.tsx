@@ -23,6 +23,7 @@ import { routes } from "@/lib/routes"
 import { type Agenda, useAgenda } from "./api"
 import { DayStrip } from "./day-strip"
 import { MeetingsTabs, ServiceFilter, withQuery } from "./meetings-nav"
+import { OccurrenceMenu } from "./occurrence-menu"
 
 const WINDOW_DAYS = 14
 
@@ -155,8 +156,9 @@ function AgendaView({
         ) : (
           <ul className="divide-y border-y">
             {day.items.map((item) => (
-              <li key={itemKey(item)}>
-                <AgendaRow item={item} today={agenda.today} />
+              <li key={itemKey(item)} className="flex items-center gap-2">
+                <AgendaRow item={item} today={agenda.today} className="min-w-0 flex-1" />
+                {item.kind === "planned" && item.can.manage ? <OccurrenceMenu item={item} /> : null}
               </li>
             ))}
           </ul>
