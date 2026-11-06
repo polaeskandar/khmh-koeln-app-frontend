@@ -36,7 +36,7 @@ pnpm cap:android       # open the Android project in Android Studio
 
 CI (`.github/workflows/ci.yml`) runs `task check` on every pull request and on `main`, plus `pnpm audit --prod
 --audit-level high` and a check that `pnpm exec cap sync android` leaves the committed native projects
-unchanged.
+unchanged. It can also be started by hand on any branch (Actions → CI → Run workflow).
 
 To see changes on a phone or simulator without rebuilding, keep `pnpm dev` running and start the app with
 live reload: `pnpm cap run ios -l --host <your computer's IP> --port 3000` (or `android`).
