@@ -26,3 +26,37 @@ export function VisibilityNote({ who, className }: { who: Audience; className?: 
     </span>
   )
 }
+
+export function LessonPanel({
+  title,
+  who,
+  actions,
+  children,
+  className,
+}: {
+  title: string
+  who?: Audience
+  actions?: React.ReactNode
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <section
+      className={cn(
+        "flex min-w-0 flex-col gap-4 border p-5",
+        who === "servants" && "bg-muted/30",
+        who === "parents" && "border-s-4 border-s-success",
+        className
+      )}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="font-heading text-base font-semibold tracking-tight">{title}</h2>
+        <div className="flex items-center gap-3">
+          {who ? <VisibilityNote who={who} /> : null}
+          {actions}
+        </div>
+      </div>
+      {children}
+    </section>
+  )
+}
