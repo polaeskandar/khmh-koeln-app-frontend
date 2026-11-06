@@ -50,3 +50,12 @@ export type PublishedHomework = Schemas["HomeworkStatusChanged"]
 
 export const publishHomeworkRequest = (id: Uuid) =>
   dataOf(api.POST("/homework/{id}/publish", { params: { path: { id } }, body: {} }))
+
+export type ProgressRow = Schemas["AudienceRow"]
+export type HomeworkProgress = Schemas["HomeworkProgress"]
+
+export const homeworkProgressQuery = (id: Uuid) => ({
+  queryKey: ["homework", "progress", id] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) =>
+    dataOf(api.GET("/homework/{id}/progress", { params: { path: { id } }, signal })),
+})
