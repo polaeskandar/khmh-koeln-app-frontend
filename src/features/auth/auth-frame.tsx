@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl"
 
 import { KhmkMark } from "@/components/brand/logo"
 import { LanguageMenu } from "@/components/language-switch"
+import { AppearanceMenu } from "@/components/theme-switch"
 import { useToday } from "@/hooks/use-today"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
@@ -34,7 +35,10 @@ export function AuthFrame({
             <span className="text-xs text-muted-foreground">{t("church")}</span>
           </span>
         </Link>
-        <LanguageMenu />
+        <span className="flex items-center gap-1">
+          <AppearanceMenu />
+          <LanguageMenu />
+        </span>
       </header>
       <main
         className={cn(
