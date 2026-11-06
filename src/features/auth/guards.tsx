@@ -73,7 +73,10 @@ function Redirect({ to, locale }: { to: string; locale?: Locale }) {
   return <SessionSplash />
 }
 
-const homeOf = (areas: Areas) => (areas.staff ? routes.home() : routes.parentHome())
+const homeOf = (areas: Areas) =>
+  areas.staff ? routes.home() : areas.parent ? routes.parentHome() : routes.memberHome()
+
+const hasArea = (areas: Areas) => areas.staff || areas.parent || areas.member
 
 function Guard({ allows, children }: { allows: (areas: Areas) => boolean; children: ReactNode }) {
   const { session, refresh } = useSession()
@@ -96,7 +99,7 @@ function Guard({ allows, children }: { allows: (areas: Areas) => boolean; childr
 
   const { areas } = session
 
-  if (!areas.staff && !areas.parent) {
+  if (!hasArea(areas)) {
     return <NoRole />
   }
 
@@ -113,6 +116,10 @@ export const RequireStaff = ({ children }: { children: ReactNode }) => (
 
 export const RequireParent = ({ children }: { children: ReactNode }) => (
   <Guard allows={(areas) => areas.parent}>{children}</Guard>
+)
+
+export const RequireMember = ({ children }: { children: ReactNode }) => (
+  <Guard allows={(areas) => areas.member}>{children}</Guard>
 )
 
 export function RequirePermission({
@@ -149,7 +156,7 @@ export function RedirectIfSignedIn({ children }: { children: ReactNode }) {
 
   const { areas } = session
 
-  if (!areas.staff && !areas.parent) {
+  if (!hasArea(areas)) {
     return <NoRole />
   }
 

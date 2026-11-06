@@ -32,8 +32,8 @@ const account = (displayName: string, roles: Me["roles"], permissions: Permissio
   },
   roles,
   permissions,
-  today: "2026-11-08",
   member: null,
+  today: "2026-11-08",
 })
 
 export const me = {
