@@ -29,3 +29,5 @@ export const apiBaseUrl = () =>
   })
 
 export const registrationEnabled = () => process.env.NEXT_PUBLIC_REGISTRATION_ENABLED === "true"
+
+export const resetByEmail = () => process.env.NEXT_PUBLIC_RESET_BY_EMAIL === "true"

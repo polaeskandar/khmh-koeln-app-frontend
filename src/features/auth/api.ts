@@ -25,3 +25,6 @@ export const MIN_PASSWORD_LENGTH = 10
 
 export const setPasswordRequest = (body: { token: string; password: string }) =>
   dataOf(api.POST("/auth/password-links", { body }))
+
+export const forgotPasswordRequest = (email: string) =>
+  dataOf(api.POST("/auth/forgot-password", { body: { email } }))
