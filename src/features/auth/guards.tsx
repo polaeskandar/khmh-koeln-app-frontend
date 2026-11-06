@@ -15,10 +15,12 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
+import type { Locale } from "@/i18n/config"
 import { useRouter } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 
 import type { areasOf } from "./api"
+import { safeNext } from "./safe-next"
 import { useSession } from "./session"
 
 type Areas = ReturnType<typeof areasOf>
@@ -55,9 +57,16 @@ export function NoRole() {
   )
 }
 
-function Redirect({ to }: { to: string }) {
+function Redirect({ to, locale }: { to: string; locale?: Locale }) {
   const router = useRouter()
-  useEffect(() => router.replace(to), [router, to])
+
+  useEffect(() => {
+    if (locale) {
+      router.replace(to, { locale })
+    } else {
+      router.replace(to)
+    }
+  }, [router, to, locale])
 
   return <SessionSplash />
 }
@@ -121,5 +130,17 @@ export function RedirectIfSignedIn({ children }: { children: ReactNode }) {
 
   const { areas } = session
 
-  return areas.staff || areas.parent ? <Redirect to={homeOf(areas)} /> : <NoRole />
+  if (!areas.staff && !areas.parent) {
+    return <NoRole />
+  }
+
+  const next = safeNext(new URLSearchParams(window.location.search).get("next"))
+
+  if (!next) {
+    return <Redirect to={homeOf(areas)} />
+  }
+
+  const [, locale, ...rest] = next.split("/")
+
+  return <Redirect to={`/${rest.join("/")}`} locale={locale as Locale} />
 }
