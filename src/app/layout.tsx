@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import { Geist, Noto_Kufi_Arabic, Oxanium } from "next/font/google"
+import { Geist, Oxanium, Vazirmatn } from "next/font/google"
 
 import { QueryProvider } from "@/lib/api/query-provider"
 import { prePaintScript } from "@/i18n/locale-choice"
@@ -12,7 +12,7 @@ import "./globals.css"
 const fontText = Oxanium({ subsets: ["latin", "latin-ext"], variable: "--font-oxanium" })
 const fontHeading = Geist({ subsets: ["latin", "latin-ext"], variable: "--font-geist" })
 
-const fontArabic = Noto_Kufi_Arabic({
+const fontArabic = Vazirmatn({
   subsets: ["arabic"],
   variable: "--font-arabic",
   adjustFontFallback: false,
