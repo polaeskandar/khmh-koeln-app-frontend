@@ -19,6 +19,7 @@ import { routes } from "@/lib/routes"
 import { type AttendanceBoard as Board, attendanceBoardQuery } from "./api"
 import { AttendanceBoard } from "./attendance-board"
 import { applyWrites, useMarkWrites, useOnline } from "./mark-writes"
+import { VisitorSearch } from "./visitor-search"
 
 export function BoardFrame({ board, children }: { board: Board; children: ReactNode }) {
   const t = useTranslations()
@@ -77,6 +78,7 @@ function ActiveBoard({ board, boardAt }: { board: Board; boardAt: number }) {
   const t = useTranslations("attendance.board")
   const online = useOnline()
   const writes = useMarkWrites(board.session.id)
+  const shown = applyWrites(board, writes.writes, boardAt)
 
   return (
     <>
@@ -86,13 +88,23 @@ function ActiveBoard({ board, boardAt }: { board: Board; boardAt: number }) {
         </p>
       )}
       <AttendanceBoard
-        board={applyWrites(board, writes.writes, boardAt)}
+        board={shown}
         actions={{
           onMark: writes.mark,
           onUndo: writes.undo,
           pending: writes.pending,
           saving: writes.pending.size > 0,
         }}
+        below={(query) =>
+          board.session.can.record ? (
+            <VisitorSearch
+              board={shown}
+              query={query}
+              pending={writes.pending}
+              onMark={writes.markVisitor}
+            />
+          ) : null
+        }
       />
     </>
   )

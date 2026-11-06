@@ -10,19 +10,22 @@ import { ApiError } from "@/lib/api/problem"
 import type { PersonRef, Uuid } from "@/lib/api/types/common"
 import { type ProblemTranslator, translateProblem } from "@/lib/api/translate-problem"
 
-import type { AttendanceBoard, Mark } from "./api"
+import type { AttendanceBoard, Mark, Placement } from "./api"
+
+export type Visitor = { person: PersonRef; placements: Placement[] }
 
 export type Write = {
   present: boolean
   status: "pending" | "confirmed"
   mark: Mark | null
   settledAt: number
+  visitor?: Visitor
 }
 
 export type Writes = Readonly<Record<Uuid, Write>>
 
 export type WriteAction =
-  | { type: "start"; personId: Uuid; present: boolean }
+  | { type: "start"; personId: Uuid; present: boolean; visitor?: Visitor }
   | { type: "confirm"; personId: Uuid; mark: Mark | null; at: number }
   | { type: "fail"; personId: Uuid }
 
@@ -37,7 +40,13 @@ export function writesReducer(writes: Writes, action: WriteAction): Writes {
 
       return {
         ...writes,
-        [action.personId]: { present: action.present, status: "pending", mark: null, settledAt: 0 },
+        [action.personId]: {
+          present: action.present,
+          status: "pending",
+          mark: null,
+          settledAt: 0,
+          visitor: action.visitor,
+        },
       }
     case "confirm":
       if (!current) {
@@ -93,6 +102,20 @@ export function applyWrites(
     return mark ? [{ ...row, mark }] : []
   })
 
+  const listed = new Set([...board.roster, ...board.notOnRoster].map((row) => row.person.id))
+
+  for (const write of Object.values(writes)) {
+    if (!write.visitor || listed.has(write.visitor.person.id)) {
+      continue
+    }
+
+    const mark = markOf(write.visitor.person.id, null)
+
+    if (mark) {
+      notOnRoster.push({ ...write.visitor, mark })
+    }
+  }
+
   const rosterPresent = roster.filter((row) => row.mark).length
 
   return {
@@ -147,8 +170,8 @@ export function useMarkWrites(sessionId: Uuid) {
     [queryClient]
   )
 
-  async function send(person: PersonRef, present: boolean) {
-    dispatch({ type: "start", personId: person.id, present })
+  async function send(person: PersonRef, present: boolean, visitor?: Visitor) {
+    dispatch({ type: "start", personId: person.id, present, visitor })
     const params = { path: { sessionId, personId: person.id } }
 
     try {
@@ -208,6 +231,11 @@ export function useMarkWrites(sessionId: Uuid) {
     mark: (person: PersonRef) => {
       if (!pending.has(person.id)) {
         void send(person, true)
+      }
+    },
+    markVisitor: (visitor: Visitor) => {
+      if (!pending.has(visitor.person.id)) {
+        void send(visitor.person, true, visitor)
       }
     },
     undo: (person: PersonRef) => {
