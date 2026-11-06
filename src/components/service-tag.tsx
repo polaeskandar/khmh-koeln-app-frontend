@@ -20,10 +20,14 @@ export function ServiceTag({
   label,
   className,
 }: {
-  service: Pick<ServiceRef, "name" | "tone">
+  service: Pick<ServiceRef, "name" | "tone"> | null
   label?: React.ReactNode
   className?: string
 }) {
+  if (!service) {
+    return null
+  }
+
   return (
     <span
       className={cn("inline-flex min-w-0 items-center gap-1.5 text-muted-foreground", className)}
