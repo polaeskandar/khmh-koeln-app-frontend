@@ -20,3 +20,21 @@ export const peopleQuery = (filter: PeopleFilter) => ({
   queryFn: ({ signal }: { signal: AbortSignal }) =>
     dataOf(api.GET("/people", { params: { query: filter }, signal })),
 })
+
+export type PlacementInput = { serviceId: Uuid; stageId: Uuid | null }
+
+export type NewPerson = {
+  firstName: string
+  lastName: string
+  displayName: string | null
+  placement: PlacementInput | null
+  confirmDuplicate?: boolean
+}
+
+export const createPersonRequest = (person: NewPerson) =>
+  dataOf(api.POST("/people", { body: person }))
+
+export const addMembershipRequest = (person: Uuid, placement: PlacementInput) =>
+  dataOf(
+    api.POST("/people/{id}/memberships", { params: { path: { id: person } }, body: placement })
+  )

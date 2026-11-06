@@ -10,6 +10,7 @@ export type Problem = {
   code: string | null
   message: string
   fieldErrors: Record<string, string>
+  extensions: Record<string, unknown>
 }
 
 function statusKey(status: number) {
@@ -76,5 +77,6 @@ export function describeProblem(error: ApiError, t: ProblemTranslator): Problem 
     code: error.code,
     message: translateProblem(error, t),
     fieldErrors: fieldErrorsOf(error, t),
+    extensions: error.extensions,
   }
 }

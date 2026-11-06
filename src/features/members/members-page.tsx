@@ -37,6 +37,7 @@ import { useFormat } from "@/i18n/format"
 import { fullName, initials, preferredName } from "@/lib/domain/names"
 
 import { type PeopleList, peopleQuery, type PersonRow, type Placement } from "./api"
+import { AddPersonButton } from "./add-person-dialog"
 import { useGroupOptions } from "./groups"
 
 const PAGE_SIZE = 25
@@ -226,19 +227,22 @@ export function MembersScreen({ onSelect }: { onSelect?: (person: PersonRow) => 
             </InputGroupAddon>
           ) : null}
         </InputGroup>
-        <NativeSelect
-          aria-label={t("members.service")}
-          className="w-full sm:w-64"
-          value={group}
-          onChange={(event) => setGroup(event.target.value)}
-        >
-          <NativeSelectOption value="">{t("members.allServices")}</NativeSelectOption>
-          {groups.map((option) => (
-            <NativeSelectOption key={option.value} value={option.value}>
-              {option.label}
-            </NativeSelectOption>
-          ))}
-        </NativeSelect>
+        <span className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          {people.data?.can.add ? <AddPersonButton /> : null}
+          <NativeSelect
+            aria-label={t("members.service")}
+            className="w-full sm:w-64"
+            value={group}
+            onChange={(event) => setGroup(event.target.value)}
+          >
+            <NativeSelectOption value="">{t("members.allServices")}</NativeSelectOption>
+            {groups.map((option) => (
+              <NativeSelectOption key={option.value} value={option.value}>
+                {option.label}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
+        </span>
       </div>
       <QueryState query={people}>
         {(list) => (
