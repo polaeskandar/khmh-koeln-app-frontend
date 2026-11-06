@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
+import { useFormat } from "@/i18n/format"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
 import {
@@ -26,14 +27,18 @@ import {
   rolesQuery,
 } from "./api"
 import { PersonSearch } from "./person-search"
+import { RolesChoice } from "./roles-choice"
 
 const CLOSE_AND_REFETCH = new Set(["accounts.alreadyApproved", "notFound.user"])
 
-function ParentApproval({ request, onDone }: { request: AccountRequest; onDone: () => void }) {
+function Approval({ request, onDone }: { request: AccountRequest; onDone: () => void }) {
   const t = useTranslations()
+  const f = useFormat()
   const queryClient = useQueryClient()
   const roles = useQuery(rolesQuery)
+  const parent = request.registeredAs === "parent"
   const [children, setChildren] = useState<DirectoryPerson[]>([])
+  const [ticked, setTicked] = useState<string[] | null>(null)
 
   const approve = useApiMutation(approveRequest, {
     successMessage: t("toast.accountApproved", { name: request.account.displayName }),
@@ -42,14 +47,17 @@ function ParentApproval({ request, onDone }: { request: AccountRequest; onDone: 
     onSuccess: onDone,
   })
 
-  const parentRoleIds = (roles.data?.items ?? []).filter(parentPortalOnly).map((role) => role.id)
+  const roleIds =
+    ticked ??
+    (parent ? (roles.data?.items ?? []).filter(parentPortalOnly).map((role) => role.id) : [])
 
   async function submit() {
-    const result = await approve.execute(request.account.id, {
-      as: "parent",
-      childIds: children.map((child) => child.id),
-      roleIds: parentRoleIds,
-    })
+    const result = await approve.execute(
+      request.account.id,
+      parent
+        ? { as: "parent", childIds: children.map((child) => child.id), roleIds }
+        : { as: "servant", roleIds }
+    )
 
     if (!result.ok && result.problem.code && CLOSE_AND_REFETCH.has(result.problem.code)) {
       toast.error(result.problem.message)
@@ -74,24 +82,39 @@ function ParentApproval({ request, onDone }: { request: AccountRequest; onDone: 
           {request.note}
         </blockquote>
       ) : null}
-      <Field data-invalid={errors.childIds ? true : undefined}>
-        <FieldLabel>{t("accountRequests.approve.children")}</FieldLabel>
-        <PersonSearch
-          chosen={children}
-          onChange={setChildren}
-          label={t("accountRequests.approve.findChild")}
+      {parent ? (
+        <Field data-invalid={errors.childIds ? true : undefined}>
+          <FieldLabel>{t("accountRequests.approve.children")}</FieldLabel>
+          <PersonSearch
+            chosen={children}
+            onChange={setChildren}
+            label={t("accountRequests.approve.findChild")}
+          />
+          {errors.childIds ? <FieldError>{errors.childIds}</FieldError> : null}
+        </Field>
+      ) : request.services.length > 0 ? (
+        <p className="text-sm">
+          {t("accountRequests.approve.servesIn", {
+            service: request.services.map((service) => service.name).join(f.separator),
+          })}
+        </p>
+      ) : null}
+      {roles.data ? (
+        <RolesChoice
+          roles={roles.data.items}
+          selected={roleIds}
+          onChange={setTicked}
+          error={errors.roleIds}
         />
-        {errors.childIds ? <FieldError>{errors.childIds}</FieldError> : null}
-        {errors.roleIds ? <FieldError>{errors.roleIds}</FieldError> : null}
-        {generalError ? <FieldError>{generalError}</FieldError> : null}
-      </Field>
+      ) : null}
+      {generalError ? <FieldError>{generalError}</FieldError> : null}
       <DialogFooter>
         <Button type="button" variant="outline" disabled={approve.pending} onClick={onDone}>
           {t("common.cancel")}
         </Button>
         <Button
           type="button"
-          disabled={approve.pending || children.length === 0 || !roles.data}
+          disabled={approve.pending || roleIds.length === 0 || (parent && children.length === 0)}
           onClick={() => void submit()}
         >
           {approve.pending ? <Spinner data-icon="inline-start" /> : null}
@@ -114,11 +137,15 @@ export function ApproveButton({ request }: { request: AccountRequest }) {
         <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t("approve.title", { name: request.account.displayName })}</DialogTitle>
-            <DialogDescription>{t("approve.parentDescription")}</DialogDescription>
+            <DialogDescription>
+              {request.registeredAs === "parent"
+                ? t("approve.parentDescription")
+                : t("approve.servantDescription")}
+            </DialogDescription>
           </DialogHeader>
           {open ? (
             <div className="flex flex-col gap-4">
-              <ParentApproval request={request} onDone={() => setOpen(false)} />
+              <Approval request={request} onDone={() => setOpen(false)} />
             </div>
           ) : null}
         </DialogContent>
