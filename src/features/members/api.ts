@@ -33,3 +33,8 @@ export const joinRequest = (person: Uuid, placement: { serviceId: Uuid; stageId:
 
 export const endMembershipRequest = (membership: Uuid) =>
   dataOf(api.POST("/memberships/{id}/end", { params: { path: { id: membership } }, body: {} }))
+
+export const moveMembershipRequest = (membership: Uuid, stageId: Uuid) =>
+  dataOf(
+    api.POST("/memberships/{id}/move", { params: { path: { id: membership } }, body: { stageId } })
+  )

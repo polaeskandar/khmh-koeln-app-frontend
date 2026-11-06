@@ -1,5 +1,7 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
+import { ArrowRightLeft, Ellipsis, UserMinus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -9,6 +11,15 @@ import { TextField } from "@/components/form-fields"
 import { MemberAvatar } from "@/components/member-avatar"
 import { ServiceSwatch } from "@/components/service-tag"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { FieldGroup } from "@/components/ui/field"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import {
@@ -18,6 +29,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import { servicesQuery } from "@/features/services/api"
 import { useInlineEnd } from "@/i18n/direction"
 import { useFormat } from "@/i18n/format"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -30,6 +42,7 @@ import {
   type PersonRow,
   type Placement,
   renamePersonRequest,
+  moveMembershipRequest,
 } from "./api"
 import { useGroupOptions } from "./groups"
 
@@ -122,6 +135,90 @@ function NameForm({ person }: { person: PersonRow["person"] }) {
   )
 }
 
+function useMoveTargets(person: PersonRow, placement: Placement) {
+  const services = useQuery(servicesQuery)
+  const service = services.data?.items.find((item) => item.id === placement.service.id)
+
+  if (!service || service.archived) {
+    return []
+  }
+
+  const taken = new Set(person.placements.flatMap((other) => (other.stage ? [other.stage.id] : [])))
+
+  return service.stages.filter(
+    (stage) => !stage.archived && stage.can.manageMembers && !taken.has(stage.id)
+  )
+}
+
+function MembershipMenu({
+  person,
+  placement,
+  onRemove,
+}: {
+  person: PersonRow
+  placement: Placement
+  onRemove: () => void
+}) {
+  const t = useTranslations()
+  const where = useWhere()
+  const targets = useMoveTargets(person, placement)
+
+  const move = useApiMutation(
+    (stageId: string) => moveMembershipRequest(placement.membershipId, stageId),
+    { successMessage: t("toast.membershipMoved"), invalidate: PEOPLE_QUERIES }
+  )
+
+  if (targets.length === 0 && !person.can.edit) {
+    return null
+  }
+
+  async function moveTo(stageId: string) {
+    const result = await move.execute(stageId)
+
+    if (!result.ok && result.problem.status === 422) {
+      toast.error(result.problem.fieldErrors.stageId ?? result.problem.message)
+    }
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          disabled={move.pending}
+          aria-label={t("common.actionsFor", { name: where(placement) })}
+        >
+          <Ellipsis />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {targets.length > 0 ? (
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <ArrowRightLeft />
+              {t("members.membership.moveFromToday")}
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>
+              {targets.map((stage) => (
+                <DropdownMenuItem key={stage.id} onSelect={() => void moveTo(stage.id)}>
+                  <bdi>{stage.name}</bdi>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+        ) : null}
+        {person.can.edit ? (
+          <DropdownMenuItem variant="destructive" onSelect={onRemove}>
+            <UserMinus />
+            {t("members.membership.removeFrom", { where: where(placement) })}
+          </DropdownMenuItem>
+        ) : null}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
 function Placements({ person, onGone }: { person: PersonRow; onGone: () => void }) {
   const t = useTranslations()
   const f = useFormat()
@@ -156,11 +253,11 @@ function Placements({ person, onGone }: { person: PersonRow; onGone: () => void 
                   </span>
                 </span>
               </span>
-              {person.can.edit ? (
-                <Button variant="ghost" size="sm" onClick={() => setEnding(placement)}>
-                  {t("members.membership.removeFrom", { where: where(placement) })}
-                </Button>
-              ) : null}
+              <MembershipMenu
+                person={person}
+                placement={placement}
+                onRemove={() => setEnding(placement)}
+              />
             </li>
           ))}
         </ul>
