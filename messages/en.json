@@ -122,6 +122,7 @@
       "notArchived": "{name} is not archived.",
       "takingAttendance": "{name} is taking attendance right now. Close the open sessions first.",
       "hasHistory": "{name} has meeting history ({count, plural, one {# session} other {# sessions}}). Archive it instead of deleting it.",
+      "hasMembers": "{count, plural, one {# person is} other {# people are}} still in {name}. Archive the service instead, or remove them first.",
       "archivedNoStageChanges": "{name} is archived. Restore it before changing its stages.",
       "hasLessons": "{name} has lessons ({count, plural, one {# lesson} other {# lessons}}). Archive it instead of deleting it."
     },
