@@ -44,3 +44,6 @@ export const attendanceBoardQuery = (session: Uuid) => ({
 })
 
 export const useAttendanceBoard = (session: Uuid) => useQuery(attendanceBoardQuery(session))
+
+export const reopenAttendanceRequest = (session: Uuid, reason: string | null) =>
+  dataOf(api.POST("/sessions/{id}/reopen", { params: { path: { id: session } }, body: { reason } }))
