@@ -3,6 +3,7 @@
 import { cn } from "cn"
 import { Menu } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useId } from "react"
 
 import {
   DropdownMenu,
@@ -12,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useCan } from "@/features/auth/session"
+import { OpenSessionsBubble } from "@/features/attendance/open-sessions-badge"
 import { Link, usePathname } from "@/i18n/navigation"
 
 import { AccountMenuItems } from "./account-menu"
@@ -43,6 +45,7 @@ export function MobileTabBar() {
   const t = useTranslations("nav")
   const pathname = usePathname()
   const can = useCan()
+  const openId = useId()
 
   if (isActive(TAKE_SCREEN, pathname)) {
     return null
@@ -64,10 +67,12 @@ export function MobileTabBar() {
           <Link
             href={TAKE_ATTENDANCE.href}
             aria-label={t("takeAttendance")}
+            aria-describedby={openId}
             aria-current={attendance ? "page" : undefined}
             className="relative -mt-5 flex size-14 items-center justify-center bg-primary text-primary-foreground shadow-lg ring-4 ring-background"
           >
             <TAKE_ATTENDANCE.icon className="size-6" aria-hidden="true" />
+            <OpenSessionsBubble id={openId} />
           </Link>
           <span
             className={cn(
