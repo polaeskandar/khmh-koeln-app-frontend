@@ -16,3 +16,11 @@ export const addStageRequest = (service: Uuid, fields: StageFields) =>
 
 export const updateStageRequest = (stage: Uuid, changes: Partial<StageFields>) =>
   dataOf(api.PATCH("/stages/{id}", { params: { path: { id: stage } }, body: changes }))
+
+export const reorderStagesRequest = (service: Uuid, stageIds: Uuid[]) =>
+  dataOf(
+    api.PUT("/services/{id}/stages/order", {
+      params: { path: { id: service } },
+      body: { stageIds },
+    })
+  )
