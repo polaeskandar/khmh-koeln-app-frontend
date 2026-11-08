@@ -33,7 +33,7 @@ export function CompletionControl({
 }) {
   const t = useTranslations("parent.completion")
   const f = useFormat()
-  const [report, setReport] = useState(initial)
+  const [local, setLocal] = useState<{ report: Report; from: Report } | null>(null)
   const busy = useRef(false)
   const invalidate = [["parent"]]
   const markDone = useApiMutation(() => reportDoneRequest(child.id, homeworkId), { invalidate })
@@ -44,6 +44,7 @@ export function CompletionControl({
   })
 
   const pending = markDone.pending || undo.pending
+  const report = local && (pending || local.from === initial) ? local.report : initial
 
   async function change(next: Report, run: () => Promise<Report | null>) {
     if (busy.current) {
@@ -52,10 +53,10 @@ export function CompletionControl({
 
     busy.current = true
     const before = report
-    setReport(next)
+    setLocal({ report: next, from: initial })
 
     try {
-      setReport((await run()) ?? before)
+      setLocal({ report: (await run()) ?? before, from: initial })
     } finally {
       busy.current = false
     }
