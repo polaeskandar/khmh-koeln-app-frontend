@@ -8,7 +8,7 @@ import { useState } from "react"
 import { Topbar } from "@/components/app-shell/topbar"
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
-import { NotFoundState, QueryState } from "@/components/page-states"
+import { NotFoundState, QueryErrorState, QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { ServiceTag } from "@/components/service-tag"
 import { AgendaRow } from "@/components/session-bits"
@@ -200,6 +200,8 @@ function Dates({ schedule, today }: { schedule: ScheduleSummary; today: LocalDat
       <Section id="next-dates" title={t("nextTitle")} description={t("nextDescription")}>
         {!schedule.active ? (
           <p className="text-sm text-muted-foreground">{t("nextInactive")}</p>
+        ) : next.isError ? (
+          <QueryErrorState error={next.error} onRetry={() => next.refetch()} />
         ) : !next.data ? (
           <Skeleton className="h-32 w-full" />
         ) : upcoming.length === 0 ? (
@@ -209,7 +211,9 @@ function Dates({ schedule, today }: { schedule: ScheduleSummary; today: LocalDat
         )}
       </Section>
       <Section id="past-sessions" title={t("pastTitle")}>
-        {!past.data || !next.data ? (
+        {past.isError ? (
+          <QueryErrorState error={past.error} onRetry={() => past.refetch()} />
+        ) : !past.data ? (
           <Skeleton className="h-32 w-full" />
         ) : earlier.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t("pastEmpty")}</p>

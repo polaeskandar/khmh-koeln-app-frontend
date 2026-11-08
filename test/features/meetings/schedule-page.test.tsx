@@ -108,6 +108,15 @@ test("without can.manage there are no actions and no date menus", async () => {
   expect(screen.queryByRole("button", { name: /^Change 3rd Class on/ })).not.toBeInTheDocument()
 })
 
+test("failed agenda requests say so with a retry instead of loading forever", async () => {
+  open(schedule())
+  server.use(http.get(apiUrl("/agenda"), () => problem(403, "forbidden")))
+  const next = await section("Next dates")
+  expect(await next.findByRole("button", { name: "Try again" })).toBeInTheDocument()
+  const past = await section("Past sessions")
+  expect(await past.findByRole("button", { name: "Try again" })).toBeInTheDocument()
+})
+
 test("next dates skip completed sessions and keep a date canceled ahead", async () => {
   open(schedule())
   const next = await section("Next dates")
