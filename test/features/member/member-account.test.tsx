@@ -37,7 +37,9 @@ function open(
   locale: Locale = "en"
 ) {
   server.use(
-    http.get(apiUrl("/me"), () => HttpResponse.json(nevine)),
+    http.get(apiUrl("/me"), () =>
+      HttpResponse.json({ ...nevine, account: { ...nevine.account, language: locale } })
+    ),
     http.get(apiUrl("/member/groups"), () =>
       typeof groups === "function"
         ? groups()
