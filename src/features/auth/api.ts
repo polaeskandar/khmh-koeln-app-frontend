@@ -1,7 +1,7 @@
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import { can } from "@/lib/permissions"
 
-export type Me = Schemas["CurrentAccount"]
+export type Me = Schemas["MeResponse"]
 
 export function areasOf(me: Me) {
   return {
