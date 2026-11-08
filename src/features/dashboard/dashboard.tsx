@@ -62,7 +62,15 @@ function Today({ data }: { data: DashboardData }) {
 
   if (data.sessions.length === 0) {
     const tomorrow = addDays(data.today, 1)
-    const names = [...new Set(data.upcoming.filter((item) => item.date === tomorrow).map(groupOf))]
+
+    const names = [
+      ...new Set(
+        data.upcoming
+          .filter((item) => item.date === tomorrow)
+          .filter((item) => !(item.kind === "session" && item.status === "canceled"))
+          .map(groupOf)
+      ),
+    ]
 
     return (
       <Empty className="border border-dashed">
