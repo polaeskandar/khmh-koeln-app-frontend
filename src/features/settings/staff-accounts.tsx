@@ -7,7 +7,7 @@ import { useEffect, useState } from "react"
 
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { Section } from "@/components/page-header"
-import { QueryState } from "@/components/page-states"
+import { QueryErrorState, QueryState } from "@/components/page-states"
 import { StatusBadge } from "@/components/status"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -41,7 +41,7 @@ import {
   staffAccountsQuery,
 } from "./api"
 
-const STAFF_QUERIES = [["staff-accounts"]]
+const STAFF_QUERIES = [["staff-accounts"], ["me"]]
 
 function GiveRoleDialog({
   account,
@@ -311,6 +311,9 @@ export function StaffAccounts() {
 
   return (
     <Section id="users" title={t("title")} description={t("description")}>
+      {roles.isError ? (
+        <QueryErrorState error={roles.error} onRetry={() => roles.refetch()} />
+      ) : null}
       <QueryState query={accounts}>
         {(data) => (
           <ul className="flex flex-col divide-y border-y">
