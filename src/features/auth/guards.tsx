@@ -67,7 +67,7 @@ const homeOf = (areas: Areas) => (areas.staff ? routes.home() : routes.parentHom
 function Guard({ allows, children }: { allows: (areas: Areas) => boolean; children: ReactNode }) {
   const { session, refresh } = useSession()
 
-  if (session.status === "unknown") {
+  if (session.status === "unknown" || session.status === "ended") {
     return <SessionSplash />
   }
 
