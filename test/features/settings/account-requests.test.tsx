@@ -130,6 +130,12 @@ test("a 409 alreadyApproved toasts and refetches", async () => {
   await waitFor(() => expect(calls.list).toBe(2))
 })
 
+test("staff who may only read requests are not offered Decline", async () => {
+  open(me.churchOffice)
+  expect(await screen.findByText(requests[0].account.email)).toBeInTheDocument()
+  expect(screen.queryByRole("button", { name: /Decline/ })).toBeNull()
+})
+
 test("an empty list says so", async () => {
   server.use(
     http.get(apiUrl("/account-requests"), () =>

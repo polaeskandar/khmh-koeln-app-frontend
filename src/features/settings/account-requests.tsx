@@ -13,6 +13,7 @@ import { StatusBadge } from "@/components/status"
 import { Button } from "@/components/ui/button"
 import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty"
 import { initialsOf } from "@/features/auth/role-summary"
+import { useCan } from "@/features/auth/session"
 import { LOCALE_NAMES } from "@/i18n/config"
 import { useFormat } from "@/i18n/format"
 import type { LocalDate } from "@/lib/api/types/common"
@@ -112,6 +113,7 @@ export function AccountRequests({
 }) {
   const t = useTranslations("accountRequests")
   const query = useQuery(accountRequestsQuery)
+  const decides = useCan()("create", "users")
 
   return (
     <Section
@@ -137,7 +139,7 @@ export function AccountRequests({
                   actions={
                     <>
                       {approve?.(request, today)}
-                      <DeclineButton request={request} />
+                      {decides ? <DeclineButton request={request} /> : null}
                     </>
                   }
                 />
