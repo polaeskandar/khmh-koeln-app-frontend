@@ -207,7 +207,7 @@ export function useMarkWrites(sessionId: Uuid) {
 
       if (retryable(error)) {
         toast.error(t("errors.notSaved"), {
-          action: { label: t("common.retry"), onClick: () => void send(person, present) },
+          action: { label: t("common.retry"), onClick: () => void send(person, present, visitor) },
         })
 
         return
