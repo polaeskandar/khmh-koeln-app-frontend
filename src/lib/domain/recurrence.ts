@@ -11,6 +11,7 @@ export type RecurrenceProblem =
   | "monthWeek"
   | "monthWeekOnlyMonthly"
   | "endBeforeStart"
+  | "startsOn"
 
 export class RecurrenceError extends Error {
   constructor(readonly code: RecurrenceProblem) {

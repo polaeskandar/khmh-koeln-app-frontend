@@ -121,6 +121,31 @@ describe("the preview", () => {
   })
 })
 
+describe("editing the pattern", () => {
+  test("clearing the first date asks for one instead of failing", async () => {
+    open()
+    const dialog = await newDialog()
+    await userEvent.clear(dialog.getByLabelText("First date"))
+    expect(preview()).toHaveTextContent("Choose the first date.")
+    expect(dialog.getByRole("button", { name: "Create schedule" })).toBeDisabled()
+  })
+
+  test("switching to monthly drops a weekly interval it cannot offer", async () => {
+    open()
+    const dialog = await newDialog()
+
+    await userEvent.selectOptions(
+      dialog.getByRole("combobox", { name: "Every how many weeks" }),
+      "4"
+    )
+
+    await userEvent.click(dialog.getByRole("radio", { name: "Monthly" }))
+
+    expect(dialog.getByRole("combobox", { name: "Every how many months" })).toHaveValue("1")
+    expect(preview()).toHaveTextContent("Next: Sat 5 Dec, Sat 2 Jan, Sat 6 Feb, Sat 6 Mar.")
+  })
+})
+
 describe("saving", () => {
   test("a weekly schedule sends monthWeek null and empty optionals as null, then toasts", async () => {
     const sent = open()
