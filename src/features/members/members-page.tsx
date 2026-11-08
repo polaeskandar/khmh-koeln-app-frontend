@@ -192,6 +192,11 @@ export function MembersScreen({ onSelect }: { onSelect?: (person: PersonRow) => 
   const q = useDebounced(search.trim(), SEARCH_DELAY_MS)
   const filterKey = `${q}|${group}`
   const [paging, setPaging] = useState({ key: filterKey, page: 1 })
+
+  if (paging.key !== filterKey) {
+    setPaging({ key: filterKey, page: 1 })
+  }
+
   const page = paging.key === filterKey ? paging.page : 1
   const setPage = (next: number) => setPaging({ key: filterKey, page: next })
   const filter = groups.find((option) => option.value === group)?.filter ?? {}
