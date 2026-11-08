@@ -13,6 +13,7 @@ import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { AttendanceBoard } from "@/features/attendance/api"
+import { CorrectionDialog } from "@/features/attendance/board-dialogs"
 import { TakeAttendancePage } from "@/features/attendance/take-attendance-page"
 
 const search = vi.hoisted(() => ({ value: "" }))
@@ -236,6 +237,28 @@ describe("recently marked and corrections", () => {
     expect((select as HTMLSelectElement).selectedOptions[0].textContent).toBe(
       "Theo Mansour · 12:30"
     )
+  })
+
+  test("a newer mark arriving while the dialog is open keeps the chosen person", () => {
+    const board = boardWithRecent()
+
+    const dialog = (shown: AttendanceBoard) => (
+      <CorrectionDialog board={shown} open onOpenChange={() => {}} />
+    )
+
+    const view = renderWithProviders(dialog(board))
+    const select = () => screen.getByRole("combobox", { name: "Person" }) as HTMLSelectElement
+    expect(select().selectedOptions[0].textContent).toBe("Theo Mansour · 12:30")
+    const later = { id: "m-later", recordedAt: "2026-11-08T12:45:00+01:00", recordedBy: daniel }
+
+    view.rerender(
+      dialog({
+        ...board,
+        roster: board.roster.map((row, i) => (i === 0 ? { ...row, mark: later } : row)),
+      })
+    )
+
+    expect(select().selectedOptions[0].textContent).toBe("Theo Mansour · 12:30")
   })
 
   test("both dialogs open in Arabic", async () => {
