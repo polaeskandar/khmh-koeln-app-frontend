@@ -33,7 +33,7 @@ const sundaySchool = services.items[0]
 function open(list: ServiceList = services, locale: Locale = "en") {
   const sent: { method: string; body: unknown }[] = []
 
-  let createAnswer: () => Response = () =>
+  let createAnswer: () => Response | Promise<Response> = () =>
     HttpResponse.json(
       { ...sundaySchool, id: "0192f3a4-7b1c-7d2e-8f3a-00000000aaaa", name: "Choir" },
       { status: 201 }
@@ -60,7 +60,10 @@ function open(list: ServiceList = services, locale: Locale = "en") {
     { locale }
   )
 
-  return { sent, answerCreate: (answer: () => Response) => (createAnswer = answer) }
+  return {
+    sent,
+    answerCreate: (answer: () => Response | Promise<Response>) => (createAnswer = answer),
+  }
 }
 
 const dialog = () => within(screen.getByRole("dialog"))
@@ -85,6 +88,24 @@ test("creating sends the typed values and opens the new service", async () => {
   ])
 
   expect(toast.success).toHaveBeenCalledWith("Created Choir.")
+})
+
+test("Escape doesn't close the dialog while it saves", async () => {
+  const { answerCreate } = open()
+  let answer: (response: Response) => void = () => {}
+  answerCreate(() => new Promise<Response>((resolve) => (answer = resolve)))
+  await userEvent.click(await screen.findByRole("button", { name: "New service" }))
+  await userEvent.type(dialog().getByLabelText("Name"), "Choir")
+  await userEvent.click(dialog().getByRole("button", { name: "Create service" }))
+
+  await waitFor(() =>
+    expect(dialog().getByRole("button", { name: /Create service/ })).toBeDisabled()
+  )
+
+  await userEvent.keyboard("{Escape}")
+  expect(screen.getByRole("dialog")).toBeInTheDocument()
+  answer(HttpResponse.json({ ...sundaySchool, name: "Choir" }, { status: 201 }))
+  await waitFor(() => expect(router.push).toHaveBeenCalled())
 })
 
 test("name errors show under Name with the dialog open; 403 toasts", async () => {
