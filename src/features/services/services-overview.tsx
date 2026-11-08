@@ -10,6 +10,7 @@ import { Topbar } from "@/components/app-shell/topbar"
 import {
   countByTab,
   DataTableColumnHeader,
+  DataTablePagination,
   DataTableTabs,
   DataTableView,
   useDataTable,
@@ -254,6 +255,7 @@ export function ServicesTable({ rows }: { rows: ServiceRow[] }) {
       </ul>
 
       <DataTableView table={table} className="hidden md:block" emptyMessage={empty} />
+      {table.getPageCount() > 1 ? <DataTablePagination table={table} /> : null}
     </div>
   )
 }

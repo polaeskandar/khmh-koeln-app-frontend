@@ -143,6 +143,27 @@ test("phones get one linked card per service", async () => {
   )
 })
 
+test("more than 50 services page through the table", async () => {
+  const many = Array.from({ length: 51 }, (_, i) => ({
+    ...services.items[1],
+    id: `0192f3a4-7b1c-7d2e-8f3c-${String(i).padStart(12, "0")}`,
+    name: `Group ${String(i + 1).padStart(2, "0")}`,
+  }))
+
+  server.use(http.get(apiUrl("/services"), () => HttpResponse.json({ items: many })))
+
+  renderWithProviders(
+    <SidebarProvider>
+      <ServicesOverview />
+    </SidebarProvider>
+  )
+
+  expect(await screen.findByText("Page 1 of 2")).toBeInTheDocument()
+  expect(serviceNames()).not.toContain("Group 51")
+  await userEvent.click(screen.getByRole("button", { name: "Next page" }))
+  expect(serviceNames()).toEqual(["Group 51"])
+})
+
 test("Retry refetches after a failed request", async () => {
   let fail = true
 
