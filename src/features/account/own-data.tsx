@@ -79,6 +79,14 @@ export function OwnData({ today }: { today: LocalDate }) {
             <p className="text-muted-foreground">{t("privacy.own.deleteText")}</p>
           )}
         </div>
+        {erasure.isError ? (
+          <span className="flex shrink-0 flex-wrap items-center gap-2 text-sm text-destructive">
+            {t("errors.loadFailed")}
+            <Button variant="outline" onClick={() => erasure.refetch()}>
+              {t("common.retry")}
+            </Button>
+          </span>
+        ) : null}
         {erasure.data && !requested ? (
           <ReasonDialog
             trigger={

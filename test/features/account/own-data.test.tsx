@@ -131,6 +131,13 @@ test.each([
   expect(screen.queryByRole("button", { name: "Ask to delete…" })).not.toBeInTheDocument()
 })
 
+test("an erasure status that fails to load says so and can be retried", async () => {
+  open()
+  server.use(http.get(apiUrl("/me/erasure-request"), () => problem(403, "forbidden")))
+  expect(await screen.findByText("This couldn’t be loaded.")).toBeInTheDocument()
+  expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument()
+})
+
 test("an open request shows on load without the button", async () => {
   open(() => ({ erasureRequested: requested }))
   expect(await screen.findByRole("status")).toHaveTextContent("You asked today at 12:08")

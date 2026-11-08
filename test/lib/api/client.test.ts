@@ -4,7 +4,7 @@ import { afterEach, describe, expect, test, vi } from "vitest"
 import { apiUrl, problem } from "@test/support/api"
 import { server } from "@test/support/msw"
 
-import { api, dataOf, onUnauthorized } from "@/lib/api/client"
+import { api, apiDownload, dataOf, onUnauthorized } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/problem"
 
 const failure = (promise: Promise<unknown>) =>
@@ -194,6 +194,29 @@ describe("the api client", () => {
     await new Promise((resolve) => setTimeout(resolve, 10))
     controller.abort()
     await expect(request).rejects.toMatchObject({ name: "AbortError" })
+  })
+})
+
+describe("apiDownload", () => {
+  test("a download cut off mid-body is a network problem", async () => {
+    server.use(
+      http.get(apiUrl("/me/personal-data"), () => {
+        const body = new ReadableStream<Uint8Array>({
+          start(stream) {
+            stream.enqueue(new TextEncoder().encode('{"kind":'))
+            stream.error(new Error("connection dropped"))
+          },
+        })
+
+        return new HttpResponse(body, { headers: { "Content-Type": "application/json" } })
+      })
+    )
+
+    const error = await failure(
+      apiDownload(api.GET("/me/personal-data", { parseAs: "blob" }), "data.json")
+    )
+
+    expect(error).toMatchObject({ status: 0, code: "network" })
   })
 })
 
