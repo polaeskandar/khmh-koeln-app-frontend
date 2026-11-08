@@ -171,7 +171,8 @@
       "monthlyOneDay": "Ein monatliches Treffen findet an genau einem Wochentag statt.",
       "monthWeek": "Wählen Sie den ersten, zweiten, dritten, vierten oder letzten Wochentag im Monat.",
       "monthWeekOnlyMonthly": "Nur monatliche Treffen haben eine Woche im Monat.",
-      "endBeforeStart": "Das Enddatum kann nicht vor dem Startdatum liegen."
+      "endBeforeStart": "Das Enddatum kann nicht vor dem Startdatum liegen.",
+      "startsOn": "Wählen Sie das erste Datum."
     },
     "attendance": {
       "openFirst": "Öffnen Sie zuerst die Anwesenheit für diesen Termin.",

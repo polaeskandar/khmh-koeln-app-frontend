@@ -171,7 +171,8 @@
       "monthlyOneDay": "A monthly meeting happens on exactly one weekday.",
       "monthWeek": "Choose the first, second, third, fourth or last weekday of the month.",
       "monthWeekOnlyMonthly": "Only monthly meetings have a week of the month.",
-      "endBeforeStart": "The end date cannot be before the start date."
+      "endBeforeStart": "The end date cannot be before the start date.",
+      "startsOn": "Choose the first date."
     },
     "attendance": {
       "openFirst": "Open attendance for this session first.",

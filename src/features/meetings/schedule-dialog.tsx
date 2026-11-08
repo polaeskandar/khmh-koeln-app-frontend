@@ -136,7 +136,18 @@ type Preview =
   | { error: RecurrenceProblem; dates: LocalDate[]; recurrence: null }
   | { error: null; dates: LocalDate[]; recurrence: Recurrence }
 
+const LOCAL_DATE = /^\d{4}-\d{2}-\d{2}$/
+
+export const INTERVALS: Record<Draft["frequency"], number[]> = {
+  weekly: [1, 2, 3, 4],
+  monthly: [1, 2, 3, 6],
+}
+
 export function previewOf(d: Draft, today: LocalDate): Preview {
+  if (!LOCAL_DATE.test(d.startsOn) || Number.isNaN(Date.parse(d.startsOn))) {
+    return { error: "startsOn", dates: [], recurrence: null }
+  }
+
   const recurrence = toRecurrence(d)
 
   try {
@@ -188,6 +199,13 @@ function ScheduleForm({
 
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) =>
     setD((prev) => ({ ...prev, [key]: value }))
+
+  const changeFrequency = (frequency: Draft["frequency"]) =>
+    setD((prev) => ({
+      ...prev,
+      frequency,
+      interval: INTERVALS[frequency].includes(prev.interval) ? prev.interval : 1,
+    }))
 
   const create = useApiMutation(createScheduleRequest, {
     successMessage: (saved) => t("toast.scheduleCreated", { created: saved.createdSessions }),
@@ -419,7 +437,7 @@ function ScheduleForm({
                 variant="outline"
                 spacing={0}
                 value={d.frequency}
-                onValueChange={(value) => value && set("frequency", value as Draft["frequency"])}
+                onValueChange={(value) => value && changeFrequency(value as Draft["frequency"])}
                 aria-label={t("meetings.form.frequency")}
               >
                 <ToggleGroupItem value="weekly" className={SELECTED}>
@@ -435,7 +453,7 @@ function ScheduleForm({
                     {t.rich("meetings.form.everyWeeks", {
                       count: d.interval,
                       interval: () =>
-                        intervalSelect(t("meetings.form.weeksInterval"), [1, 2, 3, 4]),
+                        intervalSelect(t("meetings.form.weeksInterval"), INTERVALS.weekly),
                     })}
                   </div>
                   <ToggleGroup
@@ -496,7 +514,8 @@ function ScheduleForm({
                         ))}
                       </NativeSelect>
                     ),
-                    interval: () => intervalSelect(t("meetings.form.monthsInterval"), [1, 2, 3, 6]),
+                    interval: () =>
+                      intervalSelect(t("meetings.form.monthsInterval"), INTERVALS.monthly),
                   })}
                 </div>
               )}
