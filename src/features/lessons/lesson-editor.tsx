@@ -39,6 +39,8 @@ import { type Audience, VisibilityNote } from "./visibility"
 const MAX_MATERIALS = 10
 const EMPTY_MATERIAL: Material = { label: "", url: null }
 
+const filled = (m: Material) => Boolean(m.label.trim() || (m.url ?? "").trim())
+
 const text = (value: string) => (value.trim() === "" ? null : value)
 
 function Block({
@@ -155,7 +157,7 @@ function LessonForm({ stage, today, lesson, viewNotes }: EditorProps) {
       teachingPoints: text(fields.teachingPoints),
       activities: text(fields.activities),
       materials: materials
-        .filter((m) => m.label.trim() || (m.url ?? "").trim())
+        .filter(filled)
         .map((m) => ({ label: m.label, url: m.url?.trim() ? m.url : null })),
       ...(viewNotes ? { notes: text(fields.notes) } : {}),
       ...(lesson ? {} : { responsibleId: viewerId }),
@@ -167,6 +169,11 @@ function LessonForm({ stage, today, lesson, viewNotes }: EditorProps) {
     setIntent(status)
     void mutation.execute(input(status))
   }
+
+  const materialError = (index: number, field: "label" | "url") =>
+    filled(materials[index])
+      ? errors[`materials.${materials.slice(0, index).filter(filled).length}.${field}`]
+      : undefined
 
   const updateMaterial = (index: number, change: Partial<Material>) =>
     setMaterials((list) => list.map((m, i) => (i === index ? { ...m, ...change } : m)))
@@ -271,7 +278,7 @@ function LessonForm({ stage, today, lesson, viewNotes }: EditorProps) {
                 <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
                   <Input
                     aria-label={t("lessons.editor.material", { n: index + 1 })}
-                    aria-invalid={errors[`materials.${index}.label`] ? true : undefined}
+                    aria-invalid={materialError(index, "label") ? true : undefined}
                     placeholder={t("lessons.editor.materialPlaceholder")}
                     dir="auto"
                     value={material.label}
@@ -285,7 +292,7 @@ function LessonForm({ stage, today, lesson, viewNotes }: EditorProps) {
                     />
                     <Input
                       aria-label={t("lessons.editor.materialLink", { n: index + 1 })}
-                      aria-invalid={errors[`materials.${index}.url`] ? true : undefined}
+                      aria-invalid={materialError(index, "url") ? true : undefined}
                       placeholder={t("lessons.editor.materialLinkPlaceholder")}
                       dir="ltr"
                       className="ps-5"
@@ -309,9 +316,9 @@ function LessonForm({ stage, today, lesson, viewNotes }: EditorProps) {
                     <Trash2 />
                   </Button>
                 </div>
-                {errors[`materials.${index}.label`] || errors[`materials.${index}.url`] ? (
+                {materialError(index, "label") || materialError(index, "url") ? (
                   <FieldError>
-                    {errors[`materials.${index}.label`] ?? errors[`materials.${index}.url`]}
+                    {materialError(index, "label") ?? materialError(index, "url")}
                   </FieldError>
                 ) : null}
               </div>
@@ -502,5 +509,7 @@ export function NewLessonPage() {
 }
 
 export function EditLessonPage() {
-  return <RecordPage notFound={<NotFoundPage />}>{(id) => <EditLesson id={id} />}</RecordPage>
+  return (
+    <RecordPage notFound={<NotFoundPage />}>{(id) => <EditLesson key={id} id={id} />}</RecordPage>
+  )
 }
