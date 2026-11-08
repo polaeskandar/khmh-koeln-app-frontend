@@ -72,6 +72,8 @@ function AddPersonForm({ onDone }: { onDone: () => void }) {
     onSuccess: onDone,
   })
 
+  const busy = create.pending || join.pending
+
   const problem = create.problem
   const duplicate = problem?.code === "people.duplicate"
 
@@ -97,7 +99,7 @@ function AddPersonForm({ onDone }: { onDone: () => void }) {
   })
 
   async function submit(confirmDuplicate?: boolean) {
-    if (create.pending) {
+    if (busy) {
       return
     }
 
@@ -157,7 +159,7 @@ function AddPersonForm({ onDone }: { onDone: () => void }) {
                       type="button"
                       size="sm"
                       variant="outline"
-                      disabled={join.pending}
+                      disabled={busy}
                       onClick={() => void addExisting(candidate)}
                     >
                       {t("members.addMember.add")}
@@ -175,7 +177,7 @@ function AddPersonForm({ onDone }: { onDone: () => void }) {
               type="button"
               variant="outline"
               className="self-start"
-              disabled={create.pending}
+              disabled={busy}
               onClick={() => void submit(true)}
             >
               {t("members.newPerson.addAnyway")}
@@ -263,10 +265,10 @@ function AddPersonForm({ onDone }: { onDone: () => void }) {
         </div>
       </FieldGroup>
       <DialogFooter>
-        <Button type="button" variant="outline" disabled={create.pending} onClick={onDone}>
+        <Button type="button" variant="outline" disabled={busy} onClick={onDone}>
           {t("common.cancel")}
         </Button>
-        <Button type="submit" disabled={create.pending}>
+        <Button type="submit" disabled={busy}>
           {create.pending ? <Spinner data-icon="inline-start" /> : null}
           {t("members.addPerson")}
         </Button>
