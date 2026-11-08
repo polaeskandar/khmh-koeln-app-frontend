@@ -43,7 +43,9 @@ The contract is the backend's `docs/api.md`. The web app is served from the same
 no cross-origin calls and needs no CORS. `NEXT_PUBLIC_API_BASE_URL` is `/api` in production builds (an
 absolute URL only if the API ever has to move to its own origin) and `http://localhost:8000/api` in
 development; `src/lib/env.ts` checks it, and a production build fails without it. `NEXT_PUBLIC_REGISTRATION_ENABLED=true` shows
-the link to self-registration on the sign-in page (S2); it is off unless set.
+the link to self-registration on the sign-in page (S2); it is off unless set. `NEXT_PUBLIC_RESET_BY_EMAIL=true`
+lets people request a password link by email on the forgot-password page once the API can send email in
+production; off unless set, the page says to ask the church office.
 
 - **Generated client.** The types come from the backend's OpenAPI document. `openapi/openapi.json` is a copy
   of the backend's `docs/openapi.json`, and `pnpm api:types` turns it into `src/lib/api/schema.d.ts` with
