@@ -80,7 +80,7 @@ const link = (
 
 function open(
   initial: GuardianLink[],
-  { give, revoke }: { give?: () => Response; revoke?: () => Response } = {}
+  { give, revoke }: { give?: () => Response | Promise<Response>; revoke?: () => Response } = {}
 ) {
   let items = initial
   let reads = 0
@@ -197,6 +197,19 @@ test.each([
   await userEvent.click(dialog.getByRole("button", { name: "Give access" }))
   expect(await dialog.findByRole("alert")).toHaveTextContent(text)
   expect(toast.error).not.toHaveBeenCalled()
+})
+
+test("Escape doesn't close the dialog while access is being given", async () => {
+  open([], { give: () => new Promise<Response>(() => {}) })
+  await userEvent.click(await screen.findByRole("button", { name: "Give a parent access" }))
+  const dialog = within(await screen.findByRole("dialog"))
+  await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Parent account" }), hoda.id)
+  await userEvent.type(dialog.getByRole("textbox", { name: "Child" }), "kiro")
+  await userEvent.click(await dialog.findByRole("button", { name: /Kiro Iskander/ }))
+  await userEvent.click(dialog.getByRole("button", { name: "Give access" }))
+  await waitFor(() => expect(dialog.getByRole("button", { name: /Give access/ })).toBeDisabled())
+  await userEvent.keyboard("{Escape}")
+  expect(screen.getByRole("dialog")).toBeInTheDocument()
 })
 
 test("removing asks with both names and sends one revoke", async () => {
