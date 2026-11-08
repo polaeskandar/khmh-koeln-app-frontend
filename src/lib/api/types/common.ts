@@ -16,3 +16,26 @@ export type Recurrence = {
   startsOn: LocalDate
   endsOn: LocalDate | null
 }
+
+export type ServiceRef = { id: Uuid; name: string; tone: number; archived: boolean }
+
+export type StageRef = { id: Uuid; name: string; position: number; archived: boolean }
+
+export type AccountRef = { id: Uuid; name: string } | null
+
+export type PersonRef = {
+  id: Uuid
+  firstName: string
+  lastName: string
+  displayName: string | null
+}
+
+export type LessonRef = { id: Uuid; title: string; teachingDate: LocalDate }
+
+export type Counts = {
+  present: number
+  rosterSize: number | null
+  rosterPresent: number
+  notMarked: number
+  notOnRoster: number
+}
