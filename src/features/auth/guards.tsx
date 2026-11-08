@@ -21,7 +21,7 @@ import { storeLocale } from "@/i18n/locale-choice"
 import { usePathname, useRouter } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 
-import { LANGUAGE_APPLIED_KEY } from "./account-language"
+import { LANGUAGE_APPLIED_KEY, markLanguageApplied } from "./account-language"
 import type { areasOf, Me } from "./api"
 import { safeNext } from "./safe-next"
 import { useSession } from "./session"
@@ -122,7 +122,7 @@ function AccountLanguage({ me, children }: { me: Me; children: ReactNode }) {
   )
 
   useEffect(() => {
-    queryClient.setQueryData(LANGUAGE_APPLIED_KEY, me.account.id)
+    markLanguageApplied(queryClient, me.account.id)
 
     if (switchTo) {
       storeLocale(switchTo)

@@ -13,6 +13,7 @@ import { server } from "@test/support/msw"
 import { navigation, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
+import { LANGUAGE_APPLIED_KEY } from "@/features/auth/account-language"
 import type { Me } from "@/features/auth/api"
 import { RequireStaff } from "@/features/auth/guards"
 import { SessionProvider } from "@/features/auth/session"
@@ -92,6 +93,24 @@ describe("choosing a language while signed in", () => {
     answer()
     await waitFor(() => expect(client.getQueryData<Me>(["me"])?.account.language).toBe("de"))
     expect(calls.me).toBe(1)
+  })
+
+  test("a save that answers after the session ended keeps the account out of the cache", async () => {
+    let answer: () => void = () => {}
+
+    backend(
+      () => me.servant,
+      () => new Promise((resolve) => (answer = () => resolve(HttpResponse.json(me.servant))))
+    )
+
+    const client = makeQueryClient()
+    menu(client)
+    await waitFor(() => expect(client.getQueryData(["me"])).toBeDefined())
+    await chooseGerman()
+    client.clear()
+    answer()
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(client.getQueryData(["me"])).toBeUndefined()
   })
 
   test("signed out, nothing is saved", async () => {
@@ -206,6 +225,23 @@ describe("the account's language after sign-in or app start", () => {
 
     await waitFor(() =>
       expect(router.replace).toHaveBeenCalledExactlyOnceWith("/", { locale: "ar" })
+    )
+  })
+
+  test("the applied marker is kept for the whole session, not garbage-collected", async () => {
+    backend(
+      () => me.servant,
+      () => HttpResponse.json({})
+    )
+
+    const client = makeQueryClient()
+    guardedPage(client, "en")
+    expect(await screen.findByText("Service page")).toBeInTheDocument()
+
+    await waitFor(() =>
+      expect(client.getQueryCache().find({ queryKey: LANGUAGE_APPLIED_KEY })?.options.gcTime).toBe(
+        Infinity
+      )
     )
   })
 })
