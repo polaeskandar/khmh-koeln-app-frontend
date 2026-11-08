@@ -101,6 +101,48 @@ test("pages through more than 25 members", async () => {
   expect(pages).toEqual([`${THIRD_CLASS_ID}:1`, `${THIRD_CLASS_ID}:2`])
 })
 
+test("another stage starts on its first page", async () => {
+  const otherId = "0192f3a4-7b1c-7d2e-8f3b-0000000009ff"
+  const pageOne = Array.from({ length: 25 }, (_, i) => person(`First${i}`, "Saad"))
+  const pages: string[] = []
+
+  server.use(
+    http.get(apiUrl(`/stages/${THIRD_CLASS_ID}`), () => HttpResponse.json(thirdClass)),
+    http.get(apiUrl(`/stages/${otherId}`), () =>
+      HttpResponse.json({ ...thirdClass, id: otherId, name: "4th Class" })
+    ),
+    http.get(apiUrl("/people"), ({ request }) => {
+      const url = new URL(request.url)
+      pages.push(`${url.searchParams.get("stageId")}:${url.searchParams.get("page")}`)
+
+      return HttpResponse.json(
+        url.searchParams.get("page") === "2"
+          ? peopleList(pageOne.slice(0, 5), { page: 2, total: 30 })
+          : peopleList(pageOne, { total: 30 })
+      )
+    })
+  )
+
+  const page = () => (
+    <SidebarProvider>
+      <StageOverview />
+    </SidebarProvider>
+  )
+
+  const view = renderWithProviders(page())
+  await screen.findByText("Showing 1–25 of 30")
+  search.value = `id=${otherId}`
+  view.rerender(page())
+  expect(await screen.findByRole("heading", { name: "4th Class" })).toBeInTheDocument()
+  await userEvent.click(await (await members()).findByRole("button", { name: "Next page" }))
+  await screen.findByText("Showing 26–30 of 30")
+  search.value = `id=${THIRD_CLASS_ID}`
+  view.rerender(page())
+  expect(await screen.findByRole("heading", { name: thirdClass.name })).toBeInTheDocument()
+  expect(await screen.findByText("Showing 1–25 of 30")).toBeInTheDocument()
+  expect(pages).not.toContain(`${THIRD_CLASS_ID}:2`)
+})
+
 test("a 403 keeps the header and tabs but shows no names", async () => {
   open(() => problem(403, "forbidden"))
   expect(await screen.findByText("Not allowed")).toBeInTheDocument()

@@ -170,5 +170,9 @@ export function StageLayout({
 }
 
 export function StageOverview() {
-  return <StageLayout tab="overview">{(stage) => <StageMembers stage={stage} />}</StageLayout>
+  return (
+    <StageLayout tab="overview">
+      {(stage) => <StageMembers key={stage.id} stage={stage} />}
+    </StageLayout>
+  )
 }
