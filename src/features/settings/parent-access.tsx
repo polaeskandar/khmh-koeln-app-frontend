@@ -65,8 +65,8 @@ function GiveAccessDialog({
     give.problem && Object.keys(give.fieldErrors).length === 0 ? give.problem.message : null
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+    <Dialog open={open} onOpenChange={(next) => (next || !give.pending) && onOpenChange(next)}>
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("giveTitle")}</DialogTitle>
           <DialogDescription>{t("giveDescription")}</DialogDescription>
