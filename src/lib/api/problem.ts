@@ -46,10 +46,25 @@ function retryAfterOf(response: Response): number | null {
   return Number(header)
 }
 
+export const isAbort = (error: unknown): error is Error =>
+  error instanceof Error && error.name === "AbortError"
+
+async function bodyOf(response: Response): Promise<unknown> {
+  try {
+    return await response.json()
+  } catch (error) {
+    if (isAbort(error)) {
+      throw error
+    }
+
+    return null
+  }
+}
+
 export async function problemOf(response: Response): Promise<ApiError> {
   const retryAfter = retryAfterOf(response)
   const isProblem = response.headers.get("Content-Type")?.includes("application/problem+json")
-  const body: unknown = isProblem ? await response.json().catch(() => null) : null
+  const body = isProblem ? await bodyOf(response) : null
 
   if (!isObject(body) || typeof body.code !== "string") {
     return new ApiError({ status: response.status, code: null, retryAfter })

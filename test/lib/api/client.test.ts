@@ -164,6 +164,37 @@ describe("the api client", () => {
     controller.abort()
     await expect(request).rejects.toMatchObject({ name: "AbortError" })
   })
+
+  test("a request cancelled while its problem body downloads rethrows the AbortError", async () => {
+    const controller = new AbortController()
+    let started: () => void = () => {}
+
+    const downloading = new Promise<void>((resolve) => {
+      started = resolve
+    })
+
+    server.use(
+      http.get(apiUrl("/services"), () => {
+        const body = new ReadableStream<Uint8Array>({
+          start(stream) {
+            stream.enqueue(new TextEncoder().encode('{"code":'))
+            started()
+          },
+        })
+
+        return new HttpResponse(body, {
+          status: 503,
+          headers: { "Content-Type": "application/problem+json" },
+        })
+      })
+    )
+
+    const request = dataOf(api.GET("/services", { signal: controller.signal }))
+    await downloading
+    await new Promise((resolve) => setTimeout(resolve, 10))
+    controller.abort()
+    await expect(request).rejects.toMatchObject({ name: "AbortError" })
+  })
 })
 
 describe("onUnauthorized", () => {
