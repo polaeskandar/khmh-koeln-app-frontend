@@ -115,7 +115,9 @@ function AccountRow({ account, today }: { account: MemberAccount; today: LocalDa
           const result = await unlink.execute(account.id)
 
           if (!result.ok && result.problem.status === 409) {
-            void queryClient.invalidateQueries({ queryKey: ["member-accounts"] })
+            for (const queryKey of REFETCH) {
+              void queryClient.invalidateQueries({ queryKey })
+            }
 
             return true
           }
