@@ -133,6 +133,21 @@ test("a member without homework has no To do section", async () => {
   expect(screen.queryByRole("region", { name: "Done recently" })).not.toBeInTheDocument()
 })
 
+test("done homework that fails to load keeps To do and offers to try again", async () => {
+  open()
+
+  server.use(
+    http.get(apiUrl("/member/homework"), ({ request }) =>
+      new URL(request.url).searchParams.get("state") === "done"
+        ? problem(403, "forbidden")
+        : HttpResponse.json({ today: "2026-11-08", items: [] })
+    )
+  )
+
+  expect(await screen.findByRole("button", { name: "Try again" })).toBeInTheDocument()
+  expect(await screen.findByText(/nothing to do/i)).toBeInTheDocument()
+})
+
 test("empty groups and meetings say so", async () => {
   open({ groups: [], meetings: [] })
 
