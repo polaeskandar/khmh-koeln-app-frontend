@@ -2,9 +2,11 @@ import type { Metadata, Viewport } from "next"
 import { Geist, Noto_Kufi_Arabic, Oxanium } from "next/font/google"
 import { ThemeProvider } from "next-themes"
 
+import { ThemeColor } from "@/components/theme-color"
 import { QueryProvider } from "@/lib/api/query-provider"
 import { prePaintScript } from "@/i18n/locale-choice"
 import { apiBaseUrl, impressumUrl } from "@/lib/env"
+import { THEME_COLORS } from "@/lib/theme-colors"
 import { cn } from "@/lib/utils"
 import { ApiMocking } from "@/mocks/api-mocking"
 
@@ -32,8 +34,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0c0a09" },
+    { media: "(prefers-color-scheme: light)", color: THEME_COLORS.light },
+    { media: "(prefers-color-scheme: dark)", color: THEME_COLORS.dark },
   ],
 }
 
@@ -60,6 +62,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           enableSystem
           disableTransitionOnChange
         >
+          <ThemeColor />
           <QueryProvider>
             <ApiMocking>{children}</ApiMocking>
           </QueryProvider>
