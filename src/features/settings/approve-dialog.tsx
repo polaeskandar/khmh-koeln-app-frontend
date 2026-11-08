@@ -170,7 +170,11 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
   const items = candidates.data?.items ?? []
   const namesakes = items.filter((person) => fold(fullName(person)) === fold(name))
   const free = namesakes.filter((person) => !person.hasAccount)
-  const personId = picked === undefined ? (free.length === 1 ? free[0]!.id : null) : picked
+  const shown = items.some((person) => person.id === picked)
+
+  const personId =
+    picked === undefined ? (free.length === 1 ? free[0]!.id : null) : shown ? picked : null
+
   const noteTooLong = ageCheck === "guardianConsent" && note.length > NOTE_MAX
   const errors = approve.fieldErrors
 
