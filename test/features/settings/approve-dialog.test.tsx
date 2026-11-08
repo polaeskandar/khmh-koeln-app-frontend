@@ -153,6 +153,24 @@ test("children are found from two letters and kept across searches; both are sen
   expect(toast.success).toHaveBeenCalledWith("Sandra Samuel can sign in now.")
 })
 
+test("roles that fail to load say so and can be retried", async () => {
+  open()
+  let rolesFail = true
+
+  server.use(
+    http.get(apiUrl("/roles"), () =>
+      rolesFail
+        ? problem(403, "forbidden")
+        : HttpResponse.json({ items: [servantRole, parentRole] })
+    )
+  )
+
+  const dialog = await openApprove()
+  rolesFail = false
+  await userEvent.click(await dialog.findByRole("button", { name: "Try again" }))
+  await waitFor(() => expect(dialog.queryByRole("button", { name: "Try again" })).toBeNull())
+})
+
 test("a 422 childNotFound shows in the open dialog", async () => {
   open(() =>
     problem(422, "checkFields", {

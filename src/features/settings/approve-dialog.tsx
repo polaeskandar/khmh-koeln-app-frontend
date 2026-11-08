@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
+import { QueryErrorState } from "@/components/page-states"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
 import {
@@ -85,6 +86,9 @@ function ParentApproval({ request, onDone }: { request: AccountRequest; onDone: 
         {errors.roleIds ? <FieldError>{errors.roleIds}</FieldError> : null}
         {generalError ? <FieldError>{generalError}</FieldError> : null}
       </Field>
+      {roles.isError ? (
+        <QueryErrorState error={roles.error} onRetry={() => roles.refetch()} />
+      ) : null}
       <DialogFooter>
         <Button type="button" variant="outline" disabled={approve.pending} onClick={onDone}>
           {t("common.cancel")}
