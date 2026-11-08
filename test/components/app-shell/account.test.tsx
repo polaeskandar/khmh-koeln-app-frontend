@@ -136,6 +136,22 @@ describe("the phone's tab bar", () => {
     expect(within(bar).queryByRole("link", { name: "Members" })).toBeNull()
   })
 
+  test("keeps a plain Attendance tab for accounts that only read attendance", async () => {
+    shell({
+      ...me.attendanceOnly,
+      permissions: [{ action: "read", resource: "attendance" }],
+    })
+
+    const bar = await screen.findByRole("navigation", { name: "Main" })
+
+    expect(await within(bar).findByRole("link", { name: "Attendance" })).toHaveAttribute(
+      "href",
+      "/attendance/"
+    )
+
+    expect(within(bar).queryByRole("link", { name: "Take attendance" })).toBeNull()
+  })
+
   test("is absent on the attendance screen", async () => {
     navigation.pathname = "/attendance/take/"
     shell(me.servant)

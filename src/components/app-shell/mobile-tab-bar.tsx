@@ -50,6 +50,7 @@ export function MobileTabBar() {
 
   const settings = SETTINGS.allowed(can)
   const members = item("members")
+  const attendanceItem = item("attendance")
   const attendance = isActive(TAKE_ATTENDANCE.href, pathname)
 
   return (
@@ -79,6 +80,8 @@ export function MobileTabBar() {
             {t("attendance")}
           </span>
         </div>
+      ) : attendanceItem.allowed(can) ? (
+        <Tab item={attendanceItem} active={attendance} />
       ) : null}
       {members.allowed(can) ? (
         <Tab item={members} active={isActive(members.href, pathname)} />
