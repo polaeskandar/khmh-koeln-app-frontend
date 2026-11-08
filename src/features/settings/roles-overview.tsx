@@ -32,7 +32,7 @@ function RoleMenu({ role }: { role: RoleRow }) {
 
   const remove = useApiMutation(deleteRoleRequest, {
     successMessage: t("toast.roleDeleted", { name: role.name }),
-    invalidate: [["roles"], ["staff-accounts"]],
+    invalidate: [["roles"], ["staff-accounts"], ["me"]],
   })
 
   return (
