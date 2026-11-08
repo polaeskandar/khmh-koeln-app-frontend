@@ -47,15 +47,17 @@ function useWhere() {
 function NameForm({ person }: { person: PersonRow["person"] }) {
   const t = useTranslations()
 
-  const [names, setNames] = useState<PersonNames>({
-    firstName: person.firstName,
-    lastName: person.lastName,
-    displayName: person.displayName,
-  })
+  const [edits, setEdits] = useState<Partial<PersonNames>>({})
+
+  const names: PersonNames = {
+    firstName: edits.firstName ?? person.firstName,
+    lastName: edits.lastName ?? person.lastName,
+    displayName: edits.displayName === undefined ? person.displayName : edits.displayName,
+  }
 
   const rename = useApiMutation(
     (changes: Partial<PersonNames>) => renamePersonRequest(person.id, changes),
-    { successMessage: t("toast.saved"), invalidate: PEOPLE_QUERIES }
+    { successMessage: t("toast.saved"), invalidate: PEOPLE_QUERIES, onSuccess: () => setEdits({}) }
   )
 
   const changes: Partial<PersonNames> = {}
@@ -92,14 +94,14 @@ function NameForm({ person }: { person: PersonRow["person"] }) {
             label={t("members.fields.firstName")}
             maxLength={80}
             value={names.firstName}
-            onChange={(event) => setNames({ ...names, firstName: event.target.value })}
+            onChange={(event) => setEdits({ ...edits, firstName: event.target.value })}
             error={rename.fieldErrors.firstName}
           />
           <TextField
             label={t("members.fields.lastName")}
             maxLength={80}
             value={names.lastName}
-            onChange={(event) => setNames({ ...names, lastName: event.target.value })}
+            onChange={(event) => setEdits({ ...edits, lastName: event.target.value })}
             error={rename.fieldErrors.lastName}
           />
         </div>
@@ -109,7 +111,7 @@ function NameForm({ person }: { person: PersonRow["person"] }) {
           maxLength={120}
           description={t("members.fields.displayNameHintShort")}
           value={names.displayName ?? ""}
-          onChange={(event) => setNames({ ...names, displayName: event.target.value })}
+          onChange={(event) => setEdits({ ...edits, displayName: event.target.value })}
           error={rename.fieldErrors.displayName}
         />
       </FieldGroup>
