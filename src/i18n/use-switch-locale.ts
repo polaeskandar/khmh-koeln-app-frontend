@@ -8,6 +8,12 @@ import type { Locale } from "./config"
 import { storeLocale } from "./locale-choice"
 import { usePathname, useRouter } from "./navigation"
 
+let carriedFragment: string | null = null
+
+export function carryFragment(fragment: string | null) {
+  carriedFragment = fragment
+}
+
 export function useSwitchLocale() {
   const router = useRouter()
   const pathname = usePathname()
@@ -15,7 +21,7 @@ export function useSwitchLocale() {
 
   return (locale: Locale) => {
     storeLocale(locale)
-    router.replace(`${pathname}${window.location.search}`, { locale })
+    router.replace(`${pathname}${window.location.search}${carriedFragment ?? ""}`, { locale })
     saveAccountLanguage(queryClient, locale)
   }
 }
