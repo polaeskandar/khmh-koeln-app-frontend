@@ -150,7 +150,7 @@ test("more than 50 services page through the table", async () => {
     name: `Group ${String(i + 1).padStart(2, "0")}`,
   }))
 
-  server.use(http.get(apiUrl("/services"), () => HttpResponse.json({ items: many })))
+  server.use(http.get(apiUrl("/services"), () => HttpResponse.json({ ...services, items: many })))
 
   renderWithProviders(
     <SidebarProvider>
