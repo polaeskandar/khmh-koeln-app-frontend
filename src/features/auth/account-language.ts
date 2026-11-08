@@ -3,7 +3,9 @@ import type { QueryClient } from "@tanstack/react-query"
 import type { Locale } from "@/i18n/config"
 import { api, dataOf } from "@/lib/api/client"
 
-import { meQuery } from "./api"
+import { type Me, meQuery } from "./api"
+
+export const LANGUAGE_APPLIED_KEY = ["session", "languageApplied"] as const
 
 type FailureListener = (language: Locale, error: unknown) => boolean
 
@@ -16,15 +18,29 @@ function failed(language: Locale, error: unknown) {
   }
 }
 
+const accountOf = (queryClient: QueryClient) =>
+  queryClient.getQueryData<Me>(meQuery.queryKey)?.account.id
+
 export function saveAccountLanguage(queryClient: QueryClient, language: Locale) {
-  if (!queryClient.getQueryData(meQuery.queryKey)) {
+  const account = accountOf(queryClient)
+
+  if (!account) {
     return
   }
 
   dataOf(api.PATCH("/me", { body: { language } })).then(
-    (me) => queryClient.setQueryData(meQuery.queryKey, me),
+    (me) => {
+      if (accountOf(queryClient) === account) {
+        queryClient.setQueryData(meQuery.queryKey, me)
+      }
+    },
     (error: unknown) => failed(language, error)
   )
+}
+
+export function markLanguageApplied(queryClient: QueryClient, account: string) {
+  queryClient.setQueryDefaults(LANGUAGE_APPLIED_KEY, { gcTime: Infinity })
+  queryClient.setQueryData(LANGUAGE_APPLIED_KEY, account)
 }
 
 export function onLanguageSaveFailed(listener: FailureListener) {
@@ -38,5 +54,3 @@ export function onLanguageSaveFailed(listener: FailureListener) {
     listeners.delete(listener)
   }
 }
-
-export const LANGUAGE_APPLIED_KEY = ["session", "languageApplied"] as const
