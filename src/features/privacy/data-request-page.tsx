@@ -82,7 +82,7 @@ function EraseAction({ data, name }: { data: DataRequestDetail; name: string }) 
   const [clearNotes, setClearNotes] = useState(true)
 
   const erase = useApiMutation((clear: boolean) => eraseRequest(data.request.id, clear), {
-    invalidate: [["data-requests"]],
+    onSuccess: () => queryClient.invalidateQueries(),
   })
 
   return (
