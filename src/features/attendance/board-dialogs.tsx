@@ -95,6 +95,11 @@ export function CorrectionDialog({
   const queryClient = useQueryClient()
   const marks = marksOf(board)
   const [chosen, setChosen] = useState<string | null>(null)
+
+  if (open && chosen === null && marks[0]) {
+    setChosen(marks[0].person.id)
+  }
+
   const personId = chosen ?? marks[0]?.person.id ?? ""
   const remove = useApiMutation(removeMarkRequest, { toastOnError: false })
 
