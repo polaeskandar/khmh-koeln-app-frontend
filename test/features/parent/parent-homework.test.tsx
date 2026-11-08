@@ -127,6 +127,23 @@ test("a child unlinked meanwhile refetches the children and shows the first left
   expect(screen.queryByRole("link", { name: /Mina/ })).not.toBeInTheDocument()
 })
 
+test("a failed children refresh after an unlink offers to try again", async () => {
+  search.value = `child=${MINA_ID}`
+  let reads = 0
+
+  open({ lists: { [MIMI_ID]: homeworkOf[MIMI_ID] } })
+
+  server.use(
+    http.get(apiUrl("/parent/children"), () =>
+      ++reads === 1
+        ? HttpResponse.json({ today: "2026-11-08", items: [mimi, mina] })
+        : problem(403, "forbidden")
+    )
+  )
+
+  expect((await screen.findAllByRole("button", { name: "Try again" })).length).toBeGreaterThan(0)
+})
+
 test("in Arabic stage names sit in bdi", async () => {
   search.value = `child=${MINA_ID}`
   open({ locale: "ar" })

@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import { Suspense } from "react"
 
-import { QueryState } from "@/components/page-states"
+import { QueryErrorState, QueryState } from "@/components/page-states"
 import { isolate } from "@/lib/bidi"
 import { routes } from "@/lib/routes"
 
@@ -16,12 +16,22 @@ import {
 } from "./api"
 import { ChildSwitcher, ListSkeleton, TaskList } from "./parent-bits"
 
+function UnlinkedChild() {
+  const children = useParentChildren()
+
+  return children.isError ? (
+    <QueryErrorState error={children.error} onRetry={() => children.refetch()} />
+  ) : (
+    <ListSkeleton />
+  )
+}
+
 function Tasks({ child, state }: { child: ChildSummary; state: TaskState }) {
   const t = useTranslations("parent.homework")
   const query = useChildHomework(child.id, state)
 
   return (
-    <QueryState query={query} loading={<ListSkeleton />} notFound={<ListSkeleton />}>
+    <QueryState query={query} loading={<ListSkeleton />} notFound={<UnlinkedChild />}>
       {(data) => (
         <TaskList
           title={state === "todo" ? t("toDo") : t("done")}
