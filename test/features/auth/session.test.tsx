@@ -176,6 +176,10 @@ describe("safeNext", () => {
     "/xx/",
     "",
     "/en",
+    "/en///evil.example/",
+    "/de//evil.example",
+    "/en/..//evil.example/",
+    "/en/../ar//evil.example",
   ])("rejects %j", (next) => expect(safeNext(next)).toBeNull())
 
   test.each(["/en/members/", "/de/services/view/?id=1", "/ar/parent/"])("accepts %s", (next) =>
