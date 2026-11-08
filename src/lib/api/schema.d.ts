@@ -1,5 +1,5 @@
 export type paths = {
-  "/sessions/{id}/attendance": {
+  "/services/insights": {
     parameters: {
       query?: never
       header?: never
@@ -7,7 +7,7 @@ export type paths = {
       cookie?: never
     }
 
-    get: operations["get_api_attendance_board"]
+    get: operations["get_api_services_insights"]
     put?: never
     post?: never
     delete?: never
@@ -16,7 +16,41 @@ export type paths = {
     patch?: never
     trace?: never
   }
-  "/sessions/{sessionId}/attendance/{personId}": {
+  "/account-requests": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_account_requests_list"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/account-requests/member-candidates": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_account_requests_member_candidates"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/account-requests/{id}/approve": {
     parameters: {
       query?: never
       header?: never
@@ -24,44 +58,26 @@ export type paths = {
       cookie?: never
     }
     get?: never
-
-    put: operations["put_api_attendance_mark"]
-    post?: never
-
-    delete: operations["delete_api_attendance_remove"]
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/attendance/overview": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-
-    get: operations["get_api_attendance_overview"]
     put?: never
-    post?: never
+
+    post: operations["post_api_account_requests_approve"]
     delete?: never
     options?: never
     head?: never
     patch?: never
     trace?: never
   }
-  "/stages/{id}/attendance-history": {
+  "/account-requests/{id}/decline": {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-
-    get: operations["get_api_stages_attendance_history"]
+    get?: never
     put?: never
-    post?: never
+
+    post: operations["post_api_account_requests_decline"]
     delete?: never
     options?: never
     head?: never
@@ -96,6 +112,108 @@ export type paths = {
     put?: never
 
     post: operations["post_api_auth_forgot_password"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/me": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_me"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/me/language": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+
+    put: operations["put_api_me_language"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/member-accounts": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_member_accounts_list"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/member-accounts/{id}/unlink": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+
+    post: operations["post_api_member_accounts_unlink"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/member/servants": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_member_servants"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/me/password": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+
+    post: operations["post_api_me_password"]
     delete?: never
     options?: never
     head?: never
@@ -187,211 +305,6 @@ export type paths = {
     patch?: never
     trace?: never
   }
-  "/auth/tokens": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-
-    post: operations["post_api_auth_tokens"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/auth/tokens/current": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    post?: never
-
-    delete: operations["delete_api_auth_tokens_current"]
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/health": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-
-    get: operations["get_health"]
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/health/ready": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-
-    get: operations["get_health_ready"]
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/account-requests": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-
-    get: operations["get_api_account_requests_list"]
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/account-requests/member-candidates": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-
-    get: operations["get_api_account_requests_member_candidates"]
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/account-requests/{id}/approve": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-
-    post: operations["post_api_account_requests_approve"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/account-requests/{id}/decline": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-
-    post: operations["post_api_account_requests_decline"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/me": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-
-    get: operations["get_api_me"]
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-
-    patch: operations["patch_api_me_update"]
-    trace?: never
-  }
-  "/member-accounts": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-
-    get: operations["get_api_member_accounts_list"]
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/member-accounts/{id}/unlink": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-
-    post: operations["post_api_member_accounts_unlink"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/me/password": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-
-    post: operations["post_api_me_password"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
   "/staff-accounts": {
     parameters: {
       query?: never
@@ -460,6 +373,40 @@ export type paths = {
     patch?: never
     trace?: never
   }
+  "/auth/tokens": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+
+    post: operations["post_api_auth_tokens"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/auth/tokens/current": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+
+    delete: operations["delete_api_auth_tokens_current"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/stages/{stageId}/homework": {
     parameters: {
       query?: never
@@ -503,14 +450,14 @@ export type paths = {
     }
 
     get: operations["get_api_homework_show"]
-    put?: never
+
+    put: operations["put_api_homework_edit"]
     post?: never
 
     delete: operations["delete_api_homework_delete"]
     options?: never
     head?: never
-
-    patch: operations["patch_api_homework_edit"]
+    patch?: never
     trace?: never
   }
   "/homework/{id}/publish": {
@@ -641,14 +588,14 @@ export type paths = {
     }
 
     get: operations["get_api_lessons_show"]
-    put?: never
+
+    put: operations["put_api_lessons_edit"]
     post?: never
 
     delete: operations["delete_api_lessons_delete"]
     options?: never
     head?: never
-
-    patch: operations["patch_api_lessons_edit"]
+    patch?: never
     trace?: never
   }
   "/stages/{stageId}/lesson-options": {
@@ -703,6 +650,110 @@ export type paths = {
     patch?: never
     trace?: never
   }
+  "/member/homework": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_member_homework_list"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/member/homework/{homeworkId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_member_homework_show"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/member/homework/{homeworkId}/completion": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+
+    put: operations["put_api_member_homework_report"]
+    post?: never
+
+    delete: operations["delete_api_member_homework_undo"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/parent/children/{childId}/homework": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_parent_homework_list"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/parent/children/{childId}/homework/{homeworkId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_parent_homework_show"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/parent/children/{childId}/homework/{homeworkId}/completion": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+
+    put: operations["put_api_parent_homework_report"]
+    post?: never
+
+    delete: operations["delete_api_parent_homework_undo"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/agenda": {
     parameters: {
       query?: never
@@ -720,7 +771,7 @@ export type paths = {
     patch?: never
     trace?: never
   }
-  "/dashboard": {
+  "/sessions/{id}/attendance": {
     parameters: {
       query?: never
       header?: never
@@ -728,7 +779,110 @@ export type paths = {
       cookie?: never
     }
 
-    get: operations["get_api_dashboard"]
+    get: operations["get_api_attendance_board"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/sessions/{id}/attendance/corrections": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_attendance_corrections"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/sessions/{sessionId}/attendance/{personId}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+
+    put: operations["put_api_attendance_mark"]
+    post?: never
+
+    delete: operations["delete_api_attendance_remove"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/attendance/overview": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_attendance_overview"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/attendance/counts": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_attendance_counts"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/dashboard/upcoming": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_dashboard_upcoming"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/member/meetings": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_member_meetings"]
     put?: never
     post?: never
     delete?: never
@@ -780,14 +934,14 @@ export type paths = {
     }
 
     get: operations["get_api_schedules_show"]
-    put?: never
+
+    put: operations["put_api_schedules_edit"]
     post?: never
 
     delete: operations["delete_api_schedules_delete"]
     options?: never
     head?: never
-
-    patch: operations["patch_api_schedules_edit"]
+    patch?: never
     trace?: never
   }
   "/schedules": {
@@ -842,6 +996,23 @@ export type paths = {
     patch?: never
     trace?: never
   }
+  "/sessions/{id}/details": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+
+    put: operations["put_api_sessions_details"]
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/sessions/{id}": {
     parameters: {
       query?: never
@@ -856,8 +1027,7 @@ export type paths = {
     delete?: never
     options?: never
     head?: never
-
-    patch: operations["patch_api_sessions_rename"]
+    patch?: never
     trace?: never
   }
   "/sessions/{id}/open": {
@@ -928,7 +1098,7 @@ export type paths = {
     patch?: never
     trace?: never
   }
-  "/member/homework": {
+  "/stages/{id}/attendance-history": {
     parameters: {
       query?: never
       header?: never
@@ -936,7 +1106,7 @@ export type paths = {
       cookie?: never
     }
 
-    get: operations["get_api_member_homework_list"]
+    get: operations["get_api_stages_attendance_history"]
     put?: never
     post?: never
     delete?: never
@@ -945,7 +1115,7 @@ export type paths = {
     patch?: never
     trace?: never
   }
-  "/member/homework/{homeworkId}": {
+  "/service-leaders": {
     parameters: {
       query?: never
       header?: never
@@ -953,59 +1123,7 @@ export type paths = {
       cookie?: never
     }
 
-    get: operations["get_api_member_homework_show"]
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/member/homework/{homeworkId}/completion": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-
-    put: operations["put_api_member_homework_report"]
-    post?: never
-
-    delete: operations["delete_api_member_homework_undo"]
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/member/groups": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-
-    get: operations["get_api_member_groups"]
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/member/meetings": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-
-    get: operations["get_api_member_meetings"]
+    get: operations["get_api_service_leaders"]
     put?: never
     post?: never
     delete?: never
@@ -1041,14 +1159,14 @@ export type paths = {
     }
 
     get: operations["get_api_services_show"]
-    put?: never
+
+    put: operations["put_api_services_edit"]
     post?: never
 
     delete: operations["delete_api_services_delete"]
     options?: never
     head?: never
-
-    patch: operations["patch_api_services_edit"]
+    patch?: never
     trace?: never
   }
   "/services/{id}/stages": {
@@ -1095,14 +1213,14 @@ export type paths = {
     }
 
     get: operations["get_api_stages_show"]
-    put?: never
+
+    put: operations["put_api_stages_edit"]
     post?: never
 
     delete: operations["delete_api_stages_delete"]
     options?: never
     head?: never
-
-    patch: operations["patch_api_stages_edit"]
+    patch?: never
     trace?: never
   }
   "/services/{id}/archive": {
@@ -1173,75 +1291,6 @@ export type paths = {
     patch?: never
     trace?: never
   }
-  "/parent/children": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-
-    get: operations["get_api_parent_children"]
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/parent/children/{childId}/homework": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-
-    get: operations["get_api_parent_homework_list"]
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/parent/children/{childId}/homework/{homeworkId}": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-
-    get: operations["get_api_parent_homework_show"]
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/parent/children/{childId}/homework/{homeworkId}/completion": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-
-    put: operations["put_api_parent_homework_report"]
-    post?: never
-
-    delete: operations["delete_api_parent_homework_undo"]
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
   "/people/directory": {
     parameters: {
       query?: never
@@ -1288,6 +1337,23 @@ export type paths = {
     put?: never
 
     post: operations["post_api_guardian_links_revoke"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/member/groups": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_member_groups"]
+    put?: never
+    post?: never
     delete?: never
     options?: never
     head?: never
@@ -1345,6 +1411,23 @@ export type paths = {
     patch?: never
     trace?: never
   }
+  "/parent/children": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_parent_children"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/people": {
     parameters: {
       query?: never
@@ -1371,13 +1454,13 @@ export type paths = {
       cookie?: never
     }
     get?: never
-    put?: never
+
+    put: operations["put_api_people_rename"]
     post?: never
     delete?: never
     options?: never
     head?: never
-
-    patch: operations["patch_api_people_rename"]
+    patch?: never
     trace?: never
   }
   "/people/{id}/deactivate": {
@@ -1408,6 +1491,40 @@ export type paths = {
     put?: never
 
     post: operations["post_api_people_reactivate"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/data-requests/{id}/erasure": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_data_requests_erasure_review"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/data-requests/{id}/erase": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+
+    post: operations["post_api_data_requests_erase"]
     delete?: never
     options?: never
     head?: never
@@ -1449,23 +1566,6 @@ export type paths = {
     patch?: never
     trace?: never
   }
-  "/data-requests/{id}/erase": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-
-    post: operations["post_api_data_requests_erase"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
   "/me/personal-data": {
     parameters: {
       query?: never
@@ -1501,6 +1601,40 @@ export type paths = {
     patch?: never
     trace?: never
   }
+  "/health": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_health"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/health/ready": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_health_ready"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export type components = {
@@ -1519,21 +1653,42 @@ export type components = {
         }
       }
     }
-    RemovalInput: {
-      reason?: string | null
+    MemberApprovalRequest: {
+      personId?: string | null
+
+      ageCheck?: string | null
+
+      guardianConsentNote?: string | null
     }
-    ConfirmEmailCommand: {
+    ApprovalRequest: {
+      as?: "parent" | "servant" | "member" | null
+
+      childIds?: string[]
+
+      roleIds?: string[]
+
+      member?: components["schemas"]["MemberApprovalRequest"]
+    }
+    ConfirmEmailRequest: {
       token?: string | null
     }
-    RequestPasswordResetCommand: {
+    ForgotPasswordRequest: {
       email?: string | null
     }
-    SetPasswordFromLinkCommand: {
+    ChangeLanguageRequest: {
+      language?: string | null
+    }
+    ChangePasswordRequest: {
+      currentPassword?: string | null
+
+      newPassword?: string | null
+    }
+    SetPasswordFromLinkRequest: {
       token?: string | null
 
       password?: string | null
     }
-    AccountInput: {
+    AccountRequest: {
       firstName?: string | null
 
       lastName?: string | null
@@ -1544,67 +1699,48 @@ export type components = {
 
       language?: "en" | "de" | "ar" | null
     }
-    RegistrationInput: {
+    RegistrationRequest: {
       registeredAs?: "parent" | "servant" | "member" | null
 
       note?: string | null
 
       serviceIds?: string[]
     }
-    PrivacyInput: {
+    PrivacyRequest: {
       accepted?: boolean | null
 
       version?: string | null
     }
-    RegisterAccountCommand: {
-      account?: components["schemas"]["AccountInput"]
+    RegisterAccountRequest: {
+      account?: components["schemas"]["AccountRequest"]
 
-      registration?: components["schemas"]["RegistrationInput"]
+      registration?: components["schemas"]["RegistrationRequest"]
 
-      privacy?: components["schemas"]["PrivacyInput"]
+      privacy?: components["schemas"]["PrivacyRequest"]
     }
-    ApprovalInput: {
-      as?: "parent" | "servant" | "member" | null
-
-      childIds?: string[]
-
-      roleIds?: string[]
-    }
-
-    Language: "en" | "de" | "ar"
-    ChangeLanguageCommand: {
-      language?: components["schemas"]["Language"] | null
-    }
-    ChangePasswordCommand: {
-      currentPassword?: string | null
-
-      newPassword?: string | null
-    }
-    GiveAccountRoleCommand: {
+    GiveAccountRoleRequest: {
       roleId?: string | null
     }
-    HomeworkInput: {
+    HomeworkRequest: {
       title?: string | null
 
       instructions?: string | null
 
       dueDate?: string | null
 
-      resources?:
-        | {
-            [key: string]: string | null
-          }[]
-        | null
+      resources?: {
+        [key: string]: string | null
+      }[]
     }
-    LessonOptionsInput: {
+    LessonOptionsQueryRequest: {
       lessonId?: string | null
     }
-    LessonListInput: {
+    LessonListQueryRequest: {
       tab?: "upcoming" | "previous" | "archived"
 
       q?: string | null
     }
-    LessonDetailsInput: {
+    LessonDetailsRequest: {
       title?: string | null
 
       summary?: string | null
@@ -1615,14 +1751,14 @@ export type components = {
 
       collaboratorIds?: string[] | null
     }
-    LessonLinkInput: {
+    LessonMeetingRequest: {
       scheduleId?: string | null
 
       sessionId?: string | null
 
       date?: string | null
     }
-    LessonPlanInput: {
+    LessonPlanRequest: {
       objectives?: string | null
 
       teachingPoints?: string | null
@@ -1631,27 +1767,28 @@ export type components = {
 
       notes?: string | null
 
-      materials?:
-        | {
-            [key: string]: string | null
-          }[]
-        | null
+      materials?: {
+        [key: string]: string | null
+      }[]
     }
-    LessonInput: {
-      details?: components["schemas"]["LessonDetailsInput"]
+    LessonRequest: {
+      details?: components["schemas"]["LessonDetailsRequest"]
 
-      meeting?: components["schemas"]["LessonLinkInput"] | null
+      meeting?: components["schemas"]["LessonMeetingRequest"]
 
-      plan?: components["schemas"]["LessonPlanInput"]
+      plan?: components["schemas"]["LessonPlanRequest"]
 
       responsibleId?: string | null
 
       status?: "draft" | "ready" | null
     }
-    LessonStatusInput: {
+    LessonStatusRequest: {
       status?: "draft" | "ready" | "completed" | null
     }
-    ShowAgendaQuery: {
+    ChildHomeworkQueryRequest: {
+      state?: "todo" | "done"
+    }
+    AgendaQueryRequest: {
       from?: string | null
 
       to?: string | null
@@ -1662,26 +1799,32 @@ export type components = {
 
       scheduleId?: string | null
     }
-    RosterInput: {
+    RemovalRequest: {
+      reason?: string | null
+    }
+    AttendanceCountsRequest: {
+      sessionIds?: string[]
+    }
+    RosterRequest: {
       serviceId?: string | null
 
       stageId?: string | null
 
       mode?: "expected" | "open" | null
     }
-    DetailsInput: {
+    DetailsRequest: {
       name?: string | null
 
       description?: string | null
 
       location?: string | null
     }
-    SpanInput: {
+    SpanRequest: {
       startsOn?: string | null
 
       endsOn?: string | null
     }
-    RecurrenceInput: {
+    RecurrenceRequest: {
       frequency?: "weekly" | "monthly" | null
 
       interval?: number | null
@@ -1690,36 +1833,36 @@ export type components = {
 
       monthWeek?: number | null
 
-      span?: components["schemas"]["SpanInput"]
+      span?: components["schemas"]["SpanRequest"]
     }
-    TimesInput: {
+    TimesRequest: {
       startTime?: string | null
 
       endTime?: string | null
     }
-    CreateScheduleCommand: {
-      roster?: components["schemas"]["RosterInput"]
+    CreateScheduleRequest: {
+      roster?: components["schemas"]["RosterRequest"]
 
-      details?: components["schemas"]["DetailsInput"]
+      details?: components["schemas"]["DetailsRequest"]
 
-      recurrence?: components["schemas"]["RecurrenceInput"]
+      recurrence?: components["schemas"]["RecurrenceRequest"]
 
-      times?: components["schemas"]["TimesInput"]
+      times?: components["schemas"]["TimesRequest"]
     }
-    ScheduleChanges: {
-      details?: components["schemas"]["DetailsInput"]
+    ScheduleChangesRequest: {
+      details?: components["schemas"]["DetailsRequest"]
 
-      recurrence?: components["schemas"]["RecurrenceInput"] | null
+      recurrence?: components["schemas"]["RecurrenceRequest"]
 
-      times?: components["schemas"]["TimesInput"]
+      times?: components["schemas"]["TimesRequest"]
 
       rosterMode?: "expected" | "open" | null
     }
-    ReasonInput: {
+    ReasonRequest: {
       reason?: string | null
     }
-    OneOffInput: {
-      roster?: components["schemas"]["RosterInput"]
+    OneOffSessionRequest: {
+      roster?: components["schemas"]["RosterRequest"]
 
       title?: string | null
 
@@ -1729,49 +1872,41 @@ export type components = {
 
       endsAt?: string | null
     }
-    SessionDetailsInput: {
+    SessionDetailsRequest: {
       title?: string | null
 
       location?: string | null
     }
-    ChildHomeworkInput: {
-      state?: "todo" | "done"
-    }
-    CreateServiceCommand: {
+    ServiceRequest: {
       name?: string | null
 
       description?: string | null
     }
-    ServiceChanges: {
-      name?: string | null
-
-      description?: string | null
-    }
-    ReorderStagesCommand: {
+    StageOrderRequest: {
       stageIds?: string[] | null
     }
-    StageChanges: {
+    StageRequest: {
       name?: string | null
 
       description?: string | null
     }
-    ParentAccessInput: {
+    ParentAccessRequest: {
       userId?: string | null
 
       personId?: string | null
 
       relationship?: "parent" | "guardian"
     }
-    PlacementInput: {
+    PlacementRequest: {
       serviceId?: string | null
 
       stageId?: string | null
     }
-    MoveMembershipCommand: {
+    MoveMembershipRequest: {
       stageId?: string | null
     }
-    ListPeopleQuery: {
-      status?: string
+    PeopleQueryRequest: {
+      status?: "active" | "inactive" | "all"
 
       serviceId?: string | null
 
@@ -1781,248 +1916,118 @@ export type components = {
 
       page?: number
     }
-    CreatePersonCommand: {
+    CreatePersonRequest: {
       firstName?: string | null
 
       lastName?: string | null
 
       displayName?: string | null
 
-      placement?: components["schemas"]["PlacementInput"] | null
+      placement?: components["schemas"]["PlacementRequest"] | null
 
       confirmDuplicate?: boolean
     }
-    PersonChanges: {
+    RenamePersonRequest: {
       firstName?: string | null
 
       lastName?: string | null
 
       displayName?: string | null
     }
-    RequestSubjectInput: {
+    EraseRequestRequest: {
+      clearNotes?: boolean | null
+    }
+    RequestSubjectRequest: {
       personId?: string | null
 
       accountId?: string | null
     }
-    ReceiptInput: {
+    ReceiptRequest: {
       requestedBy?: string | null
 
       channel?: "email" | "letter" | "in_person" | null
 
       receivedOn?: string | null
     }
-    RecordDataRequestCommand: {
+    RecordDataRequestRequest: {
       kind?: "erasure" | "copy" | null
 
-      subject?: components["schemas"]["RequestSubjectInput"]
+      subject?: components["schemas"]["RequestSubjectRequest"]
 
-      receipt?: components["schemas"]["ReceiptInput"]
+      receipt?: components["schemas"]["ReceiptRequest"]
 
       note?: string | null
     }
-    EraseInput: {
-      clearNotes?: boolean | null
-    }
-    RequestOwnErasureCommand: {
+    OwnErasureRequestRequest: {
       note?: string | null
     }
-    PersonRef: {
-      id: string
-      firstName: string
-      lastName: string
-      displayName: string | null
-    }
-    AccountRef: {
+    StageSummary: {
       id: string
       name: string
+      position: number
     }
-    Correction: {
-      id: string
-      person: components["schemas"]["PersonRef"]
-      reason: string | null
-      recordedAt: string
-      recordedBy: components["schemas"]["AccountRef"] | null
-      removedAt: string
-      removedBy: components["schemas"]["AccountRef"] | null
+    NextMeeting: {
+      date: string
+      startTime: string
+      stage: components["schemas"]["StageSummary"] | null
+      status: string
     }
-    SessionCounts: {
-      present: number
-      rosterSize: number | null
-      rosterPresent: number
-      notMarked: number
-      notOnRoster: number
-    }
+    AttendanceTrend: {
+      sessions: number
 
-    SessionEventType: "created" | "opened" | "closed" | "reopened" | "canceled" | "edited"
-    HistoryEntry: {
-      actor: components["schemas"]["AccountRef"] | null
-      at: string
-      byGenerator: boolean
-      note: string | null
-      type: components["schemas"]["SessionEventType"]
+      rate: number | null
+      averagePresent: number | null
     }
-    MarkRef: {
+    ArchiveImpact: {
+      activeSchedules: number
+      upcomingSessions: number
+    }
+    ServiceInsight: {
+      serviceId: string
+      next: components["schemas"]["NextMeeting"] | null
+      trend: components["schemas"]["AttendanceTrend"]
+      impact: components["schemas"]["ArchiveImpact"]
+    }
+    AccountSummary: {
       id: string
-      recordedAt: string
-      recordedBy: components["schemas"]["AccountRef"] | null
+      email: string
+      displayName: string
+      language: string
     }
-    ServiceRef: {
+    ServiceReference: {
       id: string
       name: string
       tone: number
       archived: boolean
     }
-    StageRef: {
+    AccountRequest2: {
+      account: components["schemas"]["AccountSummary"]
+
+      registeredAt: string
+      registeredAs: string | null
+      note: string | null
+      services: components["schemas"]["ServiceReference"][]
+    }
+    RoleSummary: {
+      id: string
+      name: string
+    }
+    AccountRequestListResponse: {
+      items: components["schemas"]["AccountRequest2"][]
+      roles: components["schemas"]["RoleSummary"][]
+      today: string
+    }
+    StageReference: {
       id: string
       name: string
       position: number
       archived: boolean
     }
     PersonGroup: {
-      service: components["schemas"]["ServiceRef"]
-      stage: components["schemas"]["StageRef"] | null
+      service: components["schemas"]["ServiceReference"]
+      stage: components["schemas"]["StageReference"] | null
     }
-    VisitorRow: {
-      person: components["schemas"]["PersonRef"]
-      mark: components["schemas"]["MarkRef"]
-      placements: components["schemas"]["PersonGroup"][]
-    }
-    BoardRow: {
-      person: components["schemas"]["PersonRef"]
-      mark: components["schemas"]["MarkRef"] | null
-    }
-
-    RosterMode: "expected" | "open"
-
-    SessionStatus: "scheduled" | "active" | "completed" | "canceled"
-    BoardSession: {
-      can: {
-        manage: boolean
-        record: boolean
-        reopen: boolean
-      }
-      cancelReason: string | null
-      closedAt: string | null
-      closedBy: components["schemas"]["AccountRef"] | null
-      date: string
-      endTime: string | null
-      endsAt: string | null
-      id: string
-      location: string | null
-      occurrenceDate: string
-      oneOff: boolean
-      openedAt: string | null
-      rosterMode: components["schemas"]["RosterMode"]
-      scheduleId: string | null
-      service: components["schemas"]["ServiceRef"]
-      stage: components["schemas"]["StageRef"] | null
-      startTime: string
-      startsAt: string
-      status: components["schemas"]["SessionStatus"]
-      title: string
-    }
-    AttendanceBoard: {
-      corrections: components["schemas"]["Correction"][]
-      counts: components["schemas"]["SessionCounts"]
-      history: components["schemas"]["HistoryEntry"][]
-      notOnRoster: components["schemas"]["VisitorRow"][]
-      recentlyMarked: components["schemas"]["BoardRow"][]
-      roster: components["schemas"]["BoardRow"][]
-      session: components["schemas"]["BoardSession"]
-      today: string
-    }
-    MarkView: {
-      id: string
-      sessionId: string
-      personId: string
-      recordedAt: string
-      recordedBy: components["schemas"]["AccountRef"] | null
-    }
-    OverviewCard: {
-      can: {
-        manage: boolean
-        record: boolean
-        reopen: boolean
-      }
-      cancelReason: string | null
-      closedAt: string | null
-      closedBy: components["schemas"]["AccountRef"] | null
-      counts: components["schemas"]["SessionCounts"]
-      date: string
-      endTime: string | null
-      endsAt: string | null
-      id: string
-      location: string | null
-      occurrenceDate: string
-      oneOff: boolean
-      openedAt: string | null
-      rosterMode: components["schemas"]["RosterMode"]
-      scheduleId: string | null
-      service: components["schemas"]["ServiceRef"]
-      stage: components["schemas"]["StageRef"] | null
-      startTime: string
-      startsAt: string
-      status: components["schemas"]["SessionStatus"]
-      title: string
-    }
-    AttendanceOverview: {
-      today: string
-      sessions: components["schemas"]["OverviewCard"][]
-      earlier: components["schemas"]["OverviewCard"][]
-      closed: components["schemas"]["OverviewCard"][]
-      openCount: number
-    }
-    HistorySession: {
-      id: string
-      date: string
-      startsAt: string
-      present: number
-    }
-    HistoryRow: {
-      person: components["schemas"]["PersonRef"]
-      cells: string[]
-      presentCount: number
-    }
-    AttendanceHistory: {
-      today: string
-      sessions: components["schemas"]["HistorySession"][]
-      rows: components["schemas"]["HistoryRow"][]
-    }
-    ServiceOption: {
-      id: string
-      name: string
-    }
-    Readiness: {
-      status: string
-      checks: {
-        [key: string]: string
-      }
-    }
-    AccountSummary: {
-      id: string
-      email: string
-      displayName: string
-      language: components["schemas"]["Language"]
-    }
-
-    RegisteredAs: "parent" | "servant" | "member"
-    AccountRequest: {
-      account: components["schemas"]["AccountSummary"]
-      registeredAt: string
-      registeredAs: components["schemas"]["RegisteredAs"] | null
-      note: string | null
-      services: components["schemas"]["ServiceRef"][]
-    }
-    RoleSummary: {
-      id: string
-      name: string
-    }
-    AccountRequests: {
-      items: components["schemas"]["AccountRequest"][]
-      roles: components["schemas"]["RoleSummary"][]
-      today: string
-    }
-    MemberCandidate: {
+    MemberCandidateResponse: {
       displayName: string | null
       firstName: string
       groups: components["schemas"]["PersonGroup"][]
@@ -2030,41 +2035,43 @@ export type components = {
       id: string
       lastName: string
     }
-
-    Action: "create" | "read" | "update" | "delete"
-
-    Resource:
-      | "users"
-      | "roles"
-      | "services"
-      | "stages"
-      | "sessions"
-      | "attendance"
-      | "members"
-      | "lessons"
-      | "homework"
-      | "parentPortal"
-    PermissionGrant: {
-      action: components["schemas"]["Action"]
-      resource: components["schemas"]["Resource"]
+    MemberCandidateListResponse: {
+      items: components["schemas"]["MemberCandidateResponse"][]
     }
-    MemberSummary: {
+    AccountResponse: {
+      id: string
+      email: string
+      displayName: string
+      language: string
+    }
+    RoleResponse: {
+      id: string
+      name: string
+    }
+    PermissionResponse: {
+      action: string
+      resource: string
+    }
+    MemberSummaryResponse: {
       personId: string
       groupCount: number
     }
-    CurrentAccount: {
-      account: components["schemas"]["AccountSummary"]
-      roles: components["schemas"]["RoleSummary"][]
-      permissions: components["schemas"]["PermissionGrant"][]
+    MeResponse: {
+      account: components["schemas"]["AccountResponse"]
+      roles: components["schemas"]["RoleResponse"][]
+      permissions: components["schemas"]["PermissionResponse"][]
       today: string
-      member: components["schemas"]["MemberSummary"] | null
+      member: components["schemas"]["MemberSummaryResponse"] | null
     }
+    AccountReference: {
+      id: string
+      name: string
+    }
+    MemberAccountItemResponse: {
+      ageCheck: string | null
 
-    AgeCheck: "sixteenOrOlder" | "guardianConsent"
-    MemberAccountItem: {
-      ageCheck: components["schemas"]["AgeCheck"] | null
       approvedAt: string | null
-      approvedBy: components["schemas"]["AccountRef"] | null
+      approvedBy: components["schemas"]["AccountReference"] | null
       disabled: boolean
       email: string
       guardianConsentNote: string | null
@@ -2078,9 +2085,24 @@ export type components = {
       }
       name: string
     }
-    MemberAccounts: {
-      items: components["schemas"]["MemberAccountItem"][]
+    MemberAccountListResponse: {
       today: string
+      items: components["schemas"]["MemberAccountItemResponse"][]
+    }
+    GroupServant: {
+      id: string
+      name: string
+      role: string
+    }
+    RegistrationReceivedResponse: {
+      status: string
+    }
+    ServiceOptionResponse: {
+      id: string
+      name: string
+    }
+    RegistrationServicesResponse: {
+      items: components["schemas"]["ServiceOptionResponse"][]
     }
     StaffAccount: {
       id: string
@@ -2093,10 +2115,10 @@ export type components = {
       items: components["schemas"]["StaffAccount"][]
       today: string
     }
-    PasswordLink: {
+    IssuedPasswordLink: {
       expiresAt: string
     }
-    AudienceCounts: {
+    AudienceCountsResponse: {
       assigned: number
       completed: number
       completedAfterDueDate: number
@@ -2105,440 +2127,213 @@ export type components = {
       withoutAccount: number
       withoutParentAccount: number
     }
-    LessonRef: {
+    LessonOnDate: {
       id: string
       title: string
       teachingDate: string
+      archived: boolean
     }
-
-    HomeworkStatus: "draft" | "published" | "archived"
-    HomeworkItem: {
-      can: {
-        archive: boolean
-        delete: boolean
-        edit: boolean
-        publish: boolean
-        restore: boolean
-        unpublish: boolean
-        viewProgress: boolean
-      }
-      counts: components["schemas"]["AudienceCounts"] | null
+    HomeworkItemResponse: {
+      counts: components["schemas"]["AudienceCountsResponse"] | null
       dueDate: string | null
       id: string
-      lesson: components["schemas"]["LessonRef"]
+      lesson: components["schemas"]["LessonOnDate"]
+
       publishedAt: string | null
-      status: components["schemas"]["HomeworkStatus"]
+      status: string
       title: string
     }
-    HomeworkList: {
+    HomeworkListResponse: {
+      archived: boolean
       audienceSize: number
-      can: {
-        create: boolean
-      }
       defaultLessonId: string | null
-      items: components["schemas"]["HomeworkItem"][]
-      lessons: components["schemas"]["LessonRef"][]
-      stage: components["schemas"]["StageRef"]
+      items: components["schemas"]["HomeworkItemResponse"][]
+      lessons: components["schemas"]["LessonOnDate"][]
+      stage: components["schemas"]["StageSummary"]
       tabs: {
         [key: string]: number
       }
       today: string
     }
-    HomeworkWritten: {
+    WrittenHomeworkResponse: {
       id: string
-      status: components["schemas"]["HomeworkStatus"]
+      status: string
       version: number
     }
-    HomeworkDetail: {
+    HomeworkDetailResponse: {
+      archived: boolean
       audienceSize: number
-      can: {
-        archive: boolean
-        delete: boolean
-        edit: boolean
-        publish: boolean
-        restore: boolean
-        unpublish: boolean
-        viewProgress: boolean
-      }
-      counts: components["schemas"]["AudienceCounts"] | null
+      counts: components["schemas"]["AudienceCountsResponse"] | null
       dueDate: string | null
       id: string
       instructions: string | null
       lesson: {
-        id: string
-        memoryVerse: string | null
-        passage: string | null
-        teachingDate: string
-        title: string
+        [key: string]: boolean | string | null
       }
       minDueDate: string
+
       publishedAt: string | null
       resources: {
         label: string
         url: string | null
       }[]
-      service: components["schemas"]["ServiceRef"]
-      stage: components["schemas"]["StageRef"]
-      status: components["schemas"]["HomeworkStatus"]
+      service: components["schemas"]["ServiceReference"]
+      stage: components["schemas"]["StageSummary"]
+      status: string
       title: string
       today: string
       version: number
     }
-    HomeworkStatusChanged: {
+    ChangedHomeworkResponse: {
       id: string
-      status: components["schemas"]["HomeworkStatus"]
+      status: string
+
       publishedAt: string | null
+
       archivedAt: string | null
       version: number
     }
-    AudienceRow: {
+    PersonReference: {
+      id: string
+      firstName: string
+      lastName: string
+      displayName: string | null
+    }
+    AudienceRowResponse: {
       completedAfterDueDate: boolean
+
       completedAt: string | null
-      completedBy: components["schemas"]["AccountRef"] | null
+      completedBy: components["schemas"]["AccountReference"] | null
       done: boolean
       inStage: boolean
       ownAccount: boolean
-      parentAccounts: components["schemas"]["AccountRef"][]
-      person: components["schemas"]["PersonRef"]
+      parentAccounts: components["schemas"]["AccountReference"][]
+      person: components["schemas"]["PersonReference"]
       reportedBySelf: boolean
     }
-    HomeworkProgress: {
-      counts: components["schemas"]["AudienceCounts"] | null
+    HomeworkProgressResponse: {
+      counts: components["schemas"]["AudienceCountsResponse"] | null
       homework: {
-        can: {
-          archive: boolean
-          delete: boolean
-          edit: boolean
-          publish: boolean
-          restore: boolean
-          unpublish: boolean
-          viewProgress: boolean
-        }
-        counts: components["schemas"]["AudienceCounts"] | null
+        counts: components["schemas"]["AudienceCountsResponse"] | null
         dueDate: string | null
         id: string
         instructions: string | null
-        lesson: components["schemas"]["LessonRef"]
+        lesson: components["schemas"]["LessonOnDate"]
+
         publishedAt: string | null
         resources: {
           label: string
           url: string | null
         }[]
-        status: components["schemas"]["HomeworkStatus"]
+        status: string
         title: string
       }
-      lesson: components["schemas"]["LessonRef"]
-      rows: components["schemas"]["AudienceRow"][]
-      service: components["schemas"]["ServiceRef"]
-      stage: components["schemas"]["StageRef"]
+      lesson: components["schemas"]["LessonOnDate"]
+      rows: components["schemas"]["AudienceRowResponse"][]
+      service: components["schemas"]["ServiceReference"]
+      stage: components["schemas"]["StageSummary"]
       today: string
     }
-    LessonArchived: {
+    LessonArchiveResponse: {
+      id: string
+
       archivedAt: string | null
       homeworkArchived: number
-      id: string
       version: number
     }
-    LessonRestored: {
-      archivedAt: unknown
-      id: string
-      version: number
+    LessonHomework: {
+      total: number
+      published: number
+      drafts: number
     }
-    MeetingView:
-      | {
-          kind: "none"
-          date: string
-        }
-      | {
-          kind: "planned"
-          date: string
-          startTime: string
-          title: string
-          createdOn: string
-        }
-      | {
-          kind: "session"
-          id: string
-          status: components["schemas"]["SessionStatus"]
-          date: string
-          startTime: string
-          endTime: string | null
-          title: string
-          location: string | null
-          cancelReason: string | null
-        }
-      | {
-          kind: "not-on-schedule"
-          date: string
-          title: string | null
-        }
+    MeetingViewResponse: {
+      [key: string]: string | null
+    }
+    LessonDetailResponse: {
+      archived: boolean
+      homework: components["schemas"]["LessonHomework"]
+      lesson: {
+        activities: string | null
 
-    LessonStatus: "draft" | "ready" | "completed"
-    LessonView: {
-      activities: string | null
-      archivedAt: string | null
-      collaborators: components["schemas"]["AccountRef"][]
-      completedAt: string | null
-      id: string
-      materials: {
-        label: string
-        url: string | null
-      }[]
-      meeting: components["schemas"]["MeetingView"]
-      memoryVerse: string | null
-      notes: string | null
-      objectives: string | null
-      passage: string | null
-      responsible: components["schemas"]["AccountRef"] | null
-      scheduleId: string | null
-      status: components["schemas"]["LessonStatus"]
-      summary: string | null
-      teachingDate: string
-      teachingPoints: string | null
-      title: string
-      version: number
-    }
-    LessonDetail: {
-      can: {
-        archive: boolean
-        delete: boolean
-        manage: boolean
-        manageHomework: boolean
-        markCompleted: boolean
-        restore: boolean
-        viewNotes: boolean
+        archivedAt: string | null
+        collaborators: components["schemas"]["AccountReference"][]
+
+        completedAt: string | null
+        id: string
+        materials: {
+          label: string
+          url: string | null
+        }[]
+        meeting: components["schemas"]["MeetingViewResponse"]
+        memoryVerse: string | null
+        notes: string | null
+        objectives: string | null
+        passage: string | null
+        responsible: components["schemas"]["AccountReference"] | null
+        scheduleId: string | null
+        status: string
+        summary: string | null
+        teachingDate: string
+        teachingPoints: string | null
+        title: string
+        version: number
       }
-      homework: {
-        drafts: number
-        published: number
-        total: number
-      }
-      lesson: components["schemas"]["LessonView"]
-      service: components["schemas"]["ServiceRef"]
-      stage: components["schemas"]["StageRef"]
+      service: components["schemas"]["ServiceReference"]
+      stage: components["schemas"]["StageSummary"]
       today: string
     }
-    LessonWritten: {
+    WrittenLessonResponse: {
       id: string
-      status: components["schemas"]["LessonStatus"]
+      status: string
       version: number
     }
-    LessonOption: {
+    LessonReference: {
+      id: string
+      title: string
+    }
+    LessonOptionResponse: {
       date: string
       scheduleId: string
       startTime: string
       state: string
-      takenBy: {
-        id: string
-        title: string
-      } | null
+      takenBy: components["schemas"]["LessonReference"] | null
       title: string
     }
-    LessonOptions: {
+    LessonOptionsResponse: {
       today: string
-      options: components["schemas"]["LessonOption"][]
-      servants: components["schemas"]["AccountRef"][]
+      options: components["schemas"]["LessonOptionResponse"][]
+      servants: components["schemas"]["AccountReference"][]
     }
-    LessonRow: {
-      collaborators: components["schemas"]["AccountRef"][]
-      homework: {
-        drafts: number
-        published: number
-        total: number
-      }
+    LessonRowResponse: {
+      collaborators: components["schemas"]["AccountReference"][]
+      homework: components["schemas"]["LessonHomework"]
       id: string
-      meeting: components["schemas"]["MeetingView"]
+      meeting: components["schemas"]["MeetingViewResponse"]
       passage: string | null
-      responsible: components["schemas"]["AccountRef"] | null
-      status: components["schemas"]["LessonStatus"]
+      responsible: components["schemas"]["AccountReference"] | null
+      status: string
       teachingDate: string
       title: string
     }
-    LessonList: {
-      can: {
-        create: boolean
-      }
-      items: components["schemas"]["LessonRow"][]
-      servants: components["schemas"]["AccountRef"][]
-      service: components["schemas"]["ServiceRef"]
-      stage: components["schemas"]["StageRef"]
+    LessonListResponse: {
+      archived: boolean
+      items: components["schemas"]["LessonRowResponse"][]
+      servants: components["schemas"]["AccountReference"][]
+      service: components["schemas"]["ServiceReference"]
+      stage: components["schemas"]["StageSummary"]
       tabs: {
         [key: string]: number
       }
       today: string
     }
-    LessonStatusChanged: {
-      completedAt: string | null
+    LessonStatusResponse: {
       id: string
-      status: components["schemas"]["LessonStatus"]
+      status: string
+
+      completedAt: string | null
       version: number
     }
-    PlannedItem: {
-      can: {
-        manage: boolean
-      }
-      date: string
-      endTime: string | null
-      endsAt: string | null
-
-      kind: "planned"
-      location: string | null
-      rosterMode: components["schemas"]["RosterMode"]
-      scheduleId: string
-      service: components["schemas"]["ServiceRef"]
-      stage: components["schemas"]["StageRef"] | null
-      startTime: string
-      startsAt: string
-      title: string
-    }
-    SessionItem: {
-      can: {
-        manage: boolean
-        record: boolean
-        reopen: boolean
-      }
-      cancelReason: string | null
-      counts: components["schemas"]["SessionCounts"] | null
-      date: string
-      endTime: string | null
-      endsAt: string | null
-      id: string
-
-      kind: "session"
-      location: string | null
-      occurrenceDate: string
-      oneOff: boolean
-      rosterMode: components["schemas"]["RosterMode"]
-      scheduleId: string | null
-      service: components["schemas"]["ServiceRef"]
-      stage: components["schemas"]["StageRef"] | null
-      startTime: string
-      startsAt: string
-      status: components["schemas"]["SessionStatus"]
-      title: string
-    }
-    AgendaItem: components["schemas"]["PlannedItem"] | components["schemas"]["SessionItem"]
-    Agenda: {
-      today: string
-      from: string
-      to: string
-      items: components["schemas"]["AgendaItem"][]
-    }
-    Dashboard: {
-      today: string
-      sessions: components["schemas"]["OverviewCard"][]
-      upcoming: components["schemas"]["AgendaItem"][]
-    }
-    ScheduleActivated: {
-      createdSessions: number
-      id: string
-    }
-    ScheduleDeactivated: {
-      id: string
-    }
-    PlannedDate: {
-      date: string
-      sessionId: string | null
-      startTime: string
-      status: string
-    }
-
-    Frequency: "weekly" | "monthly"
-    RecurrenceView: {
-      frequency: components["schemas"]["Frequency"]
-      interval: number
-      weekdays: number[]
-      monthWeek: number | null
-      span: {
-        endsOn: string | null
-        startsOn: string
-      }
-    }
-    ScheduleSummary: {
-      active: boolean
-      can: {
-        manage: boolean
-      }
-      createdAt: string
-      description: string | null
-      endTime: string | null
-      generating: boolean
-      id: string
-      location: string | null
-      name: string
-      nextDates: components["schemas"]["PlannedDate"][]
-      recurrence: components["schemas"]["RecurrenceView"]
-      rosterMode: components["schemas"]["RosterMode"]
-      rosterSize: number | null
-      service: components["schemas"]["ServiceRef"]
-      sessionCount: number
-      stage: components["schemas"]["StageRef"] | null
-      startTime: string
-      updatedAt: string
-    }
-    ScheduleDetail: {
-      today: string
-      schedule: components["schemas"]["ScheduleSummary"]
-    }
-    ScheduleWritten: {
-      id: string
-      createdSessions: number
-    }
-    ScheduleList: {
-      today: string
-      items: components["schemas"]["ScheduleSummary"][]
-    }
-    CanceledOccurrence: {
-      sessionId: string
-    }
-    SessionCreated: {
-      id: string
-    }
-    SessionView: {
-      can: {
-        manage: boolean
-        record: boolean
-        reopen: boolean
-      }
-      cancelReason: string | null
-      date: string
-      endTime: string | null
-      endsAt: string | null
-      id: string
-      location: string | null
-      occurrenceDate: string
-      oneOff: boolean
-      rosterMode: components["schemas"]["RosterMode"]
-      scheduleId: string | null
-      service: components["schemas"]["ServiceRef"]
-      stage: components["schemas"]["StageRef"] | null
-      startTime: string
-      startsAt: string
-      status: components["schemas"]["SessionStatus"]
-      title: string
-    }
-    SessionDetail: {
-      today: string
-      session: components["schemas"]["SessionView"]
-      schedule: {
-        active: boolean
-        id: string
-        name: string
-        recurrence: components["schemas"]["RecurrenceView"]
-      } | null
-      history: components["schemas"]["HistoryEntry"][]
-    }
-    SessionRenamed: {
-      id: string
-    }
-    SessionState: {
-      closedAt: string | null
-      closedBy: components["schemas"]["AccountRef"] | null
-      id: string
-      openedAt: string | null
-      status: components["schemas"]["SessionStatus"]
-    }
-    ParentHomeworkItem: {
+    ParentHomeworkItemResponse: {
       completedAt: string | null
       completedBy: string | null
       completedByYou: boolean
@@ -2549,11 +2344,11 @@ export type components = {
       stage: string | null
       title: string
     }
-    ChildHomeworkList: {
+    ChildHomeworkListResponse: {
       today: string
-      items: components["schemas"]["ParentHomeworkItem"][]
+      items: components["schemas"]["ParentHomeworkItemResponse"][]
     }
-    MemberHomeworkDetail: {
+    MemberHomeworkDetailResponse: {
       lesson: {
         memoryVerse: string | null
         passage: string | null
@@ -2578,160 +2373,13 @@ export type components = {
       }
       today: string
     }
-    ReportResult: {
+    ReportResultResponse: {
       completedAt: string
       completedBy: string | null
       completedByYou: boolean
       done: boolean
     }
-    MemberGroup: {
-      id: string
-      lastLesson: {
-        memoryVerse: string | null
-        passage: string | null
-        teachingDate: string
-        title: string
-      } | null
-      schedules: {
-        endTime: string | null
-        id: string
-        location: string | null
-        name: string
-        recurrence: components["schemas"]["RecurrenceView"]
-        startTime: string
-      }[]
-      servants: {
-        id: string
-        name: string
-        role: string
-      }[]
-      service: components["schemas"]["ServiceRef"]
-      since: string
-      stage: components["schemas"]["StageRef"] | null
-    }
-    MemberGroups: {
-      items: components["schemas"]["MemberGroup"][]
-      today: string
-    }
-    MemberMeeting: {
-      date: string
-      endTime: string | null
-      group: string
-      key: string
-      location: string | null
-      service: components["schemas"]["ServiceRef"]
-      startTime: string
-      status: string
-      title: string
-    }
-    MemberMeetings: {
-      from: string
-      items: components["schemas"]["MemberMeeting"][]
-      to: string
-      today: string
-    }
-    ServiceAbilities: {
-      edit: boolean
-      archive: boolean
-      manageStructure: boolean
-      manageSessions: boolean
-      manageMembers: boolean
-    }
-    StructureImpact: {
-      activeSchedules: number
-
-      upcomingSessions: number
-    }
-    NextMeeting: {
-      date: string
-      startTime: string
-      stage: components["schemas"]["StageRef"] | null
-      status: string
-    }
-    AttendanceTrend: {
-      sessions: number
-
-      rate: number | null
-      averagePresent: number | null
-    }
-    ServiceView: {
-      archived: boolean
-      archivedAt: string | null
-      can: components["schemas"]["ServiceAbilities"]
-      description: string | null
-      id: string
-      impact: components["schemas"]["StructureImpact"]
-      leaders: components["schemas"]["AccountRef"][]
-      memberCount: number
-      name: string
-      next: components["schemas"]["NextMeeting"] | null
-      serviceLevelMemberCount: number
-      stages: {
-        archived: boolean
-        can: {
-          manageMembers: boolean
-        }
-        id: string
-        name: string
-        position: number
-      }[]
-      tone: number
-      trend: components["schemas"]["AttendanceTrend"]
-    }
-    ServiceList: {
-      items: components["schemas"]["ServiceView"][]
-      can: {
-        create: boolean
-      }
-    }
-    StageList: {
-      archivedStages: {
-        archivedAt: string | null
-        id: string
-        impact: components["schemas"]["StructureImpact"]
-        name: string
-      }[]
-      can: {
-        manageStructure: boolean
-      }
-      service: components["schemas"]["ServiceRef"]
-      stages: {
-        description: string | null
-        id: string
-        impact: components["schemas"]["StructureImpact"]
-        memberCount: number
-        name: string
-        position: number
-      }[]
-    }
-    StageView: {
-      archived: boolean
-      can: {
-        manageMembers: boolean
-        manageStructure: boolean
-      }
-      description: string | null
-      id: string
-      memberCount: number
-      name: string
-      position: number
-      service: components["schemas"]["ServiceRef"]
-    }
-    ChildSummary: {
-      id: string
-      name: string
-      fullName: string
-      initials: string
-      stage: string | null
-      service: string | null
-      toDo: number
-      done: number
-    }
-    ChildList: {
-      today: string
-      items: components["schemas"]["ChildSummary"][]
-    }
-    ChildHomeworkDetail: {
+    ChildHomeworkDetailResponse: {
       child: {
         id: string
         name: string
@@ -2760,57 +2408,364 @@ export type components = {
       }
       today: string
     }
-    DirectoryEntry: {
-      displayName: string | null
-      firstName: string
-      groups: components["schemas"]["PersonGroup"][]
-      id: string
-      lastName: string
+    JsonSerializable: Record<string, never>
+    AgendaResponse: {
+      today: string
+      from: string
+      to: string
+      items: components["schemas"]["JsonSerializable"][]
     }
-
-    GuardianKind: "parent" | "guardian"
-    ParentAccessItem: {
-      approvedAt: string
-      approvedBy: components["schemas"]["AccountRef"] | null
-      child: components["schemas"]["DirectoryEntry"]
+    AttendanceCounts: {
+      present: number
+      rosterSize: number | null
+      rosterPresent: number
+      notMarked: number
+      notOnRoster: number
+    }
+    MarkReference: {
       id: string
-      parent: {
-        email: string
+
+      recordedAt: string
+    }
+    VisitorRow: {
+      person: components["schemas"]["PersonReference"]
+      mark: components["schemas"]["MarkReference"]
+      placements: components["schemas"]["PersonGroup"][]
+    }
+    BoardRow: {
+      person: components["schemas"]["PersonReference"]
+      mark: components["schemas"]["MarkReference"] | null
+    }
+    AttendanceBoardResponse: {
+      counts: components["schemas"]["AttendanceCounts"]
+      notOnRoster: components["schemas"]["VisitorRow"][]
+      recentlyMarked: components["schemas"]["BoardRow"][]
+      roster: components["schemas"]["BoardRow"][]
+    }
+    MarkHistory: {
+      at: string | null
+      by: components["schemas"]["AccountReference"] | null
+    }
+    Correction: {
+      id: string
+      person: components["schemas"]["PersonReference"]
+      recorded: components["schemas"]["MarkHistory"]
+      removed: components["schemas"]["MarkHistory"]
+      reason: string | null
+    }
+    AttendanceCorrectionsResponse: {
+      items: components["schemas"]["Correction"][]
+    }
+    MarkResponse: {
+      id: string
+      sessionId: string
+      personId: string
+
+      recordedAt: string
+      recordedBy: components["schemas"]["AccountReference"] | null
+    }
+    SessionResponse: {
+      cancelReason: string | null
+      date: string
+      endTime: string | null
+
+      endsAt: string | null
+      id: string
+      location: string | null
+      occurrenceDate: string
+      rosterMode: string
+      scheduleId: string | null
+      service: components["schemas"]["ServiceReference"] | null
+      stage: components["schemas"]["StageReference"] | null
+      startTime: string
+
+      startsAt: string
+      status: string
+      title: string
+    }
+    SessionState: {
+      id: string
+      status: string
+
+      openedAt: string | null
+
+      closedAt: string | null
+      closedBy: components["schemas"]["AccountReference"] | null
+    }
+    AttendanceOverviewResponse: {
+      closed: {
+        session: components["schemas"]["SessionResponse"]
+        state: components["schemas"]["SessionState"]
+      }[]
+      earlier: {
+        session: components["schemas"]["SessionResponse"]
+        state: components["schemas"]["SessionState"]
+      }[]
+      openCount: number
+      sessions: {
+        session: components["schemas"]["SessionResponse"]
+        state: components["schemas"]["SessionState"]
+      }[]
+      today: string
+    }
+    CountedSession: {
+      sessionId: string
+      counts: components["schemas"]["AttendanceCounts"]
+    }
+    AttendanceCountsResponse: {
+      items: components["schemas"]["CountedSession"][]
+    }
+    MemberMeetingResponse: {
+      date: string
+      endTime: string | null
+      group: string
+      key: string
+      location: string | null
+      service: components["schemas"]["ServiceReference"]
+      startTime: string
+      status: string
+      title: string
+    }
+    MemberMeetingListResponse: {
+      today: string
+      from: string
+      to: string
+      items: components["schemas"]["MemberMeetingResponse"][]
+    }
+    WrittenScheduleResponse: {
+      id: string
+      createdSessions: number
+    }
+    UpcomingDate: {
+      date: string
+      startTime: string
+      status: string
+      sessionId: string | null
+    }
+    RecurrenceSummary: {
+      frequency: string
+      interval: number
+      weekdays: number[]
+      monthWeek: number | null
+      span: {
+        endsOn: string | null
+        startsOn: string
+      }
+    }
+    ScheduleResponse: {
+      active: boolean
+
+      createdAt: string
+      description: string | null
+      endTime: string | null
+      generating: boolean
+      id: string
+      location: string | null
+      name: string
+      nextDates: components["schemas"]["UpcomingDate"][]
+      recurrence: components["schemas"]["RecurrenceSummary"]
+      rosterMode: string
+      rosterSize: number | null
+      service: components["schemas"]["ServiceReference"] | null
+      sessionCount: number
+      stage: components["schemas"]["StageReference"] | null
+      startTime: string
+
+      updatedAt: string
+    }
+    DatedScheduleResponse: {
+      today: string
+      schedule: components["schemas"]["ScheduleResponse"]
+    }
+    ScheduleListResponse: {
+      today: string
+      items: components["schemas"]["ScheduleResponse"][]
+    }
+    CanceledOccurrenceResponse: {
+      sessionId: string
+    }
+    ScheduleBrief: {
+      id: string
+      name: string
+      recurrence: components["schemas"]["RecurrenceSummary"]
+      active: boolean
+    }
+    HistoryEntry: {
+      type: string
+
+      at: string
+      actor: components["schemas"]["AccountReference"] | null
+      byGenerator: boolean
+      note: string | null
+    }
+    SessionDetailResponse: {
+      today: string
+      session: components["schemas"]["SessionResponse"]
+      state: components["schemas"]["SessionState"]
+      schedule: components["schemas"]["ScheduleBrief"] | null
+      history: components["schemas"]["HistoryEntry"][]
+    }
+    SessionStateResponse: {
+      id: string
+      status: string
+
+      openedAt: string | null
+
+      closedAt: string | null
+      closedBy: components["schemas"]["AccountReference"] | null
+    }
+    HistorySession: {
+      id: string
+      date: string
+
+      startsAt: string
+      present: number
+    }
+    HistoryRow: {
+      person: components["schemas"]["PersonReference"]
+      cells: string[]
+      presentCount: number
+    }
+    AttendanceHistory: {
+      today: string
+      sessions: components["schemas"]["HistorySession"][]
+      rows: components["schemas"]["HistoryRow"][]
+    }
+    ServiceResponse: {
+      archived: boolean
+
+      archivedAt: string | null
+      description: string | null
+      id: string
+      memberCount: number
+      name: string
+      serviceLevelMemberCount: number
+      stages: {
         id: string
         name: string
-      }
-      relationship: components["schemas"]["GuardianKind"]
+        position: number
+      }[]
+      tone: number
     }
-    ParentAccess: {
+    ServiceListResponse: {
+      items: components["schemas"]["ServiceResponse"][]
+    }
+    StageListResponse: {
+      archivedStages: {
+        archivedAt: string | null
+        id: string
+        impact: components["schemas"]["ArchiveImpact"]
+        name: string
+      }[]
+      service: components["schemas"]["ServiceReference"]
+      stages: {
+        description: string | null
+        id: string
+        impact: components["schemas"]["ArchiveImpact"]
+        memberCount: number
+        name: string
+        position: number
+      }[]
+    }
+    StageResponse: {
+      archived: boolean
+      description: string | null
+      id: string
+      memberCount: number
+      name: string
+      position: number
+      service: components["schemas"]["ServiceReference"]
+    }
+    DirectoryEntry: {
+      id: string
+      firstName: string
+      lastName: string
+      displayName: string | null
+      groups: components["schemas"]["PersonGroup"][]
+    }
+    DirectoryResponse: {
+      items: components["schemas"]["DirectoryEntry"][]
+    }
+    ParentAccountView: {
+      id: string
+      name: string
+      email: string
+    }
+    ParentAccessItemResponse: {
+      approvedAt: string
+      approvedBy: components["schemas"]["AccountReference"] | null
+      child: components["schemas"]["DirectoryEntry"]
+      id: string
+      parent: components["schemas"]["ParentAccountView"]
+      relationship: string
+    }
+    ParentAccessListResponse: {
+      items: components["schemas"]["ParentAccessItemResponse"][]
       accounts: {
         email: string
         id: string
         name: string
       }[]
-      items: components["schemas"]["ParentAccessItem"][]
       today: string
     }
-    AddedMembership: {
+    LastLesson: {
+      title: string
+      teachingDate: string
+      passage: string | null
+      memoryVerse: string | null
+    }
+    MemberGroupResponse: {
+      id: string
+      lastLesson: components["schemas"]["LastLesson"] | null
+      schedules: {
+        endTime: string | null
+        id: string
+        location: string | null
+        name: string
+        recurrence: components["schemas"]["RecurrenceSummary"]
+        startTime: string
+      }[]
+      service: components["schemas"]["ServiceReference"]
+      since: string
+      stage: components["schemas"]["StageSummary"] | null
+    }
+    MemberGroupListResponse: {
+      today: string
+      items: components["schemas"]["MemberGroupResponse"][]
+    }
+    AddedMembershipResponse: {
       endsOn: unknown
       id: string
       personId: string
-      service: components["schemas"]["ServiceRef"]
-      stage: components["schemas"]["StageRef"] | null
+      service: components["schemas"]["ServiceReference"]
+      stage: components["schemas"]["StageReference"] | null
       startsOn: string
     }
-
-    PersonStatus: "active" | "inactive"
+    ChildSummaryResponse: {
+      id: string
+      name: string
+      fullName: string
+      initials: string
+      stage: string | null
+      service: string | null
+      toDo: number
+      done: number
+    }
+    ChildListResponse: {
+      today: string
+      items: components["schemas"]["ChildSummaryResponse"][]
+    }
     PersonView: {
       id: string
       firstName: string
       lastName: string
       displayName: string | null
-      status: components["schemas"]["PersonStatus"]
+      status: string
     }
     PlacementRow: {
       membershipId: string
-      service: components["schemas"]["ServiceRef"]
-      stage: components["schemas"]["StageRef"] | null
+      service: components["schemas"]["ServiceReference"]
+      stage: components["schemas"]["StageReference"] | null
       startsOn: string
       endsOn: string | null
     }
@@ -2818,14 +2773,8 @@ export type components = {
       person: components["schemas"]["PersonView"]
       placements: components["schemas"]["PlacementRow"][]
       pastPlacements: components["schemas"]["PlacementRow"][]
-      can: {
-        edit: boolean
-      }
     }
-    PeoplePage: {
-      can: {
-        add: boolean
-      }
+    PeoplePageResponse: {
       items: components["schemas"]["PersonRow"][]
       page: number
       pageSize: number
@@ -2839,43 +2788,16 @@ export type components = {
       startsOn: string
       endsOn: string | null
     }
-    CreatedPerson: {
+    CreatedPersonResponse: {
       person: components["schemas"]["PersonView"]
       membership: components["schemas"]["MembershipView"] | null
     }
-
-    RequestChannel: "app" | "email" | "letter" | "in_person"
-
-    ErasedSubjectKind: "member" | "account"
-
-    RequestKind: "erasure" | "copy"
-
-    RequestStatus: "open" | "done" | "declined"
-    DataRequestRow: {
-      channel: components["schemas"]["RequestChannel"]
-      closedAt: string | null
-      closedBy: components["schemas"]["AccountRef"] | null
-      declineReason: string | null
-      dueOn: string
-      erasedSubject: {
-        group: string | null
-        kind: components["schemas"]["ErasedSubjectKind"]
-      } | null
+    PersonResponse: {
       id: string
-      kind: components["schemas"]["RequestKind"]
-      note: string | null
-      outcome: {
-        [key: string]: number
-      } | null
-      receivedAt: string
-      requestedBy: string
-      status: components["schemas"]["RequestStatus"]
-      subjectName: string | null
-    }
-    DataRequestList: {
-      today: string
-      open: components["schemas"]["DataRequestRow"][]
-      closed: components["schemas"]["DataRequestRow"][]
+      firstName: string
+      lastName: string
+      displayName: string | null
+      status: string
     }
     Mention: {
       id: string
@@ -2884,33 +2806,148 @@ export type components = {
       date: string | null
       group: string | null
     }
-    ExportRow: {
-      [key: string]: boolean | string | null
-    }
-    DataRequestDetail: {
-      today: string
-      request: components["schemas"]["DataRequestRow"]
-      can: {
-        erase: boolean
+    ErasureReviewResponse: {
+      erase: {
+        [key: string]: number
       }
-      inventory: {
-        erase: {
-          [key: string]: number
-        }
-        keep: {
-          [key: string]: number
-        }
-        mentions: components["schemas"]["Mention"][]
-      } | null
-      member: {
-        [key: string]: components["schemas"]["ExportRow"][] | string | null
-      } | null
-      account: {
-        [key: string]: string[] | string
-      } | null
+      keep: {
+        [key: string]: number
+      }
+      mentions: components["schemas"]["Mention"][]
     }
-    PersonalData: {
-      [key: string]: unknown
+    ErasedSubjectView: {
+      kind: string
+      group: string | null
+    }
+    DataRequestRowResponse: {
+      channel: string
+
+      closedAt: string | null
+      closedBy: components["schemas"]["AccountReference"] | null
+      declineReason: string | null
+      dueOn: string
+      erasedSubject: components["schemas"]["ErasedSubjectView"] | null
+      id: string
+      kind: string
+      note: string | null
+      outcome: {
+        [key: string]: number
+      } | null
+
+      receivedAt: string
+      requestedBy: string
+      status: string
+      subjectName: string | null
+    }
+    DataRequestListResponse: {
+      today: string
+      open: components["schemas"]["DataRequestRowResponse"][]
+      closed: components["schemas"]["DataRequestRowResponse"][]
+    }
+    MembershipRow: {
+      service: string | null
+      stage: string | null
+      from: string
+      until: string | null
+    }
+    RequestMemberResponse: {
+      displayName: string | null
+      firstName: string
+      id: string
+      lastName: string
+      memberships: components["schemas"]["MembershipRow"][]
+      status: string
+    }
+    RequestAccount: {
+      id: string
+      name: string
+      email: string
+      roles: string[]
+    }
+    DataRequestDetailResponse: {
+      today: string
+      request: components["schemas"]["DataRequestRowResponse"]
+      member: components["schemas"]["RequestMemberResponse"] | null
+      account: components["schemas"]["RequestAccount"] | null
+    }
+    PrivacyAcceptance: {
+      at: string | null
+      version: string | null
+    }
+    RegistrationView: {
+      registeredAs: string | null
+      note: string | null
+    }
+    LinkRow: {
+      name: string | null
+      linkStatus: string
+    }
+    ReportByRow: {
+      homework: string
+      child: string | null
+
+      completedAt: string
+
+      undoneAt: string | null
+    }
+    AttendanceRow: {
+      meeting: string | null
+      date: string | null
+
+      markedPresentAt: string
+
+      removedAt: string | null
+      removalNote: string | null
+    }
+    ReportAboutRow: {
+      homework: string
+
+      completedAt: string
+
+      undoneAt: string | null
+    }
+    MemberDataResponse: {
+      attendance: components["schemas"]["AttendanceRow"][]
+
+      exportedAt: string
+      homeworkReports: components["schemas"]["ReportAboutRow"][]
+      kind: string
+      member: {
+        displayName: string | null
+        firstName: string
+        id: string
+        lastName: string
+        recordedSince: string
+        status: string
+      }
+      memberships: components["schemas"]["MembershipRow"][]
+      parentAccounts: components["schemas"]["LinkRow"][]
+    }
+    AccountDataResponse: {
+      account: {
+        approvedAt: string | null
+
+        createdAt: string
+
+        disabledAt: string | null
+        email: string
+        id: string
+        language: string
+        memberAgeCheck: {
+          parentAgreed: string | null
+          result: string
+        } | null
+        name: string
+        privacyNoticeAccepted: components["schemas"]["PrivacyAcceptance"]
+        registration: components["schemas"]["RegistrationView"] | null
+        roles: string[]
+      }
+      children: components["schemas"]["LinkRow"][]
+
+      exportedAt: string
+      homeworkReports: components["schemas"]["ReportByRow"][]
+      kind: string
+      memberRecord: components["schemas"]["MemberDataResponse"] | null
     }
     OwnErasureRequest: {
       receivedAt: string
@@ -2918,6 +2955,15 @@ export type components = {
     }
     OwnErasureStatus: {
       erasureRequested: components["schemas"]["OwnErasureRequest"] | null
+    }
+    LivenessResponse: {
+      status: string
+    }
+    ReadinessResponse: {
+      status: string
+      checks: {
+        [key: string]: string
+      }
     }
   }
   responses: {
@@ -2937,13 +2983,13 @@ export type components = {
 }
 export type $defs = Record<string, never>
 export interface operations {
-  get_api_attendance_board: {
+  get_api_services_insights: {
     parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
+      query?: {
+        status?: string
       }
+      header?: never
+      path?: never
       cookie?: never
     }
     requestBody?: never
@@ -2953,74 +2999,15 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["AttendanceBoard"]
+          "application/json": {
+            items: components["schemas"]["ServiceInsight"][]
+          }
         }
       }
       default: components["responses"]["Problem"]
     }
   }
-  put_api_attendance_mark: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        sessionId: string
-        personId: string
-      }
-      cookie?: never
-    }
-    requestBody?: {
-      content: {
-        "application/json": Record<string, never>
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["MarkView"]
-        }
-      }
-
-      201: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["MarkView"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  delete_api_attendance_remove: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        sessionId: string
-        personId: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RemovalInput"]
-      }
-    }
-    responses: {
-      204: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  get_api_attendance_overview: {
+  get_api_account_requests_list: {
     parameters: {
       query?: never
       header?: never
@@ -3034,19 +3021,19 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["AttendanceOverview"]
+          "application/json": components["schemas"]["AccountRequestListResponse"]
         }
       }
       default: components["responses"]["Problem"]
     }
   }
-  get_api_stages_attendance_history: {
+  get_api_account_requests_member_candidates: {
     parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
+      query?: {
+        q?: string
       }
+      header?: never
+      path?: never
       cookie?: never
     }
     requestBody?: never
@@ -3056,8 +3043,58 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["AttendanceHistory"]
+          "application/json": components["schemas"]["MemberCandidateListResponse"]
         }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_account_requests_approve: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ApprovalRequest"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AccountSummary"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_account_requests_decline: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>
+      }
+    }
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
       }
       default: components["responses"]["Problem"]
     }
@@ -3071,7 +3108,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        "application/json": components["schemas"]["ConfirmEmailCommand"]
+        "application/json": components["schemas"]["ConfirmEmailRequest"]
       }
     }
     responses: {
@@ -3093,7 +3130,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        "application/json": components["schemas"]["RequestPasswordResetCommand"]
+        "application/json": components["schemas"]["ForgotPasswordRequest"]
       }
     }
     responses: {
@@ -3110,6 +3147,138 @@ export interface operations {
       default: components["responses"]["Problem"]
     }
   }
+  get_api_me: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MeResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  put_api_me_language: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChangeLanguageRequest"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MeResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_member_accounts_list: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MemberAccountListResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_member_accounts_unlink: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>
+      }
+    }
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_member_servants: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            items: components["schemas"]["GroupServant"][]
+          }
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_me_password: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChangePasswordRequest"]
+      }
+    }
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
   post_api_auth_password_links: {
     parameters: {
       query?: never
@@ -3119,7 +3288,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SetPasswordFromLinkCommand"]
+        "application/json": components["schemas"]["SetPasswordFromLinkRequest"]
       }
     }
     responses: {
@@ -3141,7 +3310,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        "application/json": components["schemas"]["RegisterAccountCommand"]
+        "application/json": components["schemas"]["RegisterAccountRequest"]
       }
     }
     responses: {
@@ -3150,9 +3319,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": {
-            status: "received"
-          }
+          "application/json": components["schemas"]["RegistrationReceivedResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -3172,9 +3339,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": {
-            items: components["schemas"]["ServiceOption"][]
-          }
+          "application/json": components["schemas"]["RegistrationServicesResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -3223,6 +3388,101 @@ export interface operations {
           [name: string]: unknown
         }
         content?: never
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_staff_accounts: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StaffAccountList"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_account_roles_give: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GiveAccountRoleRequest"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            role: components["schemas"]["RoleSummary"]
+          }
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  delete_api_account_roles_take: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+        roleId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_account_password_link: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["IssuedPasswordLink"]
+        }
       }
       default: components["responses"]["Problem"]
     }
@@ -3276,354 +3536,6 @@ export interface operations {
       default: components["responses"]["Problem"]
     }
   }
-  get_health: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["Liveness"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  get_health_ready: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["Readiness"]
-        }
-      }
-
-      503: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["Readiness"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  get_api_account_requests_list: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["AccountRequests"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  get_api_account_requests_member_candidates: {
-    parameters: {
-      query?: {
-        q?: string
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": {
-            items: components["schemas"]["MemberCandidate"][]
-          }
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_account_requests_approve: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ApprovalInput"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["AccountSummary"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_account_requests_decline: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: {
-      content: {
-        "application/json": Record<string, never>
-      }
-    }
-    responses: {
-      204: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  get_api_me: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["CurrentAccount"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  patch_api_me_update: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ChangeLanguageCommand"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["CurrentAccount"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  get_api_member_accounts_list: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["MemberAccounts"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_member_accounts_unlink: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: {
-      content: {
-        "application/json": Record<string, never>
-      }
-    }
-    responses: {
-      204: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_me_password: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ChangePasswordCommand"]
-      }
-    }
-    responses: {
-      204: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  get_api_staff_accounts: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["StaffAccountList"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_account_roles_give: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GiveAccountRoleCommand"]
-      }
-    }
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": {
-            role: components["schemas"]["RoleSummary"]
-          }
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  delete_api_account_roles_take: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-        roleId: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      204: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_account_password_link: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: {
-      content: {
-        "application/json": Record<string, never>
-      }
-    }
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["PasswordLink"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
   get_api_homework_list: {
     parameters: {
       query?: never
@@ -3640,7 +3552,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["HomeworkList"]
+          "application/json": components["schemas"]["HomeworkListResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -3657,7 +3569,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        "application/json": components["schemas"]["HomeworkInput"]
+        "application/json": components["schemas"]["HomeworkRequest"]
       }
     }
     responses: {
@@ -3666,7 +3578,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["HomeworkWritten"]
+          "application/json": components["schemas"]["WrittenHomeworkResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -3688,7 +3600,35 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["HomeworkDetail"]
+          "application/json": components["schemas"]["HomeworkDetailResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  put_api_homework_edit: {
+    parameters: {
+      query?: {
+        version?: number | null
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["HomeworkRequest"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["WrittenHomeworkResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -3714,34 +3654,6 @@ export interface operations {
       default: components["responses"]["Problem"]
     }
   }
-  patch_api_homework_edit: {
-    parameters: {
-      query?: {
-        version?: number | null
-      }
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["HomeworkInput"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["HomeworkWritten"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
   post_api_homework_publish: {
     parameters: {
       query?: never
@@ -3751,7 +3663,7 @@ export interface operations {
       }
       cookie?: never
     }
-    requestBody?: {
+    requestBody: {
       content: {
         "application/json": Record<string, never>
       }
@@ -3762,7 +3674,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["HomeworkStatusChanged"]
+          "application/json": components["schemas"]["ChangedHomeworkResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -3784,7 +3696,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["HomeworkProgress"]
+          "application/json": components["schemas"]["HomeworkProgressResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -3799,7 +3711,7 @@ export interface operations {
       }
       cookie?: never
     }
-    requestBody?: {
+    requestBody: {
       content: {
         "application/json": Record<string, never>
       }
@@ -3810,7 +3722,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["HomeworkStatusChanged"]
+          "application/json": components["schemas"]["ChangedHomeworkResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -3825,7 +3737,7 @@ export interface operations {
       }
       cookie?: never
     }
-    requestBody?: {
+    requestBody: {
       content: {
         "application/json": Record<string, never>
       }
@@ -3836,7 +3748,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["HomeworkStatusChanged"]
+          "application/json": components["schemas"]["ChangedHomeworkResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -3851,7 +3763,7 @@ export interface operations {
       }
       cookie?: never
     }
-    requestBody?: {
+    requestBody: {
       content: {
         "application/json": Record<string, never>
       }
@@ -3862,7 +3774,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["HomeworkStatusChanged"]
+          "application/json": components["schemas"]["ChangedHomeworkResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -3877,7 +3789,7 @@ export interface operations {
       }
       cookie?: never
     }
-    requestBody?: {
+    requestBody: {
       content: {
         "application/json": Record<string, never>
       }
@@ -3888,7 +3800,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["LessonArchived"]
+          "application/json": components["schemas"]["LessonArchiveResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -3903,7 +3815,7 @@ export interface operations {
       }
       cookie?: never
     }
-    requestBody?: {
+    requestBody: {
       content: {
         "application/json": Record<string, never>
       }
@@ -3914,7 +3826,11 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["LessonRestored"]
+          "application/json": {
+            id: string
+            archivedAt: null
+            version: number
+          }
         }
       }
       default: components["responses"]["Problem"]
@@ -3936,7 +3852,35 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["LessonDetail"]
+          "application/json": components["schemas"]["LessonDetailResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  put_api_lessons_edit: {
+    parameters: {
+      query?: {
+        version?: number | null
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LessonRequest"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["WrittenLessonResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -3962,34 +3906,6 @@ export interface operations {
       default: components["responses"]["Problem"]
     }
   }
-  patch_api_lessons_edit: {
-    parameters: {
-      query?: {
-        version?: number | null
-      }
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["LessonInput"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["LessonWritten"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
   get_api_lesson_options: {
     parameters: {
       query?: {
@@ -4008,7 +3924,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["LessonOptions"]
+          "application/json": components["schemas"]["LessonOptionsResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -4033,7 +3949,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["LessonList"]
+          "application/json": components["schemas"]["LessonListResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -4050,7 +3966,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        "application/json": components["schemas"]["LessonInput"]
+        "application/json": components["schemas"]["LessonRequest"]
       }
     }
     responses: {
@@ -4059,7 +3975,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["LessonWritten"]
+          "application/json": components["schemas"]["WrittenLessonResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -4076,7 +3992,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        "application/json": components["schemas"]["LessonStatusInput"]
+        "application/json": components["schemas"]["LessonStatusRequest"]
       }
     }
     responses: {
@@ -4085,423 +4001,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["LessonStatusChanged"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  get_api_agenda: {
-    parameters: {
-      query?: {
-        from?: string | null
-        to?: string | null
-        serviceId?: string | null
-        stageId?: string | null
-        scheduleId?: string | null
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["Agenda"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  get_api_dashboard: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["Dashboard"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_schedules_activate: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: {
-      content: {
-        "application/json": Record<string, never>
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ScheduleActivated"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_schedules_deactivate: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: {
-      content: {
-        "application/json": Record<string, never>
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ScheduleDeactivated"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  get_api_schedules_show: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ScheduleDetail"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  delete_api_schedules_delete: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      204: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  patch_api_schedules_edit: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ScheduleChanges"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ScheduleWritten"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  get_api_schedules_list: {
-    parameters: {
-      query?: {
-        serviceId?: string | null
-        stageId?: string | null
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ScheduleList"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_schedules_create: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateScheduleCommand"]
-      }
-    }
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ScheduleWritten"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_schedules_cancel_occurrence: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-        date: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ReasonInput"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["CanceledOccurrence"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_sessions_create: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OneOffInput"]
-      }
-    }
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["SessionCreated"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  get_api_sessions_show: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["SessionDetail"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  patch_api_sessions_rename: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SessionDetailsInput"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["SessionRenamed"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_sessions_open: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: {
-      content: {
-        "application/json": Record<string, never>
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["SessionState"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_sessions_close: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: {
-      content: {
-        "application/json": Record<string, never>
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["SessionState"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_sessions_reopen: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ReasonInput"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["SessionState"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_sessions_cancel: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ReasonInput"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["SessionState"]
+          "application/json": components["schemas"]["LessonStatusResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -4523,7 +4023,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["ChildHomeworkList"]
+          "application/json": components["schemas"]["ChildHomeworkListResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -4545,7 +4045,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["MemberHomeworkDetail"]
+          "application/json": components["schemas"]["MemberHomeworkDetailResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -4560,7 +4060,7 @@ export interface operations {
       }
       cookie?: never
     }
-    requestBody?: {
+    requestBody: {
       content: {
         "application/json": Record<string, never>
       }
@@ -4571,7 +4071,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["ReportResult"]
+          "application/json": components["schemas"]["ReportResultResponse"]
         }
       }
 
@@ -4580,7 +4080,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["ReportResult"]
+          "application/json": components["schemas"]["ReportResultResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -4606,426 +4106,6 @@ export interface operations {
       default: components["responses"]["Problem"]
     }
   }
-  get_api_member_groups: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["MemberGroups"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  get_api_member_meetings: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["MemberMeetings"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  get_api_services_list: {
-    parameters: {
-      query?: {
-        status?: string
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ServiceList"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_services_create: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateServiceCommand"]
-      }
-    }
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ServiceView"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  get_api_services_show: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ServiceView"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  delete_api_services_delete: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      204: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  patch_api_services_edit: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ServiceChanges"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ServiceView"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  get_api_stages_list: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["StageList"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_stages_add: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["StageChanges"]
-      }
-    }
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["StageView"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  put_api_stages_reorder: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ReorderStagesCommand"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["StageList"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  get_api_stages_show: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["StageView"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  delete_api_stages_delete: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      204: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  patch_api_stages_edit: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["StageChanges"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["StageView"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_services_archive: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: {
-      content: {
-        "application/json": Record<string, never>
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ServiceView"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_services_restore: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: {
-      content: {
-        "application/json": Record<string, never>
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ServiceView"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_stages_archive: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: {
-      content: {
-        "application/json": Record<string, never>
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["StageView"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_stages_restore: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: {
-      content: {
-        "application/json": Record<string, never>
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["StageView"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  get_api_parent_children: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["ChildList"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
   get_api_parent_homework_list: {
     parameters: {
       query?: {
@@ -5044,7 +4124,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["ChildHomeworkList"]
+          "application/json": components["schemas"]["ChildHomeworkListResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -5067,7 +4147,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["ChildHomeworkDetail"]
+          "application/json": components["schemas"]["ChildHomeworkDetailResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -5083,7 +4163,7 @@ export interface operations {
       }
       cookie?: never
     }
-    requestBody?: {
+    requestBody: {
       content: {
         "application/json": Record<string, never>
       }
@@ -5094,7 +4174,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["ReportResult"]
+          "application/json": components["schemas"]["ReportResultResponse"]
         }
       }
 
@@ -5103,7 +4183,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["ReportResult"]
+          "application/json": components["schemas"]["ReportResultResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -5130,6 +4210,999 @@ export interface operations {
       default: components["responses"]["Problem"]
     }
   }
+  get_api_agenda: {
+    parameters: {
+      query?: {
+        from?: string | null
+        to?: string | null
+        serviceId?: string | null
+        stageId?: string | null
+        scheduleId?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AgendaResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_attendance_board: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AttendanceBoardResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_attendance_corrections: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AttendanceCorrectionsResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  put_api_attendance_mark: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        sessionId: string
+        personId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MarkResponse"]
+        }
+      }
+
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MarkResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  delete_api_attendance_remove: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        sessionId: string
+        personId: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RemovalRequest"]
+      }
+    }
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_attendance_overview: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AttendanceOverviewResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_attendance_counts: {
+    parameters: {
+      query?: {
+        "sessionIds[]"?: string[]
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AttendanceCountsResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_dashboard_upcoming: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AgendaResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_member_meetings: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MemberMeetingListResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_schedules_activate: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["WrittenScheduleResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_schedules_deactivate: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            id: string
+          }
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_schedules_show: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["DatedScheduleResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  put_api_schedules_edit: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ScheduleChangesRequest"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["WrittenScheduleResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  delete_api_schedules_delete: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_schedules_list: {
+    parameters: {
+      query?: {
+        serviceId?: string | null
+        stageId?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ScheduleListResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_schedules_create: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateScheduleRequest"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["WrittenScheduleResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_schedules_cancel_occurrence: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+        date: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReasonRequest"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["CanceledOccurrenceResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_sessions_create: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OneOffSessionRequest"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            id: string
+          }
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  put_api_sessions_details: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SessionDetailsRequest"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            id: string
+          }
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_sessions_show: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SessionDetailResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_sessions_open: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SessionStateResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_sessions_close: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SessionStateResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_sessions_reopen: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReasonRequest"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SessionStateResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_sessions_cancel: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ReasonRequest"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["SessionStateResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_stages_attendance_history: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AttendanceHistory"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_service_leaders: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            items: components["schemas"]["AccountReference"][]
+          }
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_services_list: {
+    parameters: {
+      query?: {
+        status?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ServiceListResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_services_create: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ServiceRequest"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ServiceResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_services_show: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ServiceResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  put_api_services_edit: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ServiceRequest"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ServiceResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  delete_api_services_delete: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_stages_list: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StageListResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_stages_add: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StageRequest"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StageResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  put_api_stages_reorder: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StageOrderRequest"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StageListResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_stages_show: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StageResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  put_api_stages_edit: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StageRequest"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StageResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  delete_api_stages_delete: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_services_archive: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ServiceResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_services_restore: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ServiceResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_stages_archive: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StageResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_stages_restore: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["StageResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
   get_api_people_directory: {
     parameters: {
       query?: {
@@ -5146,9 +5219,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": {
-            items: components["schemas"]["DirectoryEntry"][]
-          }
+          "application/json": components["schemas"]["DirectoryResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -5168,7 +5239,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["ParentAccess"]
+          "application/json": components["schemas"]["ParentAccessListResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -5183,7 +5254,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        "application/json": components["schemas"]["ParentAccessInput"]
+        "application/json": components["schemas"]["ParentAccessRequest"]
       }
     }
     responses: {
@@ -5192,7 +5263,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["ParentAccessItem"]
+          "application/json": components["schemas"]["ParentAccessItemResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -5207,7 +5278,7 @@ export interface operations {
       }
       cookie?: never
     }
-    requestBody?: {
+    requestBody: {
       content: {
         "application/json": Record<string, never>
       }
@@ -5218,6 +5289,26 @@ export interface operations {
           [name: string]: unknown
         }
         content?: never
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_member_groups: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["MemberGroupListResponse"]
+        }
       }
       default: components["responses"]["Problem"]
     }
@@ -5233,7 +5324,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        "application/json": components["schemas"]["PlacementInput"]
+        "application/json": components["schemas"]["PlacementRequest"]
       }
     }
     responses: {
@@ -5242,7 +5333,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["AddedMembership"]
+          "application/json": components["schemas"]["AddedMembershipResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -5259,7 +5350,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        "application/json": components["schemas"]["MoveMembershipCommand"]
+        "application/json": components["schemas"]["MoveMembershipRequest"]
       }
     }
     responses: {
@@ -5268,7 +5359,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["AddedMembership"]
+          "application/json": components["schemas"]["AddedMembershipResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -5283,7 +5374,7 @@ export interface operations {
       }
       cookie?: never
     }
-    requestBody?: {
+    requestBody: {
       content: {
         "application/json": Record<string, never>
       }
@@ -5298,10 +5389,30 @@ export interface operations {
       default: components["responses"]["Problem"]
     }
   }
+  get_api_parent_children: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ChildListResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
   get_api_people_list: {
     parameters: {
       query?: {
-        status?: string
+        status?: "active" | "inactive" | "all"
         serviceId?: string | null
         stageId?: string | null
         q?: string
@@ -5318,7 +5429,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["PeoplePage"]
+          "application/json": components["schemas"]["PeoplePageResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -5333,7 +5444,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreatePersonCommand"]
+        "application/json": components["schemas"]["CreatePersonRequest"]
       }
     }
     responses: {
@@ -5342,7 +5453,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["CreatedPerson"]
+          "application/json": components["schemas"]["CreatedPersonResponse"]
         }
       }
 
@@ -5362,7 +5473,7 @@ export interface operations {
       default: components["responses"]["Problem"]
     }
   }
-  patch_api_people_rename: {
+  put_api_people_rename: {
     parameters: {
       query?: never
       header?: never
@@ -5373,7 +5484,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        "application/json": components["schemas"]["PersonChanges"]
+        "application/json": components["schemas"]["RenamePersonRequest"]
       }
     }
     responses: {
@@ -5382,7 +5493,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["PersonView"]
+          "application/json": components["schemas"]["PersonResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -5397,7 +5508,7 @@ export interface operations {
       }
       cookie?: never
     }
-    requestBody?: {
+    requestBody: {
       content: {
         "application/json": Record<string, never>
       }
@@ -5408,7 +5519,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["PersonView"]
+          "application/json": components["schemas"]["PersonResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -5423,7 +5534,7 @@ export interface operations {
       }
       cookie?: never
     }
-    requestBody?: {
+    requestBody: {
       content: {
         "application/json": Record<string, never>
       }
@@ -5434,7 +5545,55 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["PersonView"]
+          "application/json": components["schemas"]["PersonResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_data_requests_erasure_review: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ErasureReviewResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_data_requests_erase: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EraseRequestRequest"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["DataRequestRowResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -5454,7 +5613,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["DataRequestList"]
+          "application/json": components["schemas"]["DataRequestListResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -5469,7 +5628,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        "application/json": components["schemas"]["RecordDataRequestCommand"]
+        "application/json": components["schemas"]["RecordDataRequestRequest"]
       }
     }
     responses: {
@@ -5502,33 +5661,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["DataRequestDetail"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  post_api_data_requests_erase: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["EraseInput"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["DataRequestRow"]
+          "application/json": components["schemas"]["DataRequestDetailResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -5548,7 +5681,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["PersonalData"]
+          "application/json": components["schemas"]["AccountDataResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -5583,7 +5716,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        "application/json": components["schemas"]["RequestOwnErasureCommand"]
+        "application/json": components["schemas"]["OwnErasureRequestRequest"]
       }
     }
     responses: {
@@ -5593,6 +5726,55 @@ export interface operations {
         }
         content: {
           "application/json": components["schemas"]["OwnErasureRequest"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_health: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["LivenessResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_health_ready: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ReadinessResponse"]
+        }
+      }
+
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ReadinessResponse"]
         }
       }
       default: components["responses"]["Problem"]
