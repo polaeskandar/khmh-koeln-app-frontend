@@ -279,6 +279,49 @@ test("shows a 422 under each field, maps resources past blank rows, and focuses 
   expect(toast.error).not.toHaveBeenCalled()
 })
 
+test("removing a resource keeps a 422 on the resource it belongs to", async () => {
+  openNew(list())
+
+  server.use(
+    http.post(apiUrl("/lessons/:lesson/homework"), () =>
+      problem(422, "validation.failed", {
+        fieldErrors: { "resources.1.url": { code: "materials.url", params: {} } },
+      })
+    )
+  )
+
+  await lessonSelect()
+  await userEvent.type(screen.getByRole("textbox", { name: "Title" }), "Read")
+
+  for (let i = 0; i < 3; i++) {
+    await userEvent.click(screen.getByRole("button", { name: "Add resource" }))
+  }
+
+  await userEvent.type(screen.getByRole("textbox", { name: "Resource 1" }), "Video")
+  await userEvent.type(screen.getByRole("textbox", { name: "Resource 2" }), "Song")
+  await userEvent.type(screen.getByRole("textbox", { name: "Link for resource 2" }), "ftp://song")
+  await userEvent.type(screen.getByRole("textbox", { name: "Resource 3" }), "Poster")
+  await userEvent.click(screen.getByRole("button", { name: "Save draft" }))
+
+  await vi.waitFor(() =>
+    expect(screen.getByRole("textbox", { name: "Link for resource 2" })).toHaveAttribute(
+      "aria-invalid",
+      "true"
+    )
+  )
+
+  await userEvent.click(screen.getByRole("button", { name: "Remove resource 1" }))
+
+  expect(screen.getByRole("textbox", { name: "Link for resource 1" })).toHaveAttribute(
+    "aria-invalid",
+    "true"
+  )
+
+  expect(screen.getByRole("textbox", { name: "Link for resource 2" })).not.toHaveAttribute(
+    "aria-invalid"
+  )
+})
+
 test("a 409 on save is a toast", async () => {
   openNew(list())
   server.use(http.post(apiUrl("/lessons/:lesson/homework"), () => problem(409, "lessons.archived")))
