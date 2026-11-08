@@ -130,7 +130,7 @@ function HomeworkForm(props: FormProps) {
 
   function removeResource(row: number) {
     setResources((list) => list.filter((_, i) => i !== row))
-    setSent((list) => list.filter((i) => i !== row).map((i) => (i > row ? i - 1 : i)))
+    setSent((list) => list.map((i) => (i === row ? -1 : i > row ? i - 1 : i)))
   }
 
   function submit() {
