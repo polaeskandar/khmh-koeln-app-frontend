@@ -1,7 +1,6 @@
 import { screen } from "@testing-library/react"
 import { expect, test } from "vitest"
 
-import { MIMI_ID } from "@test/support/fixtures/parent"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { Report } from "@/features/parent/api"
@@ -18,10 +17,13 @@ const doneByCoParent: Report = {
 
 const control = (initial: Report) => (
   <CompletionControl
-    homeworkId="0192f3a4-7b1c-7d2e-8f60-000000000001"
-    child={{ id: MIMI_ID, name: "Mimi" }}
     today="2026-11-08"
     initial={initial}
+    hint="Tap when Mimi has done it."
+    undone="Marked as not done."
+    reportDone={() => Promise.resolve(doneByCoParent)}
+    undoReport={() => Promise.resolve()}
+    invalidate={[]}
   />
 )
 
