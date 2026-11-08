@@ -88,6 +88,23 @@ test("a stage filter sends stageId with q; page 2 shows the range", async () => 
   expect(requests.at(-1)?.get("page")).toBe("2")
 })
 
+test("a search started and cleared on page 2 comes back on page 1", async () => {
+  const requests = open((url) =>
+    peopleList(
+      Array.from({ length: 25 }, (_, i) => person(`P${i}`, "Saad")),
+      { page: Number(url.searchParams.get("page") ?? 1), total: 121 }
+    )
+  )
+
+  await screen.findByText("Showing 1–25 of 121 people")
+  await userEvent.click(screen.getByRole("button", { name: "Next page" }))
+  expect(await screen.findByText("Showing 26–50 of 121 people")).toBeInTheDocument()
+  await userEvent.type(screen.getByRole("textbox", { name: "Search people" }), "saad")
+  await waitFor(() => expect(requests.at(-1)?.get("q")).toBe("saad"))
+  await userEvent.clear(screen.getByRole("textbox", { name: "Search people" }))
+  expect(await screen.findByText("Showing 1–25 of 121 people")).toBeInTheDocument()
+})
+
 test("a display name shows the full name under it; no placements read No service", async () => {
   open(() => peopleList([demi, nobodyPlaced]))
   const table = within(await screen.findByRole("table"))
