@@ -37,6 +37,5 @@ messages/*.d.json.ts
 
 /public/mockServiceWorker.js
 
-# Deployable bundles (task package)
 /web-*.tar.gz
 /web-*.tar.gz.sha256
