@@ -9,11 +9,9 @@ import { FormPanel } from "@/components/form-panel"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { useFormat } from "@/i18n/format"
-import { api, apiDownload, dataOf, type Schemas } from "@/lib/api/client"
+import { api, apiDownload, dataOf } from "@/lib/api/client"
 import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
-
-type ErasureRequest = Schemas["OwnErasureRequest"]
 
 const erasureRequestQuery = {
   queryKey: ["me", "erasure-request"] as const,
