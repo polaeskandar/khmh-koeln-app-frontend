@@ -89,7 +89,7 @@ function SubjectSearch({
 }: {
   about: "member" | "account"
   subject: string | null
-  onChange: (id: string) => void
+  onChange: (id: string | null) => void
   error?: string
 }) {
   const t = useTranslations("privacy.record")
@@ -123,7 +123,10 @@ function SubjectSearch({
         placeholder={about === "member" ? t("findMember") : t("findAccount")}
         value={text}
         aria-invalid={error ? true : undefined}
-        onChange={(event) => setText(event.target.value)}
+        onChange={(event) => {
+          setText(event.target.value)
+          onChange(null)
+        }}
       />
       {q.length < 2 ? (
         <FieldDescription>{t("searchHint")}</FieldDescription>
