@@ -53,6 +53,23 @@ describe("ConfirmDialog", () => {
     expect(screen.getByRole("alertdialog")).toBeInTheDocument()
   })
 
+  test("stays open and usable when the action throws", async () => {
+    renderWithProviders(
+      <ConfirmDialog
+        trigger={<button>Delete…</button>}
+        title="Delete Choir?"
+        confirmLabel="Delete"
+        onConfirm={() => Promise.reject(new DOMException("Aborted", "AbortError"))}
+      />
+    )
+
+    await userEvent.click(screen.getByRole("button", { name: "Delete…" }))
+    await userEvent.click(screen.getByRole("button", { name: "Delete" }))
+    await waitFor(() => expect(screen.getByRole("button", { name: "Delete" })).toBeEnabled())
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeEnabled()
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+  })
+
   test("the dismiss button reads 'Abbrechen' in German by default", async () => {
     renderWithProviders(
       <ConfirmDialog

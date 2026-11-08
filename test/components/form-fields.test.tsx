@@ -30,6 +30,13 @@ describe.each([
     renderWithProviders(<Field label="Note" optional />)
     expect(screen.getByRole("textbox", { name: "Note (optional)" })).toBeInTheDocument()
   })
+
+  test("a supplied id keeps the label and the hint on the control", () => {
+    renderWithProviders(<Field id="person-name" label="Name" description="As people say it" />)
+    const control = screen.getByRole("textbox", { name: "Name" })
+    expect(control).toHaveAttribute("id", "person-name")
+    expect(control).toHaveAccessibleDescription("As people say it")
+  })
 })
 
 test("FormPanel is a group named by its title", () => {
