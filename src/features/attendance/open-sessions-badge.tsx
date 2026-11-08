@@ -17,7 +17,7 @@ export function useOpenCount(): number {
     refetchOnWindowFocus: true,
   })
 
-  return query.data?.openCount ?? 0
+  return query.isError ? 0 : (query.data?.openCount ?? 0)
 }
 
 export function OpenSessionsBadge() {
