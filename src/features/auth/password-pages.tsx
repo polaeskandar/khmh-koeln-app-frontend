@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { Link } from "@/i18n/navigation"
+import { carryFragment } from "@/i18n/use-switch-locale"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { routes } from "@/lib/routes"
 
@@ -65,6 +66,12 @@ function SetPasswordFlow() {
   const save = useApiMutation(setPasswordRequest, { toastOnError: false })
 
   useEffect(forgetAddressFragment, [])
+
+  useEffect(() => {
+    carryFragment(token && outcome === null ? `#token=${encodeURIComponent(token)}` : null)
+
+    return () => carryFragment(null)
+  }, [token, outcome])
 
   async function submit() {
     if (submitting.current || !token) {

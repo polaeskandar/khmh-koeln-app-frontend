@@ -5,6 +5,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { apiUrl, problem } from "@test/support/api"
 import { server } from "@test/support/msw"
+import { navigation, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import { ForgotPasswordPage, SetPasswordPage } from "@/features/auth/password-pages"
@@ -72,6 +73,21 @@ test("the token leaves the address before any request and travels only in the bo
   ])
 
   expect(screen.getByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/sign-in/")
+})
+
+test("choosing another language keeps the link usable", async () => {
+  router.replace.mockReset()
+  navigation.pathname = "/set-password/"
+  open()
+  await userEvent.click(await screen.findByRole("button", { name: "Language" }))
+  await userEvent.click(screen.getByRole("menuitemradio", { name: "Deutsch" }))
+
+  expect(router.replace).toHaveBeenCalledExactlyOnceWith("/set-password/#token=abc", {
+    locale: "de",
+  })
+
+  expect(window.location.hash).toBe("")
+  navigation.pathname = "/"
 })
 
 test("without a token the link is invalid and nothing is sent", async () => {
