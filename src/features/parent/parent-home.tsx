@@ -4,7 +4,7 @@ import { Info } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Suspense } from "react"
 
-import { QueryState } from "@/components/page-states"
+import { QueryErrorState, QueryState } from "@/components/page-states"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSession } from "@/features/auth/session"
 import { useFormat } from "@/i18n/format"
@@ -79,6 +79,7 @@ function ChildTasks({ child }: { child: ChildSummary }) {
           child={child.id}
         />
       ) : null}
+      {done.isError ? <QueryErrorState error={done.error} onRetry={() => done.refetch()} /> : null}
     </div>
   )
 }
