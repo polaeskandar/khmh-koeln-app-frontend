@@ -4,6 +4,7 @@ import { Info } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { FormPanel } from "@/components/form-panel"
+import { Button } from "@/components/ui/button"
 import { PasswordSection, PreferencesFields } from "@/features/account/account-sections"
 import { useSession } from "@/features/auth/session"
 import { useFormat } from "@/i18n/format"
@@ -44,11 +45,20 @@ export function ParentAccount() {
           </dd>
           <dt className="text-muted-foreground">{t("parent.account.children")}</dt>
           <dd dir="auto">
-            {children.data
-              ? names.length > 0
-                ? names.join(f.separator)
-                : t("parent.account.noneLinked")
-              : null}
+            {children.isError ? (
+              <span className="inline-flex flex-wrap items-center gap-2 text-destructive">
+                {t("errors.loadFailed")}
+                <Button variant="outline" size="sm" onClick={() => children.refetch()}>
+                  {t("common.retry")}
+                </Button>
+              </span>
+            ) : children.data ? (
+              names.length > 0 ? (
+                names.join(f.separator)
+              ) : (
+                t("parent.account.noneLinked")
+              )
+            ) : null}
           </dd>
         </dl>
       </FormPanel>

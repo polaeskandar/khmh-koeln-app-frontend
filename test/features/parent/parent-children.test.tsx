@@ -118,6 +118,13 @@ describe("Account", () => {
     expect(await screen.findByText("None linked yet")).toBeInTheDocument()
   })
 
+  test("children that fail to load say so with a retry", async () => {
+    open([mariam])
+    server.use(http.get(apiUrl("/parent/children"), () => problem(403, "forbidden")))
+    expect(await screen.findByText("This couldn’t be loaded.")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument()
+  })
+
   test("Deutsch switches the language in place", async () => {
     open([mina])
     expect(await screen.findByRole("radio", { name: "English" })).toBeChecked()
