@@ -58,7 +58,7 @@ function open({
       },
       { status: 201 }
     ),
-  join = () => HttpResponse.json({ id: "m2" }, { status: 201 }),
+  join = (): Response | Promise<Response> => HttpResponse.json({ id: "m2" }, { status: 201 }),
   locale = "en" as Locale,
 } = {}) {
   const sent: { path: string; body: Record<string, unknown> }[] = []
@@ -192,6 +192,18 @@ describe("duplicates", () => {
     await userEvent.click(await dialog.findByRole("button", { name: "Add" }))
     expect(await dialog.findByText("Mina Hanna is already in Sunday School.")).toBeInTheDocument()
     expect(screen.getByRole("dialog")).toBeInTheDocument()
+  })
+
+  test("while Add saves, adding a different person waits", async () => {
+    open({ create: duplicate([mina]), join: () => new Promise<Response>(() => {}) })
+    const dialog = await openDialog()
+    await userEvent.type(dialog.getByLabelText("First name"), "Mina")
+    await userEvent.click(dialog.getByRole("button", { name: "Add person" }))
+    await userEvent.click(await dialog.findByRole("button", { name: "Add" }))
+
+    expect(
+      dialog.getByRole("button", { name: "It’s a different person, add anyway" })
+    ).toBeDisabled()
   })
 
   test("Add anyway resends with confirmDuplicate; without candidates only it shows", async () => {
