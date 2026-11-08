@@ -111,7 +111,7 @@ function LoadedBoard({ id }: { id: string }) {
       {(board) => (
         <BoardFrame board={board}>
           {board.session.status === "active" ? (
-            <ActiveBoard board={board} boardAt={query.dataUpdatedAt} />
+            <ActiveBoard key={board.session.id} board={board} boardAt={query.dataUpdatedAt} />
           ) : null}
         </BoardFrame>
       )}
