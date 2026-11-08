@@ -42,7 +42,8 @@ The contract is the backend's `docs/api.md`. The web app is served from the same
 `https://app.khmk-koeln.com` serves the static files at `/` and the API at `/api` (D2), so the browser makes
 no cross-origin calls and needs no CORS. `NEXT_PUBLIC_API_BASE_URL` is `/api` in production builds (an
 absolute URL only if the API ever has to move to its own origin) and `http://localhost:8000/api` in
-development; `src/lib/env.ts` checks it, and a production build fails without it.
+development; `src/lib/env.ts` checks it, and a production build fails without it. `NEXT_PUBLIC_REGISTRATION_ENABLED=true` shows
+the link to self-registration on the sign-in page (S2); it is off unless set.
 
 - **Generated client.** The types come from the backend's OpenAPI document. `openapi/openapi.json` is a copy
   of the backend's `docs/openapi.json`, and `pnpm api:types` turns it into `src/lib/api/schema.d.ts` with
