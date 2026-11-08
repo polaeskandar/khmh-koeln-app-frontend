@@ -2,7 +2,6 @@
 
 import { useTranslations } from "next-intl"
 import { useState } from "react"
-import { toast } from "sonner"
 
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { TextField } from "@/components/form-fields"
