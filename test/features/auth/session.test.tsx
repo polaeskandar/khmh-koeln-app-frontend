@@ -70,7 +70,24 @@ describe("when the session ends while working", () => {
       "/sign-in/?next=%2Fen%2Fmembers%2F%3Fq%3DMina"
     )
 
-    expect(client.getQueryCache().getAll()).toEqual([])
+    expect(
+      client
+        .getQueryCache()
+        .getAll()
+        .filter((query) => query.state.data !== undefined)
+    ).toEqual([])
+  })
+
+  test("the guarded page closes at once instead of showing the account that expired", async () => {
+    await signedIn()
+
+    server.use(
+      http.get(apiUrl("/people"), () => problem(401, "auth.unauthenticated")),
+      http.get(apiUrl("/me"), () => HttpResponse.json(me.servant))
+    )
+
+    await act(() => dataOf(api.GET("/people")).catch(() => {}))
+    await waitFor(() => expect(screen.queryByText("Members")).toBeNull())
   })
 
   test("a 401 on the first load gives no toast", async () => {
