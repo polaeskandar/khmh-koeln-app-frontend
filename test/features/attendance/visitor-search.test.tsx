@@ -11,7 +11,6 @@ import { openRosterBoard, rosterPeople, thirdClassBoard } from "@test/support/fi
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { AttendanceBoard } from "@/features/attendance/api"
 import { TakeAttendancePage } from "@/features/attendance/take-attendance-page"
 
 const search = vi.hoisted(() => ({ value: "" }))
