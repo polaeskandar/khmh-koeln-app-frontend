@@ -6,7 +6,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { SessionProvider } from "@/features/auth/session"
 import type { Locale } from "@/i18n/config"
 import type { Me } from "@/features/auth/api"
-import { apiUrl } from "@test/support/api"
+import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { homeworkOf, MIMI_ID, MINA_ID, mimi, mina } from "@test/support/fixtures/parent"
 import { server } from "@test/support/msw"
@@ -126,6 +126,21 @@ test("hides Done recently when nothing was done", async () => {
   open()
   await screen.findByRole("region", { name: "To do for Mimi" })
   expect(screen.queryByRole("region", { name: "Done recently" })).not.toBeInTheDocument()
+})
+
+test("done homework that fails to load says so instead of looking empty", async () => {
+  open()
+
+  server.use(
+    http.get(apiUrl("/parent/children/:child/homework"), ({ request }) =>
+      new URL(request.url).searchParams.get("state") === "done"
+        ? problem(403, "forbidden")
+        : HttpResponse.json({ today: "2026-11-08", items: [] })
+    )
+  )
+
+  await screen.findByRole("region", { name: "To do for Mimi" })
+  expect(await screen.findByRole("button", { name: "Try again" })).toBeInTheDocument()
 })
 
 test("a network error offers to try again", async () => {
