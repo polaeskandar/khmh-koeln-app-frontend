@@ -147,6 +147,15 @@ test("with one servant there is no Helping group", async () => {
   expect(screen.queryByRole("group", { name: "Helping" })).not.toBeInTheDocument()
 })
 
+test("a saved helper stays editable when only the responsible servant is left to choose", async () => {
+  openEdit(lessonDetail({ status: "ready", responsible: daniel, collaborators: [christine] }), [
+    daniel,
+  ])
+
+  const group = within(await helping())
+  expect(group.getByRole("checkbox", { name: "Christine Adel" })).toBeChecked()
+})
+
 const row = (id: string, title: string, extra: Partial<LessonRow> = {}): LessonRow => ({
   id,
   title,

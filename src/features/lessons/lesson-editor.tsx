@@ -447,7 +447,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
             </NativeSelect>
             {errors.responsibleId ? <FieldError>{errors.responsibleId}</FieldError> : null}
           </Field>
-          {choices.servants.length > 1 ? (
+          {helpers.length > 0 ? (
             <FieldSet data-invalid={errors.collaboratorIds ? true : undefined}>
               <FieldLegend variant="label">{t("lessons.editor.helping")}</FieldLegend>
               <div className="flex flex-col gap-2">
