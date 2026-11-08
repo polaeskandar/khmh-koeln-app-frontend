@@ -4,7 +4,7 @@ import { Info, Link2Off } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { Section } from "@/components/page-header"
-import { QueryState } from "@/components/page-states"
+import { QueryErrorState, QueryState } from "@/components/page-states"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSession } from "@/features/auth/session"
 import { ListSkeleton, TaskList } from "@/features/parent/parent-bits"
@@ -31,13 +31,14 @@ function Homework({ which }: { which: "todo" | "done" }) {
   const t = useTranslations("member.home")
   const toDo = useMemberHomework("todo")
   const done = useMemberHomework("done")
+  const own = which === "todo" ? toDo : done
 
-  if (!toDo.data || !done.data) {
-    return which === "todo" ? <ListSkeleton /> : null
+  if (own.isError) {
+    return <QueryErrorState error={own.error} onRetry={() => own.refetch()} />
   }
 
   if (which === "done") {
-    return done.data.items.length > 0 ? (
+    return done.data && done.data.items.length > 0 ? (
       <TaskList
         title={t("doneRecently")}
         tasks={done.data.items.slice(0, DONE_RECENTLY)}
@@ -47,7 +48,11 @@ function Homework({ which }: { which: "todo" | "done" }) {
     ) : null
   }
 
-  if (toDo.data.items.length === 0 && done.data.items.length === 0) {
+  if (!toDo.data) {
+    return <ListSkeleton />
+  }
+
+  if (toDo.data.items.length === 0 && done.data?.items.length === 0) {
     return null
   }
 
