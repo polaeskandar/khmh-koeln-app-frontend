@@ -1,4 +1,4 @@
-import type { OverviewSession } from "@/features/attendance/api"
+import type { OverviewSession } from "@/features/meetings/attendance/api"
 import type { StageRef } from "@/lib/api/types/common"
 
 export const sundaySchool = {

@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
-import { PendingPage } from "@/features/auth/sign-in-page"
+import { PendingPage } from "@/features/identity/sign-in-page"
 import { pageLocale } from "@/i18n/page"
 
 export async function generateMetadata({

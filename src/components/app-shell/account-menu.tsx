@@ -14,8 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
-import { initialsOf, roleSummary } from "@/features/auth/role-summary"
-import { useSession } from "@/features/auth/session"
+import { initialsOf, roleSummary } from "@/features/identity/role-summary"
+import { useSession } from "@/features/identity/session"
 import { useInlineEnd } from "@/i18n/direction"
 import { Link } from "@/i18n/navigation"
 import type { ProblemTranslator } from "@/lib/api/translate-problem"

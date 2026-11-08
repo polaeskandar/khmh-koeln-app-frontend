@@ -1,4 +1,4 @@
-import type { HomeworkFlags } from "@/features/homework/api"
+import type { HomeworkFlags } from "@/features/learning/homework/api"
 
 export const homeworkFlags = (can: Partial<HomeworkFlags> = {}): HomeworkFlags => ({
   edit: false,

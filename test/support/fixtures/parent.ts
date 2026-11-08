@@ -1,4 +1,5 @@
-import type { ChildSummary, ParentTask } from "@/features/parent/api"
+import type { ChildSummary } from "@/features/people/parent/api"
+import type { ParentTask } from "@/features/learning/parent/api"
 
 export const MIMI_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ec001"
 export const MINA_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ec002"

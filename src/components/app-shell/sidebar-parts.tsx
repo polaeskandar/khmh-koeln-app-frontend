@@ -10,9 +10,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { useCan } from "@/features/auth/session"
+import { useCan } from "@/features/identity/session"
 import { useInlineEnd } from "@/i18n/direction"
-import { OpenSessionsBadge } from "@/features/attendance/open-sessions-badge"
+import { OpenSessionsBadge } from "@/features/meetings/attendance/open-sessions-badge"
 import { Link, usePathname } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 

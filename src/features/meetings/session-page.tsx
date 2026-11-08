@@ -20,7 +20,7 @@ import type { LocalDate } from "@/lib/api/types/common"
 import { groupOf, type SessionView } from "@/lib/api/types/meetings"
 import { routes } from "@/lib/routes"
 
-import { OpenAttendanceButton } from "@/features/attendance/open-attendance-button"
+import { OpenAttendanceButton } from "@/features/meetings/attendance/open-attendance-button"
 
 import { type MeetingSession, useMeetingSession } from "./api"
 import { SessionManageMenu } from "./session-dialogs"

@@ -77,10 +77,21 @@ production; off unless set, the page says to ask the church office.
   Inside the apps the origin is `capacitor://localhost` on iOS and `https://localhost` on Android, so the
   API will need them in its CORS allowlist then.
 
+### Features
+
+`src/features/` holds one folder per backend context, so the frontend and the backend share one map:
+`identity` (sign-in, sessions, accounts, account requests, roles), `organization` (services and stages),
+`people` (members, children, guardian links, the portals' groups and shells), `meetings` (schedules,
+sessions, the agenda, attendance and the dashboard), `learning` (lessons and homework, including the
+parent's and member's homework) and `privacy` (the notice, your data and data protection requests). A
+screen that serves one context lives in that context's folder even when a portal shows it: the member's
+and the parent's homework are in `learning/member` and `learning/parent`. Shared UI stays in
+`src/components`, helpers in `src/lib` and `src/hooks`, and `test/features/` mirrors `src/features/`.
+
 ### Data access
 
-- **One `api.ts` per feature** (`src/features/<area>/api.ts`) holds its response types, query options and
-  calls; screens never build URLs or call `apiRequest()` themselves.
+- **One `api.ts` per feature folder** (`src/features/<context>/…/api.ts`) holds its response types, query
+  options and calls; screens never build URLs or call `apiRequest()` themselves.
 - **Query keys** are `["<resource>", "list" | "detail", params]`, e.g. `["services", "list", {status: "all"}]`
   or `["sessions", "detail", id]`. A change invalidates by prefix (`["services"]`), so every list and detail
   of that resource refetches.

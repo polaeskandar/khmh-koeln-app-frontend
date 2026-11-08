@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { afterEach, describe, expect, test, vi } from "vitest"
 
-import { SessionProvider } from "@/features/auth/session"
+import { SessionProvider } from "@/features/identity/session"
 import { LOCALES } from "@/i18n/config"
 import { PRIVACY_NOTICE_VERSION, parsePrivacyNotice } from "@/lib/privacy"
 import { apiUrl } from "@test/support/api"

@@ -33,3 +33,9 @@ helpers (the setup file, MSW, render helpers, fixtures) live in `test/support/` 
 Call the API only through `api` and `dataOf()` from `@/lib/api/client`, the client generated from the backend's
 OpenAPI document (`openapi/openapi.json`, `pnpm api:types`). Types of API data are `Schemas["…"]` from the
 same module; don't write them by hand.
+
+## Features
+
+`src/features/` mirrors the backend's contexts: `identity`, `organization`, `people`, `meetings`, `learning` and
+`privacy`. Put a screen in the folder of the context it serves, even when a portal shows it (`learning/parent`,
+`learning/member`), and mirror the folder in `test/features/`. See `docs/architecture.md` (Features).

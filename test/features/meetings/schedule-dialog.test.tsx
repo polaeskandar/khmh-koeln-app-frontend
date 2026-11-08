@@ -5,7 +5,7 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
-import type { ServiceList } from "@/features/services/api"
+import type { ServiceList } from "@/features/organization/services/api"
 import { apiUrl, problem } from "@test/support/api"
 import { schedule } from "@test/support/fixtures/schedules"
 import { services } from "@test/support/fixtures/services"

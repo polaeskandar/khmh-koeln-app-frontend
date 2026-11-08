@@ -4,7 +4,7 @@ import { renderToString } from "react-dom/server"
 import { afterEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
-import { SessionProvider } from "@/features/auth/session"
+import { SessionProvider } from "@/features/identity/session"
 import type { Locale } from "@/i18n/config"
 import { apiUrl } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -12,7 +12,7 @@ import { server } from "@test/support/msw"
 import { navigation } from "@test/support/navigation"
 import { renderWithProviders, testProviders } from "@test/support/providers"
 
-import type { Me } from "@/features/auth/api"
+import type { Me } from "@/features/identity/api"
 
 import { AppShell } from "@/components/app-shell/app-shell"
 import { isActive } from "@/components/app-shell/nav"

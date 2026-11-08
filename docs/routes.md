@@ -106,13 +106,13 @@ id without asking the API:
 ## The page template
 
 Route groups: `(staff)` and `(public)` don't appear in the URL; `parent` does. Each `page.tsx` is small and
-server-rendered at build time; the screen itself is one client component in `src/features/<area>/`:
+server-rendered at build time; the screen itself is one client component in `src/features/<context>/`:
 
 ```tsx
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
-import { ServiceDetails } from "@/features/services/service-details"
+import { ServiceDetails } from "@/features/organization/services/service-details"
 import { pageLocale } from "@/i18n/page"
 
 export async function generateMetadata({
