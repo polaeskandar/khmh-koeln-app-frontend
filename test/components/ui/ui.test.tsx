@@ -8,6 +8,8 @@ import { renderWithProviders } from "@test/support/providers"
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { Spinner } from "@/components/ui/spinner"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 describe("translated screen-reader labels", () => {
   test.each([
@@ -71,5 +73,25 @@ describe("the Toaster", () => {
     const toaster = document.querySelector("[data-sonner-toaster]")
     expect(toaster).toHaveAttribute("dir", "rtl")
     expect(toaster).toHaveAttribute("data-sonner-theme", "light")
+  })
+})
+
+describe("orientation", () => {
+  test("vertical tabs and toggle groups tell the primitives, not only the styles", () => {
+    renderWithProviders(
+      <>
+        <Tabs orientation="vertical" defaultValue="one">
+          <TabsList>
+            <TabsTrigger value="one">One</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <ToggleGroup type="single" orientation="vertical">
+          <ToggleGroupItem value="a">A</ToggleGroupItem>
+        </ToggleGroup>
+      </>
+    )
+
+    expect(screen.getByRole("tablist")).toHaveAttribute("aria-orientation", "vertical")
+    expect(screen.getByRole("radio", { name: "A" })).toHaveAttribute("data-orientation", "vertical")
   })
 })
