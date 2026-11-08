@@ -166,12 +166,11 @@ function Manager({ data }: { data: ServiceStages }) {
       return
     }
 
-    const previous = order
     setOrder(next)
     const result = await reorder.execute(next)
 
     if (!result.ok) {
-      setOrder(previous)
+      setSyncedKey("")
     }
 
     void queryClient.invalidateQueries({ queryKey: ["services"] })
