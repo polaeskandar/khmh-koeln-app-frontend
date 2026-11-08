@@ -70,6 +70,20 @@ describe("the write reducer", () => {
     expect(applyWrites(board, confirmed, 20).roster[1].mark).toBeNull()
   })
 
+  test("a failed undo after a confirmed mark goes back to the confirmed mark", () => {
+    const confirmed = writesReducer(start, {
+      type: "confirm",
+      personId: ramy.id,
+      mark: savedMark,
+      at: 10,
+    })
+
+    const undoing = writesReducer(confirmed, { type: "start", personId: ramy.id, present: false })
+    const failed = writesReducer(undoing, { type: "fail", personId: ramy.id })
+    expect(failed).toEqual(confirmed)
+    expect(applyWrites(board, failed, 5).roster[1].mark).toEqual(savedMark)
+  })
+
   test("a pending row ignores a second tap", () => {
     expect(writesReducer(start, { type: "start", personId: ramy.id, present: false })).toBe(start)
   })

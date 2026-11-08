@@ -17,6 +17,7 @@ export type Write = {
   status: "pending" | "confirmed"
   mark: Mark | null
   settledAt: number
+  confirmed: Write | null
 }
 
 export type Writes = Readonly<Record<Uuid, Write>>
@@ -37,7 +38,13 @@ export function writesReducer(writes: Writes, action: WriteAction): Writes {
 
       return {
         ...writes,
-        [action.personId]: { present: action.present, status: "pending", mark: null, settledAt: 0 },
+        [action.personId]: {
+          present: action.present,
+          status: "pending",
+          mark: null,
+          settledAt: 0,
+          confirmed: current?.status === "confirmed" ? current : null,
+        },
       }
     case "confirm":
       if (!current) {
@@ -51,13 +58,14 @@ export function writesReducer(writes: Writes, action: WriteAction): Writes {
           status: "confirmed",
           mark: action.mark,
           settledAt: action.at,
+          confirmed: null,
         },
       }
     case "fail": {
       const rest = { ...writes }
       delete rest[action.personId]
 
-      return rest
+      return current?.confirmed ? { ...rest, [action.personId]: current.confirmed } : rest
     }
   }
 }
