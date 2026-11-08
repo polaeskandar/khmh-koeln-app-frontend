@@ -22,6 +22,18 @@ import { Textarea } from "@/components/ui/textarea"
 
 type Controlled = { open?: boolean; onOpenChange?: (open: boolean) => void }
 
+async function whilePending(setPending: (pending: boolean) => void, run: () => Promise<boolean>) {
+  setPending(true)
+
+  try {
+    return await run()
+  } catch {
+    return false
+  } finally {
+    setPending(false)
+  }
+}
+
 export function ConfirmDialog({
   trigger,
   title,
@@ -78,11 +90,7 @@ export function ConfirmDialog({
             variant={tone === "destructive" ? "destructive" : "default"}
             disabled={pending}
             onClick={async () => {
-              setPending(true)
-              const close = await onConfirm()
-              setPending(false)
-
-              if (close) {
+              if (await whilePending(setPending, onConfirm)) {
                 setOpen(false)
               }
             }}
@@ -176,9 +184,9 @@ export function ReasonDialog({
             variant={tone === "destructive" ? "destructive" : "default"}
             disabled={pending || blocked}
             onClick={async () => {
-              setPending(true)
-              const close = await onConfirm(reason.trim() === "" ? null : reason.trim())
-              setPending(false)
+              const close = await whilePending(setPending, () =>
+                onConfirm(reason.trim() === "" ? null : reason.trim())
+              )
 
               if (close) {
                 setReason("")

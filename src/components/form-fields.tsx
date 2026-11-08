@@ -24,6 +24,7 @@ export function TextField({
   error,
   optional,
   className,
+  id: suppliedId,
   ...props
 }: React.ComponentProps<typeof Input> & {
   label: string
@@ -31,7 +32,8 @@ export function TextField({
   error?: string
   optional?: boolean
 }) {
-  const id = useId()
+  const generatedId = useId()
+  const id = suppliedId ?? generatedId
 
   return (
     <Field data-invalid={error ? true : undefined} className={className}>
@@ -59,6 +61,7 @@ export function TextAreaField({
   error,
   optional,
   className,
+  id: suppliedId,
   ...props
 }: React.ComponentProps<typeof Textarea> & {
   label: string
@@ -66,7 +69,8 @@ export function TextAreaField({
   error?: string
   optional?: boolean
 }) {
-  const id = useId()
+  const generatedId = useId()
+  const id = suppliedId ?? generatedId
 
   return (
     <Field data-invalid={error ? true : undefined} className={className}>
