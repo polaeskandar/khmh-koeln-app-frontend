@@ -2,7 +2,7 @@ import createClient, { type Middleware } from "openapi-fetch"
 
 import { apiBaseUrl } from "@/lib/env"
 
-import { isAbort, networkError, problemOf } from "./problem"
+import { ApiError, isAbort, networkError, problemOf } from "./problem"
 import type { components, paths } from "./schema"
 
 export type Schemas = components["schemas"]
@@ -69,8 +69,20 @@ export async function dataOf<Data>(request: Promise<{ data?: Data }>): Promise<D
   return data as Data
 }
 
+async function downloaded(request: Promise<{ data?: Blob }>): Promise<Blob> {
+  try {
+    return await dataOf(request)
+  } catch (error) {
+    if (error instanceof ApiError || isAbort(error)) {
+      throw error
+    }
+
+    throw networkError()
+  }
+}
+
 export async function apiDownload(request: Promise<{ data?: Blob }>, filename: string) {
-  const url = URL.createObjectURL(await dataOf(request))
+  const url = URL.createObjectURL(await downloaded(request))
   const link = document.createElement("a")
   link.href = url
   link.download = filename
