@@ -2,7 +2,7 @@ import createClient, { type Middleware } from "openapi-fetch"
 
 import { apiBaseUrl } from "@/lib/env"
 
-import { networkError, problemOf } from "./problem"
+import { isAbort, networkError, problemOf } from "./problem"
 import type { components, paths } from "./schema"
 
 export type Schemas = components["schemas"]
@@ -49,7 +49,7 @@ const problems: Middleware = {
     throw problem
   },
   onError({ error }) {
-    return error instanceof Error && error.name === "AbortError" ? error : networkError()
+    return isAbort(error) ? error : networkError()
   },
 }
 
