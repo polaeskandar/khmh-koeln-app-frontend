@@ -197,20 +197,20 @@ function RoleForm({ role }: { role: RoleDetail | null }) {
 
   const create = useApiMutation(createRoleRequest, {
     successMessage: t("toast.roleCreated", { name: name.trim() }),
-    invalidate: [["roles"], ["staff-accounts"]],
+    invalidate: [["roles"], ["staff-accounts"], ["me"]],
     onSuccess: (saved) => router.push(routes.role(saved.id)),
   })
 
   const update = useApiMutation((input: RoleInput) => updateRoleRequest(role?.id ?? "", input), {
     successMessage: t("toast.roleSaved"),
-    invalidate: [["roles"], ["staff-accounts"]],
+    invalidate: [["roles"], ["staff-accounts"], ["me"]],
   })
 
   const save = role ? update : create
 
   const remove = useApiMutation(deleteRoleRequest, {
     successMessage: t("toast.roleDeleted", { name: role?.name ?? "" }),
-    invalidate: [["roles"], ["staff-accounts"]],
+    invalidate: [["roles"], ["staff-accounts"], ["me"]],
     onSuccess: () => router.push(`${routes.settings()}#roles`),
   })
 
@@ -293,12 +293,14 @@ function RoleForm({ role }: { role: RoleDetail | null }) {
           ) : null}
           <PermissionGrid chosen={chosen} onChange={setChosen} disabled={!editable} />
         </FormPanel>
-        {editable ? (
+        {editable || (role && can("delete", "roles")) ? (
           <div className="flex flex-wrap gap-2">
-            <Button type="submit" disabled={blocked}>
-              {save.pending ? <Spinner data-icon="inline-start" /> : null}
-              {role ? t("roleEditor.save") : t("roleEditor.create")}
-            </Button>
+            {editable ? (
+              <Button type="submit" disabled={blocked}>
+                {save.pending ? <Spinner data-icon="inline-start" /> : null}
+                {role ? t("roleEditor.save") : t("roleEditor.create")}
+              </Button>
+            ) : null}
             {role && can("delete", "roles") ? (
               <Button type="button" variant="outline" onClick={() => setDeleting(true)}>
                 {t("roleEditor.deleteRole")}
