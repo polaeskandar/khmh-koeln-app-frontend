@@ -50,7 +50,15 @@ function changesOf(service: ServiceRow, fields: ServiceFields): Partial<ServiceF
   return changes
 }
 
-function ServiceForm({ service, onDone }: { service?: ServiceRow; onDone: () => void }) {
+function ServiceForm({
+  service,
+  onDone,
+  onPendingChange,
+}: {
+  service?: ServiceRow
+  onDone: () => void
+  onPendingChange: (pending: boolean) => void
+}) {
   const t = useTranslations()
   const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
@@ -76,6 +84,8 @@ function ServiceForm({ service, onDone }: { service?: ServiceRow; onDone: () => 
       focusFirstInvalid(formRef.current)
     }
   }, [mutation.problem])
+
+  useEffect(() => onPendingChange(mutation.pending), [mutation.pending, onPendingChange])
 
   async function submit() {
     const fields = { name, description: description.trim() === "" ? null : description }
@@ -150,9 +160,10 @@ export function ServiceFormDialog({
   onOpenChange: (open: boolean) => void
 }) {
   const t = useTranslations("services")
+  const [pending, setPending] = useState(false)
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(next) => (next || !pending) && onOpenChange(next)}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
@@ -162,7 +173,13 @@ export function ServiceFormDialog({
             {service ? t("form.editDescription") : t("form.newDescription")}
           </DialogDescription>
         </DialogHeader>
-        {open ? <ServiceForm service={service} onDone={() => onOpenChange(false)} /> : null}
+        {open ? (
+          <ServiceForm
+            service={service}
+            onDone={() => onOpenChange(false)}
+            onPendingChange={setPending}
+          />
+        ) : null}
       </DialogContent>
     </Dialog>
   )
