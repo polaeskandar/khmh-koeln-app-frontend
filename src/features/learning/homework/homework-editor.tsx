@@ -63,10 +63,11 @@ type HomeworkStage = StageHomework["stage"]
 type FormProps = {
   stage: HomeworkStage
   audienceSize: number
+  fromLesson: Uuid | null
 } & ({ lessons: LessonRef[]; lessonId: Uuid; homework?: never } | { homework: HomeworkDetail })
 
 function HomeworkForm(props: FormProps) {
-  const { stage, audienceSize, homework } = props
+  const { stage, audienceSize, fromLesson, homework } = props
   const lessons = homework ? [homework.lesson] : props.lessons
   const t = useTranslations()
   const f = useFormat()
@@ -96,7 +97,7 @@ function HomeworkForm(props: FormProps) {
       savedId
         ? updateHomeworkRequest(savedId, version, input)
         : createHomeworkRequest(lessonId, input),
-    { invalidate: [["homework"]] }
+    { invalidate: [["homework"], ["lessons"]] }
   )
 
   const publisher = usePublishHomework(t("toast.homeworkPublishedNew"))
@@ -108,7 +109,11 @@ function HomeworkForm(props: FormProps) {
     : can("update", "homework")
 
   const pending = mutation.pending || publisher.pending
-  const listOn = (status: string) => `${routes.stageHomework(stage.id)}&status=${status}`
+  const lessonPage = fromLesson ? routes.lesson(fromLesson) : null
+
+  const afterSave = (status: string) =>
+    lessonPage ?? `${routes.stageHomework(stage.id)}&status=${status}`
+
   const lessonLabel = (l: LessonRef) => `${f.dayMonth(l.teachingDate)} · ${l.title}`
 
   useEffect(() => {
@@ -185,7 +190,7 @@ function HomeworkForm(props: FormProps) {
               : t("toast.homeworkDraftSaved")
         )
 
-        router.push(listOn(saved.data.status))
+        router.push(afterSave(saved.data.status))
 
         return
       }
@@ -197,9 +202,9 @@ function HomeworkForm(props: FormProps) {
       })
 
       if (result?.ok) {
-        router.push(listOn("published"))
+        router.push(afterSave("published"))
       } else if (!homework) {
-        router.replace(routes.editHomework(saved.data.id))
+        router.replace(routes.editHomework(saved.data.id, fromLesson))
       }
     } finally {
       busy.current = false
@@ -417,7 +422,10 @@ function HomeworkForm(props: FormProps) {
             </Button>
             <Button type="button" variant="ghost" asChild>
               <Link
-                href={published ? routes.homework(homework.id) : routes.stageHomework(stage.id)}
+                href={
+                  lessonPage ??
+                  (published ? routes.homework(homework.id) : routes.stageHomework(stage.id))
+                }
               >
                 {t("common.cancel")}
               </Link>
@@ -489,12 +497,12 @@ function LessonFirst({ stage }: { stage: Uuid }) {
   )
 }
 
-function firstLesson(data: StageHomework, wanted: Uuid | null): Uuid {
-  if (wanted && data.lessons.some((l) => l.id === wanted)) {
-    return wanted
-  }
+function lessonFrom(data: StageHomework, wanted: Uuid | null): Uuid | null {
+  return wanted && data.lessons.some((l) => l.id === wanted) ? wanted : null
+}
 
-  return data.defaultLessonId ?? data.lessons[0]!.id
+function firstLesson(data: StageHomework, wanted: Uuid | null): Uuid {
+  return lessonFrom(data, wanted) ?? data.defaultLessonId ?? data.lessons[0]!.id
 }
 
 function NewHomework({ stageId }: { stageId: Uuid }) {
@@ -528,6 +536,7 @@ function NewHomework({ stageId }: { stageId: Uuid }) {
                   audienceSize={data.audienceSize}
                   lessons={data.lessons}
                   lessonId={firstLesson(data, wanted)}
+                  fromLesson={lessonFrom(data, wanted)}
                 />
               )
             }
@@ -541,6 +550,7 @@ function NewHomework({ stageId }: { stageId: Uuid }) {
 function EditHomework({ id }: { id: Uuid }) {
   const t = useTranslations("homework")
   const can = useCan()
+  const fromLesson = useSearchParamId("lesson")
   const query = useQuery(homeworkQuery(id))
 
   return (
@@ -564,7 +574,12 @@ function EditHomework({ id }: { id: Uuid }) {
               {t("edit.noAccess", { stage: data.stage.name })}
             </NoAccess>
           ) : (
-            <HomeworkForm stage={data.stage} audienceSize={data.audienceSize} homework={data} />
+            <HomeworkForm
+              stage={data.stage}
+              audienceSize={data.audienceSize}
+              fromLesson={fromLesson}
+              homework={data}
+            />
           )}
         </EditorPage>
       )}

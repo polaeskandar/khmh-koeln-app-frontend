@@ -1,3 +1,4 @@
+import { QueryClient } from "@tanstack/react-query"
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
@@ -128,8 +129,8 @@ function openNew(data: StageHomework, query = "", locale: Locale = "en", account
 
 const versions: (string | null)[] = []
 
-function openEdit(data: HomeworkDetail, account: Me = me.servant) {
-  search.value = `id=${HOMEWORK_ID}`
+function openEdit(data: HomeworkDetail, account: Me = me.servant, query = "") {
+  search.value = `id=${HOMEWORK_ID}${query}`
   const put: unknown[] = []
   versions.length = 0
 
@@ -555,4 +556,92 @@ test("new homework from someone who can't change homework only saves a draft", a
   openNew(list(), "", "en", servantWithoutUpdate)
   const status = within(await screen.findByRole("group", { name: "Status" }))
   expect(status.getAllByRole("button").map((b) => b.textContent)).toEqual(["Save draft"])
+})
+
+const statusPanel = async () => within(await screen.findByRole("group", { name: "Status" }))
+
+test("opened from a lesson, Save draft and Cancel return to that lesson, which refetches", async () => {
+  const invalidated = vi.spyOn(QueryClient.prototype, "invalidateQueries")
+  const posted = openNew(list(), `&lesson=${sheep.id}`)
+  const status = await statusPanel()
+
+  expect(status.getByRole("link", { name: "Cancel" })).toHaveAttribute(
+    "href",
+    `/lessons/view/?id=${sheep.id}`
+  )
+
+  await fill("Learn the verse", "Say it.")
+  await userEvent.click(status.getByRole("button", { name: "Save draft" }))
+  await vi.waitFor(() => expect(router.push).toHaveBeenCalledWith(`/lessons/view/?id=${sheep.id}`))
+  expect(posted).toHaveLength(1)
+  expect(invalidated).toHaveBeenCalledWith({ queryKey: ["lessons"] })
+})
+
+test("opened from a lesson, Publish returns to that lesson", async () => {
+  openNew(list(), `&lesson=${sheep.id}`)
+
+  server.use(
+    http.post(apiUrl(`/homework/${HOMEWORK_ID}/publish`), () =>
+      HttpResponse.json({
+        id: HOMEWORK_ID,
+        status: "published",
+        publishedAt: "2026-11-10T12:00:00Z",
+      })
+    )
+  )
+
+  const status = await statusPanel()
+  await fill("Learn the verse", "Say it.")
+  await userEvent.click(status.getByRole("button", { name: "Publish" }))
+  await vi.waitFor(() => expect(router.push).toHaveBeenCalledWith(`/lessons/view/?id=${sheep.id}`))
+})
+
+test.each([
+  ["without a lesson", ""],
+  ["with a lesson of another stage", "&lesson=0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e9999"],
+])("opened %s, Cancel returns to the stage's list", async (_, query) => {
+  openNew(list(), query)
+  const status = await statusPanel()
+
+  expect(status.getByRole("link", { name: "Cancel" })).toHaveAttribute(
+    "href",
+    `/stages/homework/?id=${THIRD_CLASS_ID}`
+  )
+})
+
+test("a refused publish from a lesson keeps the lesson in the edit page's address", async () => {
+  openNew(list(), `&lesson=${sheep.id}`)
+
+  server.use(
+    http.post(apiUrl(`/homework/${HOMEWORK_ID}/publish`), () =>
+      problem(409, "homework.lessonArchived")
+    )
+  )
+
+  const status = await statusPanel()
+  await fill("Learn the verse", "Say it.")
+  await userEvent.click(status.getByRole("button", { name: "Publish" }))
+
+  await vi.waitFor(() =>
+    expect(router.replace).toHaveBeenCalledWith(
+      `/homework/edit/?id=${HOMEWORK_ID}&lesson=${sheep.id}`
+    )
+  )
+})
+
+test("the edit page opened from a lesson returns there after saving and on Cancel", async () => {
+  const put = openEdit(detail(), me.servant, `&lesson=${samaritan.id}`)
+  const status = await statusPanel()
+
+  expect(status.getByRole("link", { name: "Cancel" })).toHaveAttribute(
+    "href",
+    `/lessons/view/?id=${samaritan.id}`
+  )
+
+  await userEvent.click(status.getByRole("button", { name: "Save changes" }))
+  await vi.waitFor(() => expect(put).toHaveLength(1))
+
+  await vi.waitFor(() =>
+    expect(router.push).toHaveBeenCalledWith(`/lessons/view/?id=${samaritan.id}`)
+  )
 })
