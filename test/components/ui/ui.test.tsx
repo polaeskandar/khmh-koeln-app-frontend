@@ -95,3 +95,18 @@ describe("orientation", () => {
     expect(screen.getByRole("radio", { name: "A" })).toHaveAttribute("data-orientation", "vertical")
   })
 })
+
+test("a dialog's title keeps clear of the close button", () => {
+  renderWithProviders(
+    <Dialog open>
+      <DialogContent>
+        <DialogTitle>Record a data protection request</DialogTitle>
+        <DialogDescription>Text</DialogDescription>
+      </DialogContent>
+    </Dialog>
+  )
+
+  expect(screen.getByRole("heading", { name: "Record a data protection request" })).toHaveClass(
+    "pe-8"
+  )
+})
