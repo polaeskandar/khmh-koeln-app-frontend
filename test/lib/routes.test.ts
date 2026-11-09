@@ -29,6 +29,7 @@ describe("routes", () => {
     [routes.newHomework(ID), `/homework/new/?stage=${ID}`],
     [routes.newHomework(ID, CHILD), `/homework/new/?stage=${ID}&lesson=${CHILD}`],
     [routes.editHomework(ID), `/homework/edit/?id=${ID}`],
+    [routes.editHomework(ID, CHILD), `/homework/edit/?id=${ID}&lesson=${CHILD}`],
     [routes.settings(), "/settings/"],
     [routes.newRole(), "/settings/roles/new/"],
     [routes.role(ID), `/settings/roles/view/?id=${ID}`],
