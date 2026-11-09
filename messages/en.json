@@ -1363,7 +1363,7 @@
         "description": "Groups within the service, in their display order. Open a stage for its members, meetings, lessons and homework.",
         "manage": "Manage stages",
         "empty": "No stages",
-        "emptyDescription": "{name} meets as one group. Its {count, plural, one {# member belongs} other {# members belong}} to the service itself. Add stages if it splits into classes or levels.",
+        "emptyDescription": "{name} meets as one group. {count, plural, =0 {It has no members yet.} one {Its # member belongs to the service itself.} other {Its # members belong to the service itself.}} Add stages if it splits into classes or levels.",
         "addFirst": "Add the first stage",
         "next": "Next: {day}, {time}",
         "noAttendance": "No attendance yet",

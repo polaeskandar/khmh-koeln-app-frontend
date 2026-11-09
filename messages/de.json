@@ -1363,7 +1363,7 @@
         "description": "Gruppen innerhalb des Dienstes in ihrer Anzeigereihenfolge. Öffnen Sie eine Stufe, um ihre Mitglieder, Termine, Lektionen und Hausaufgaben zu sehen.",
         "manage": "Stufen verwalten",
         "empty": "Keine Stufen",
-        "emptyDescription": "{name} trifft sich als eine Gruppe. {count, plural, one {Sein einziges Mitglied gehört} other {Seine # Mitglieder gehören}} direkt zum Dienst. Fügen Sie Stufen hinzu, wenn er sich in Klassen oder Niveaus aufteilt.",
+        "emptyDescription": "{name} trifft sich als eine Gruppe. {count, plural, =0 {Er hat noch keine Mitglieder.} one {Sein einziges Mitglied gehört direkt zum Dienst.} other {Seine # Mitglieder gehören direkt zum Dienst.}} Fügen Sie Stufen hinzu, wenn er sich in Klassen oder Niveaus aufteilt.",
         "addFirst": "Erste Stufe hinzufügen",
         "next": "Nächster Termin: {day}, {time}",
         "noAttendance": "Noch keine Anwesenheit erfasst",
