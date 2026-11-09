@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Spinner } from "@/components/ui/spinner"
+import { useCan } from "@/features/identity/auth/session"
 import { Link } from "@/i18n/navigation"
 import { isolate } from "@/lib/bidi"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -22,13 +23,14 @@ import { routes } from "@/lib/routes"
 
 import {
   deleteHomeworkRequest,
+  homeworkFlagsFor,
   type HomeworkRow,
   type HomeworkTransition,
   transitionHomeworkRequest,
 } from "./api"
 import { usePublishHomework } from "./use-publish-homework"
 
-type Homework = Pick<HomeworkRow, "id" | "title" | "status" | "publishedAt" | "counts" | "can">
+type Homework = Pick<HomeworkRow, "id" | "title" | "status" | "publishedAt" | "counts" | "lesson">
 type Change = HomeworkTransition | "delete"
 
 function useChangeHomework(homework: Homework, onDeleted?: () => void) {
@@ -131,26 +133,29 @@ function ChangeDialog({
 
 export function HomeworkActions({
   homework,
+  stageArchived,
   place,
   onDeleted,
 }: {
   homework: Homework
+  stageArchived: boolean
   place: "list" | "page"
   onDeleted?: () => void
 }) {
   const t = useTranslations()
   const publish = usePublishHomework()
   const [change, setChange] = useState<Change | null>(null)
-  const { can } = homework
+  const can = useCan()
+  const flags = homeworkFlagsFor(can, homework, stageArchived)
   const target = { id: homework.id, title: homework.title, publishedAt: homework.publishedAt }
-  const progress = place === "list" && can.viewProgress && homework.status !== "draft"
-  const edit = place === "list" && can.edit
-  const opening = [progress, edit, can.publish, can.unpublish].some(Boolean)
-  const closing = [can.archive, can.restore, can.delete].some(Boolean)
+  const progress = place === "list" && flags.viewProgress && homework.status !== "draft"
+  const edit = place === "list" && flags.edit
+  const opening = [progress, edit, flags.publish, flags.unpublish].some(Boolean)
+  const closing = [flags.archive, flags.restore, flags.delete].some(Boolean)
 
   return (
     <span className="flex items-center justify-end gap-1">
-      {can.publish ? (
+      {flags.publish ? (
         <Button
           variant="outline"
           size="sm"
@@ -183,7 +188,7 @@ export function HomeworkActions({
                 <Link href={routes.editHomework(homework.id)}>{t("common.edit")}</Link>
               </DropdownMenuItem>
             ) : null}
-            {can.publish ? (
+            {flags.publish ? (
               <DropdownMenuItem
                 disabled={publish.pending}
                 onSelect={() => void publish.publish(target)}
@@ -191,23 +196,23 @@ export function HomeworkActions({
                 {t("homework.actions.publishToParents")}
               </DropdownMenuItem>
             ) : null}
-            {can.unpublish ? (
+            {flags.unpublish ? (
               <DropdownMenuItem onSelect={() => setChange("unpublish")}>
                 {t("homework.actions.unpublish")}
               </DropdownMenuItem>
             ) : null}
             {opening && closing ? <DropdownMenuSeparator /> : null}
-            {can.archive ? (
+            {flags.archive ? (
               <DropdownMenuItem onSelect={() => setChange("archive")}>
                 {t("common.archive")}
               </DropdownMenuItem>
             ) : null}
-            {can.restore ? (
+            {flags.restore ? (
               <DropdownMenuItem onSelect={() => setChange("restore")}>
                 {t("common.restore")}
               </DropdownMenuItem>
             ) : null}
-            {can.delete ? (
+            {flags.delete ? (
               <DropdownMenuItem variant="destructive" onSelect={() => setChange("delete")}>
                 {t("homework.actions.deleteDraft")}
               </DropdownMenuItem>

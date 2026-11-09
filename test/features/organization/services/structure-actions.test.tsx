@@ -7,16 +7,24 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { StagesManager } from "@/features/organization/stages/stages-manager"
 import { apiUrl, problem } from "@test/support/api"
-import { services } from "@test/support/fixtures/services"
+import { me } from "@test/support/fixtures/me"
+import { insightsOf, services } from "@test/support/fixtures/services"
 import { stageRef } from "@test/support/fixtures/sessions"
 import { SUNDAY_SCHOOL_ID } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { ServiceRow, ServiceStages } from "@/features/organization/services/api"
+import type { Me } from "@/features/identity/auth/api"
+import {
+  type Impact,
+  serviceInsightsQuery,
+  type ServiceRow,
+  type ServiceStages,
+} from "@/features/organization/services/api"
 import { ServiceDetails } from "@/features/organization/services/service-details"
 import { ServiceActionsMenu } from "@/features/organization/services/service-dialogs"
+import type { Stage } from "@/features/organization/stages/api"
 
 const search = vi.hoisted(() => ({ value: "" }))
 vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
@@ -32,14 +40,18 @@ afterEach(() => vi.restoreAllMocks())
 
 const [, youth, choir] = services.items as [ServiceRow, ServiceRow, ServiceRow]
 
-const admin = (service: ServiceRow, extra: Partial<ServiceRow> = {}): ServiceRow => ({
-  ...service,
-  can: { ...service.can, archive: true },
-  ...extra,
-})
+function menu(
+  service: ServiceRow,
+  viewer: Me = me.administrator,
+  impact: Impact = { activeSchedules: 0, upcomingSessions: 0 }
+) {
+  server.use(
+    http.get(apiUrl("/services/insights"), () =>
+      HttpResponse.json(insightsOf(services.items, { [service.id]: { impact } }))
+    )
+  )
 
-function menu(service: ServiceRow) {
-  renderWithProviders(<ServiceActionsMenu service={service} />)
+  return renderWithProviders(<ServiceActionsMenu service={service} />, { me: viewer })
 }
 
 const items = async (name: string) => {
@@ -51,17 +63,17 @@ const items = async (name: string) => {
 }
 
 test("an administrator may archive and delete a service", async () => {
-  menu(admin(youth))
+  menu(youth)
   expect(await items("Youth Meeting")).toEqual(["Edit name and description", "Archive", "Delete"])
 })
 
 test("a leader may only edit", async () => {
-  menu(youth)
+  menu(youth, me.leader)
   expect(await items("Youth Meeting")).toEqual(["Edit name and description"])
 })
 
 test("a servant gets no menu", () => {
-  menu({ ...youth, can: { ...youth.can, edit: false } })
+  menu(youth, me.servant)
 
   expect(
     screen.queryByRole("button", { name: "Actions for Youth Meeting" })
@@ -69,7 +81,7 @@ test("a servant gets no menu", () => {
 })
 
 test("an archived service offers Restore", async () => {
-  menu(admin(choir))
+  menu(choir)
   expect(await items("Choir")).toEqual(["Restore", "Delete"])
 })
 
@@ -84,7 +96,12 @@ test("the archive dialog lists the impact, and a refusal stays in it", async () 
     })
   )
 
-  menu(admin(youth, { impact: { activeSchedules: 1, upcomingSessions: 2 } }))
+  const { client } = menu(youth, me.administrator, { activeSchedules: 1, upcomingSessions: 2 })
+
+  await vi.waitFor(() =>
+    expect(client.getQueryState(serviceInsightsQuery.queryKey)?.status).toBe("success")
+  )
+
   await items("Youth Meeting")
   await userEvent.click(screen.getByRole("menuitem", { name: "Archive" }))
   const dialog = within(await screen.findByRole("alertdialog"))
@@ -120,7 +137,7 @@ test("deleting a service sends one DELETE and returns to the overview", async ()
     })
   )
 
-  menu(admin(choir))
+  menu(choir)
   await items("Choir")
   await userEvent.click(screen.getByRole("menuitem", { name: "Delete" }))
   const dialog = within(await screen.findByRole("alertdialog"))
@@ -136,7 +153,7 @@ test("a service with history can't be deleted, and says so in the dialog", async
     )
   )
 
-  menu(admin(choir))
+  menu(choir)
   await items("Choir")
   await userEvent.click(screen.getByRole("menuitem", { name: "Delete" }))
   const dialog = within(await screen.findByRole("alertdialog"))
@@ -152,32 +169,34 @@ test("a service with history can't be deleted, and says so in the dialog", async
 })
 
 test("an archived service's details show when and why", async () => {
-  const archived = admin(choir)
+  const archived = choir
   search.value = `id=${archived.id}`
+
+  const archivedStages: ServiceStages = {
+    service: { id: archived.id, name: archived.name, tone: archived.tone, archived: true },
+    stages: [],
+    archivedStages: [
+      {
+        id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef901",
+        name: "Altos",
+        archivedAt: "2026-09-05T22:30:00Z",
+        impact: { activeSchedules: 0, upcomingSessions: 0 },
+      },
+    ],
+  }
 
   server.use(
     http.get(apiUrl(`/services/${archived.id}`), () => HttpResponse.json(archived)),
-    http.get(apiUrl(`/services/${archived.id}/stages`), () =>
-      HttpResponse.json({
-        service: archived,
-        stages: [],
-        archivedStages: [
-          {
-            id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef901",
-            name: "Altos",
-            archivedAt: "2026-09-05T22:30:00Z",
-          },
-        ],
-        can: { manageStructure: true },
-      })
-    ),
+    http.get(apiUrl(`/services/${archived.id}/stages`), () => HttpResponse.json(archivedStages)),
+    http.get(apiUrl("/services/insights"), () => HttpResponse.json(insightsOf(services.items))),
     http.get(apiUrl("/schedules"), () => HttpResponse.json({ today: "2026-11-08", items: [] }))
   )
 
   renderWithProviders(
     <SidebarProvider>
       <ServiceDetails />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: me.administrator }
   )
 
   expect(await screen.findByText("Archived on Sun 6 Sep 2026")).toBeInTheDocument()
@@ -192,10 +211,22 @@ test("an archived service's details show when and why", async () => {
 test("a leader's archived stage moves to Archived stages, and Restore puts it last", async () => {
   const impact = { activeSchedules: 0, upcomingSessions: 0 }
   const third = { ...stageRef("3rd Class", 2), description: null, memberCount: 14, impact }
+  const service = { id: SUNDAY_SCHOOL_ID, name: "Sunday School", tone: 1, archived: false }
+
+  const stageOf = (stage: typeof third, archived: boolean): Stage => ({
+    id: stage.id,
+    name: stage.name,
+    description: stage.description,
+    position: stage.position,
+    archived,
+    memberCount: stage.memberCount,
+    service,
+  })
+
   let state: "active" | "archived" | "restored" = "active"
 
   const data = (): ServiceStages => ({
-    service: { id: SUNDAY_SCHOOL_ID, name: "Sunday School", tone: 1, archived: false },
+    service,
     stages: [
       { ...stageRef("Kindergarten", 0), description: null, memberCount: 9, impact },
       { ...stageRef("1st Class", 1), description: null, memberCount: 11, impact },
@@ -205,7 +236,6 @@ test("a leader's archived stage moves to Archived stages, and Restore puts it la
       state === "archived"
         ? [{ id: third.id, name: third.name, archivedAt: "2026-11-08T11:00:00Z", impact }]
         : [],
-    can: { manageStructure: true },
   })
 
   search.value = `id=${SUNDAY_SCHOOL_ID}`
@@ -215,19 +245,20 @@ test("a leader's archived stage moves to Archived stages, and Restore puts it la
     http.post(apiUrl(`/stages/${third.id}/archive`), () => {
       state = "archived"
 
-      return HttpResponse.json({})
+      return HttpResponse.json(stageOf(third, true))
     }),
     http.post(apiUrl(`/stages/${third.id}/restore`), () => {
       state = "restored"
 
-      return HttpResponse.json({})
+      return HttpResponse.json(stageOf({ ...third, position: 3 }, false))
     })
   )
 
   renderWithProviders(
     <SidebarProvider>
       <StagesManager />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: me.leader }
   )
 
   await userEvent.click(await screen.findByRole("button", { name: "Actions for 3rd Class" }))

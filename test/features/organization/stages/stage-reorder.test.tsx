@@ -5,8 +5,10 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
 import type { ServiceStages } from "@/features/organization/services/api"
 import { apiUrl, problem } from "@test/support/api"
+import { me } from "@test/support/fixtures/me"
 import { stageRef } from "@test/support/fixtures/sessions"
 import { SUNDAY_SCHOOL_ID } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
@@ -54,16 +56,16 @@ const kindergarten = { ...stageRef("Kindergarten", 0), description: null, member
 const first = { ...stageRef("1st Class", 1), description: null, memberCount: 11, impact }
 const third = { ...stageRef("3rd Class", 2), description: null, memberCount: 14, impact }
 
-const data = (stages = [kindergarten, first, third], manage = true): ServiceStages => ({
+const data = (stages = [kindergarten, first, third]): ServiceStages => ({
   service: { id: SUNDAY_SCHOOL_ID, name: "Sunday School", tone: 1, archived: false },
   stages,
   archivedStages: [],
-  can: { manageStructure: manage },
 })
 
 function open(
   body: ServiceStages,
-  answer: () => Response | Promise<Response> = () => new HttpResponse(null, { status: 204 })
+  answer: () => Response | Promise<Response> = () => HttpResponse.json(body),
+  viewer: Me = me.leader
 ) {
   const puts: unknown[] = []
 
@@ -79,7 +81,8 @@ function open(
   renderWithProviders(
     <SidebarProvider>
       <StagesManager />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: viewer }
   )
 
   return puts
@@ -141,7 +144,7 @@ test("Move items are disabled while saving", async () => {
   open(data(), async () => {
     await gate
 
-    return new HttpResponse(null, { status: 204 })
+    return HttpResponse.json(data())
   })
 
   await userEvent.click(await screen.findByRole("button", { name: "Actions for Kindergarten" }))
@@ -170,8 +173,8 @@ test("a stale order rolls back and says why", async () => {
   expect(names()).toEqual(["Kindergarten", "1st Class", "3rd Class"])
 })
 
-test("without manageStructure there are no grips or Move items", async () => {
-  open(data(undefined, false))
+test("without stages: update there are no grips or Move items", async () => {
+  open(data(), undefined, me.servant)
   await screen.findByRole("table")
   expect(screen.queryByRole("button", { name: /Drag to reorder/ })).not.toBeInTheDocument()
   expect(screen.queryByRole("button", { name: /Actions for/ })).not.toBeInTheDocument()

@@ -8,6 +8,7 @@ import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import {
+  memberServants,
   minaGroups,
   nevineGroups,
   nevineHomework,
@@ -58,6 +59,7 @@ function open({
         ? groups()
         : HttpResponse.json({ today: "2026-11-08", items: groups })
     ),
+    http.get(apiUrl("/member/servants"), () => HttpResponse.json({ items: memberServants })),
     http.get(apiUrl("/member/meetings"), () =>
       HttpResponse.json({
         today: "2026-11-08",
@@ -120,6 +122,8 @@ test("lists the groups with schedules, servants and the last lesson", async () =
   const cards = await screen.findAllByRole("article")
   expect(cards.map((c) => c.getAttribute("aria-label"))).toEqual(["Bible Study", "Level 1"])
   expect(cards[0]).toHaveTextContent("Every Friday · 19:30–21:00 · Hall")
+  expect(await within(cards[0]!).findByText(/Irene Wahba/)).toBeInTheDocument()
+  expect(cards[0]).toHaveTextContent("⁨Irene Wahba⁩ (Service leader), ⁨Youssef Nashed⁩")
   expect(cards[1]).toHaveTextContent("⁨Irene Wahba⁩ (Service leader), ⁨Youssef Nashed⁩")
   expect(cards[1]).toHaveTextContent("Last lesson: “⁨The first eight letters⁩”")
   expect(within(cards[1]!).getByText("Ⲭⲣⲓⲥⲧⲟⲥ ⲁϥⲧⲱⲛϥ")).toHaveAttribute("dir", "auto")
@@ -168,5 +172,6 @@ test("an account unlinked meanwhile reads not linked", async () => {
 test("in Arabic servant names are joined with the Arabic comma", async () => {
   open({ locale: "ar" })
   const cards = await screen.findAllByRole("article")
+  await within(cards[1]!).findByText(/Irene Wahba/)
   expect(cards[1]).toHaveTextContent("⁨Irene Wahba⁩ (أمين الخدمة)، ⁨Youssef Nashed⁩")
 })

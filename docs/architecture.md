@@ -46,15 +46,14 @@ development; `src/lib/env.ts` checks it, and a production build fails without it
 lets people request a password link by email on the forgot-password page once the API can send email in
 production; off unless set, the page says to ask the church office.
 
-- **Generated client.** The types come from the backend's OpenAPI document. `openapi/openapi.json` is a copy
-  of the backend's `docs/openapi.json`, and `pnpm api:types` turns it into `src/lib/api/schema.d.ts` with
-  [openapi-typescript](https://openapi-ts.dev), dropping the `/api` prefix that `NEXT_PUBLIC_API_BASE_URL`
-  already holds. CI fails when the generated file is stale. Calls go through `api` from
+- **Generated client.** The types come from the backend's OpenAPI document. `pnpm api:types` reads it from
+  the backend's dev server (`http://localhost:8000/api/openapi.json`, served in dev only) and turns it into
+  `src/lib/api/schema.d.ts` with [openapi-typescript](https://openapi-ts.dev), dropping the `/api` prefix that
+  `NEXT_PUBLIC_API_BASE_URL` already holds. The generated file is committed, so CI and builds need no backend. Calls go through `api` from
   `src/lib/api/client.ts`, an [openapi-fetch](https://openapi-ts.dev/openapi-fetch/) client, wrapped in
   `dataOf()`: `dataOf(api.GET("/stages/{id}", { params: { path: { id } }, signal }))`. Paths, parameters,
   bodies and the data are checked against the document; types of API data are `Schemas["…"]`, never written
-  by hand. To follow a backend change, copy its `docs/openapi.json` over `openapi/openapi.json` and run
-  `pnpm api:types`.
+  by hand. To follow a backend change, run `pnpm api:types` with the backend running.
   `openapi/pending.json` holds the endpoints the frontend uses before the backend has them (the roles API
   of backend #81); `pnpm api:types` merges them in, and each goes once the backend's document has it.
 - **Cookie session (D1).** Signing in sets an HttpOnly session cookie. The client sends every call with
@@ -102,6 +101,10 @@ use the same folders.
 
 - **One `api.ts` per feature** (`src/features/<context>/<resource>/api.ts`) holds its response types, query options and
   calls; screens never build URLs or call `apiRequest()` themselves.
+- **Permissions** come from `GET /me` only: read models carry no permission flags (the backend's
+  `docs/api.md`, "What the viewer may do"). Screens offer an action when `useCan()` from
+  `src/features/identity/auth/session.tsx` grants it, together with the item's own state (archived, status) as
+  `docs/api.md` describes for that action.
 - **Query keys** are `["<resource>", "list" | "detail", params]`, e.g. `["services", "list", {status: "all"}]`
   or `["sessions", "detail", id]`. A change invalidates by prefix (`["services"]`), so every list and detail
   of that resource refetches.

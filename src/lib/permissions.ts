@@ -23,7 +23,7 @@ export const SENSITIVE: Resource[] = ["members", "users", "roles"]
 
 export const PERMISSION_COUNT = ACTIONS.length * RESOURCES.length
 
-export type Permission = Schemas["PermissionGrant"]
+export type Permission = Schemas["PermissionResponse"]
 
 export type Can = (action: Action, resource: Resource) => boolean
 

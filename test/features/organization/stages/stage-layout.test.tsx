@@ -4,6 +4,7 @@ import { http, HttpResponse } from "msw"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { apiUrl, problem } from "@test/support/api"
+import { peopleList } from "@test/support/fixtures/people"
 import { SUNDAY_SCHOOL_ID, THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
 import { SidebarProvider } from "@/components/ui/sidebar"
@@ -45,16 +46,7 @@ function answer(stage: () => Response) {
 
       return stage()
     }),
-    http.get(apiUrl("/people"), () =>
-      HttpResponse.json({
-        today: "2026-11-08",
-        items: [],
-        page: 1,
-        pageSize: 25,
-        total: 0,
-        can: { add: false },
-      })
-    )
+    http.get(apiUrl("/people"), () => HttpResponse.json(peopleList([])))
   )
 
   return () => requests

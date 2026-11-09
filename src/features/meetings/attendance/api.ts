@@ -1,17 +1,14 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQueries, useQuery, type UseQueryResult } from "@tanstack/react-query"
 
 import { api, dataOf, type Schemas } from "@/lib/api/client"
-import type {
-  AccountRef,
-  Instant,
-  PersonRef,
-  ServiceRef,
-  StageRef,
-  Uuid,
-} from "@/lib/api/types/common"
+import type { Counts, Uuid } from "@/lib/api/types/common"
+import type { CountedSession, SessionView } from "@/lib/api/types/meetings"
 
-export type OverviewSession = Schemas["OverviewCard"]
-export type AttendanceOverview = Schemas["AttendanceOverview"]
+import type { MeetingSession } from "../meetings/api"
+
+export type AttendanceOverview = Schemas["AttendanceOverviewResponse"]
+
+export type OverviewCard = AttendanceOverview["sessions"][number]
 
 export const attendanceOverviewQuery = {
   queryKey: ["attendance", "overview"] as const,
@@ -21,21 +18,52 @@ export const attendanceOverviewQuery = {
 
 export const useAttendanceOverview = () => useQuery(attendanceOverviewQuery)
 
-export type Mark = { id: Uuid; recordedAt: Instant; recordedBy: AccountRef }
+export const overviewSessionIds = (overview: AttendanceOverview): Uuid[] =>
+  [...overview.sessions, ...overview.earlier, ...overview.closed].map((card) => card.session.id)
 
-export type Placement = { service: ServiceRef; stage: StageRef | null }
+const COUNTS_PER_REQUEST = 100
 
-export type Correction = {
-  id: Uuid
-  person: PersonRef
-  recordedAt: Instant
-  recordedBy: AccountRef
-  removedAt: Instant
-  removedBy: AccountRef
-  reason: string | null
+export type AttendanceCounts = Schemas["AttendanceCountsResponse"]
+
+export const attendanceCountsQuery = (sessionIds: Uuid[]) => ({
+  queryKey: ["attendance", "counts", sessionIds] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) =>
+    dataOf(
+      api.GET("/attendance/counts", { params: { query: { "sessionIds[]": sessionIds } }, signal })
+    ),
+})
+
+const countsById = (results: UseQueryResult<AttendanceCounts>[]): Map<Uuid, Counts> =>
+  new Map(
+    results
+      .flatMap((result) => result.data?.items ?? [])
+      .map((item) => [item.sessionId, item.counts])
+  )
+
+function chunksOf<T>(items: T[], size: number): T[][] {
+  return Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
+    items.slice(index * size, (index + 1) * size)
+  )
 }
 
-export type AttendanceBoard = Schemas["AttendanceBoard"]
+export function useAttendanceCounts(sessionIds: Uuid[]): Map<Uuid, Counts> {
+  const chunks = chunksOf([...new Set(sessionIds)], COUNTS_PER_REQUEST)
+
+  return useQueries({ queries: chunks.map(attendanceCountsQuery), combine: countsById })
+}
+
+export const withCounts = (session: SessionView, counts: Map<Uuid, Counts>): CountedSession => ({
+  ...session,
+  counts: counts.get(session.id) ?? null,
+})
+
+export type Mark = Schemas["MarkReference"]
+
+export type Placement = Schemas["PersonGroup"]
+
+export type Correction = Schemas["Correction"]
+
+export type AttendanceBoard = Schemas["AttendanceBoardResponse"]
 
 export const attendanceBoardQuery = (session: Uuid) => ({
   queryKey: ["attendance", "board", session] as const,
@@ -43,9 +71,40 @@ export const attendanceBoardQuery = (session: Uuid) => ({
     dataOf(api.GET("/sessions/{id}/attendance", { params: { path: { id: session } }, signal })),
 })
 
-export const useAttendanceBoard = (session: Uuid) => useQuery(attendanceBoardQuery(session))
+export const attendanceCorrectionsQuery = (session: Uuid) => ({
+  queryKey: ["attendance", "corrections", session] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) =>
+    dataOf(
+      api.GET("/sessions/{id}/attendance/corrections", {
+        params: { path: { id: session } },
+        signal,
+      })
+    ),
+})
 
-export type SessionState = Schemas["SessionState"]
+export type SessionState = Schemas["SessionStateResponse"]
+
+export type BoardSession = SessionView & Pick<SessionState, "openedAt" | "closedAt" | "closedBy">
+
+export type AttendanceSheet = AttendanceBoard &
+  Pick<MeetingSession, "today" | "history"> & { session: BoardSession; corrections: Correction[] }
+
+export const sheetOf = (
+  detail: MeetingSession,
+  board: AttendanceBoard,
+  corrections: Correction[]
+): AttendanceSheet => ({
+  ...board,
+  today: detail.today,
+  history: detail.history,
+  session: {
+    ...detail.session,
+    openedAt: detail.state.openedAt,
+    closedAt: detail.state.closedAt,
+    closedBy: detail.state.closedBy,
+  },
+  corrections,
+})
 
 export const openAttendanceRequest = (session: Uuid) =>
   dataOf(api.POST("/sessions/{id}/open", { params: { path: { id: session } }, body: {} }))

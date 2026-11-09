@@ -4,8 +4,10 @@ import { http, HttpResponse } from "msw"
 import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
 import { apiUrl } from "@test/support/api"
 import { goodSamaritan, stageLessons } from "@test/support/fixtures/lessons"
+import { me } from "@test/support/fixtures/me"
 import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
@@ -77,7 +79,7 @@ const builders = row({
   },
 })
 
-function open(list: StageLessons) {
+function open(list: StageLessons, account: Me = me.servant) {
   const queries: string[] = []
 
   server.use(
@@ -92,7 +94,8 @@ function open(list: StageLessons) {
   renderWithProviders(
     <SidebarProvider>
       <StageLessonsPage />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: account }
   )
 
   return queries
@@ -148,8 +151,8 @@ test("search sends q; the status filter narrows; Clear filters resets", async ()
   expect(screen.getByRole("combobox", { name: "Servant" })).toHaveValue("")
 })
 
-test("without can.create there is no New lesson and the note shows; a null responsible reads Former account", async () => {
-  open({ ...upcoming(), can: { create: false } })
+test("without lessons: create there is no New lesson and the note shows; a null responsible reads Former account", async () => {
+  open(upcoming(), me.churchOffice)
   const items = await rows()
   expect(screen.queryByRole("link", { name: "New lesson" })).toBeNull()
   expect(screen.getByText(/Only the servants of this stage/)).toBeInTheDocument()
@@ -163,4 +166,10 @@ test("New lesson opens the editor for this stage", async () => {
     "href",
     `/lessons/new/?stage=${THIRD_CLASS_ID}`
   )
+})
+
+test("an archived stage offers no New lesson", async () => {
+  open({ ...upcoming(), archived: true })
+  await rows()
+  expect(screen.queryByRole("link", { name: "New lesson" })).toBeNull()
 })

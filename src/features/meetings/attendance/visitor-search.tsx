@@ -8,7 +8,7 @@ import { useEffect, useState } from "react"
 import { directoryQuery } from "@/features/people/members/api"
 import { isolate } from "@/lib/bidi"
 
-import type { AttendanceBoard } from "./api"
+import type { AttendanceSheet } from "./api"
 import { PersonRow } from "./attendance-board"
 import { useOnline, type Visitor } from "./mark-writes"
 
@@ -34,7 +34,7 @@ export function VisitorSearch({
   pending,
   onMark,
 }: {
-  board: AttendanceBoard
+  board: AttendanceSheet
   query: string
   pending: ReadonlySet<string>
   onMark: (visitor: Visitor) => void

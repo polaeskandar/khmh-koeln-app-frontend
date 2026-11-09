@@ -5,8 +5,10 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
 import type { ServiceList } from "@/features/organization/services/api"
 import { apiUrl, problem } from "@test/support/api"
+import { me } from "@test/support/fixtures/me"
 import { schedule } from "@test/support/fixtures/schedules"
 import { services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
@@ -36,10 +38,12 @@ function open({
   list = services,
   write = () => HttpResponse.json({ id: "s-new", createdSessions: 1 }, { status: 201 }),
   schedules = [existing],
+  who = me.leader,
 }: {
   list?: ServiceList
   write?: () => Response
   schedules?: ReturnType<typeof schedule>[]
+  who?: Me
 } = {}) {
   const sent: { method: string; body: Record<string, unknown> }[] = []
 
@@ -53,8 +57,8 @@ function open({
 
       return write()
     }),
-    http.patch(apiUrl(`/schedules/${existing.id}`), async ({ request }) => {
-      sent.push({ method: "PATCH", body: (await request.json()) as Record<string, unknown> })
+    http.put(apiUrl(`/schedules/${existing.id}`), async ({ request }) => {
+      sent.push({ method: "PUT", body: (await request.json()) as Record<string, unknown> })
 
       return HttpResponse.json({ id: existing.id, createdSessions: 0 })
     })
@@ -63,7 +67,8 @@ function open({
   renderWithProviders(
     <SidebarProvider>
       <SchedulesPage />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: who }
   )
 
   return sent
@@ -155,11 +160,8 @@ describe("saving", () => {
     await waitFor(() => expect(sent).toHaveLength(1))
 
     expect(sent[0].body).toEqual({
-      serviceId: sundaySchool.id,
-      stageId: null,
-      name: "Sunday class",
-      description: null,
-      location: null,
+      roster: { serviceId: sundaySchool.id, stageId: null, mode: "expected" },
+      details: { name: "Sunday class", description: null, location: null },
       recurrence: {
         frequency: "weekly",
         interval: 1,
@@ -167,9 +169,7 @@ describe("saving", () => {
         monthWeek: null,
         span: { startsOn: "2026-11-08", endsOn: null },
       },
-      startTime: "18:00",
-      endTime: "19:30",
-      rosterMode: "expected",
+      times: { startTime: "18:00", endTime: "19:30" },
     })
 
     await waitFor(() =>
@@ -200,8 +200,8 @@ describe("saving", () => {
     let answer = () =>
       problem(422, "checkFields", {
         fieldErrors: {
-          name: { code: "meetings.scheduleNameRequired", params: {} },
-          endTime: { code: "meetings.endAfterStart", params: {} },
+          "details.name": { code: "meetings.scheduleNameRequired", params: {} },
+          "times.endTime": { code: "meetings.endAfterStart", params: {} },
           "recurrence.weekdays": { code: "recurrence.weekdays", params: {} },
         },
       })
@@ -223,7 +223,7 @@ describe("saving", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument()
   })
 
-  test("editing sends a PATCH without serviceId or stageId", async () => {
+  test("editing sends the whole schedule as a PUT without its roster", async () => {
     const sent = open()
     await userEvent.click(await screen.findByRole("button", { name: "Edit schedule" }))
     const dialog = within(await screen.findByRole("dialog"))
@@ -234,20 +234,19 @@ describe("saving", () => {
 
     await userEvent.click(dialog.getByRole("button", { name: "Save schedule" }))
     await waitFor(() => expect(sent).toHaveLength(1))
-    expect(sent[0].method).toBe("PATCH")
-    expect(sent[0].body).not.toHaveProperty("serviceId")
-    expect(sent[0].body).not.toHaveProperty("stageId")
+    expect(sent[0].method).toBe("PUT")
+
+    expect(sent[0].body).toEqual({
+      details: { name: existing.name, description: null, location: existing.location },
+      recurrence: existing.recurrence,
+      times: { startTime: existing.startTime, endTime: existing.endTime },
+      rosterMode: existing.rosterMode,
+    })
   })
 })
 
 test("a servant sees neither New schedule nor Edit", async () => {
-  open({
-    list: {
-      ...services,
-      items: services.items.map((s) => ({ ...s, can: { ...s.can, manageSessions: false } })),
-    },
-    schedules: [{ ...existing, can: { manage: false } }],
-  })
+  open({ who: me.servant })
 
   await screen.findByText(/Sunday class/)
   expect(screen.queryByRole("button", { name: "New schedule" })).toBeNull()

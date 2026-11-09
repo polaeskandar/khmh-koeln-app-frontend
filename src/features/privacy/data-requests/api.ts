@@ -5,56 +5,49 @@ export type RequestKind = Schemas["RequestKind"]
 export type RequestChannel = Schemas["RequestChannel"]
 export type RequestStatus = Schemas["RequestStatus"]
 
-export type DataRequestRow = Schemas["DataRequestRow"]
+export type DataRequestRow = Schemas["DataRequestRowResponse"]
 
-export type DataRequests = Schemas["DataRequestList"]
+export type DataRequests = Schemas["DataRequestListResponse"]
 
 export const dataRequestsQuery = {
   queryKey: ["data-requests", "list"] as const,
   queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/data-requests", { signal })),
 }
 
-export type NewDataRequest = Schemas["RecordDataRequestCommand"]
+export type NewDataRequest = Schemas["RecordDataRequestRequest"]
 
 export const recordDataRequest = (input: NewDataRequest) =>
   dataOf(api.POST("/data-requests", { body: input }))
 
-export type AccountChoice = { id: Uuid; name: string; email: string }
+export type AccountChoice = Schemas["ParentAccessListResponse"]["accounts"][number]
 
 export const accountChoicesQuery = {
   queryKey: ["guardian-links"] as const,
   queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/guardian-links", { signal })),
 }
 
-export type EraseCounts = {
-  person: number
-  memberships: number
-  attendance: number
-  completions: number
-  guardianLinks: number
-  account: number
-  roles: number
-}
+export type ErasureReview = Schemas["ErasureReviewResponse"]
 
-export type KeepCounts = {
-  sessionTotals: number
-  recordedMarks: number
-  reportedCompletions: number
-  lessons: number
-  homework: number
-  sessionHistory: number
-}
+export type Counts = ErasureReview["erase"]
 
 export type Mention = Schemas["Mention"]
 
-const MENTION_PLACES = ["sessionNote", "correctionNote", "cancelReason", "lessonNote"] as const
+const MENTION_LABELS = {
+  sessionNote: "sessionNote",
+  removalReason: "correctionNote",
+  cancelReason: "cancelReason",
+  lessonNote: "lessonNote",
+} as const
 
-export type MentionPlace = (typeof MENTION_PLACES)[number]
+export type MentionLabel = (typeof MENTION_LABELS)[keyof typeof MENTION_LABELS]
 
-export const isMentionPlace = (where: string): where is MentionPlace =>
-  MENTION_PLACES.some((place) => place === where)
+const isMentionPlace = (where: string): where is keyof typeof MENTION_LABELS =>
+  Object.hasOwn(MENTION_LABELS, where)
 
-export type DataRequestDetail = Schemas["DataRequestDetail"]
+export const mentionLabelOf = (where: string): MentionLabel | null =>
+  isMentionPlace(where) ? MENTION_LABELS[where] : null
+
+export type DataRequestDetail = Schemas["DataRequestDetailResponse"]
 
 const textOf = (value: unknown) => (typeof value === "string" ? value : null)
 
@@ -96,6 +89,12 @@ export const dataRequestQuery = (id: Uuid) => ({
   queryKey: ["data-requests", "detail", id] as const,
   queryFn: ({ signal }: { signal: AbortSignal }) =>
     dataOf(api.GET("/data-requests/{id}", { params: { path: { id } }, signal })),
+})
+
+export const erasureReviewQuery = (id: Uuid) => ({
+  queryKey: ["data-requests", "erasure", id] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) =>
+    dataOf(api.GET("/data-requests/{id}/erasure", { params: { path: { id } }, signal })),
 })
 
 export const eraseRequest = (id: Uuid, clearNotes: boolean) =>

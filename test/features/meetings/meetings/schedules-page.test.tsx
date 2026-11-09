@@ -7,6 +7,7 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 import type { ScheduleSummary } from "@/lib/api/types/meetings"
 import { apiUrl } from "@test/support/api"
 import { schedule } from "@test/support/fixtures/schedules"
+import { me } from "@test/support/fixtures/me"
 import { services } from "@test/support/fixtures/services"
 import { stageRef, sundaySchool } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
@@ -88,7 +89,8 @@ function open(query = "") {
   renderWithProviders(
     <SidebarProvider>
       <SchedulesPage />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: me.leader }
   )
 }
 

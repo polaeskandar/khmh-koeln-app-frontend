@@ -1,12 +1,11 @@
-import type { ServiceList, ServiceRow } from "@/features/organization/services/api"
+import type {
+  ServiceInsight,
+  serviceInsightsQuery,
+  ServiceList,
+  ServiceRow,
+} from "@/features/organization/services/api"
 
-const can = {
-  edit: true,
-  archive: false,
-  manageStructure: true,
-  manageSessions: true,
-  manageMembers: true,
-}
+export type ServiceInsightList = Awaited<ReturnType<(typeof serviceInsightsQuery)["queryFn"]>>
 
 let n = 0
 function service(
@@ -38,16 +37,9 @@ function service(
       id: `0192f3a4-7b1c-7d2e-8f3b-${String(n * 10 + position).padStart(12, "0")}`,
       name: stage,
       position,
-      archived: false,
-      can: { manageMembers: true },
     })),
     memberCount,
     serviceLevelMemberCount: 0,
-    leaders: [],
-    next: null,
-    trend: { sessions: 0, rate: null, averagePresent: null },
-    impact: { activeSchedules: 0, upcomingSessions: 0 },
-    can,
   }
 }
 
@@ -66,5 +58,24 @@ export const services: ServiceList = {
     service("Bible Study", { memberCount: 105, tone: 7 }),
     service("Scouts", { stages: ["Cubs"], memberCount: 25, tone: 8 }),
   ],
-  can: { create: true },
 }
+
+export const insight = (
+  serviceId: string,
+  extra: Partial<Omit<ServiceInsight, "serviceId">> = {}
+): ServiceInsight => ({
+  serviceId,
+  next: null,
+  trend: { sessions: 0, rate: null, averagePresent: null },
+  impact: { activeSchedules: 0, upcomingSessions: 0 },
+  ...extra,
+})
+
+export const insightsOf = (
+  rows: ServiceRow[],
+  extra: Record<string, Partial<Omit<ServiceInsight, "serviceId">>> = {}
+): ServiceInsightList => ({
+  items: rows.map((row) => insight(row.id, extra[row.id])),
+})
+
+export const serviceInsights: ServiceInsightList = insightsOf(services.items)

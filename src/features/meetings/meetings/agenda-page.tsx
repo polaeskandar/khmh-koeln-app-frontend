@@ -12,6 +12,7 @@ import { QueryState } from "@/components/page-states"
 import { AgendaRow } from "@/components/session-bits"
 import { Button } from "@/components/ui/button"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import { useCan } from "@/features/identity/auth/session"
 import { servicesQuery } from "@/features/organization/services/api"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
@@ -69,6 +70,7 @@ function AgendaView({
 }) {
   const t = useTranslations("meetings.agenda")
   const f = useFormat()
+  const can = useCan()
   const summary = useDaySummary()
   const dates = datesBetween(agenda.from, agenda.to)
   const inWindow = (date: LocalDate | null) => date !== null && dates.includes(date)
@@ -102,7 +104,7 @@ function AgendaView({
       count: items.length,
       tones: items
         .filter((item) => item.kind === "planned" || item.status !== "canceled")
-        .map((item) => item.service.tone),
+        .flatMap((item) => (item.service ? [item.service.tone] : [])),
     }
   })
 
@@ -158,7 +160,9 @@ function AgendaView({
             {day.items.map((item) => (
               <li key={itemKey(item)} className="flex items-center gap-2">
                 <AgendaRow item={item} today={agenda.today} className="min-w-0 flex-1" />
-                {item.kind === "planned" && item.can.manage ? <OccurrenceMenu item={item} /> : null}
+                {item.kind === "planned" && can("update", "sessions") ? (
+                  <OccurrenceMenu item={item} />
+                ) : null}
               </li>
             ))}
           </ul>

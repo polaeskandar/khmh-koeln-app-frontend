@@ -1,7 +1,7 @@
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { Uuid } from "@/lib/api/types/common"
 
-export type Stage = Schemas["StageView"]
+export type Stage = Schemas["StageResponse"]
 
 export const stageQuery = (id: Uuid) => ({
   queryKey: ["stages", "detail", id] as const,
@@ -14,8 +14,8 @@ export type StageFields = { name: string; description: string | null }
 export const addStageRequest = (service: Uuid, fields: StageFields) =>
   dataOf(api.POST("/services/{id}/stages", { params: { path: { id: service } }, body: fields }))
 
-export const updateStageRequest = (stage: Uuid, changes: Partial<StageFields>) =>
-  dataOf(api.PATCH("/stages/{id}", { params: { path: { id: stage } }, body: changes }))
+export const updateStageRequest = (stage: Uuid, fields: StageFields) =>
+  dataOf(api.PUT("/stages/{id}", { params: { path: { id: stage } }, body: fields }))
 
 export const reorderStagesRequest = (service: Uuid, stageIds: Uuid[]) =>
   dataOf(

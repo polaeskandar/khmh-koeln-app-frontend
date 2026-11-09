@@ -18,6 +18,7 @@ import {
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useCan } from "@/features/identity/auth/session"
 import type { Stage } from "@/features/organization/stages/api"
 import { StageLayout } from "@/features/organization/stages/stage-layout"
 import { useFormat } from "@/i18n/format"
@@ -176,6 +177,7 @@ function LessonList({
 
 function Lessons({ stage }: { stage: Stage }) {
   const t = useTranslations()
+  const can = useCan()
   const [tab, setTab] = useState<LessonTab>("upcoming")
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState("")
@@ -196,6 +198,7 @@ function Lessons({ stage }: { stage: Stage }) {
   }
 
   const data = query.data
+  const creatable = data !== undefined && !data.archived && can("create", "lessons")
 
   const tabs: LessonTab[] =
     data && data.tabs.archived > 0 ? ["upcoming", "previous", "archived"] : ["upcoming", "previous"]
@@ -206,7 +209,7 @@ function Lessons({ stage }: { stage: Stage }) {
       title={t("lessons.list.sectionTitle")}
       description={t("lessons.list.sectionDescription")}
       actions={
-        data?.can.create ? (
+        creatable ? (
           <Button asChild>
             <Link href={routes.newLesson(stage.id)}>
               <Plus data-icon="inline-start" />
@@ -216,7 +219,7 @@ function Lessons({ stage }: { stage: Stage }) {
         ) : null
       }
     >
-      {data && !data.can.create ? (
+      {data && !creatable ? (
         <p className="text-sm text-muted-foreground">{t("lessons.list.onlyServants")}</p>
       ) : null}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">

@@ -32,6 +32,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { servicesQuery } from "@/features/organization/services/api"
+import { useCan } from "@/features/identity/auth/session"
 import { useInlineEnd } from "@/i18n/direction"
 import { useFormat } from "@/i18n/format"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -73,26 +74,18 @@ function NameForm({ person }: { person: PersonRow["person"] }) {
     displayName: edits.displayName === undefined ? person.displayName : edits.displayName,
   }
 
-  const rename = useApiMutation(
-    (changes: Partial<PersonNames>) => renamePersonRequest(person.id, changes),
-    { successMessage: t("toast.saved"), invalidate: PEOPLE_QUERIES, onSuccess: () => setEdits({}) }
-  )
+  const rename = useApiMutation((next: PersonNames) => renamePersonRequest(person.id, next), {
+    successMessage: t("toast.saved"),
+    invalidate: PEOPLE_QUERIES,
+    onSuccess: () => setEdits({}),
+  })
 
-  const changes: Partial<PersonNames> = {}
+  const next: PersonNames = { ...names, displayName: names.displayName || null }
 
-  if (names.firstName !== person.firstName) {
-    changes.firstName = names.firstName
-  }
-
-  if (names.lastName !== person.lastName) {
-    changes.lastName = names.lastName
-  }
-
-  if ((names.displayName || null) !== person.displayName) {
-    changes.displayName = names.displayName || null
-  }
-
-  const changed = Object.keys(changes).length > 0
+  const changed =
+    next.firstName !== person.firstName ||
+    next.lastName !== person.lastName ||
+    next.displayName !== person.displayName
 
   return (
     <form
@@ -102,7 +95,7 @@ function NameForm({ person }: { person: PersonRow["person"] }) {
         event.preventDefault()
 
         if (changed) {
-          void rename.execute(changes)
+          void rename.execute(next)
         }
       }}
     >
@@ -143,18 +136,17 @@ function NameForm({ person }: { person: PersonRow["person"] }) {
 }
 
 function useMoveTargets(person: PersonRow, placement: Placement) {
+  const can = useCan()
   const services = useQuery(servicesQuery)
   const service = services.data?.items.find((item) => item.id === placement.service.id)
 
-  if (!service || service.archived) {
+  if (!service || service.archived || !can("update", "members")) {
     return []
   }
 
   const taken = new Set(person.placements.flatMap((other) => (other.stage ? [other.stage.id] : [])))
 
-  return service.stages.filter(
-    (stage) => !stage.archived && stage.can.manageMembers && !taken.has(stage.id)
-  )
+  return service.stages.filter((stage) => !taken.has(stage.id))
 }
 
 function MembershipMenu({
@@ -167,15 +159,17 @@ function MembershipMenu({
   onRemove: () => void
 }) {
   const t = useTranslations()
+  const can = useCan()
   const where = useWhere()
   const targets = useMoveTargets(person, placement)
+  const remove = can("delete", "members")
 
   const move = useApiMutation(
     (stageId: string) => moveMembershipRequest(placement.membershipId, stageId),
     { successMessage: t("toast.membershipMoved"), invalidate: PEOPLE_QUERIES }
   )
 
-  if (targets.length === 0 && !person.can.edit) {
+  if (targets.length === 0 && !remove) {
     return null
   }
 
@@ -215,7 +209,7 @@ function MembershipMenu({
             </DropdownMenuSubContent>
           </DropdownMenuSub>
         ) : null}
-        {person.can.edit ? (
+        {remove ? (
           <DropdownMenuItem variant="destructive" onSelect={onRemove}>
             <UserMinus />
             {t("members.membership.removeFrom", { where: where(placement) })}
@@ -226,7 +220,7 @@ function MembershipMenu({
   )
 }
 
-function Placements({ person, onGone }: { person: PersonRow; onGone: () => void }) {
+function Placements({ person }: { person: PersonRow }) {
   const t = useTranslations()
   const f = useFormat()
   const where = useWhere()
@@ -260,7 +254,7 @@ function Placements({ person, onGone }: { person: PersonRow; onGone: () => void 
                   </span>
                 </span>
               </span>
-              {person.can.edit && person.person.status === "active" ? (
+              {person.person.status === "active" ? (
                 <MembershipMenu
                   person={person}
                   placement={placement}
@@ -290,13 +284,7 @@ function Placements({ person, onGone }: { person: PersonRow; onGone: () => void 
             return true
           }
 
-          const result = await end.execute(ending.membershipId)
-
-          if (result.ok && person.placements.length === 1 && !person.can.edit) {
-            onGone()
-          }
-
-          return result.ok
+          return (await end.execute(ending.membershipId)).ok
         }}
       />
     </section>
@@ -451,6 +439,8 @@ export function PersonSheet({
   onOpenChange: (open: boolean) => void
 }) {
   const t = useTranslations("members.sheet")
+  const can = useCan()
+  const edit = can("update", "members")
   const side = useInlineEnd()
 
   return (
@@ -476,14 +466,12 @@ export function PersonSheet({
               </span>
             </SheetHeader>
             <div className="flex flex-col gap-6 px-4 pb-6">
-              {person.can.edit ? <NameForm key={person.person.id} person={person.person} /> : null}
-              <Placements person={person} onGone={() => onOpenChange(false)} />
-              {person.can.edit && person.person.status === "active" ? (
-                <AddTo person={person} />
-              ) : null}
+              {edit ? <NameForm key={person.person.id} person={person.person} /> : null}
+              <Placements person={person} />
+              {edit && person.person.status === "active" ? <AddTo person={person} /> : null}
               <Earlier placements={person.pastPlacements} />
             </div>
-            {person.can.edit ? (
+            {edit ? (
               <SheetFooter className="border-t">
                 <StatusAction person={person} />
               </SheetFooter>

@@ -3,11 +3,13 @@ import type { Counts, LocalDate, LocalTime, ServiceRef, StageRef } from "./commo
 
 export type SessionStatus = Schemas["SessionStatus"]
 export type RosterMode = Schemas["RosterMode"]
-export type SessionView = Schemas["SessionView"] & { counts?: Counts | null }
-export type PlannedItem = Schemas["PlannedItem"]
-export type AgendaItem = PlannedItem | (SessionView & { kind: "session" })
-export type NextDate = Schemas["PlannedDate"]
-export type ScheduleSummary = Schemas["ScheduleSummary"]
+export type SessionView = Schemas["SessionResponse"] & { counts?: Counts | null }
+export type SessionItem = Schemas["AgendaSessionResponse"]
+export type CountedSession = Omit<SessionItem, "kind">
+export type PlannedItem = Schemas["PlannedSessionResponse"]
+export type AgendaItem = Schemas["AgendaResponse"]["items"][number]
+export type NextDate = Schemas["UpcomingDate"]
+export type ScheduleSummary = Schemas["ScheduleResponse"]
 export type HistoryEntry = Schemas["HistoryEntry"]
 
 type Placed = { service: ServiceRef | null; stage: StageRef | null }

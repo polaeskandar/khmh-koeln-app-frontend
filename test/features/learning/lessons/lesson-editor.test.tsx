@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
 import { apiUrl, problem } from "@test/support/api"
 import {
@@ -31,6 +32,7 @@ vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation
 beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
+  vi.spyOn(toast, "error")
 })
 
 afterEach(() => {
@@ -38,11 +40,14 @@ afterEach(() => {
   router.push.mockReset()
 })
 
-function render(page: React.ReactNode, write?: () => Response) {
+const versions: (string | null)[] = []
+
+function render(page: React.ReactNode, write?: () => Response, account: Me = me.administrator) {
   const sent: Record<string, unknown>[] = []
+  versions.length = 0
 
   server.use(
-    http.get(apiUrl("/me"), () => HttpResponse.json(me.administrator)),
+    http.get(apiUrl("/me"), () => HttpResponse.json(account)),
     http.get(apiUrl(`/stages/${lessonStage.id}/lessons`), () => HttpResponse.json(stageLessons())),
     http.get(apiUrl(`/stages/${lessonStage.id}/lesson-options`), () =>
       HttpResponse.json(lessonOptions())
@@ -51,13 +56,17 @@ function render(page: React.ReactNode, write?: () => Response) {
       sent.push((await request.json()) as Record<string, unknown>)
 
       return (
-        write?.() ?? HttpResponse.json({ id: goodSamaritan.id, status: "ready" }, { status: 201 })
+        write?.() ??
+        HttpResponse.json({ id: goodSamaritan.id, status: "ready", version: 1 }, { status: 201 })
       )
     }),
-    http.patch(apiUrl(`/lessons/${goodSamaritan.id}`), async ({ request }) => {
+    http.put(apiUrl(`/lessons/${goodSamaritan.id}`), async ({ request }) => {
       sent.push((await request.json()) as Record<string, unknown>)
+      versions.push(new URL(request.url).searchParams.get("version"))
 
-      return write?.() ?? HttpResponse.json({ id: goodSamaritan.id, status: "completed" })
+      return (
+        write?.() ?? HttpResponse.json({ id: goodSamaritan.id, status: "completed", version: 2 })
+      )
     })
   )
 
@@ -76,11 +85,11 @@ const openNew = (write?: () => Response) => {
   return render(<NewLessonPage />, write)
 }
 
-const openEdit = (detail: LessonDetail) => {
+const openEdit = (detail: LessonDetail, write?: () => Response, account?: Me) => {
   search.value = `id=${detail.lesson.id}`
   server.use(http.get(apiUrl(`/lessons/${detail.lesson.id}`), () => HttpResponse.json(detail)))
 
-  return render(<EditLessonPage />)
+  return render(<EditLessonPage />, write, account)
 }
 
 async function fillGoodSamaritan() {
@@ -106,23 +115,25 @@ test("Mark ready posts ready, two materials, null for empty texts and no empty r
   )
 
   expect(sent[0]).toEqual({
-    title: "The Good Samaritan",
-    teachingDate: "2026-11-22",
-    scheduleId: SCHEDULE_ID,
-    sessionId: null,
-    summary: null,
-    passage: "Luke 10:25–37",
-    memoryVerse: null,
-    objectives: null,
-    teachingPoints: null,
-    activities: null,
-    materials: [
-      { label: "Felt board figures", url: null },
-      { label: "Bandages", url: "https://example.org/bandages" },
-    ],
-    notes: null,
+    details: {
+      title: "The Good Samaritan",
+      summary: null,
+      passage: "Luke 10:25–37",
+      memoryVerse: null,
+      collaboratorIds: [],
+    },
+    meeting: { scheduleId: SCHEDULE_ID, date: "2026-11-22" },
+    plan: {
+      objectives: null,
+      teachingPoints: null,
+      activities: null,
+      notes: null,
+      materials: [
+        { label: "Felt board figures", url: null },
+        { label: "Bandages", url: "https://example.org/bandages" },
+      ],
+    },
     responsibleId: me.administrator.account.id,
-    collaboratorIds: [],
     status: "ready",
   })
 
@@ -133,8 +144,8 @@ test("422s show in place, focus the first and keep the input", async () => {
   openNew(() =>
     problem(422, "checkFields", {
       fieldErrors: {
-        title: { code: "lessons.titleRequired", params: {} },
-        "materials.1.url": { code: "materials.url", params: {} },
+        "details.title": { code: "lessons.titleRequired", params: {} },
+        "plan.materials.1.url": { code: "materials.url", params: {} },
         meeting: { code: "lessons.meetingHasLesson", params: { title: "Zacchaeus" } },
       },
     })
@@ -151,7 +162,7 @@ test("422s show in place, focus the first and keep the input", async () => {
 test("a material error lands on its row when an empty row comes first", async () => {
   openNew(() =>
     problem(422, "checkFields", {
-      fieldErrors: { "materials.0.url": { code: "materials.url", params: {} } },
+      fieldErrors: { "plan.materials.0.url": { code: "materials.url", params: {} } },
     })
   )
 
@@ -188,13 +199,69 @@ test.each([
   ).toHaveLength(buttons.length)
 })
 
-test("a completed lesson's Save changes sends no status and no unchanged link fields", async () => {
-  const sent = openEdit(lessonDetail({ status: "completed" }))
+test("a completed lesson's Save changes puts the whole lesson without a status, at its version", async () => {
+  const sent = openEdit(
+    lessonDetail({
+      status: "completed",
+      version: 4,
+      summary: "Who is my neighbour?",
+      objectives: "Love the neighbour",
+      materials: [{ label: "Map of Judea", url: "https://example.org/map" }],
+      notes: "Mina needs help reading.",
+    })
+  )
+
   await userEvent.click(await screen.findByRole("button", { name: "Save changes" }))
   await waitFor(() => expect(sent).toHaveLength(1))
-  expect(sent[0]).not.toHaveProperty("status")
-  expect(sent[0]).not.toHaveProperty("teachingDate")
-  expect(sent[0]).not.toHaveProperty("responsibleId")
+
+  expect(sent[0]).toEqual({
+    details: {
+      title: "The Good Samaritan",
+      summary: "Who is my neighbour?",
+      passage: "Luke 10:25–37",
+      memoryVerse: null,
+      collaboratorIds: [],
+    },
+    meeting: { date: "2026-11-15" },
+    plan: {
+      objectives: "Love the neighbour",
+      teachingPoints: null,
+      activities: null,
+      notes: "Mina needs help reading.",
+      materials: [{ label: "Map of Judea", url: "https://example.org/map" }],
+    },
+    responsibleId: goodSamaritan.responsible!.id,
+  })
+
+  expect(versions).toEqual(["4"])
+})
+
+test("an editor who can't read members sends no notes and sees no notes field", async () => {
+  const noMembers = {
+    ...me.servant,
+    permissions: me.servant.permissions.filter((p) => p.resource !== "members"),
+  }
+
+  const sent = openEdit(lessonDetail(), undefined, noMembers)
+  await userEvent.click(await screen.findByRole("button", { name: "Save draft" }))
+  await waitFor(() => expect(sent).toHaveLength(1))
+  expect(screen.queryByLabelText(/Notes for the servants/)).toBeNull()
+  expect(sent[0]!.plan).not.toHaveProperty("notes")
+})
+
+test("a 409 changedMeanwhile keeps the form", async () => {
+  openEdit(lessonDetail(), () => problem(409, "lessons.changedMeanwhile"))
+  await userEvent.click(await screen.findByRole("button", { name: "Save draft" }))
+  await waitFor(() => expect(toast.error).toHaveBeenCalled())
+  expect(router.push).not.toHaveBeenCalled()
+  expect(screen.getByLabelText("Title")).toHaveValue("The Good Samaritan")
+})
+
+test("someone who can't create lessons sees no form", async () => {
+  search.value = `stage=${lessonStage.id}`
+  render(<NewLessonPage />, undefined, me.churchOffice)
+  expect(await screen.findByText("You can’t prepare lessons here")).toBeInTheDocument()
+  expect(screen.queryByLabelText("Title")).toBeNull()
 })
 
 test("Add material is disabled at ten rows", async () => {

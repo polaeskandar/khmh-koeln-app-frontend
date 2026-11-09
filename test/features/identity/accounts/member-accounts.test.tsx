@@ -7,6 +7,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
+import type { Schemas } from "@/lib/api/client"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
@@ -79,7 +80,11 @@ function open(
   server.use(
     http.get(apiUrl("/me"), () => HttpResponse.json(who)),
     http.get(apiUrl("/account-requests"), () =>
-      HttpResponse.json({ items: requests, today: "2026-11-08" })
+      HttpResponse.json({
+        items: requests,
+        roles: [],
+        today: "2026-11-08",
+      } satisfies Schemas["AccountRequestListResponse"])
     ),
     http.get(apiUrl("/member-accounts"), () => {
       reads++
@@ -175,6 +180,13 @@ test("a link already removed toasts and refetches", async () => {
   )
 
   await waitFor(() => expect(page.reads()).toBe(2))
+})
+
+test("with users: read only the accounts show without Remove link", async () => {
+  open(me.churchOffice)
+  const list = await section()
+  expect(await list.findAllByRole("listitem")).toHaveLength(3)
+  expect(list.queryByRole("button", { name: "Remove link" })).not.toBeInTheDocument()
 })
 
 test("leaders don't see the section", async () => {

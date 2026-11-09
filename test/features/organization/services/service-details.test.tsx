@@ -5,12 +5,14 @@ import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { apiUrl, problem } from "@test/support/api"
+import { me } from "@test/support/fixtures/me"
 import { schedule } from "@test/support/fixtures/schedules"
-import { services } from "@test/support/fixtures/services"
+import { insightsOf, services } from "@test/support/fixtures/services"
 import { stageRef } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
+import type { Me } from "@/features/identity/auth/api"
 import type { ServiceRow, ServiceStages } from "@/features/organization/services/api"
 import { ServiceDetails } from "@/features/organization/services/service-details"
 
@@ -32,7 +34,6 @@ const familyMeeting: ServiceRow = {
   ...services.items.find((s) => s.name === "Family Meeting")!,
   memberCount: 0,
   serviceLevelMemberCount: 0,
-  can: { ...services.items[0].can, edit: false },
 }
 
 const stagesOf = (service: ServiceRow, names: string[]): ServiceStages => ({
@@ -46,10 +47,14 @@ const stagesOf = (service: ServiceRow, names: string[]): ServiceStages => ({
     }))
     .reverse(),
   archivedStages: [],
-  can: { manageStructure: true },
 })
 
-function open(service: ServiceRow, names: string[], scheduleCount: number) {
+function open(
+  service: ServiceRow,
+  names: string[],
+  scheduleCount: number,
+  viewer: Me = me.administrator
+) {
   search.value = `id=${service.id}`
   const scheduleRequests: string[] = []
 
@@ -58,6 +63,7 @@ function open(service: ServiceRow, names: string[], scheduleCount: number) {
     http.get(apiUrl(`/services/${service.id}/stages`), () =>
       HttpResponse.json(stagesOf(service, names))
     ),
+    http.get(apiUrl("/services/insights"), () => HttpResponse.json(insightsOf([service]))),
     http.get(apiUrl("/schedules"), ({ request }) => {
       scheduleRequests.push(new URL(request.url).searchParams.get("serviceId") ?? "")
 
@@ -72,7 +78,8 @@ function open(service: ServiceRow, names: string[], scheduleCount: number) {
   renderWithProviders(
     <SidebarProvider>
       <ServiceDetails />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: viewer }
   )
 
   return scheduleRequests
@@ -120,7 +127,7 @@ test("Edit opens the pre-filled dialog when allowed, and is absent otherwise", a
 })
 
 test("a servant sees no Edit", async () => {
-  open(familyMeeting, [], 0)
+  open(familyMeeting, [], 0, me.servant)
   await screen.findByRole("heading", { level: 1, name: "Family Meeting" })
   expect(screen.queryByRole("button", { name: "Edit" })).toBeNull()
 })
@@ -133,7 +140,8 @@ test("an unknown id shows not found", async () => {
   renderWithProviders(
     <SidebarProvider>
       <ServiceDetails />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: me.administrator }
   )
 
   expect(await screen.findByText("This page doesn’t exist")).toBeInTheDocument()

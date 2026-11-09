@@ -6,6 +6,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
+import type { Schemas } from "@/lib/api/client"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
@@ -66,16 +67,15 @@ function open({
     http.get(apiUrl("/staff-accounts"), () => HttpResponse.json({ today: "2026-11-08", items })),
     http.get(apiUrl("/roles"), () => HttpResponse.json({ items: roles })),
     http.post(apiUrl("/accounts/:id/roles"), async ({ params, request }) => {
-      const body = (await request.json()) as { roleId: string }
+      const body = (await request.json()) as Schemas["GiveAccountRoleRequest"]
       sent.push(`give ${params.id} ${body.roleId}`)
+      const given = roles.find((r) => r.id === body.roleId)!
 
       items = items.map((item) =>
-        item.id === params.id
-          ? { ...item, roles: [...item.roles, roles.find((r) => r.id === body.roleId)!] }
-          : item
+        item.id === params.id ? { ...item, roles: [...item.roles, given] } : item
       )
 
-      return new HttpResponse(null, { status: 201 })
+      return HttpResponse.json({ role: { id: given.id, name: given.name } }, { status: 201 })
     }),
     http.delete(apiUrl("/accounts/:id/roles/:roleId"), ({ params }) => {
       sent.push(`remove ${params.id} ${params.roleId}`)
@@ -208,6 +208,37 @@ test("with users: read only there is nothing to change, and the description says
 
   expect(screen.queryByRole("button", { name: "Role" })).not.toBeInTheDocument()
   expect(screen.queryByRole("button", { name: /^Remove role/ })).not.toBeInTheDocument()
+  expect(screen.queryByRole("button", { name: "Password link…" })).not.toBeInTheDocument()
+})
+
+test("users: update without roles: update sends links but changes no roles", async () => {
+  open({
+    who: {
+      ...me.administrator,
+      permissions: me.administrator.permissions.filter(
+        (p) => p.resource !== "roles" || p.action !== "update"
+      ),
+    },
+  })
+
+  const row = within(await rowOf("Sara Wissa"))
+  expect(row.getByRole("button", { name: "Password link…" })).toBeEnabled()
+  expect(screen.queryByRole("button", { name: "Role" })).not.toBeInTheDocument()
+  expect(screen.queryByRole("button", { name: /^Remove role/ })).not.toBeInTheDocument()
+})
+
+test("roles: update without users: update changes roles but sends no links", async () => {
+  open({
+    who: {
+      ...me.administrator,
+      permissions: me.administrator.permissions.filter(
+        (p) => p.resource !== "users" || p.action !== "update"
+      ),
+    },
+  })
+
+  await rowOf("Sara Wissa")
+  expect(await screen.findAllByRole("button", { name: "Role" })).not.toHaveLength(0)
   expect(screen.queryByRole("button", { name: "Password link…" })).not.toBeInTheDocument()
 })
 

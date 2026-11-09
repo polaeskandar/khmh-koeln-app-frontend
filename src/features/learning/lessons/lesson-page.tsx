@@ -27,6 +27,8 @@ import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 
 import { initialsOf } from "@/features/identity/auth/role-summary"
+import { useCan } from "@/features/identity/auth/session"
+import { stageHomeworkQuery } from "@/features/learning/homework/api"
 import { routes } from "@/lib/routes"
 
 import {
@@ -34,6 +36,8 @@ import {
   changeLessonStatusRequest,
   deleteLessonRequest,
   type LessonDetail,
+  type LessonFlags,
+  lessonFlagsFor,
   lessonQuery,
   linesOf,
   restoreLessonRequest,
@@ -77,10 +81,28 @@ function useLessonChange<A extends unknown[], T>(
   }
 }
 
-function StatusActions({ data }: { data: LessonDetail }) {
+function useEverPublished({ archived, lesson, stage, homework }: LessonDetail): boolean | null {
+  const can = useCan()
+  const readable = can("read", "homework")
+
+  const deletable =
+    lesson.status === "draft" && lesson.archivedAt === null && !archived && can("update", "lessons")
+
+  const tasks = useQuery({ ...stageHomeworkQuery(stage.id), enabled: readable && deletable })
+
+  if (!readable) {
+    return homework.published > 0
+  }
+
+  return tasks.data
+    ? tasks.data.items.some((task) => task.lesson.id === lesson.id && task.publishedAt !== null)
+    : null
+}
+
+function StatusActions({ data, flags }: { data: LessonDetail; flags: LessonFlags }) {
   const t = useTranslations()
   const router = useRouter()
-  const { lesson, stage, homework, can } = data
+  const { lesson, stage, homework } = data
   const [dialog, setDialog] = useState<"archive" | "delete" | null>(null)
   const title = isolate(lesson.title)
 
@@ -106,7 +128,7 @@ function StatusActions({ data }: { data: LessonDetail }) {
   )
 
   if (lesson.archivedAt) {
-    return can.restore ? (
+    return flags.restore ? (
       <Button disabled={restore.pending} onClick={() => void restore.execute(lesson.id)}>
         {t("common.restore")}
       </Button>
@@ -114,18 +136,18 @@ function StatusActions({ data }: { data: LessonDetail }) {
   }
 
   const back =
-    can.manage && lesson.status === "ready"
+    flags.manage && lesson.status === "ready"
       ? { label: t("lessons.actions.backToDraft"), status: "draft" as const }
-      : can.manage && lesson.status === "completed"
+      : flags.manage && lesson.status === "completed"
         ? { label: t("lessons.actions.notTaughtYet"), status: "ready" as const }
         : null
 
   const set = (status: LessonStatus) => void change.execute(lesson.id, status)
-  const menu = back || can.archive || can.delete
+  const menu = back || flags.archive || flags.delete
 
   return (
     <>
-      {can.manage ? (
+      {flags.manage ? (
         <Button variant="outline" asChild>
           <Link href={routes.editLesson(lesson.id)}>
             <PencilLine data-icon="inline-start" />
@@ -133,12 +155,12 @@ function StatusActions({ data }: { data: LessonDetail }) {
           </Link>
         </Button>
       ) : null}
-      {can.manage && lesson.status === "draft" ? (
+      {flags.manage && lesson.status === "draft" ? (
         <Button disabled={change.pending} onClick={() => set("ready")}>
           {t("lessons.actions.markReady")}
         </Button>
       ) : null}
-      {can.manage && lesson.status === "ready" && can.markCompleted ? (
+      {flags.markCompleted ? (
         <Button disabled={change.pending} onClick={() => set("completed")}>
           {t("lessons.actions.markTaught")}
         </Button>
@@ -154,13 +176,13 @@ function StatusActions({ data }: { data: LessonDetail }) {
             {back ? (
               <DropdownMenuItem onSelect={() => set(back.status)}>{back.label}</DropdownMenuItem>
             ) : null}
-            {back && (can.archive || can.delete) ? <DropdownMenuSeparator /> : null}
-            {can.archive ? (
+            {back && (flags.archive || flags.delete) ? <DropdownMenuSeparator /> : null}
+            {flags.archive ? (
               <DropdownMenuItem onSelect={() => setDialog("archive")}>
                 {t("common.archive")}
               </DropdownMenuItem>
             ) : null}
-            {can.delete ? (
+            {flags.delete ? (
               <DropdownMenuItem variant="destructive" onSelect={() => setDialog("delete")}>
                 {t("lessons.actions.deleteDraft")}
               </DropdownMenuItem>
@@ -241,7 +263,10 @@ function TextList({
 function LessonView({ data }: { data: LessonDetail }) {
   const t = useTranslations()
   const f = useFormat()
-  const { lesson, stage, service, today, homework, can } = data
+  const { lesson, stage, service, today, homework } = data
+  const can = useCan()
+  const everPublished = useEverPublished(data)
+  const flags = lessonFlagsFor(can, data, everPublished)
 
   return (
     <>
@@ -260,10 +285,10 @@ function LessonView({ data }: { data: LessonDetail }) {
           meta={<LessonStatusBadge status={lesson.status} archived={!!lesson.archivedAt} />}
           title={lesson.title}
           description={lesson.summary ? <span dir="auto">{lesson.summary}</span> : null}
-          actions={<StatusActions data={data} />}
+          actions={<StatusActions data={data} flags={flags} />}
         >
           <MeetingLine meeting={lesson.meeting} today={today} />
-          {can.manage && lesson.status === "ready" && lesson.teachingDate > today ? (
+          {flags.manage && lesson.status === "ready" && lesson.teachingDate > today ? (
             <p className="text-sm text-muted-foreground">
               {t("lessons.detail.readyHint", { date: f.dayMonth(lesson.teachingDate) })}
             </p>
@@ -336,7 +361,7 @@ function LessonView({ data }: { data: LessonDetail }) {
             <LessonPanel
               title={t("lessons.detail.homework")}
               actions={
-                can.manageHomework ? (
+                flags.addHomework ? (
                   <Button size="sm" variant="outline" asChild>
                     <Link href={routes.newHomework(stage.id, lesson.id)}>
                       <Plus data-icon="inline-start" />

@@ -6,13 +6,27 @@ import { describe, expect, test, vi } from "vitest"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
-import { services } from "@test/support/fixtures/services"
+import { me } from "@test/support/fixtures/me"
+import { insightsOf, services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
+import type { ServiceRow } from "@/features/organization/services/api"
 import { ServicesOverview } from "@/features/organization/services/services-overview"
 
 vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
+
+const answerInsights = (rows: ServiceRow[] = services.items) =>
+  server.use(http.get(apiUrl("/services/insights"), () => HttpResponse.json(insightsOf(rows))))
+
+function renderOverview(locale: Locale = "en") {
+  renderWithProviders(
+    <SidebarProvider>
+      <ServicesOverview />
+    </SidebarProvider>,
+    { locale, me: me.administrator }
+  )
+}
 
 function overview(locale: Locale = "en") {
   let requests = 0
@@ -26,12 +40,8 @@ function overview(locale: Locale = "en") {
     })
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <ServicesOverview />
-    </SidebarProvider>,
-    { locale }
-  )
+  answerInsights()
+  renderOverview(locale)
 
   return () => requests
 }
@@ -103,6 +113,7 @@ describe("columns", () => {
   test("Members sorts numerically", async () => {
     overview()
     await screen.findByRole("tab", { name: "Active (7)" })
+    await table().findAllByText("No sessions")
     await userEvent.click(table().getByRole("button", { name: "Sort by Members" }))
 
     expect(serviceNames()).toEqual([
@@ -151,12 +162,8 @@ test("more than 50 services page through the table", async () => {
   }))
 
   server.use(http.get(apiUrl("/services"), () => HttpResponse.json({ ...services, items: many })))
-
-  renderWithProviders(
-    <SidebarProvider>
-      <ServicesOverview />
-    </SidebarProvider>
-  )
+  answerInsights(many)
+  renderOverview()
 
   expect(await screen.findByText("Page 1 of 2")).toBeInTheDocument()
   expect(serviceNames()).not.toContain("Group 51")
@@ -173,11 +180,8 @@ test("Retry refetches after a failed request", async () => {
     )
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <ServicesOverview />
-    </SidebarProvider>
-  )
+  answerInsights()
+  renderOverview()
 
   const retry = await screen.findByRole("button", { name: "Try again" }, { timeout: 8000 })
   fail = false
@@ -187,12 +191,8 @@ test("Retry refetches after a failed request", async () => {
 
 test("there is no Leaders column on any screen size", async () => {
   server.use(http.get(apiUrl("/services"), () => HttpResponse.json(services)))
-
-  renderWithProviders(
-    <SidebarProvider>
-      <ServicesOverview />
-    </SidebarProvider>
-  )
+  answerInsights()
+  renderOverview()
 
   await screen.findAllByRole("link", { name: "Sunday School" })
   expect(screen.queryByText(/Leaders/)).toBeNull()

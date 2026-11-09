@@ -15,12 +15,13 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { isolate } from "@/lib/bidi"
 import type { PersonRef } from "@/lib/api/types/common"
 import { fullName, initials, matchesQuery, preferredName } from "@/lib/domain/names"
 
-import type { AttendanceBoard as Board, Mark, Placement } from "./api"
+import type { AttendanceSheet as Board, Mark, Placement } from "./api"
 
 type Filter = "all" | "open" | "present"
 
@@ -43,12 +44,14 @@ export function PersonRow({
   mark,
   placements,
   canRecord,
+  canRemove = false,
   actions,
 }: {
   person: PersonRef
   mark: Mark | null
   placements?: Placement[]
   canRecord: boolean
+  canRemove?: boolean
   actions: BoardActions
 }) {
   const t = useTranslations("attendance.board")
@@ -79,7 +82,7 @@ export function PersonRow({
               ) : null}
             </span>
           </span>
-          {canRecord ? (
+          {canRemove ? (
             <Button
               variant="ghost"
               size="icon"
@@ -108,8 +111,6 @@ export function PersonRow({
   )
 }
 
-const firstName = (name: string) => name.split(" ")[0]
-
 function RecentlyMarked({ board, onCorrect }: { board: Board; onCorrect?: () => void }) {
   const t = useTranslations("attendance.board")
   const f = useFormat()
@@ -132,7 +133,6 @@ function RecentlyMarked({ board, onCorrect }: { board: Board; onCorrect?: () => 
               <span className="truncate">{preferredName(person)}</span>
               <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
                 {f.instantTime(mark.recordedAt)}
-                {mark.recordedBy ? ` · ${firstName(mark.recordedBy.name)}` : ""}
               </span>
             </li>
           ))}
@@ -168,9 +168,13 @@ function Corrections({ board }: { board: Board }) {
           .slice(-4)
           .reverse()
           .map((correction) => {
+            if (!correction.removed.at) {
+              return null
+            }
+
             const removal = {
               name: preferredName(correction.person),
-              when: f.atLabel(correction.removedAt, board.today),
+              when: f.atLabel(correction.removed.at, board.today),
             }
 
             return (
@@ -197,10 +201,12 @@ export function AttendanceBoard({
 }) {
   const t = useTranslations("attendance.board")
   const tc = useTranslations("common")
+  const can = useCan()
   const [query, setQuery] = useState("")
   const [filter, setFilter] = useState<Filter>("all")
   const { session, counts } = board
-  const canRecord = session.can.record
+  const canRecord = can("create", "attendance")
+  const canRemove = can("delete", "attendance")
   const expected = session.rosterMode === "expected"
   const rosterSize = board.roster.length
   const notMarked = rosterSize - counts.rosterPresent
@@ -285,6 +291,7 @@ export function AttendanceBoard({
                     person={row.person}
                     mark={row.mark}
                     canRecord={canRecord}
+                    canRemove={canRemove}
                     actions={actions}
                   />
                 ))}
@@ -309,6 +316,7 @@ export function AttendanceBoard({
                   mark={row.mark}
                   placements={row.placements}
                   canRecord={canRecord}
+                  canRemove={canRemove}
                   actions={actions}
                 />
               ))}
@@ -350,7 +358,7 @@ export function AttendanceBoard({
             <p className="text-xs text-muted-foreground">{t("viewOnly")}</p>
           )}
         </div>
-        <RecentlyMarked board={board} onCorrect={canRecord ? actions.onCorrect : undefined} />
+        <RecentlyMarked board={board} onCorrect={canRemove ? actions.onCorrect : undefined} />
         <Corrections board={board} />
       </aside>
 

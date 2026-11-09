@@ -5,8 +5,10 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
 import type { AgendaItem, PlannedItem, ScheduleSummary } from "@/lib/api/types/meetings"
 import { apiUrl, problem } from "@test/support/api"
+import { me } from "@test/support/fixtures/me"
 import { schedule } from "@test/support/fixtures/schedules"
 import { services } from "@test/support/fixtures/services"
 import { session, stageRef, sundaySchool } from "@test/support/fixtures/sessions"
@@ -44,12 +46,11 @@ const planned = (date: string, scheduleId: string): PlannedItem => ({
   endsAt: `${date}T13:00:00+01:00`,
   location: "Hall 1",
   rosterMode: "expected",
-  can: { manage: true },
 })
 
 const asItem = (s: ReturnType<typeof session>): AgendaItem => ({ ...s, kind: "session" })
 
-function open(data: ScheduleSummary | (() => ScheduleSummary)) {
+function open(data: ScheduleSummary | (() => ScheduleSummary), who: Me = me.leader) {
   const current = typeof data === "function" ? data : () => data
   const id = current().id
   search.value = `id=${id}`
@@ -90,7 +91,8 @@ function open(data: ScheduleSummary | (() => ScheduleSummary)) {
   renderWithProviders(
     <SidebarProvider>
       <SchedulePage />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: who }
   )
 
   return id
@@ -99,8 +101,8 @@ function open(data: ScheduleSummary | (() => ScheduleSummary)) {
 const section = async (name: string) =>
   within((await screen.findByRole("heading", { name })).closest("section")!)
 
-test("without can.manage there are no actions and no date menus", async () => {
-  open(schedule({ can: { manage: false } }))
+test("without sessions: update there are no actions and no date menus", async () => {
+  open(schedule(), me.servant)
   await screen.findByRole("heading", { name: "Sunday class", level: 1 })
   await (await section("Next dates")).findAllByRole("listitem")
   expect(screen.queryByRole("button", { name: "Edit schedule" })).not.toBeInTheDocument()
@@ -220,6 +222,20 @@ test("delete is disabled while the schedule has sessions", async () => {
   expect(
     await screen.findByRole("menuitem", { name: "Can’t delete: has sessions" })
   ).toHaveAttribute("aria-disabled", "true")
+})
+
+test("sessions: update without sessions: delete offers no delete", async () => {
+  const updater: Me = {
+    ...me.leader,
+    permissions: me.leader.permissions.filter(
+      (p) => p.resource !== "sessions" || p.action !== "delete"
+    ),
+  }
+
+  open(schedule({ sessionCount: 0 }), updater)
+  await userEvent.click(await screen.findByRole("button", { name: "More actions" }))
+  expect(await screen.findByRole("menuitem", { name: "Deactivate" })).toBeInTheDocument()
+  expect(screen.queryByRole("menuitem", { name: "Delete schedule" })).toBeNull()
 })
 
 test("deleting a schedule without sessions returns to the list", async () => {

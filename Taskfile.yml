@@ -27,7 +27,7 @@ tasks:
       - pnpm format:check
 
   api:types:
-    desc: Generate src/lib/api/schema.d.ts from openapi/openapi.json
+    desc: Generate src/lib/api/schema.d.ts from the backend's /api/openapi.json
     cmds:
       - pnpm api:types
 

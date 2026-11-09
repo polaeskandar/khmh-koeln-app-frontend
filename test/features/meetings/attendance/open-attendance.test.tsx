@@ -5,16 +5,18 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
 import { SessionPage } from "@/features/meetings/meetings/session-page"
 import type { Locale } from "@/i18n/config"
 import type { SessionView } from "@/lib/api/types/meetings"
 import { apiUrl, problem } from "@test/support/api"
-import { thirdClassBoard } from "@test/support/fixtures/board"
+import { boardOf, detailOf, thirdClassBoard } from "@test/support/fixtures/board"
+import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { AttendanceBoard } from "@/features/meetings/attendance/api"
+import type { AttendanceSheet } from "@/features/meetings/attendance/api"
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
 
 const search = vi.hoisted(() => ({ value: "" }))
@@ -32,7 +34,14 @@ afterEach(() => {
   router.push.mockReset()
 })
 
-const scheduled = (overrides: Partial<SessionView> = {}): AttendanceBoard => {
+const viewer: Me = {
+  ...me.servant,
+  permissions: me.servant.permissions.filter(
+    (p) => p.resource !== "attendance" || p.action === "read"
+  ),
+}
+
+const scheduled = (overrides: Partial<SessionView> = {}): AttendanceSheet => {
   const board = thirdClassBoard()
 
   return {
@@ -43,20 +52,37 @@ const scheduled = (overrides: Partial<SessionView> = {}): AttendanceBoard => {
   }
 }
 
-function openBoard(board: AttendanceBoard, open?: () => Response, locale: Locale = "en") {
+const opened = (board: AttendanceSheet) => ({
+  ...detailOf(board).state,
+  status: "active",
+  openedAt: "2026-11-08T12:00:00+01:00",
+})
+
+function openBoard(
+  board: AttendanceSheet,
+  {
+    open,
+    locale = "en",
+    who = me.servant,
+  }: { open?: () => Response; locale?: Locale; who?: Me } = {}
+) {
   search.value = `session=${board.session.id}`
   let current = board
   const calls = { open: 0, get: 0 }
 
   server.use(
+    http.get(apiUrl(`/sessions/${board.session.id}`), () => HttpResponse.json(detailOf(current))),
+    http.get(apiUrl(`/sessions/${board.session.id}/attendance/corrections`), () =>
+      HttpResponse.json({ items: [] })
+    ),
     http.get(apiUrl(`/sessions/${board.session.id}/attendance`), () => {
       calls.get++
 
-      return HttpResponse.json(current)
+      return HttpResponse.json(boardOf(current))
     }),
     http.post(apiUrl(`/sessions/${board.session.id}/open`), () => {
       calls.open++
-      const response = open?.() ?? HttpResponse.json({ id: board.session.id, status: "active" })
+      const response = open?.() ?? HttpResponse.json(opened(board))
 
       if (response.ok) {
         current = { ...current, session: { ...current.session, status: "active" } }
@@ -70,7 +96,7 @@ function openBoard(board: AttendanceBoard, open?: () => Response, locale: Locale
     <SidebarProvider>
       <TakeAttendancePage />
     </SidebarProvider>,
-    { locale }
+    { locale, me: who }
   )
 
   return calls
@@ -100,8 +126,8 @@ describe("the board route before and after", () => {
     }
   )
 
-  test("without can.record the servants open it", async () => {
-    openBoard(scheduled({ can: { manage: false, record: false, reopen: false } }))
+  test("without attendance: create the servants open it", async () => {
+    openBoard(scheduled(), { who: viewer })
 
     expect(
       await screen.findByText("The servants of this group open it when the meeting starts.")
@@ -122,11 +148,9 @@ describe("the board route before and after", () => {
   })
 
   test("a cancel reason renders as text, isolated in Arabic", async () => {
-    openBoard(
-      scheduled({ status: "canceled", cancelReason: "<b>رحلة</b> retreat" }),
-      undefined,
-      "ar"
-    )
+    openBoard(scheduled({ status: "canceled", cancelReason: "<b>رحلة</b> retreat" }), {
+      locale: "ar",
+    })
 
     const reason = await screen.findByText("<b>رحلة</b> retreat")
     expect(reason).toHaveAttribute("dir", "auto")
@@ -134,7 +158,11 @@ describe("the board route before and after", () => {
   })
 
   test("a 409 opensOnTheDay says why in German and refetches", async () => {
-    const calls = openBoard(scheduled(), () => problem(409, "meetings.opensOnTheDay"), "de")
+    const calls = openBoard(scheduled(), {
+      open: () => problem(409, "meetings.opensOnTheDay"),
+      locale: "de",
+    })
+
     await userEvent.click(await screen.findByRole("button", { name: "Anwesenheit öffnen" }))
 
     await waitFor(() =>
@@ -148,28 +176,22 @@ describe("the board route before and after", () => {
 })
 
 describe("the session page", () => {
-  function openSession(view: Partial<SessionView>) {
+  function openSession(view: Partial<SessionView>, who: Me = me.servant) {
     const board = scheduled(view)
     search.value = `id=${board.session.id}`
 
     server.use(
-      http.get(apiUrl(`/sessions/${board.session.id}`), () =>
-        HttpResponse.json({
-          today: "2026-11-08",
-          session: board.session,
-          schedule: null,
-          history: [],
-        })
-      ),
+      http.get(apiUrl(`/sessions/${board.session.id}`), () => HttpResponse.json(detailOf(board))),
       http.post(apiUrl(`/sessions/${board.session.id}/open`), () =>
-        HttpResponse.json({ id: board.session.id, status: "active" })
+        HttpResponse.json(opened(board))
       )
     )
 
     renderWithProviders(
       <SidebarProvider>
         <SessionPage />
-      </SidebarProvider>
+      </SidebarProvider>,
+      { me: who }
     )
 
     return board.session.id
@@ -181,11 +203,11 @@ describe("the session page", () => {
     await waitFor(() => expect(router.push).toHaveBeenCalledWith(`/attendance/take/?session=${id}`))
   })
 
-  test.each([
-    ["a later session", { date: "2026-11-15" }],
-    ["no can.record", { can: { manage: false, record: false, reopen: false } }],
-  ])("%s has no button", async (_, view) => {
-    openSession(view)
+  test.each<[string, Partial<SessionView>, Me]>([
+    ["a later session", { date: "2026-11-15" }, me.servant],
+    ["no attendance: create", {}, viewer],
+  ])("%s has no button", async (_, view, who) => {
+    openSession(view, who)
     await screen.findByRole("heading", { level: 1 })
     expect(screen.queryByRole("button", { name: "Open attendance" })).toBeNull()
   })

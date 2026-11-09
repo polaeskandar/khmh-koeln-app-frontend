@@ -94,7 +94,7 @@
           "name": { "type": "string" },
           "permissions": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/PermissionGrant" }
+            "items": { "$ref": "#/components/schemas/PermissionResponse" }
           },
           "holderCount": { "type": "integer" }
         }
@@ -113,7 +113,7 @@
           "name": { "type": "string" },
           "permissions": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/PermissionGrant" }
+            "items": { "$ref": "#/components/schemas/PermissionResponse" }
           }
         }
       },
@@ -148,7 +148,7 @@
           "name": { "type": "string" },
           "permissions": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/PermissionGrant" }
+            "items": { "$ref": "#/components/schemas/PermissionResponse" }
           },
           "createdAt": { "type": "string" },
           "updatedAt": { "type": "string" },

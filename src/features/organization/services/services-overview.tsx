@@ -1,5 +1,6 @@
 "use client"
 
+import { useCan } from "@/features/identity/auth/session"
 import { useQuery } from "@tanstack/react-query"
 import type { ColumnDef } from "@tanstack/react-table"
 import { Archive, Search, X } from "lucide-react"
@@ -39,7 +40,7 @@ import { fold } from "@/lib/domain/names"
 import { localDateOf } from "@/lib/domain/time"
 import { routes } from "@/lib/routes"
 
-import { type ServiceRow, servicesQuery } from "./api"
+import { type ServiceRow, servicesQuery, useServiceInsights } from "./api"
 import { AttendanceCell, NextMeetingCell, useNextAt } from "./service-bits"
 import { NewServiceButton, ServiceActionsMenu } from "./service-dialogs"
 
@@ -54,6 +55,7 @@ const TABS: Record<Tab, (row: ServiceRow) => boolean> = {
 export function ServicesOverview() {
   const t = useTranslations()
   const query = useQuery(servicesQuery)
+  const can = useCan()
 
   return (
     <>
@@ -62,7 +64,7 @@ export function ServicesOverview() {
         <PageHeader
           title={t("nav.services")}
           description={t("services.description")}
-          actions={query.data?.can.create ? <NewServiceButton /> : null}
+          actions={can("create", "services") ? <NewServiceButton /> : null}
         />
         <QueryState query={query}>{(list) => <ServicesTable rows={list.items} />}</QueryState>
       </PageBody>
@@ -93,6 +95,7 @@ export function ServicesTable({ rows }: { rows: ServiceRow[] }) {
   const t = useTranslations()
   const f = useFormat()
   const nextAt = useNextAt()
+  const insights = useServiceInsights()
   const [tab, setTab] = useState<Tab>("active")
   const [search, setSearch] = useState("")
   const counts = countByTab(rows, TABS)
@@ -168,7 +171,11 @@ export function ServicesTable({ rows }: { rows: ServiceRow[] }) {
       },
       {
         id: "next",
-        accessorFn: (r) => (r.next ? `${r.next.date}T${r.next.startTime}` : "9999"),
+        accessorFn: (r) => {
+          const next = insights.get(r.id)?.next
+
+          return next ? `${next.date}T${next.startTime}` : "9999"
+        },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("services.table.next")} />
         ),
@@ -177,7 +184,7 @@ export function ServicesTable({ rows }: { rows: ServiceRow[] }) {
       },
       {
         id: "attendance",
-        accessorFn: (r) => r.trend?.rate ?? -1,
+        accessorFn: (r) => insights.get(r.id)?.trend.rate ?? -1,
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t("services.table.attendance")} />
         ),
@@ -192,7 +199,7 @@ export function ServicesTable({ rows }: { rows: ServiceRow[] }) {
         size: 48,
       },
     ],
-    [t, f]
+    [t, f, insights]
   )
 
   const { table } = useDataTable({

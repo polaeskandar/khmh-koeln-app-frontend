@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useCan } from "@/features/identity/auth/session"
 import { CompletionMeter, HomeworkStatusBadge } from "@/features/learning/lessons/lesson-bits"
 import { useStageCrumbs } from "@/features/organization/stages/stage-layout"
 import { useFormat } from "@/i18n/format"
@@ -25,7 +26,13 @@ import { isolate } from "@/lib/bidi"
 import { initials, matchesQuery, preferredName } from "@/lib/domain/names"
 import { routes } from "@/lib/routes"
 
-import { type HomeworkProgress, homeworkProgressQuery, type ProgressRow } from "./api"
+import {
+  homeworkFlagsFor,
+  type HomeworkProgress,
+  homeworkProgressQuery,
+  homeworkQuery,
+  type ProgressRow,
+} from "./api"
 import { HomeworkActions } from "./homework-actions"
 import { DueLine } from "./homework-bits"
 
@@ -267,15 +274,21 @@ function ProgressView({ data }: { data: HomeworkProgress }) {
   const t = useTranslations()
   const f = useFormat()
   const router = useRouter()
+  const can = useCan()
   const { homework, lesson } = data
+  const detail = useQuery(homeworkQuery(homework.id))
+  const stageArchived = detail.data?.archived ?? true
+  const flags = homeworkFlagsFor(can, homework, stageArchived)
+
+  const crumbs = useStageCrumbs(
+    { ...data.stage, archived: stageArchived, service: data.service },
+    "homework",
+    [{ label: homework.title }]
+  )
 
   return (
     <>
-      <Topbar
-        crumbs={useStageCrumbs({ ...data.stage, service: data.service }, "homework", [
-          { label: homework.title },
-        ])}
-      />
+      <Topbar crumbs={crumbs} />
       <PageBody>
         <PageHeader
           meta={
@@ -296,7 +309,7 @@ function ProgressView({ data }: { data: HomeworkProgress }) {
           })}
           actions={
             <>
-              {homework.can.edit ? (
+              {flags.edit ? (
                 <Button variant="outline" asChild>
                   <Link href={routes.editHomework(homework.id)}>
                     <Pencil data-icon="inline-start" />
@@ -306,6 +319,7 @@ function ProgressView({ data }: { data: HomeworkProgress }) {
               ) : null}
               <HomeworkActions
                 homework={homework}
+                stageArchived={stageArchived}
                 place="page"
                 onDeleted={() => router.push(routes.stageHomework(data.stage.id))}
               />

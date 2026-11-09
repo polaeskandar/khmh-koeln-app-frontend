@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { useRouter } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
@@ -49,7 +50,7 @@ const itemKey = (item: AgendaItem) =>
   item.kind === "planned" ? `${item.scheduleId}-${item.date}` : item.id
 
 function archivedPart(schedule: ScheduleSummary) {
-  if (schedule.service.archived) {
+  if (schedule.service?.archived) {
     return { kind: "service" as const, name: schedule.service.name }
   }
 
@@ -63,6 +64,7 @@ function archivedPart(schedule: ScheduleSummary) {
 function Actions({ schedule, today }: { schedule: ScheduleSummary; today: LocalDate }) {
   const t = useTranslations()
   const router = useRouter()
+  const can = useCan()
   const [dialog, setDialog] = useState<"deactivate" | "delete" | null>(null)
   const name = isolate(schedule.name)
   const archived = archivedPart(schedule)
@@ -83,14 +85,17 @@ function Actions({ schedule, today }: { schedule: ScheduleSummary; today: LocalD
     onSuccess: () => router.push(routes.schedules()),
   })
 
-  if (!schedule.can.manage) {
+  const manages = can("update", "sessions")
+  const deletes = can("delete", "sessions")
+
+  if (!manages && !deletes) {
     return null
   }
 
   return (
     <>
-      <EditScheduleButton schedule={schedule} today={today} />
-      {schedule.active ? null : (
+      {manages ? <EditScheduleButton schedule={schedule} today={today} /> : null}
+      {schedule.active || !manages ? null : (
         <span className="flex flex-col items-start gap-1">
           <Button
             disabled={activate.pending || archived !== null}
@@ -112,20 +117,22 @@ function Actions({ schedule, today }: { schedule: ScheduleSummary; today: LocalD
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {schedule.active ? (
+          {schedule.active && manages ? (
             <DropdownMenuItem onSelect={() => setDialog("deactivate")}>
               {t("meetings.actions.deactivate")}
             </DropdownMenuItem>
           ) : null}
-          <DropdownMenuItem
-            variant="destructive"
-            disabled={schedule.sessionCount > 0}
-            onSelect={() => setDialog("delete")}
-          >
-            {schedule.sessionCount > 0
-              ? t("meetings.actions.cantDelete")
-              : t("meetings.actions.delete")}
-          </DropdownMenuItem>
+          {deletes ? (
+            <DropdownMenuItem
+              variant="destructive"
+              disabled={schedule.sessionCount > 0}
+              onSelect={() => setDialog("delete")}
+            >
+              {schedule.sessionCount > 0
+                ? t("meetings.actions.cantDelete")
+                : t("meetings.actions.delete")}
+            </DropdownMenuItem>
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
       <ConfirmDialog
@@ -155,6 +162,7 @@ function Actions({ schedule, today }: { schedule: ScheduleSummary; today: LocalD
 
 function Dates({ schedule, today }: { schedule: ScheduleSummary; today: LocalDate }) {
   const t = useTranslations("meetings.schedule")
+  const can = useCan()
   const next = useAgenda({ scheduleId: schedule.id, from: today, to: addDays(today, DAYS) })
 
   const past = useAgenda({
@@ -187,7 +195,7 @@ function Dates({ schedule, today }: { schedule: ScheduleSummary; today: LocalDat
             href={item.kind === "planned" ? null : undefined}
             className="min-w-0 flex-1"
           />
-          {schedule.can.manage && item.kind === "planned" && item.can.manage ? (
+          {item.kind === "planned" && can("update", "sessions") ? (
             <OccurrenceMenu item={item} />
           ) : null}
         </li>

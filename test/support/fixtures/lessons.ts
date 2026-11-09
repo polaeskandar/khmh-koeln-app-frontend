@@ -9,11 +9,10 @@ import { thirdClass } from "@test/support/fixtures/stages"
 
 export const lessonService = thirdClass.service
 
-export const lessonStage = {
+export const lessonStage: LessonDetail["stage"] = {
   id: thirdClass.id,
   name: thirdClass.name,
   position: 2,
-  archived: false,
 }
 
 export const goodSamaritan: Lesson = {
@@ -40,23 +39,15 @@ export const goodSamaritan: Lesson = {
 
 export const lessonDetail = (
   lesson: Partial<Lesson> = {},
-  can: Partial<LessonDetail["can"]> = {}
+  detail: Partial<Omit<LessonDetail, "lesson">> = {}
 ): LessonDetail => ({
   service: lessonService,
   stage: lessonStage,
+  archived: false,
   today: "2026-11-08",
   lesson: { ...goodSamaritan, ...lesson },
   homework: { total: 0, published: 0, drafts: 0 },
-  can: {
-    manage: true,
-    markCompleted: false,
-    manageHomework: true,
-    viewNotes: true,
-    archive: false,
-    restore: false,
-    delete: false,
-    ...can,
-  },
+  ...detail,
 })
 
 export const stageLessons = (overrides: Partial<StageLessons> = {}): StageLessons => ({
@@ -65,7 +56,7 @@ export const stageLessons = (overrides: Partial<StageLessons> = {}): StageLesson
   today: "2026-11-08",
   tabs: { upcoming: 0, previous: 0, archived: 0 },
   servants: [],
-  can: { create: true },
+  archived: false,
   items: [],
   ...overrides,
 })

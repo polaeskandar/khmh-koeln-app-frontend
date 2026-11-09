@@ -1,4 +1,4 @@
-import type { MemberGroup } from "@/features/people/groups/api"
+import type { GroupServant, MemberGroup } from "@/features/people/groups/api"
 import type { MemberMeeting } from "@/features/meetings/meetings/api"
 import type { MemberTask } from "@/features/learning/homework/api"
 import type { Recurrence } from "@/lib/api/types/common"
@@ -39,7 +39,12 @@ const weekly = (weekday: 1 | 2 | 3 | 4 | 5 | 6 | 7): Recurrence => ({
   span: { startsOn: "2026-09-01", endsOn: null },
 })
 
-const stage = (id: string, name: string) => ({ id, name, position: 0, archived: false })
+const stage = (id: string, name: string) => ({ id, name, position: 0 })
+
+export const memberServants: GroupServant[] = [
+  { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef402", name: "Irene Wahba", role: "service_leader" },
+  { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef403", name: "Youssef Nashed", role: "servant" },
+]
 
 export const nevineGroups: MemberGroup[] = [
   {
@@ -56,9 +61,6 @@ export const nevineGroups: MemberGroup[] = [
         endTime: "21:00",
         location: "Hall",
       },
-    ],
-    servants: [
-      { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef401", name: "Fr. Mina", role: "service_leader" },
     ],
     lastLesson: null,
   },
@@ -77,10 +79,6 @@ export const nevineGroups: MemberGroup[] = [
         location: "Room 2",
       },
     ],
-    servants: [
-      { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef402", name: "Irene Wahba", role: "service_leader" },
-      { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef403", name: "Youssef Nashed", role: "servant" },
-    ],
     lastLesson: {
       title: "The first eight letters",
       teachingDate: "2026-11-02",
@@ -97,7 +95,6 @@ export const minaGroups: MemberGroup[] = [
     stage: stage("0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef502", "Advanced"),
     since: "2025-09-01",
     schedules: [],
-    servants: [],
     lastLesson: null,
   },
   {
@@ -106,7 +103,6 @@ export const minaGroups: MemberGroup[] = [
     stage: null,
     since: "2025-09-01",
     schedules: [],
-    servants: [],
     lastLesson: null,
   },
 ]

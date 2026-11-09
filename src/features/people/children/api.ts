@@ -3,9 +3,9 @@ import { useSearchParams } from "next/navigation"
 
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 
-export type ChildSummary = Schemas["ChildSummary"]
+export type ChildSummary = Schemas["ChildSummaryResponse"]
 
-export type ParentChildren = Schemas["ChildList"]
+export type ParentChildren = Schemas["ChildListResponse"]
 
 export const parentChildrenQuery = () => ({
   queryKey: ["parent", "children"] as const,

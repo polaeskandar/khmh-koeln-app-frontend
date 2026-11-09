@@ -6,11 +6,13 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { apiUrl, problem } from "@test/support/api"
-import { rosterPeople, thirdClassBoard } from "@test/support/fixtures/board"
+import type { Schemas } from "@/lib/api/client"
+import { boardOf, detailOf, rosterPeople, thirdClassBoard } from "@test/support/fixtures/board"
+import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { AttendanceBoard } from "@/features/meetings/attendance/api"
+import type { AttendanceSheet, Mark } from "@/features/meetings/attendance/api"
 import { applyWrites, type Writes, writesReducer } from "@/features/meetings/attendance/mark-writes"
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
 
@@ -27,11 +29,14 @@ afterEach(() => vi.restoreAllMocks())
 
 const ramy = rosterPeople[1]
 
-const savedMark = {
-  id: "m-new",
-  recordedAt: "2026-11-08T12:31:00+01:00",
-  recordedBy: { id: "a1", name: "Daniel Mikhail" },
-}
+const savedMark: Mark = { id: "m-new", recordedAt: "2026-11-08T12:31:00+01:00" }
+
+const markResponse = (mark: Mark, by = "Daniel Mikhail"): Schemas["MarkResponse"] => ({
+  ...mark,
+  sessionId: "0192f3a4-7b1c-7d2e-8f3a-000000000001",
+  personId: ramy.id,
+  recordedBy: { id: "a1", name: by },
+})
 
 describe("the write reducer", () => {
   const board = thirdClassBoard()
@@ -91,24 +96,29 @@ describe("the write reducer", () => {
 
 function open(
   write: () => Response | Promise<Response>,
-  board: AttendanceBoard = thirdClassBoard()
+  board: AttendanceSheet = thirdClassBoard()
 ) {
   search.value = `session=${board.session.id}`
   const calls = { put: 0, get: 0 }
   let current = board
 
   server.use(
+    http.get(apiUrl(`/sessions/${board.session.id}`), () => HttpResponse.json(detailOf(board))),
+    http.get(apiUrl(`/sessions/${board.session.id}/attendance/corrections`), () =>
+      HttpResponse.json({ items: [] })
+    ),
     http.get(apiUrl(`/sessions/${board.session.id}/attendance`), () => {
       calls.get++
 
-      return HttpResponse.json(current)
+      return HttpResponse.json(boardOf(current))
     }),
     http.put(apiUrl(`/sessions/${board.session.id}/attendance/${ramy.id}`), async () => {
       calls.put++
       const response = await write()
 
       if (response.ok) {
-        const mark = await response.clone().json()
+        const saved = (await response.clone().json()) as Schemas["MarkResponse"]
+        const mark = { id: saved.id, recordedAt: saved.recordedAt }
 
         current = {
           ...current,
@@ -123,7 +133,8 @@ function open(
   renderWithProviders(
     <SidebarProvider>
       <TakeAttendancePage />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: me.servant }
   )
 
   return calls
@@ -145,7 +156,7 @@ describe("marking on the board", () => {
     open(async () => {
       await new Promise<void>((resolve) => (release = resolve))
 
-      return HttpResponse.json(savedMark, { status: 201 })
+      return HttpResponse.json(markResponse(savedMark), { status: 201 })
     })
 
     await markRamy()
@@ -173,7 +184,7 @@ describe("marking on the board", () => {
         return problem(503, "unavailable")
       }
 
-      return HttpResponse.json(savedMark, { status: 201 })
+      return HttpResponse.json(markResponse(savedMark), { status: 201 })
     })
 
     await markRamy()
@@ -189,7 +200,7 @@ describe("marking on the board", () => {
       let failing = true
 
       const calls = open(() =>
-        failing ? HttpResponse.error() : HttpResponse.json(savedMark, { status: 201 })
+        failing ? HttpResponse.error() : HttpResponse.json(markResponse(savedMark), { status: 201 })
       )
 
       await markRamy()
@@ -238,11 +249,7 @@ describe("marking on the board", () => {
   test("another servant's earlier mark shows their time without an error", async () => {
     open(() =>
       HttpResponse.json(
-        {
-          id: "m-old",
-          recordedAt: "2026-11-08T12:05:00+01:00",
-          recordedBy: { id: "a2", name: "Bishoy Tadros" },
-        },
+        markResponse({ id: "m-old", recordedAt: "2026-11-08T12:05:00+01:00" }, "Bishoy Tadros"),
         { status: 200 }
       )
     )

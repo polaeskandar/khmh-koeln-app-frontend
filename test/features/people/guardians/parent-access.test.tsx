@@ -4,7 +4,10 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
+import type { Me } from "@/features/identity/auth/api"
+import type { Schemas } from "@/lib/api/client"
 import { apiUrl, problem } from "@test/support/api"
+import { me } from "@test/support/fixtures/me"
 import { stageRef } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
@@ -81,7 +84,11 @@ const link = (
 
 function open(
   initial: GuardianLink[],
-  { give, revoke }: { give?: () => Response | Promise<Response>; revoke?: () => Response } = {}
+  {
+    give,
+    revoke,
+    viewer = me.administrator,
+  }: { give?: () => Response | Promise<Response>; revoke?: () => Response; viewer?: Me } = {}
 ) {
   let items = initial
   let reads = 0
@@ -99,7 +106,7 @@ function open(
     }),
     http.get(apiUrl("/people/directory"), () => HttpResponse.json({ items: [kiro] })),
     http.post(apiUrl("/guardian-links"), async ({ request }) => {
-      const body = (await request.json()) as { userId: string; personId: string }
+      const body = (await request.json()) as Schemas["ParentAccessRequest"]
       sent.push({ path: "give", body })
       const answer = give?.()
 
@@ -126,7 +133,7 @@ function open(
     })
   )
 
-  renderWithProviders(<ParentAccess />)
+  renderWithProviders(<ParentAccess />, { me: viewer })
 
   return { sent, reads: () => reads }
 }
@@ -149,6 +156,16 @@ test("rows read parent, child and class, and who approved when", async () => {
   expect(first).toHaveTextContent("on Sun 27 Sep at 11:30 by Mariam Fahmy")
   expect(second).toHaveTextContent("by Former account")
   expect(screen.getByText(/2 links between parent accounts and children/)).toBeInTheDocument()
+})
+
+test("with users: read only the links show without Give or Remove", async () => {
+  open([link("0192f3a4-7b1c-7d2e-8f3a-4b5c6d7eb401", mariamFanous, anna)], {
+    viewer: me.churchOffice,
+  })
+
+  expect((await rows())[0]).toHaveTextContent("Mariam Fanous")
+  expect(screen.queryByRole("button", { name: "Give a parent access" })).toBeNull()
+  expect(screen.queryByRole("button", { name: "Remove" })).toBeNull()
 })
 
 test("giving access sends both ids, closes, toasts and shows the row", async () => {
@@ -187,7 +204,7 @@ test.each([
     { parent: "Hoda Farag", child: "Kiro Iskander" },
     "Hoda Farag already has access to Kiro Iskander.",
   ],
-  ["guardians.accountNotActive", {}, "This account isn’t active. Approve or reactivate it first."],
+  ["guardians.accountInactive", {}, "This account isn’t active. Approve or reactivate it first."],
 ])("a 409 %s shows in the open dialog", async (code, params, text) => {
   open([], { give: () => problem(409, code, { params }) })
   await userEvent.click(await screen.findByRole("button", { name: "Give a parent access" }))

@@ -31,5 +31,5 @@ helpers (the setup file, MSW, render helpers, fixtures) live in `test/support/` 
 ## API
 
 Call the API only through `api` and `dataOf()` from `@/lib/api/client`, the client generated from the backend's
-OpenAPI document (`openapi/openapi.json`, `pnpm api:types`). Types of API data are `Schemas["…"]` from the
+OpenAPI document (`pnpm api:types` reads it from the backend's dev server at `/api/openapi.json`). Types of API data are `Schemas["…"]` from the
 same module; don't write them by hand.

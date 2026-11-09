@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
+import type { Schemas } from "@/lib/api/client"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { peopleList, person } from "@test/support/fixtures/people"
@@ -58,7 +59,7 @@ const mockup: DataRequests = {
   ],
 }
 
-function open(who: Me = me.churchOffice) {
+function open(who: Me = me.administrator) {
   const calls = { list: 0, people: [] as string[], posts: [] as unknown[] }
 
   server.use(
@@ -74,7 +75,11 @@ function open(who: Me = me.churchOffice) {
       return HttpResponse.json(peopleList([person("Kirollos", "Iskander")]))
     }),
     http.get(apiUrl("/guardian-links"), () =>
-      HttpResponse.json({ items: [], accounts: [], today: "2026-11-08" })
+      HttpResponse.json({
+        items: [],
+        accounts: [],
+        today: "2026-11-08",
+      } satisfies Schemas["ParentAccessListResponse"])
     )
   )
 
@@ -105,6 +110,7 @@ describe("DueLabel", () => {
 test.each([
   ["leaders", me.leader],
   ["servants", me.servant],
+  ["the church office", me.churchOffice],
 ])("%s get NoAccess without asking for requests", async (_, who) => {
   const calls = open(who)
   expect(await screen.findByText("You can’t handle data protection requests")).toBeInTheDocument()

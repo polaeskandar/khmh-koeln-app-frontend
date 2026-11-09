@@ -5,12 +5,14 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { apiUrl, problem } from "@test/support/api"
-import { closedFirstNovember, openRosterBoard } from "@test/support/fixtures/board"
+import { closedFirstNovember, openRosterBoard, sheetHandlers } from "@test/support/fixtures/board"
+import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { AttendanceBoard } from "@/features/meetings/attendance/api"
+import type { Me } from "@/features/identity/auth/api"
+import type { AttendanceSheet } from "@/features/meetings/attendance/api"
 import { AttendanceSummaryPage } from "@/features/meetings/attendance/attendance-summary"
 
 const search = vi.hoisted(() => ({ value: "" }))
@@ -25,12 +27,12 @@ afterEach(() => {
   router.replace.mockReset()
 })
 
-function open(board: AttendanceBoard, reopen?: (body: unknown) => Response) {
+function open(board: AttendanceSheet, reopen?: (body: unknown) => Response, who: Me = me.leader) {
   search.value = `session=${board.session.id}`
   const sent: unknown[] = []
 
   server.use(
-    http.get(apiUrl(`/sessions/${board.session.id}/attendance`), () => HttpResponse.json(board)),
+    ...sheetHandlers(board),
     http.post(apiUrl(`/sessions/${board.session.id}/reopen`), async ({ request }) => {
       const body = await request.json()
       sent.push(body)
@@ -42,7 +44,8 @@ function open(board: AttendanceBoard, reopen?: (body: unknown) => Response) {
   renderWithProviders(
     <SidebarProvider>
       <AttendanceSummaryPage />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: who }
   )
 
   return sent
@@ -108,10 +111,8 @@ describe("the 1 Nov summary", () => {
     expect(router.push).not.toHaveBeenCalled()
   })
 
-  test("Reopen shows only with can.reopen", async () => {
-    const board = closedFirstNovember()
-    board.session = { ...board.session, can: { ...board.session.can, reopen: false } }
-    open(board)
+  test("Reopen shows only with sessions: update", async () => {
+    open(closedFirstNovember(), undefined, me.servant)
     await section("Present (11)")
     expect(screen.queryByRole("button", { name: "Reopen for corrections" })).toBeNull()
   })
@@ -142,7 +143,15 @@ describe("other summaries", () => {
   test("a null closer and remover drop the name", async () => {
     const board = closedFirstNovember()
     board.session = { ...board.session, closedBy: null }
-    board.corrections = [{ ...board.corrections[0], removedBy: null, reason: null }]
+
+    board.corrections = [
+      {
+        ...board.corrections[0],
+        removed: { ...board.corrections[0].removed, by: null },
+        reason: null,
+      },
+    ]
+
     open(board)
 
     expect(await screen.findByTestId("summary-line")).toHaveTextContent(

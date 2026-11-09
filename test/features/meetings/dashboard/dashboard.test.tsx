@@ -7,15 +7,22 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Locale } from "@/i18n/config"
-import type { AgendaItem, PlannedItem } from "@/lib/api/types/meetings"
+import type { AgendaItem, PlannedItem, SessionView } from "@/lib/api/types/meetings"
 import { apiUrl } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
-import { session, stageRef, sundaySchool } from "@test/support/fixtures/sessions"
+import {
+  card,
+  countsHandler,
+  session,
+  stageRef,
+  sundaySchool,
+} from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
 import { navigation } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { Dashboard as DashboardData } from "@/features/meetings/dashboard/api"
+import type { AttendanceOverview } from "@/features/meetings/attendance/api"
+import type { Upcoming } from "@/features/meetings/dashboard/api"
 import { Dashboard } from "@/features/meetings/dashboard/dashboard"
 import { groupUpcoming } from "@/features/meetings/dashboard/group-upcoming"
 
@@ -57,7 +64,6 @@ const planned = (
   endsAt: `${date}T13:00:00+01:00`,
   location: null,
   rosterMode: "expected",
-  can: { manage: true },
   ...extra,
 })
 
@@ -67,13 +73,32 @@ const demoDay = [
   session({ stage: stageRef("5th Class", 5), status: "completed" }),
 ]
 
+type DashboardData = { sessions: SessionView[]; upcoming: AgendaItem[] }
+
 function open(
   data: DashboardData,
   { who = christine, locale = "en" }: { who?: Me; locale?: Locale } = {}
 ) {
+  const overview: AttendanceOverview = {
+    today: "2026-11-08",
+    sessions: data.sessions.map((view) => card(view)),
+    earlier: [],
+    closed: [],
+    openCount: 0,
+  }
+
+  const upcoming: Upcoming = {
+    today: "2026-11-08",
+    from: "2026-11-09",
+    to: "2026-11-15",
+    items: data.upcoming,
+  }
+
   server.use(
     http.get(apiUrl("/me"), () => HttpResponse.json(who)),
-    http.get(apiUrl("/dashboard"), () => HttpResponse.json(data))
+    http.get(apiUrl("/dashboard/upcoming"), () => HttpResponse.json(upcoming)),
+    http.get(apiUrl("/attendance/overview"), () => HttpResponse.json(overview)),
+    countsHandler(data.sessions)
   )
 
   renderWithProviders(
@@ -88,7 +113,6 @@ function open(
 }
 
 const data = (extra: Partial<DashboardData> = {}): DashboardData => ({
-  today: "2026-11-08",
   sessions: demoDay,
   upcoming: [],
   ...extra,
@@ -177,6 +201,14 @@ test("German day headings", async () => {
 
   expect(await screen.findByRole("heading", { name: "Morgen" })).toBeInTheDocument()
   expect(screen.getByRole("heading", { name: "So., 15. Nov." })).toBeInTheDocument()
+})
+
+test("without attendance: read the dashboard has no Today section", async () => {
+  open(data({ upcoming: [planned("2026-11-09", "3rd Class", 3)] }), { who: me.churchOffice })
+
+  expect(await screen.findByRole("heading", { name: "Tomorrow" })).toBeInTheDocument()
+  expect(screen.queryByRole("heading", { name: "Today" })).toBeNull()
+  expect(screen.queryAllByRole("article")).toEqual([])
 })
 
 test("the home page marks Dashboard active", async () => {

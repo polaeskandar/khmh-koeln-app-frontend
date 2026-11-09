@@ -5,8 +5,11 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
 import { apiUrl, problem } from "@test/support/api"
-import { goodSamaritan, lessonDetail } from "@test/support/fixtures/lessons"
+import { stageHomework } from "@test/support/fixtures/homework"
+import { goodSamaritan, lessonDetail, lessonStage } from "@test/support/fixtures/lessons"
+import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
@@ -26,11 +29,8 @@ beforeEach(() => {
 
 afterEach(() => vi.restoreAllMocks())
 
-const ready = (
-  overrides: Partial<LessonDetail["lesson"]> = {},
-  can: Partial<LessonDetail["can"]> = {}
-) => ({
-  ...lessonDetail(
+const ready = (overrides: Partial<LessonDetail["lesson"]> = {}) =>
+  lessonDetail(
     {
       status: "ready",
       teachingPoints:
@@ -39,23 +39,29 @@ const ready = (
       materials: [{ label: "Map of Judea", url: "https://example.org/map" }],
       ...overrides,
     },
-    can
-  ),
-  homework: { total: 3, published: 2, drafts: 1 },
-})
+    { homework: { total: 3, published: 2, drafts: 1 } }
+  )
 
-function open(detail: LessonDetail, status?: () => Response) {
+function open(detail: LessonDetail, status?: () => Response, account: Me = me.servant) {
   const sent: unknown[] = []
 
   server.use(
     http.get(apiUrl(`/lessons/${goodSamaritan.id}`), () => HttpResponse.json(detail)),
+    http.get(apiUrl(`/stages/${lessonStage.id}/homework`), () =>
+      HttpResponse.json(stageHomework())
+    ),
     http.post(apiUrl(`/lessons/${goodSamaritan.id}/status`), async ({ request }) => {
       const body = (await request.json()) as { status: string }
       sent.push(body)
 
       return (
         status?.() ??
-        HttpResponse.json({ id: goodSamaritan.id, status: body.status, completedAt: null })
+        HttpResponse.json({
+          id: goodSamaritan.id,
+          status: body.status,
+          completedAt: null,
+          version: 2,
+        })
       )
     })
   )
@@ -63,7 +69,8 @@ function open(detail: LessonDetail, status?: () => Response) {
   renderWithProviders(
     <SidebarProvider>
       <LessonPage />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: account }
   )
 
   return sent
@@ -118,8 +125,8 @@ describe("status actions", () => {
     expect(screen.getByRole("button", { name: "Mark ready" })).toBeInTheDocument()
   })
 
-  test("a ready lesson with markCompleted is marked taught", async () => {
-    const sent = open(ready({ teachingDate: "2026-11-08" }, { markCompleted: true }))
+  test("a ready lesson taught today or earlier is marked taught", async () => {
+    const sent = open(ready({ teachingDate: "2026-11-08" }))
     await userEvent.click(await screen.findByRole("button", { name: "Mark as taught" }))
     await waitFor(() => expect(sent).toEqual([{ status: "completed" }]))
     expect(toast.success).toHaveBeenCalledWith("Marked as taught.")
@@ -132,17 +139,33 @@ describe("status actions", () => {
     await waitFor(() => expect(sent).toEqual([{ status: "ready" }]))
   })
 
-  test("without can.manage there are no actions", async () => {
-    open(ready({}, { manage: false }))
+  test("without lessons: update there are no actions", async () => {
+    open(ready(), undefined, me.churchOffice)
     await screen.findByRole("heading", { level: 1 })
     expect(screen.queryByRole("link", { name: "Edit" })).toBeNull()
     expect(screen.queryByRole("button", { name: /Mark/ })).toBeNull()
+    expect(screen.queryByRole("link", { name: "Add homework" })).toBeNull()
+  })
+
+  test("an archived stage offers no actions", async () => {
+    open({ ...ready({ teachingDate: "2026-11-08" }), archived: true })
+    await screen.findByRole("heading", { level: 1 })
+    expect(screen.queryByRole("link", { name: "Edit" })).toBeNull()
+    expect(screen.queryByRole("button", { name: /Mark/ })).toBeNull()
+    expect(screen.queryByRole("link", { name: "Add homework" })).toBeNull()
+  })
+
+  test("Add homework opens the editor for this lesson", async () => {
+    open(ready())
+
+    expect(await screen.findByRole("link", { name: "Add homework" })).toHaveAttribute(
+      "href",
+      `/homework/new/?stage=${lessonStage.id}&lesson=${goodSamaritan.id}`
+    )
   })
 
   test("a 409 taughtAfterDate toasts its text", async () => {
-    open(ready({ teachingDate: "2026-11-08" }, { markCompleted: true }), () =>
-      problem(409, "lessons.taughtAfterDate")
-    )
+    open(ready({ teachingDate: "2026-11-08" }), () => problem(409, "lessons.taughtAfterDate"))
 
     await userEvent.click(await screen.findByRole("button", { name: "Mark as taught" }))
     await waitFor(() => expect(toast.error).toHaveBeenCalled())

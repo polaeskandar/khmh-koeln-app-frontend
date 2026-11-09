@@ -5,9 +5,11 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
-import type { ServiceList } from "@/features/organization/services/api"
+import type { Me } from "@/features/identity/auth/api"
 import type { Locale } from "@/i18n/config"
+import type { Schemas } from "@/lib/api/client"
 import { apiUrl, problem } from "@test/support/api"
+import { me } from "@test/support/fixtures/me"
 import { peopleList } from "@test/support/fixtures/people"
 import { services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
@@ -26,21 +28,17 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks())
 
 const sundaySchool = services.items[0]
-const thirdClassId = sundaySchool.stages.find((stage) => stage.name === "3rd Class")!.id
 
-const servantServices: ServiceList = {
-  ...services,
-  items: services.items.map((service) => ({
-    ...service,
-    can: { ...service.can, manageMembers: false },
-    stages: service.stages.map((stage) => ({
-      ...stage,
-      can: { manageMembers: stage.id === thirdClassId },
-    })),
-  })),
+const addOnly: Me = {
+  ...me.churchOffice,
+  permissions: [
+    { action: "read", resource: "services" },
+    { action: "read", resource: "members" },
+    { action: "create", resource: "members" },
+  ],
 }
 
-const mina = {
+const mina: Schemas["DirectoryEntry"] = {
   id: "0192f3a4-7b1c-7d2e-8f60-000000000001",
   firstName: "Mina",
   lastName: "Hanna",
@@ -48,23 +46,34 @@ const mina = {
   groups: [{ service: { id: "y", name: "Youth Meeting", tone: 2, archived: false }, stage: null }],
 }
 
+const created = (
+  id: string,
+  firstName: string,
+  lastName: string
+): Schemas["CreatedPersonResponse"] => ({
+  person: { id, firstName, lastName, displayName: null, status: "active" },
+  membership: null,
+})
+
+const joined: Schemas["AddedMembershipResponse"] = {
+  id: "m2",
+  personId: mina.id,
+  service: { id: sundaySchool.id, name: sundaySchool.name, tone: 1, archived: false },
+  stage: null,
+  startsOn: "2026-11-08",
+  endsOn: null,
+}
+
 function open({
-  list = services,
-  create = () =>
-    HttpResponse.json(
-      {
-        person: { id: "p1", firstName: "Mina", lastName: "Hanna", displayName: null },
-        membership: { id: "m1" },
-      },
-      { status: 201 }
-    ),
-  join = (): Response | Promise<Response> => HttpResponse.json({ id: "m2" }, { status: 201 }),
+  create = () => HttpResponse.json(created("p1", "Mina", "Hanna"), { status: 201 }),
+  join = (): Response | Promise<Response> => HttpResponse.json(joined, { status: 201 }),
   locale = "en" as Locale,
+  viewer = me.administrator,
 } = {}) {
   const sent: { path: string; body: Record<string, unknown> }[] = []
 
   server.use(
-    http.get(apiUrl("/services"), () => HttpResponse.json(list)),
+    http.get(apiUrl("/services"), () => HttpResponse.json(services)),
     http.get(apiUrl("/people"), () => HttpResponse.json(peopleList([]))),
     http.post(apiUrl("/people"), async ({ request }) => {
       sent.push({ path: "/people", body: (await request.json()) as Record<string, unknown> })
@@ -85,7 +94,7 @@ function open({
     <SidebarProvider>
       <MembersScreen />
     </SidebarProvider>,
-    { locale }
+    { locale, me: viewer }
   )
 
   return sent
@@ -104,14 +113,16 @@ const options = (dialog: { getAllByRole: (role: "option") => HTMLElement[] }, na
     .map((option) => option.textContent)
 
 describe("placements", () => {
-  test("a 3rd Class servant sees Sunday School with only 3rd Class and no No stage", async () => {
-    open({ list: servantServices })
+  test("every active service is offered, the archived one is not", async () => {
+    open()
     const dialog = await openDialog()
-    expect(options(dialog, "person-service")).toEqual(["Sunday School"])
-    expect(options(dialog, "person-stage")).toEqual(["3rd Class"])
+
+    expect(options(dialog, "person-service")).toEqual(
+      services.items.filter((service) => !service.archived).map((service) => service.name)
+    )
   })
 
-  test("a leader sees No stage and every stage", async () => {
+  test("No stage comes first and is chosen, then every stage", async () => {
     open()
     const dialog = await openDialog()
 
@@ -119,6 +130,14 @@ describe("placements", () => {
       "No stage",
       ...sundaySchool.stages.map((stage) => stage.name),
     ])
+
+    expect(dialog.getByLabelText("Stage")).toHaveValue("")
+  })
+
+  test("without members: create there is no Add person", async () => {
+    open({ viewer: me.servant })
+    expect(await screen.findByRole("tab", { name: /^Active/ })).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Add person" })).toBeNull()
   })
 })
 
@@ -206,6 +225,20 @@ describe("duplicates", () => {
     ).toBeDisabled()
   })
 
+  test("without members: update a candidate can't be added, only Add anyway shows", async () => {
+    open({ create: duplicate([mina]), viewer: addOnly })
+    const dialog = await openDialog()
+    await userEvent.type(dialog.getByLabelText("First name"), "Mina")
+    await userEvent.click(dialog.getByRole("button", { name: "Add person" }))
+
+    expect(
+      await dialog.findByRole("button", { name: "It’s a different person, add anyway" })
+    ).toBeInTheDocument()
+
+    expect(dialog.getByText("Youth Meeting", { selector: "li span" })).toBeInTheDocument()
+    expect(dialog.queryByRole("button", { name: "Add" })).toBeNull()
+  })
+
   test("Add anyway resends with confirmDuplicate; without candidates only it shows", async () => {
     let answer = duplicate([])
     const sent = open({ create: () => answer() })
@@ -220,14 +253,7 @@ describe("duplicates", () => {
 
     expect(dialog.queryByRole("button", { name: "Add" })).toBeNull()
 
-    answer = () =>
-      HttpResponse.json(
-        {
-          person: { id: "p2", firstName: "Mina", lastName: "Hanna", displayName: null },
-          membership: null,
-        },
-        { status: 201 }
-      )
+    answer = () => HttpResponse.json(created("p2", "Mina", "Hanna"), { status: 201 })
 
     await userEvent.click(anyway)
     await waitFor(() => expect(sent).toHaveLength(2))
@@ -252,13 +278,7 @@ test("a double click on Add person sends one request", async () => {
       sent.push({ path: "/people", body: (await request.json()) as Record<string, unknown> })
       await new Promise<void>((resolve) => (release = resolve))
 
-      return HttpResponse.json(
-        {
-          person: { id: "p1", firstName: "A", lastName: "B", displayName: null },
-          membership: null,
-        },
-        { status: 201 }
-      )
+      return HttpResponse.json(created("p1", "A", "B"), { status: 201 })
     })
   )
 

@@ -6,6 +6,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { SessionProvider } from "@/features/identity/auth/session"
+import type { Schemas } from "@/lib/api/client"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
@@ -86,7 +87,11 @@ function open(approve?: () => Response, account = me.administrator) {
   server.use(
     http.get(apiUrl("/me"), () => HttpResponse.json(account)),
     http.get(apiUrl("/account-requests"), () =>
-      HttpResponse.json({ items: [sandra, fady], today: "2026-11-08" })
+      HttpResponse.json({
+        items: [sandra, fady],
+        roles: [servantRole, parentRole].map(({ id, name }) => ({ id, name })),
+        today: "2026-11-08",
+      } satisfies Schemas["AccountRequestListResponse"])
     ),
     http.get(apiUrl("/roles"), () => HttpResponse.json({ items: [servantRole, parentRole] })),
     http.get(apiUrl("/people/directory"), ({ request }) => {
@@ -100,7 +105,7 @@ function open(approve?: () => Response, account = me.administrator) {
     http.post(apiUrl("/account-requests/:id/approve"), async ({ request }) => {
       sent.push(await request.json())
 
-      return approve?.() ?? HttpResponse.json({ id: sandra.account.id })
+      return approve?.() ?? HttpResponse.json(sandra.account)
     })
   )
 
@@ -249,8 +254,21 @@ test("a 422 roles.unknown shows under the roles with the dialog open", async () 
 })
 
 test("with users:read only the requests show without Approve… or Decline", async () => {
-  open(undefined, me.churchOffice)
+  open(undefined, { ...me.churchOffice, permissions: [{ action: "read", resource: "users" }] })
   await screen.findByRole("heading", { name: "Account requests (2)" })
   expect(screen.queryByRole("button", { name: "Approve…" })).toBeNull()
   expect(screen.queryByRole("button", { name: "Decline" })).toBeNull()
+})
+
+test("approving needs roles: update as well as users: update", async () => {
+  open(undefined, {
+    ...me.administrator,
+    permissions: me.administrator.permissions.filter(
+      (p) => p.resource !== "roles" || p.action !== "update"
+    ),
+  })
+
+  await screen.findByRole("heading", { name: "Account requests (2)" })
+  expect(screen.queryByRole("button", { name: "Approve…" })).toBeNull()
+  expect(screen.getAllByRole("button", { name: "Decline" })).toHaveLength(2)
 })

@@ -27,9 +27,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
-import { useSession } from "@/features/identity/auth/session"
+import { useCan, useSession } from "@/features/identity/auth/session"
 import { Link, useRouter } from "@/i18n/navigation"
-import type { ServiceRef, StageRef } from "@/lib/api/types/common"
+import type { ServiceRef } from "@/lib/api/types/common"
 import { ApiError } from "@/lib/api/problem"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { routes } from "@/lib/routes"
@@ -41,11 +41,13 @@ import {
   type LessonOptions,
   lessonOptionsQuery,
   lessonQuery,
+  type LessonStage,
+  type Material,
+  meetingOf,
   OTHER_DATE,
   optionValue,
-  toLink,
-  type Material,
   stageLessonsQuery,
+  toMeeting,
   updateLessonRequest,
 } from "./api"
 import { LessonStatusBadge } from "./lesson-bits"
@@ -82,7 +84,7 @@ function Block({
   )
 }
 
-function useLessonCrumbs(service: ServiceRef, stage: StageRef, last: string): Crumb[] {
+function useLessonCrumbs(service: ServiceRef, stage: LessonStage, last: string): Crumb[] {
   const t = useTranslations()
 
   return [
@@ -96,7 +98,7 @@ function useLessonCrumbs(service: ServiceRef, stage: StageRef, last: string): Cr
 }
 
 type EditorProps = {
-  stage: StageRef
+  stage: LessonStage
   lesson?: Lesson
   viewNotes: boolean
   choices: LessonOptions
@@ -136,7 +138,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
       ? [...choices.servants, lesson.responsible]
       : choices.servants
 
-  const savedHelpers = (lesson?.collaborators ?? []).filter((helper) => helper !== null)
+  const savedHelpers = lesson?.collaborators ?? []
   const [helperIds, setHelperIds] = useState(() => savedHelpers.map((helper) => helper.id))
 
   const helpers = [
@@ -144,17 +146,13 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
     ...savedHelpers.filter((saved) => !choices.servants.some((s) => s.id === saved.id)),
   ].filter((servant) => servant.id !== responsibleId)
 
-  const helpersChanged =
-    !lesson ||
-    helperIds.length !== savedHelpers.length ||
-    helperIds.some((id) => !savedHelpers.some((saved) => saved.id === id))
-
   const chooseResponsible = (id: string) => {
     setResponsibleId(id)
     setHelperIds((ids) => ids.filter((helper) => helper !== id))
   }
 
   const formRef = useRef<HTMLFormElement>(null)
+  const [version] = useState(lesson?.version ?? 0)
 
   const [fields, setFields] = useState({
     title: lesson?.title ?? "",
@@ -188,11 +186,10 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
     onSuccess: onSaved,
   })
 
-  const update = useApiMutation((input: LessonInput) => updateLessonRequest(lesson!.id, input), {
-    successMessage,
-    invalidate: [["lessons"]],
-    onSuccess: onSaved,
-  })
+  const update = useApiMutation(
+    (input: LessonInput) => updateLessonRequest(lesson!.id, version, input),
+    { successMessage, invalidate: [["lessons"]], onSuccess: onSaved }
+  )
 
   const mutation = lesson ? update : create
   const errors = mutation.fieldErrors
@@ -204,27 +201,32 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
     }
   }, [mutation.problem])
 
-  function input(status: "draft" | "ready"): LessonInput {
-    const linkChanged =
-      !lesson ||
-      meeting !== savedMeeting ||
-      (meeting === OTHER_DATE && otherDate !== lesson.teachingDate)
+  const keepsMeeting = (saved: Lesson) =>
+    meeting === savedMeeting && (meeting !== OTHER_DATE || otherDate === saved.teachingDate)
 
+  function input(status: "draft" | "ready"): LessonInput {
     return {
-      title: fields.title,
-      ...(linkChanged ? toLink(meeting, otherDate, choices.options) : {}),
-      summary: text(fields.summary),
-      passage: text(fields.passage),
-      memoryVerse: text(fields.memoryVerse),
-      objectives: text(fields.objectives),
-      teachingPoints: text(fields.teachingPoints),
-      activities: text(fields.activities),
-      materials: materials
-        .filter(filled)
-        .map((m) => ({ label: m.label, url: m.url?.trim() ? m.url : null })),
-      ...(viewNotes ? { notes: text(fields.notes) } : {}),
-      ...(!lesson || responsibleId !== lesson.responsible?.id ? { responsibleId } : {}),
-      ...(helpersChanged ? { collaboratorIds: helperIds } : {}),
+      details: {
+        title: fields.title,
+        summary: text(fields.summary),
+        passage: text(fields.passage),
+        memoryVerse: text(fields.memoryVerse),
+        collaboratorIds: helperIds,
+      },
+      meeting:
+        lesson && keepsMeeting(lesson)
+          ? meetingOf(lesson)
+          : toMeeting(meeting, otherDate, choices.options),
+      plan: {
+        objectives: text(fields.objectives),
+        teachingPoints: text(fields.teachingPoints),
+        activities: text(fields.activities),
+        ...(viewNotes ? { notes: text(fields.notes) } : {}),
+        materials: materials
+          .filter(filled)
+          .map((m) => ({ label: m.label, url: m.url?.trim() ? m.url : null })),
+      },
+      responsibleId,
       ...(completed ? {} : { status }),
     }
   }
@@ -236,7 +238,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
 
   const materialError = (index: number, field: "label" | "url") =>
     filled(materials[index])
-      ? errors[`materials.${materials.slice(0, index).filter(filled).length}.${field}`]
+      ? errors[`plan.materials.${materials.slice(0, index).filter(filled).length}.${field}`]
       : undefined
 
   const updateMaterial = (index: number, change: Partial<Material>) =>
@@ -263,7 +265,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
               maxLength={160}
               placeholder={t("lessons.editor.titlePlaceholder")}
               autoFocus={!lesson}
-              error={errors.title}
+              error={errors["details.title"]}
             />
             <TextAreaField
               label={t("lessons.editor.summary")}
@@ -273,7 +275,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
               onChange={set("summary")}
               maxLength={1000}
               placeholder={t("lessons.editor.summaryPlaceholder")}
-              error={errors.summary}
+              error={errors["details.summary"]}
             />
           </FieldGroup>
         </Block>
@@ -287,7 +289,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
               onChange={set("passage")}
               maxLength={200}
               placeholder={t("lessons.editor.passagePlaceholder")}
-              error={errors.passage}
+              error={errors["details.passage"]}
             />
             <TextAreaField
               label={t("lessons.fields.memoryVerse")}
@@ -297,7 +299,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
               onChange={set("memoryVerse")}
               maxLength={500}
               placeholder={t("lessons.editor.memoryVersePlaceholder")}
-              error={errors.memoryVerse}
+              error={errors["details.memoryVerse"]}
             />
           </FieldGroup>
         </Block>
@@ -311,7 +313,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
               onChange={set("objectives")}
               maxLength={4000}
               placeholder={t("lessons.editor.objectivesPlaceholder")}
-              error={errors.objectives}
+              error={errors["plan.objectives"]}
             />
             <TextAreaField
               label={t("lessons.fields.teachingPoints")}
@@ -321,7 +323,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
               onChange={set("teachingPoints")}
               maxLength={4000}
               description={t("lessons.editor.teachingPointsHint")}
-              error={errors.teachingPoints}
+              error={errors["plan.teachingPoints"]}
             />
             <TextAreaField
               label={t("lessons.fields.activities")}
@@ -331,7 +333,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
               onChange={set("activities")}
               maxLength={4000}
               description={t("lessons.editor.activitiesHint")}
-              error={errors.activities}
+              error={errors["plan.activities"]}
             />
           </FieldGroup>
         </Block>
@@ -387,7 +389,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
                 ) : null}
               </div>
             ))}
-            {errors.materials ? <FieldError>{errors.materials}</FieldError> : null}
+            {errors["plan.materials"] ? <FieldError>{errors["plan.materials"]}</FieldError> : null}
             <Button
               type="button"
               variant="outline"
@@ -411,7 +413,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
               onChange={set("notes")}
               maxLength={4000}
               placeholder={t("lessons.editor.notesPlaceholder")}
-              error={errors.notes}
+              error={errors["plan.notes"]}
             />
           </Block>
         ) : null}
@@ -426,7 +428,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
             otherDate={otherDate}
             onChange={setMeeting}
             onOtherDateChange={setOtherDate}
-            error={errors.meeting ?? errors.teachingDate}
+            error={errors.meeting}
           />
         </FormPanel>
         <FormPanel title={t("lessons.fields.servants")}>
@@ -448,7 +450,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
             {errors.responsibleId ? <FieldError>{errors.responsibleId}</FieldError> : null}
           </Field>
           {helpers.length > 0 ? (
-            <FieldSet data-invalid={errors.collaboratorIds ? true : undefined}>
+            <FieldSet data-invalid={errors["details.collaboratorIds"] ? true : undefined}>
               <FieldLegend variant="label">{t("lessons.editor.helping")}</FieldLegend>
               <div className="flex flex-col gap-2">
                 {helpers.map((servant) => (
@@ -456,7 +458,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
                     <Checkbox
                       id={`lesson-helper-${servant.id}`}
                       checked={helperIds.includes(servant.id)}
-                      aria-invalid={errors.collaboratorIds ? true : undefined}
+                      aria-invalid={errors["details.collaboratorIds"] ? true : undefined}
                       onCheckedChange={(checked) =>
                         setHelperIds((ids) =>
                           checked === true
@@ -471,7 +473,9 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
                   </Field>
                 ))}
               </div>
-              {errors.collaboratorIds ? <FieldError>{errors.collaboratorIds}</FieldError> : null}
+              {errors["details.collaboratorIds"] ? (
+                <FieldError>{errors["details.collaboratorIds"]}</FieldError>
+              ) : null}
             </FieldSet>
           ) : null}
         </FormPanel>
@@ -529,7 +533,7 @@ function EditorPage({
   children,
 }: {
   service: ServiceRef
-  stage: StageRef
+  stage: LessonStage
   title: string
   children: React.ReactNode
 }) {
@@ -562,7 +566,7 @@ function WithOptions({
   lesson,
   children,
 }: {
-  stage: StageRef
+  stage: LessonStage
   lesson?: string
   children: (choices: LessonOptions) => React.ReactNode
 }) {
@@ -583,13 +587,14 @@ function WithOptions({
 
 function NewLesson({ stageId }: { stageId: string }) {
   const t = useTranslations("lessons")
+  const can = useCan()
   const query = useQuery(stageLessonsQuery(stageId))
 
   return (
     <QueryState query={query} notFound={<NotFoundPage />}>
       {(data) => (
         <EditorPage service={data.service} stage={data.stage} title={t("newLesson")}>
-          {data.can.create ? (
+          {!data.archived && can("create", "lessons") ? (
             <WithOptions stage={data.stage}>
               {(choices) => <LessonForm stage={data.stage} viewNotes choices={choices} />}
             </WithOptions>
@@ -606,6 +611,7 @@ function NewLesson({ stageId }: { stageId: string }) {
 
 function EditLesson({ id }: { id: string }) {
   const t = useTranslations("lessons")
+  const can = useCan()
   const query = useQuery(lessonQuery(id))
 
   return (
@@ -614,7 +620,7 @@ function EditLesson({ id }: { id: string }) {
         <EditorPage service={data.service} stage={data.stage} title={t("editLesson")}>
           {data.lesson.archivedAt ? (
             <NoAccess title={t("noAccess.archivedTitle")}>{t("noAccess.archivedBody")}</NoAccess>
-          ) : !data.can.manage ? (
+          ) : data.archived || !can("update", "lessons") ? (
             <NoAccess title={t("noAccess.changeTitle")}>
               {t("noAccess.changeBody", { stage: data.stage.name })}
             </NoAccess>
@@ -624,7 +630,7 @@ function EditLesson({ id }: { id: string }) {
                 <LessonForm
                   stage={data.stage}
                   lesson={data.lesson}
-                  viewNotes={data.can.viewNotes}
+                  viewNotes={can("read", "members")}
                   choices={choices}
                 />
               )}

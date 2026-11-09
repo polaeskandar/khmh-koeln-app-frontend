@@ -12,6 +12,7 @@ import { QueryState } from "@/components/page-states"
 import { StatusBadge } from "@/components/status"
 import { Button } from "@/components/ui/button"
 import { initialsOf } from "@/features/identity/auth/role-summary"
+import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -39,7 +40,15 @@ function AgeLine({ account }: { account: MemberAccount }) {
   return <>{t("linkedByOffice")}</>
 }
 
-function AccountRow({ account, today }: { account: MemberAccount; today: LocalDate }) {
+function AccountRow({
+  account,
+  today,
+  unlinks,
+}: {
+  account: MemberAccount
+  today: LocalDate
+  unlinks: boolean
+}) {
   const t = useTranslations()
   const f = useFormat()
   const queryClient = useQueryClient()
@@ -99,10 +108,17 @@ function AccountRow({ account, today }: { account: MemberAccount; today: LocalDa
           </span>
         </span>
       </span>
-      <Button variant="outline" size="sm" className="self-start" onClick={() => setRemoving(true)}>
-        <Unlink data-icon="inline-start" />
-        {t("settings.members.remove")}
-      </Button>
+      {unlinks ? (
+        <Button
+          variant="outline"
+          size="sm"
+          className="self-start"
+          onClick={() => setRemoving(true)}
+        >
+          <Unlink data-icon="inline-start" />
+          {t("settings.members.remove")}
+        </Button>
+      ) : null}
       <ConfirmDialog
         open={removing}
         onOpenChange={setRemoving}
@@ -131,6 +147,7 @@ function AccountRow({ account, today }: { account: MemberAccount; today: LocalDa
 
 export function MemberAccounts() {
   const t = useTranslations("settings.members")
+  const unlinks = useCan()("update", "users")
   const query = useQuery(memberAccountsQuery)
 
   return (
@@ -142,7 +159,12 @@ export function MemberAccounts() {
           ) : (
             <ul className="flex flex-col divide-y border-y">
               {data.items.map((account) => (
-                <AccountRow key={account.id} account={account} today={data.today} />
+                <AccountRow
+                  key={account.id}
+                  account={account}
+                  today={data.today}
+                  unlinks={unlinks}
+                />
               ))}
             </ul>
           )

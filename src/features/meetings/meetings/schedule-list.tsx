@@ -56,7 +56,9 @@ export function ScheduleList({
           <div className="grid min-w-0 flex-1 grid-cols-1 gap-x-6 gap-y-1.5 py-3 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,170px)]">
             <span className="flex min-w-0 flex-col gap-0.5">
               <span className="flex min-w-0 items-center gap-2">
-                {showService ? <ServiceSwatch tone={schedule.service.tone} /> : null}
+                {showService && schedule.service ? (
+                  <ServiceSwatch tone={schedule.service.tone} />
+                ) : null}
                 <span
                   className={cn(
                     "truncate font-medium",
@@ -76,7 +78,7 @@ export function ScheduleList({
                   </Link>
                 </span>
               </span>
-              {showService && schedule.stage ? (
+              {showService && schedule.stage && schedule.service ? (
                 <span className="truncate text-xs text-muted-foreground">
                   {schedule.service.name}
                 </span>

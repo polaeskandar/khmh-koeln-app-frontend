@@ -5,9 +5,11 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
-
+import type { Me } from "@/features/identity/auth/api"
+import type { SessionView } from "@/lib/api/types/meetings"
 import { apiUrl, problem } from "@test/support/api"
-import { session } from "@test/support/fixtures/sessions"
+import { me } from "@test/support/fixtures/me"
+import { session, sessionDetail, sessionState } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
@@ -26,20 +28,21 @@ afterEach(() => vi.restoreAllMocks())
 
 function open(
   view: Parameters<typeof session>[0] = {},
-  answer?: (body: unknown) => Response | Promise<Response>
+  answer?: (body: unknown) => Response | Promise<Response>,
+  who: Me = me.leader
 ) {
   let current = session({ status: "scheduled", date: "2026-11-15", ...view })
   search.value = `id=${current.id}`
   const sent: unknown[] = []
 
   server.use(
-    http.get(apiUrl(`/sessions/${current.id}`), () =>
-      HttpResponse.json({ today: "2026-11-08", session: current, schedule: null, history: [] })
-    ),
+    http.get(apiUrl(`/sessions/${current.id}`), () => HttpResponse.json(sessionDetail(current))),
     http.post(apiUrl(`/sessions/${current.id}/cancel`), async ({ request }) => {
       const body = (await request.json()) as { reason: string | null }
       sent.push(body)
-      const response = await (answer?.(body) ?? HttpResponse.json({ id: current.id }))
+
+      const response = await (answer?.(body) ??
+        HttpResponse.json(sessionState({ ...current, status: "canceled" })))
 
       if (response.ok) {
         current = { ...current, status: "canceled", cancelReason: body.reason }
@@ -52,7 +55,8 @@ function open(
   renderWithProviders(
     <SidebarProvider>
       <SessionPage />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: who }
   )
 
   return sent
@@ -129,13 +133,13 @@ test("a reopened dialog is reset", async () => {
   expect(dialog.queryByRole("alert")).toBeNull()
 })
 
-test.each([
-  ["a servant", { can: { manage: false, record: true, reopen: false } }],
-  ["an active session", { status: "active" as const, date: "2026-11-08" }],
-  ["a completed session", { status: "completed" as const, date: "2026-11-01" }],
-  ["a canceled session", { status: "canceled" as const }],
-])("no menu for %s", async (_, view) => {
-  open(view)
+test.each<[string, Partial<SessionView>, Me]>([
+  ["a servant", {}, me.servant],
+  ["an active session", { status: "active", date: "2026-11-08" }, me.leader],
+  ["a completed session", { status: "completed", date: "2026-11-01" }, me.leader],
+  ["a canceled session", { status: "canceled" }, me.leader],
+])("no menu for %s", async (_, view, who) => {
+  open(view, undefined, who)
   await screen.findByRole("heading", { level: 1 })
   expect(screen.queryByRole("button", { name: "Change this session" })).toBeNull()
 })

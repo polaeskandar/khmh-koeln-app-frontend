@@ -3,16 +3,22 @@ import { http, HttpResponse } from "msw"
 import { afterEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
+import type { SessionView } from "@/lib/api/types/meetings"
 import { apiUrl, problem } from "@test/support/api"
-import { session, stageRef, thirdClassRef } from "@test/support/fixtures/sessions"
+import { me } from "@test/support/fixtures/me"
+import {
+  card,
+  countsHandler,
+  session,
+  stageRef,
+  thirdClassRef,
+} from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import type {
-  AttendanceOverview as Overview,
-  OverviewSession,
-} from "@/features/meetings/attendance/api"
+import type { AttendanceOverview as Overview } from "@/features/meetings/attendance/api"
 import { AttendanceOverview } from "@/features/meetings/attendance/attendance-overview"
 
 vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
@@ -22,7 +28,7 @@ afterEach(() => router.replace.mockReset())
 const kindergarten = stageRef("Kindergarten", 0)
 const firstClass = stageRef("1st Class", 1)
 
-const today: OverviewSession[] = [
+const today: SessionView[] = [
   session({
     stage: thirdClassRef,
     status: "active",
@@ -35,26 +41,32 @@ const today: OverviewSession[] = [
   session({ stage: stageRef("4th Class", 4), status: "scheduled", startTime: "16:00" }),
 ]
 
-function answer(overview: Partial<Overview> | (() => Response)) {
+type Lists = { sessions?: SessionView[]; earlier?: SessionView[]; closed?: Overview["closed"] }
+
+function answer(lists: Lists | (() => Response), who: Me = me.leader) {
+  const sessions = typeof lists === "function" ? [] : (lists.sessions ?? today)
+  const earlier = typeof lists === "function" ? [] : (lists.earlier ?? [])
+
   server.use(
     http.get(apiUrl("/attendance/overview"), () =>
-      typeof overview === "function"
-        ? overview()
+      typeof lists === "function"
+        ? lists()
         : HttpResponse.json({
             today: "2026-11-08",
-            sessions: today,
-            earlier: [],
-            closed: [],
+            sessions: sessions.map((view) => card(view)),
+            earlier: earlier.map((view) => card(view)),
+            closed: lists.closed ?? [],
             openCount: 2,
-            ...overview,
-          })
-    )
+          } satisfies Overview)
+    ),
+    countsHandler([...sessions, ...earlier])
   )
 
   return renderWithProviders(
     <SidebarProvider>
       <AttendanceOverview />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: who }
   )
 }
 
@@ -90,12 +102,25 @@ test("a leader's six cards keep the API's order and offer the next step", async 
   expect(action(all[3])[0]).toHaveAttribute("href", `/attendance/summary/?session=${today[3].id}`)
   expect(action(all[4])).toEqual([])
   expect(all[4]).toHaveTextContent(/Retreat weekend/)
+  expect(await within(all[0]).findByText(/^7 of 14 present/)).toBeInTheDocument()
+})
+
+test("a servant without attendance: create sees the cards but no Take or Open", async () => {
+  answer({}, { ...me.servant, permissions: [{ action: "read", resource: "attendance" }] })
+  const all = await cards()
+
+  const labels = all.flatMap((card) =>
+    within(card)
+      .queryAllByRole("link")
+      .filter((link) => link.closest("h3") === null)
+      .map((link) => link.textContent)
+  )
+
+  expect(labels).toEqual(["View attendance"])
 })
 
 test("with global roles a servant sees every session and each open one offers its action", async () => {
-  answer({
-    sessions: today.map((s) => ({ ...s, can: { manage: false, record: true, reopen: false } })),
-  })
+  answer({}, me.servant)
 
   const all = await cards()
   expect(all).toHaveLength(6)
@@ -123,8 +148,8 @@ test("earlier sessions are marked Not taken or Not closed and link to the board"
 })
 
 test("without earlier sessions that section is hidden, and closed ones link to the summary", async () => {
-  const closed = session({ status: "completed", closedAt: "2026-11-08T13:05:00+01:00" })
-  answer({ closed: [closed] })
+  const closed = session({ status: "completed" })
+  answer({ closed: [card(closed, { closedAt: "2026-11-08T13:05:00+01:00" })] })
   await cards()
   expect(screen.queryByRole("heading", { name: "Still open from earlier" })).toBeNull()
 

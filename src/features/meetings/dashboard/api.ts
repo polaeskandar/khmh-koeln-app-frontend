@@ -1,13 +1,19 @@
 import { useQuery } from "@tanstack/react-query"
 
-import { api, dataOf, type Schemas } from "@/lib/api/client"
+import { api, dataOf } from "@/lib/api/client"
 
-export type Dashboard = Schemas["Dashboard"]
+import type { Agenda } from "../meetings/api"
 
-export const dashboardQuery = {
-  queryKey: ["dashboard"] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/dashboard", { signal })),
+export type Upcoming = Agenda
+
+const LIVE = { refetchInterval: 60_000, refetchOnWindowFocus: true }
+
+export const upcomingQuery = {
+  queryKey: ["dashboard", "upcoming"] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) =>
+    dataOf(api.GET("/dashboard/upcoming", { signal })),
 }
 
-export const useDashboard = () =>
-  useQuery({ ...dashboardQuery, refetchInterval: 60_000, refetchOnWindowFocus: true })
+export const useUpcoming = () => useQuery({ ...upcomingQuery, ...LIVE })
+
+export const DASHBOARD_REFRESH = LIVE

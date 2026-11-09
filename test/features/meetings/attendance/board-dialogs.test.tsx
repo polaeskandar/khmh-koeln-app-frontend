@@ -7,12 +7,13 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
-import { rosterPeople, thirdClassBoard } from "@test/support/fixtures/board"
+import { boardOf, detailOf, rosterPeople, thirdClassBoard } from "@test/support/fixtures/board"
+import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { AttendanceBoard } from "@/features/meetings/attendance/api"
+import type { AttendanceSheet } from "@/features/meetings/attendance/api"
 import { CorrectionDialog } from "@/features/meetings/attendance/board-dialogs"
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
 
@@ -40,9 +41,9 @@ const rita = {
 const daniel = { id: "a1", name: "Daniel Mikhail" }
 const mina = rosterPeople[4]
 
-function boardWithRecent(): AttendanceBoard {
+function boardWithRecent(): AttendanceSheet {
   const board = thirdClassBoard()
-  const minaMark = { id: "m-mina", recordedAt: "2026-11-08T12:01:00+01:00", recordedBy: daniel }
+  const minaMark = { id: "m-mina", recordedAt: "2026-11-08T12:01:00+01:00" }
 
   return {
     ...board,
@@ -52,11 +53,11 @@ function boardWithRecent(): AttendanceBoard {
     recentlyMarked: [
       {
         person: rita,
-        mark: { id: "m-rita", recordedAt: "2026-11-08T12:08:00+01:00", recordedBy: daniel },
+        mark: { id: "m-rita", recordedAt: "2026-11-08T12:08:00+01:00" },
       },
       {
         person: rosterPeople[0],
-        mark: { id: "m-anna", recordedAt: "2026-11-08T12:06:00+01:00", recordedBy: null },
+        mark: { id: "m-anna", recordedAt: "2026-11-08T12:06:00+01:00" },
       },
       { person: mina, mark: minaMark },
     ],
@@ -64,7 +65,7 @@ function boardWithRecent(): AttendanceBoard {
 }
 
 function open(
-  board: AttendanceBoard,
+  board: AttendanceSheet,
   handlers: Parameters<typeof server.use> = [],
   locale: Locale = "en"
 ) {
@@ -73,11 +74,15 @@ function open(
   const calls = { close: 0, get: 0, removed: [] as unknown[] }
 
   server.use(
+    http.get(apiUrl(`/sessions/${board.session.id}`), () => HttpResponse.json(detailOf(board))),
     http.get(apiUrl(`/sessions/${board.session.id}/attendance`), () => {
       calls.get++
 
-      return HttpResponse.json(current)
+      return HttpResponse.json(boardOf(current))
     }),
+    http.get(apiUrl(`/sessions/${board.session.id}/attendance/corrections`), () =>
+      HttpResponse.json({ items: current.corrections })
+    ),
     http.delete(
       apiUrl(`/sessions/${board.session.id}/attendance/:person`),
       async ({ request, params }) => {
@@ -94,10 +99,8 @@ function open(
             {
               id: "c-new",
               person: row.person,
-              recordedAt: row.mark!.recordedAt,
-              recordedBy: row.mark!.recordedBy,
-              removedAt: "2026-11-08T12:20:00+01:00",
-              removedBy: daniel,
+              recorded: { at: row.mark!.recordedAt, by: daniel },
+              removed: { at: "2026-11-08T12:20:00+01:00", by: daniel },
               reason: "Tapped the wrong name",
             },
           ],
@@ -113,13 +116,13 @@ function open(
     <SidebarProvider>
       <TakeAttendancePage />
     </SidebarProvider>,
-    { locale }
+    { locale, me: me.servant }
   )
 
   return calls
 }
 
-const closeOn = (board: AttendanceBoard, answer: () => Response) => {
+const closeOn = (board: AttendanceSheet, answer: () => Response) => {
   const calls = { close: 0 }
 
   return [
@@ -191,11 +194,11 @@ describe("closing", () => {
 })
 
 describe("recently marked and corrections", () => {
-  test("Recently marked shows Rita first with time and recorder, without a null recorder", async () => {
+  test("Recently marked shows Rita first with her time", async () => {
     open(boardWithRecent())
     const recent = within(await screen.findByRole("region", { name: "Recently marked" }))
     const items = recent.getAllByRole("listitem")
-    expect(items[0]).toHaveTextContent("Rita Henein12:08 · Daniel")
+    expect(items[0]).toHaveTextContent(/^Rita Henein12:08$/)
     expect(items[1]).toHaveTextContent(/^Anna Fanous12:06$/)
   })
 
@@ -242,14 +245,14 @@ describe("recently marked and corrections", () => {
   test("a newer mark arriving while the dialog is open keeps the chosen person", () => {
     const board = boardWithRecent()
 
-    const dialog = (shown: AttendanceBoard) => (
+    const dialog = (shown: AttendanceSheet) => (
       <CorrectionDialog board={shown} open onOpenChange={() => {}} />
     )
 
     const view = renderWithProviders(dialog(board))
     const select = () => screen.getByRole("combobox", { name: "Person" }) as HTMLSelectElement
     expect(select().selectedOptions[0].textContent).toBe("Theo Mansour · 12:30")
-    const later = { id: "m-later", recordedAt: "2026-11-08T12:45:00+01:00", recordedBy: daniel }
+    const later = { id: "m-later", recordedAt: "2026-11-08T12:45:00+01:00" }
 
     view.rerender(
       dialog({

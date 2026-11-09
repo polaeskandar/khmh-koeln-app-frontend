@@ -3,12 +3,12 @@ import { useEffect } from "react"
 
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/problem"
-import type { LocalDate, Uuid } from "@/lib/api/types/common"
+import type { Uuid } from "@/lib/api/types/common"
+import type { Can } from "@/lib/permissions"
 
-export type HomeworkCounts = Schemas["AudienceCounts"]
-export type HomeworkFlags = Schemas["HomeworkItem"]["can"]
-export type HomeworkRow = Schemas["HomeworkItem"]
-export type StageHomework = Schemas["HomeworkList"]
+export type HomeworkCounts = Schemas["AudienceCountsResponse"]
+export type HomeworkRow = Schemas["HomeworkItemResponse"]
+export type StageHomework = Schemas["HomeworkListResponse"]
 
 export const stageHomeworkQuery = (stage: Uuid) => ({
   queryKey: ["homework", "list", { stage }] as const,
@@ -18,18 +18,13 @@ export const stageHomeworkQuery = (stage: Uuid) => ({
 
 export const useStageHomework = (stage: Uuid) => useQuery(stageHomeworkQuery(stage))
 
-export type Resource = { label: string; url: string | null }
+export type HomeworkDetail = Schemas["HomeworkDetailResponse"]
 
-export type HomeworkDetail = Schemas["HomeworkDetail"]
+export type Resource = HomeworkDetail["resources"][number]
 
-export type HomeworkInput = {
-  title: string
-  instructions: string
-  dueDate: LocalDate | null
-  resources: Resource[]
-}
+export type HomeworkInput = Schemas["HomeworkRequest"]
 
-export type SavedHomework = Schemas["HomeworkWritten"]
+export type SavedHomework = Schemas["WrittenHomeworkResponse"]
 
 export const homeworkQuery = (id: Uuid) => ({
   queryKey: ["homework", "detail", id] as const,
@@ -45,16 +40,16 @@ export const createHomeworkRequest = (lesson: Uuid, input: HomeworkInput) =>
     })
   )
 
-export const updateHomeworkRequest = (id: Uuid, input: HomeworkInput) =>
-  dataOf(api.PATCH("/homework/{id}", { params: { path: { id } }, body: input }))
+export const updateHomeworkRequest = (id: Uuid, version: number, input: HomeworkInput) =>
+  dataOf(api.PUT("/homework/{id}", { params: { path: { id }, query: { version } }, body: input }))
 
-export type PublishedHomework = Schemas["HomeworkStatusChanged"]
+export type PublishedHomework = Schemas["ChangedHomeworkResponse"]
 
 export const publishHomeworkRequest = (id: Uuid) =>
   dataOf(api.POST("/homework/{id}/publish", { params: { path: { id } }, body: {} }))
 
-export type ProgressRow = Schemas["AudienceRow"]
-export type HomeworkProgress = Schemas["HomeworkProgress"]
+export type ProgressRow = Schemas["AudienceRowResponse"]
+export type HomeworkProgress = Schemas["HomeworkProgressResponse"]
 
 export const homeworkProgressQuery = (id: Uuid) => ({
   queryKey: ["homework", "progress", id] as const,
@@ -64,7 +59,35 @@ export const homeworkProgressQuery = (id: Uuid) => ({
 
 export type HomeworkTransition = "unpublish" | "archive" | "restore"
 
-export type HomeworkLifecycle = Schemas["HomeworkStatusChanged"]
+export type HomeworkFlags = Record<
+  "edit" | "publish" | "unpublish" | "archive" | "restore" | "delete" | "viewProgress",
+  boolean
+>
+
+export type HomeworkState = Pick<HomeworkRow, "status" | "publishedAt" | "counts"> & {
+  lesson: Pick<HomeworkRow["lesson"], "archived">
+}
+
+export function homeworkFlagsFor(
+  can: Can,
+  { status, publishedAt, counts, lesson }: HomeworkState,
+  stageArchived: boolean
+): HomeworkFlags {
+  const update = can("update", "homework") && !stageArchived
+  const edit = update && status !== "archived" && !lesson.archived
+
+  return {
+    edit,
+    publish: edit && status === "draft",
+    unpublish: update && status === "published" && (counts?.reportedTotal ?? 0) === 0,
+    archive: update && status !== "archived",
+    restore: update && status === "archived" && !lesson.archived,
+    delete: update && publishedAt === null,
+    viewProgress: can("read", "members"),
+  }
+}
+
+export type HomeworkLifecycle = Schemas["ChangedHomeworkResponse"]
 
 export const transitionHomeworkRequest = (id: Uuid, transition: HomeworkTransition) => {
   const params = { path: { id } }
@@ -85,9 +108,9 @@ export const deleteHomeworkRequest = (id: Uuid) =>
 
 export type TaskState = "todo" | "done"
 
-export type ParentTask = Schemas["ParentHomeworkItem"]
+export type ParentTask = Schemas["ParentHomeworkItemResponse"]
 
-export type ChildHomework = Schemas["ChildHomeworkList"]
+export type ChildHomework = Schemas["ChildHomeworkListResponse"]
 
 export const childHomeworkQuery = (child: Uuid, state: TaskState) => ({
   queryKey: ["parent", "homework", child, state] as const,
@@ -119,7 +142,7 @@ export function useChildHomework(child: Uuid, state: TaskState) {
 
 export type Report = Pick<ParentTask, "done" | "completedAt" | "completedBy" | "completedByYou">
 
-export type ParentTaskDetail = Schemas["ChildHomeworkDetail"]
+export type ParentTaskDetail = Schemas["ChildHomeworkDetailResponse"]
 
 const taskParams = (child: Uuid, id: Uuid) => ({ path: { childId: child, homeworkId: id } })
 
@@ -159,7 +182,7 @@ export const memberHomeworkQuery = (state: TaskState) => ({
 
 export const useMemberHomework = (state: TaskState) => useQuery(memberHomeworkQuery(state))
 
-export type MemberTaskDetail = Schemas["MemberHomeworkDetail"]
+export type MemberTaskDetail = Schemas["MemberHomeworkDetailResponse"]
 
 export const memberTaskQuery = (id: Uuid) => ({
   queryKey: ["member", "task", id] as const,

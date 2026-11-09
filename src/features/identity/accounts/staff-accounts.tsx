@@ -261,11 +261,13 @@ function RoleChip({
 function AccountRow({
   account,
   roles,
-  canChange,
+  changeRoles,
+  sendLinks,
 }: {
   account: StaffAccount
   roles: Role[]
-  canChange: boolean
+  changeRoles: boolean
+  sendLinks: boolean
 }) {
   const t = useTranslations()
   const [dialog, setDialog] = useState<"role" | "link" | null>(null)
@@ -289,10 +291,10 @@ function AccountRow({
             <li className="text-xs text-muted-foreground">{t("roles.summary.none")}</li>
           ) : (
             account.roles.map((role) => (
-              <RoleChip key={role.id} account={account} role={role} canChange={canChange} />
+              <RoleChip key={role.id} account={account} role={role} canChange={changeRoles} />
             ))
           )}
-          {canChange && left.length > 0 ? (
+          {changeRoles && left.length > 0 ? (
             <li>
               <Button variant="ghost" size="xs" onClick={() => setDialog("role")}>
                 <Plus data-icon="inline-start" />
@@ -302,7 +304,7 @@ function AccountRow({
           ) : null}
         </ul>
       </span>
-      {canChange ? (
+      {sendLinks ? (
         <Button
           variant="outline"
           size="sm"
@@ -324,15 +326,17 @@ function AccountRow({
 
 export function StaffAccounts() {
   const t = useTranslations("settings.users")
-  const canChange = useCan()("update", "users")
+  const can = useCan()
+  const changeRoles = can("update", "roles")
+  const sendLinks = can("update", "users")
   const accounts = useQuery(staffAccountsQuery)
-  const roles = useQuery({ ...rolesQuery, enabled: canChange })
+  const roles = useQuery({ ...rolesQuery, enabled: changeRoles })
 
   return (
     <Section
       id="users"
       title={t("title")}
-      description={canChange ? t("description") : t("descriptionReadOnly")}
+      description={changeRoles || sendLinks ? t("description") : t("descriptionReadOnly")}
     >
       {roles.isError ? (
         <QueryErrorState error={roles.error} onRetry={() => roles.refetch()} />
@@ -345,7 +349,8 @@ export function StaffAccounts() {
                 key={account.id}
                 account={account}
                 roles={roles.data?.items ?? []}
-                canChange={canChange}
+                changeRoles={changeRoles}
+                sendLinks={sendLinks}
               />
             ))}
           </ul>

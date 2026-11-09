@@ -35,7 +35,14 @@ import { type ServiceRow, servicesQuery } from "@/features/organization/services
 import { useFormat } from "@/i18n/format"
 import { useRouter } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
-import type { IsoWeekday, LocalDate, MonthWeek, Recurrence, Uuid } from "@/lib/api/types/common"
+import type {
+  Frequency,
+  IsoWeekday,
+  LocalDate,
+  MonthWeek,
+  Recurrence,
+  Uuid,
+} from "@/lib/api/types/common"
 import { groupOf, type RosterMode, type ScheduleSummary } from "@/lib/api/types/meetings"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import {
@@ -48,7 +55,7 @@ import {
 } from "@/lib/domain/recurrence"
 import { addDays } from "@/lib/domain/time"
 
-import { createScheduleRequest, type ScheduleInput, updateScheduleRequest } from "./api"
+import { type ScheduleChanges, createScheduleRequest, updateScheduleRequest } from "./api"
 
 const WEEKDAYS: IsoWeekday[] = [1, 2, 3, 4, 5, 6, 7]
 const MONTH_WEEKS: MonthWeek[] = [1, 2, 3, 4, -1]
@@ -65,7 +72,7 @@ type Draft = {
   name: string
   description: string
   location: string
-  frequency: "weekly" | "monthly"
+  frequency: Frequency
   interval: number
   weekdays: IsoWeekday[]
   monthWeek: MonthWeek
@@ -87,7 +94,7 @@ function initialDraft(
     const r = recurrenceOf(schedule.recurrence)
 
     return {
-      serviceId: schedule.service.id,
+      serviceId: schedule.service?.id ?? "",
       stageId: schedule.stage?.id ?? "",
       name: schedule.name,
       description: schedule.description ?? "",
@@ -174,6 +181,16 @@ export function previewOf(d: Draft, today: LocalDate): Preview {
   }
 }
 
+const FIELDS = {
+  service: "roster.serviceId",
+  stage: "roster.stageId",
+  name: "details.name",
+  description: "details.description",
+  location: "details.location",
+  startTime: "times.startTime",
+  endTime: "times.endTime",
+} as const
+
 const RECURRENCE_FIELDS = [
   "recurrence.interval",
   "recurrence.weekdays",
@@ -220,8 +237,7 @@ function ScheduleForm({
   })
 
   const update = useApiMutation(
-    (changes: Omit<ScheduleInput, "serviceId" | "stageId">) =>
-      updateScheduleRequest(schedule!.id, changes),
+    (changes: ScheduleChanges) => updateScheduleRequest(schedule!.id, changes),
     {
       successMessage: (saved) => t("toast.scheduleSaved", { created: saved.createdSessions }),
       invalidate: MEETING_QUERIES,
@@ -261,19 +277,22 @@ function ScheduleForm({
     }
 
     const fields = {
-      name: d.name,
-      description: d.description.trim() === "" ? null : d.description,
-      location: d.location.trim() === "" ? null : d.location,
+      details: {
+        name: d.name,
+        description: d.description.trim() === "" ? null : d.description,
+        location: d.location.trim() === "" ? null : d.location,
+      },
       recurrence: toRecurrence(d),
-      startTime: d.startTime,
-      endTime: d.endTime || null,
-      rosterMode: d.rosterMode,
+      times: { startTime: d.startTime, endTime: d.endTime || null },
     }
 
     if (schedule) {
-      void update.execute(fields)
+      void update.execute({ ...fields, rosterMode: d.rosterMode })
     } else {
-      void create.execute({ ...fields, serviceId: d.serviceId, stageId: d.stageId || null })
+      void create.execute({
+        ...fields,
+        roster: { serviceId: d.serviceId, stageId: d.stageId || null, mode: d.rosterMode },
+      })
     }
   }
 
@@ -313,41 +332,41 @@ function ScheduleForm({
         <div className="grid gap-y-8 md:grid-cols-2">
           <FieldGroup className="gap-6 md:pe-8">
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field data-invalid={errors.serviceId ? true : undefined}>
+              <Field data-invalid={errors[FIELDS.service] ? true : undefined}>
                 <FieldLabel htmlFor="schedule-service">{t("meetings.fields.service")}</FieldLabel>
                 <NativeSelect
                   id="schedule-service"
                   className="w-full"
                   value={d.serviceId}
                   disabled={!!schedule || !!fixedServiceId}
-                  aria-invalid={errors.serviceId ? true : undefined}
+                  aria-invalid={errors[FIELDS.service] ? true : undefined}
                   onChange={(event) =>
                     setD((prev) => ({ ...prev, serviceId: event.target.value, stageId: "" }))
                   }
                 >
-                  {schedule ? (
+                  {schedule?.service ? (
                     <NativeSelectOption value={schedule.service.id}>
                       {schedule.service.name}
                     </NativeSelectOption>
                   ) : null}
                   {services
-                    .filter((s) => s.id !== schedule?.service.id)
+                    .filter((s) => s.id !== schedule?.service?.id)
                     .map((s) => (
                       <NativeSelectOption key={s.id} value={s.id}>
                         {s.name}
                       </NativeSelectOption>
                     ))}
                 </NativeSelect>
-                {errors.serviceId ? <FieldError>{errors.serviceId}</FieldError> : null}
+                {errors[FIELDS.service] ? <FieldError>{errors[FIELDS.service]}</FieldError> : null}
               </Field>
-              <Field data-invalid={errors.stageId ? true : undefined}>
+              <Field data-invalid={errors[FIELDS.stage] ? true : undefined}>
                 <FieldLabel htmlFor="schedule-stage">{t("meetings.fields.stage")}</FieldLabel>
                 <NativeSelect
                   id="schedule-stage"
                   className="w-full"
                   value={d.stageId}
                   disabled={!!schedule}
-                  aria-invalid={errors.stageId ? true : undefined}
+                  aria-invalid={errors[FIELDS.stage] ? true : undefined}
                   onChange={(event) => set("stageId", event.target.value)}
                 >
                   <NativeSelectOption value="">
@@ -366,7 +385,7 @@ function ScheduleForm({
                       </NativeSelectOption>
                     ))}
                 </NativeSelect>
-                {errors.stageId ? <FieldError>{errors.stageId}</FieldError> : null}
+                {errors[FIELDS.stage] ? <FieldError>{errors[FIELDS.stage]}</FieldError> : null}
               </Field>
             </div>
             <TextField
@@ -376,7 +395,7 @@ function ScheduleForm({
               maxLength={120}
               placeholder={t("meetings.form.namePlaceholder")}
               description={t("meetings.form.nameHint")}
-              error={errors.name}
+              error={errors[FIELDS.name]}
             />
             <TextField
               label={t("meetings.fields.place")}
@@ -385,7 +404,7 @@ function ScheduleForm({
               onChange={(event) => set("location", event.target.value)}
               maxLength={120}
               placeholder={t("meetings.form.placePlaceholder")}
-              error={errors.location}
+              error={errors[FIELDS.location]}
             />
             <FieldSet>
               <FieldLegend>{t("meetings.fields.whoIsExpected")}</FieldLegend>
@@ -431,7 +450,7 @@ function ScheduleForm({
               value={d.description}
               onChange={(event) => set("description", event.target.value)}
               maxLength={500}
-              error={errors.description}
+              error={errors[FIELDS.description]}
             />
           </FieldGroup>
 
@@ -534,7 +553,7 @@ function ScheduleForm({
                 type="time"
                 value={d.startTime}
                 onChange={(event) => set("startTime", event.target.value)}
-                error={errors.startTime}
+                error={errors[FIELDS.startTime]}
               />
               <TextField
                 label={t("meetings.form.endsAt")}
@@ -542,7 +561,7 @@ function ScheduleForm({
                 optional
                 value={d.endTime}
                 onChange={(event) => set("endTime", event.target.value)}
-                error={errors.endTime}
+                error={errors[FIELDS.endTime]}
               />
               <TextField
                 label={t("meetings.form.firstDate")}
@@ -628,7 +647,7 @@ export function ScheduleDialog({
   const t = useTranslations()
   const f = useFormat()
   const services = useQuery(servicesQuery)
-  const manageable = services.data?.items.filter((s) => s.can.manageSessions && !s.archived) ?? []
+  const manageable = services.data?.items.filter((s) => !s.archived) ?? []
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

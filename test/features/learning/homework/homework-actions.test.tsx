@@ -5,15 +5,17 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
 import { apiUrl, problem } from "@test/support/api"
-import { homeworkFlags } from "@test/support/fixtures/homework"
+import { me } from "@test/support/fixtures/me"
 import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type {
-  HomeworkFlags,
+  HomeworkCounts,
+  HomeworkDetail,
   HomeworkProgress,
   HomeworkRow,
   StageHomework,
@@ -35,17 +37,27 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks())
 
 const ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea001"
-const stage = { id: THIRD_CLASS_ID, name: "3rd Class", position: 2, archived: false }
+const stage = { id: THIRD_CLASS_ID, name: "3rd Class", position: 2 }
 
 const lesson = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e9001",
   title: "The Good Samaritan",
   teachingDate: "2026-11-01",
+  archived: false,
 }
+
+const counts = (reported: number): HomeworkCounts => ({
+  assigned: 14,
+  completed: reported,
+  notCompleted: 14 - reported,
+  completedAfterDueDate: 0,
+  withoutParentAccount: 4,
+  withoutAccount: 4,
+  reportedTotal: reported,
+})
 
 const homework = (
   status: HomeworkRow["status"],
-  can: Partial<HomeworkFlags>,
   extra: Partial<HomeworkRow> = {}
 ): HomeworkRow => ({
   id: ID,
@@ -54,25 +66,14 @@ const homework = (
   dueDate: "2026-11-08",
   publishedAt: status === "draft" ? null : "2026-11-01T10:00:00Z",
   lesson,
-  counts:
-    status === "draft"
-      ? null
-      : {
-          assigned: 14,
-          completed: 0,
-          notCompleted: 14,
-          completedAfterDueDate: 0,
-          withoutParentAccount: 4,
-          withoutAccount: 4,
-          reportedTotal: 0,
-        },
-  can: homeworkFlags({ edit: status !== "archived", ...can }),
+  counts: status === "draft" ? null : counts(0),
   ...extra,
 })
 
-const list = (item: HomeworkRow): StageHomework => ({
+const list = (item: HomeworkRow, archived = false): StageHomework => ({
   today: "2026-11-08",
   stage,
+  archived,
   tabs: {
     published: item.status === "published" ? 1 : 0,
     draft: item.status === "draft" ? 1 : 0,
@@ -81,23 +82,30 @@ const list = (item: HomeworkRow): StageHomework => ({
   lessons: [lesson],
   defaultLessonId: lesson.id,
   audienceSize: 14,
-  can: { create: true },
   items: [item],
 })
 
-function openList(item: HomeworkRow | (() => HomeworkRow)) {
+type Options = { account?: Me; archived?: boolean }
+
+function openList(
+  item: HomeworkRow | (() => HomeworkRow),
+  { account = me.servant, archived = false }: Options = {}
+) {
   const current = typeof item === "function" ? item : () => item
   search.value = `id=${THIRD_CLASS_ID}&status=${current().status}`
 
   server.use(
     http.get(apiUrl(`/stages/${THIRD_CLASS_ID}`), () => HttpResponse.json(thirdClass)),
-    http.get(apiUrl(`/stages/${THIRD_CLASS_ID}/homework`), () => HttpResponse.json(list(current())))
+    http.get(apiUrl(`/stages/${THIRD_CLASS_ID}/homework`), () =>
+      HttpResponse.json(list(current(), archived))
+    )
   )
 
   renderWithProviders(
     <SidebarProvider>
       <StageHomeworkPage />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: account }
   )
 }
 
@@ -115,47 +123,57 @@ const lifecycle = ["Back to draft", "Archive", "Restore", "Delete draft"]
 const lifecycleItems = async () => (await menuItems()).filter((i) => lifecycle.includes(i!))
 
 test("a never-published draft can be archived or deleted", async () => {
-  openList(homework("draft", { publish: true, archive: true, delete: true }))
-  expect(await lifecycleItems()).toEqual(["Archive", "Delete draft"])
+  openList(homework("draft"))
+  expect(await menuItems()).toEqual(["Edit", "Publish", "Archive", "Delete draft"])
   expect(screen.getByRole("menu").querySelector("[data-slot$=separator]")).not.toBeNull()
 })
 
 test("published homework without reports can go back to draft or be archived", async () => {
-  openList(homework("published", { viewProgress: true, unpublish: true, archive: true }))
-  expect(await lifecycleItems()).toEqual(["Back to draft", "Archive"])
+  openList(homework("published"))
+  expect(await menuItems()).toEqual(["Who reported it done", "Edit", "Back to draft", "Archive"])
 })
 
 test("published homework with reports can't go back to draft", async () => {
-  openList(homework("published", { viewProgress: true, archive: true }))
+  openList(homework("published", { counts: counts(1) }))
   expect(await lifecycleItems()).toEqual(["Archive"])
 })
 
 test("archived homework can be restored, and deleted only if never published", async () => {
-  openList(homework("archived", { restore: true }))
+  openList(homework("archived"))
   expect(await lifecycleItems()).toEqual(["Restore"])
 })
 
 test("an archived draft can be restored or deleted", async () => {
-  openList(homework("archived", { restore: true, delete: true }, { publishedAt: null }))
+  openList(homework("archived", { publishedAt: null }))
   expect(await lifecycleItems()).toEqual(["Restore", "Delete draft"])
 })
 
+test("homework of an archived lesson can't be edited, published or restored", async () => {
+  const archivedLesson = { ...lesson, archived: true }
+  openList(homework("draft", { lesson: archivedLesson }))
+  expect(await menuItems()).toEqual(["Archive", "Delete draft"])
+  expect(screen.queryByRole("button", { name: "Publish" })).not.toBeInTheDocument()
+})
+
+test("an archived task of an archived lesson can't be restored", async () => {
+  openList(homework("archived", { lesson: { ...lesson, archived: true } }))
+  expect(await menuItems()).toEqual(["Who reported it done"])
+})
+
+test("in an archived stage a draft has no actions", async () => {
+  openList(homework("draft"), { archived: true })
+  await screen.findByRole("link", { name: "Learn the memory verse" })
+  expect(screen.queryByRole("button", { name: /Actions for/ })).not.toBeInTheDocument()
+  expect(screen.queryByRole("button", { name: "Publish" })).not.toBeInTheDocument()
+})
+
+test("without homework: update only the progress is offered", async () => {
+  openList(homework("published"), { account: me.churchOffice })
+  expect(await menuItems()).toEqual(["Who reported it done"])
+})
+
 test("archiving says reported completions are kept, and posts {}", async () => {
-  const reported = homework(
-    "published",
-    { archive: true },
-    {
-      counts: {
-        assigned: 14,
-        completed: 1,
-        notCompleted: 13,
-        completedAfterDueDate: 0,
-        withoutParentAccount: 4,
-        withoutAccount: 4,
-        reportedTotal: 1,
-      },
-    }
-  )
+  const reported = homework("published", { counts: counts(1) })
 
   const bodies: unknown[] = []
   openList(reported)
@@ -169,6 +187,7 @@ test("archiving says reported completions are kept, and posts {}", async () => {
         status: "archived",
         publishedAt: reported.publishedAt,
         archivedAt: "2026-11-08T12:00:00Z",
+        version: 2,
       })
     })
   )
@@ -195,14 +214,14 @@ test("archiving says reported completions are kept, and posts {}", async () => {
 })
 
 test("archiving without reports leaves the kept line out", async () => {
-  openList(homework("published", { archive: true }))
+  openList(homework("published"))
   await menuItems()
   await userEvent.click(screen.getByRole("menuitem", { name: "Archive" }))
   expect(await screen.findByRole("alertdialog")).not.toHaveTextContent("kept in the history")
 })
 
 test("restoring says it comes back published only when it was published", async () => {
-  openList(homework("archived", { restore: true }))
+  openList(homework("archived"))
   await menuItems()
   await userEvent.click(screen.getByRole("menuitem", { name: "Restore" }))
 
@@ -212,19 +231,19 @@ test("restoring says it comes back published only when it was published", async 
 })
 
 test("restoring a never-published task says it comes back as a draft", async () => {
-  openList(homework("archived", { restore: true }, { publishedAt: null }))
+  openList(homework("archived", { publishedAt: null }))
   await menuItems()
   await userEvent.click(screen.getByRole("menuitem", { name: "Restore" }))
   expect(await screen.findByRole("alertdialog")).toHaveTextContent(/It comes back as a draft\./)
 })
 
 test("a refused Back to draft toasts, keeps the dialog, and the refetched row drops it", async () => {
-  let current = homework("published", { viewProgress: true, unpublish: true, archive: true })
+  let current = homework("published")
   openList(() => current)
 
   server.use(
     http.post(apiUrl(`/homework/${ID}/unpublish`), () => {
-      current = homework("published", { viewProgress: true, archive: true })
+      current = homework("published", { counts: counts(1) })
 
       return problem(409, "homework.alreadyReported")
     })
@@ -252,7 +271,7 @@ test("a refused Back to draft toasts, keeps the dialog, and the refetched row dr
 })
 
 test("the menu and its dialog work with the keyboard", async () => {
-  openList(homework("draft", { publish: true, archive: true, delete: true }))
+  openList(homework("draft"))
   const trigger = await screen.findByRole("button", { name: "Actions for Learn the memory verse" })
   trigger.focus()
   await userEvent.keyboard("{Enter}")
@@ -267,7 +286,7 @@ test("the menu and its dialog work with the keyboard", async () => {
 })
 
 test("deleting from the progress page opens the stage's homework list", async () => {
-  const draft = homework("draft", { publish: true, archive: true, delete: true })
+  const draft = homework("draft")
 
   const progress: HomeworkProgress = {
     today: "2026-11-08",
@@ -279,11 +298,26 @@ test("deleting from the progress page opens the stage's homework list", async ()
     rows: [],
   }
 
+  const detail: HomeworkDetail = {
+    ...draft,
+    today: "2026-11-08",
+    instructions: "Say it.",
+    resources: [],
+    minDueDate: lesson.teachingDate,
+    lesson: { ...lesson, passage: null, memoryVerse: null },
+    service: thirdClass.service,
+    stage,
+    archived: false,
+    audienceSize: 14,
+    version: 1,
+  }
+
   let deletes = 0
   search.value = `id=${ID}`
 
   server.use(
     http.get(apiUrl(`/homework/${ID}/progress`), () => HttpResponse.json(progress)),
+    http.get(apiUrl(`/homework/${ID}`), () => HttpResponse.json(detail)),
     http.delete(apiUrl(`/homework/${ID}`), () => {
       deletes++
 
@@ -294,7 +328,8 @@ test("deleting from the progress page opens the stage's homework list", async ()
   renderWithProviders(
     <SidebarProvider>
       <HomeworkProgressPage />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: me.servant }
   )
 
   expect(await menuItems()).toEqual(["Publish", "Archive", "Delete draft"])
@@ -312,7 +347,7 @@ test("deleting from the progress page opens the stage's homework list", async ()
 })
 
 test("homework taken back to draft can be published again from the same row", async () => {
-  let current = homework("draft", { publish: true, archive: true, delete: true })
+  let current = homework("draft")
   let publishes = 0
   openList(() => current)
   search.value = `id=${THIRD_CLASS_ID}`
@@ -321,26 +356,25 @@ test("homework taken back to draft can be published again from the same row", as
     http.post(apiUrl(`/homework/${ID}/publish`), () => {
       publishes++
 
-      current = homework(
-        "published",
-        { unpublish: true, archive: true },
-        { publishedAt: `2026-11-08T1${publishes}:00:00Z` }
-      )
+      current = homework("published", { publishedAt: `2026-11-08T1${publishes}:00:00Z` })
 
-      return HttpResponse.json({ id: ID, status: "published", publishedAt: current.publishedAt })
+      return HttpResponse.json({
+        id: ID,
+        status: "published",
+        publishedAt: current.publishedAt,
+        archivedAt: null,
+        version: publishes * 2,
+      })
     }),
     http.post(apiUrl(`/homework/${ID}/unpublish`), () => {
-      current = homework(
-        "draft",
-        { publish: true, archive: true },
-        { publishedAt: current.publishedAt }
-      )
+      current = homework("draft", { publishedAt: current.publishedAt })
 
       return HttpResponse.json({
         id: ID,
         status: "draft",
         publishedAt: current.publishedAt,
         archivedAt: null,
+        version: publishes * 2 + 1,
       })
     })
   )

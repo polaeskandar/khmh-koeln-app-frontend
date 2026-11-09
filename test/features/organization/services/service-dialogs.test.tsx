@@ -7,12 +7,14 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
-import { services } from "@test/support/fixtures/services"
+import { me } from "@test/support/fixtures/me"
+import { insightsOf, services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { ServiceList } from "@/features/organization/services/api"
+import type { Me } from "@/features/identity/auth/api"
+import type { ServiceFields } from "@/features/organization/services/api"
 import { ServicesOverview } from "@/features/organization/services/services-overview"
 
 vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
@@ -30,7 +32,7 @@ afterEach(() => {
 
 const sundaySchool = services.items[0]
 
-function open(list: ServiceList = services, locale: Locale = "en") {
+function open(viewer: Me = me.administrator, locale: Locale = "en") {
   const sent: { method: string; body: unknown }[] = []
 
   let createAnswer: () => Response | Promise<Response> = () =>
@@ -40,16 +42,18 @@ function open(list: ServiceList = services, locale: Locale = "en") {
     )
 
   server.use(
-    http.get(apiUrl("/services"), () => HttpResponse.json(list)),
+    http.get(apiUrl("/services"), () => HttpResponse.json(services)),
+    http.get(apiUrl("/services/insights"), () => HttpResponse.json(insightsOf(services.items))),
     http.post(apiUrl("/services"), async ({ request }) => {
       sent.push({ method: "POST", body: await request.json() })
 
       return createAnswer()
     }),
-    http.patch(apiUrl(`/services/${sundaySchool.id}`), async ({ request }) => {
-      sent.push({ method: "PATCH", body: await request.json() })
+    http.put(apiUrl(`/services/${sundaySchool.id}`), async ({ request }) => {
+      const body = (await request.json()) as ServiceFields
+      sent.push({ method: "PUT", body })
 
-      return HttpResponse.json(sundaySchool)
+      return HttpResponse.json({ ...sundaySchool, ...body })
     })
   )
 
@@ -57,7 +61,7 @@ function open(list: ServiceList = services, locale: Locale = "en") {
     <SidebarProvider>
       <ServicesOverview />
     </SidebarProvider>,
-    { locale }
+    { locale, me: viewer }
   )
 
   return {
@@ -144,7 +148,7 @@ test("name errors show under Name with the dialog open; 403 toasts", async () =>
   await waitFor(() => expect(toast.error).toHaveBeenCalledWith("You can’t create services."))
 })
 
-test("edit pre-fills and sends only what changed; Cancel sends nothing; reopening clears errors", async () => {
+test("edit pre-fills and sends the whole service; Cancel sends nothing", async () => {
   const { sent } = open()
   const rows = await screen.findAllByRole("button", { name: "Actions for Sunday School" })
   await userEvent.click(rows[0])
@@ -160,30 +164,55 @@ test("edit pre-fills and sends only what changed; Cancel sends nothing; reopenin
   await userEvent.click(dialog().getByRole("button", { name: "Save changes" }))
 
   await waitFor(() =>
-    expect(sent).toEqual([{ method: "PATCH", body: { description: "For children" } }])
+    expect(sent).toEqual([
+      { method: "PUT", body: { name: "Sunday School", description: "For children" } },
+    ])
   )
 
   expect(toast.success).toHaveBeenCalledWith("Saved.")
 })
 
-test("a servant sees neither the button nor menus; a leader edits only their service", async () => {
-  open({
-    can: { create: false },
-    items: services.items.map((s) => ({ ...s, can: { ...s.can, edit: s.id === sundaySchool.id } })),
-  })
+test("saving without a change sends nothing and closes", async () => {
+  const { sent } = open()
+  const rows = await screen.findAllByRole("button", { name: "Actions for Sunday School" })
+  await userEvent.click(rows[0])
+  await userEvent.click(screen.getByRole("menuitem", { name: "Edit name and description" }))
+  await userEvent.click(dialog().getByRole("button", { name: "Save changes" }))
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull())
+  expect(sent).toEqual([])
+})
 
+test("a servant sees neither the button nor menus", async () => {
+  open(me.servant)
+  await screen.findAllByRole("link", { name: "Sunday School" })
+  expect(screen.queryByRole("button", { name: "New service" })).toBeNull()
+  expect(screen.queryByRole("button", { name: /^Actions for / })).toBeNull()
+})
+
+test("a leader edits every active service but creates none", async () => {
+  open(me.leader)
   await screen.findAllByRole("link", { name: "Sunday School" })
   expect(screen.queryByRole("button", { name: "New service" })).toBeNull()
 
-  expect(
+  const menus = new Set(
     screen
       .getAllByRole("button", { name: /^Actions for / })
-      .every((b) => b.getAttribute("aria-label") === "Actions for Sunday School")
-  ).toBe(true)
+      .map((b) => b.getAttribute("aria-label"))
+  )
+
+  expect(menus).toEqual(
+    new Set(services.items.filter((s) => !s.archived).map((s) => `Actions for ${s.name}`))
+  )
+
+  await userEvent.click(screen.getAllByRole("button", { name: "Actions for Youth Meeting" })[0])
+
+  expect(screen.getAllByRole("menuitem").map((item) => item.textContent)).toEqual([
+    "Edit name and description",
+  ])
 })
 
 test("the dialog runs right to left in Arabic", async () => {
-  open(services, "ar")
+  open(me.administrator, "ar")
   await userEvent.click(await screen.findByRole("button", { name: "خدمة جديدة" }))
   expect(screen.getByRole("dialog")).toBeInTheDocument()
 })

@@ -4,8 +4,11 @@ import { http, HttpResponse } from "msw"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
 import type { ServiceStages } from "@/features/organization/services/api"
+import type { StageFields } from "@/features/organization/stages/api"
 import { apiUrl, problem } from "@test/support/api"
+import { me } from "@test/support/fixtures/me"
 import { stageRef } from "@test/support/fixtures/sessions"
 import { SUNDAY_SCHOOL_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
@@ -29,7 +32,7 @@ const service = { id: SUNDAY_SCHOOL_ID, name: "Sunday School", tone: 1, archived
 
 const noImpact = { activeSchedules: 0, upcomingSessions: 0 }
 
-const stagesData = (manage = true): ServiceStages => ({
+const stagesData = (): ServiceStages => ({
   service,
   stages: [
     { ...stageRef("3rd Class", 2), description: "Ages 8 to 9", memberCount: 14, impact: noImpact },
@@ -37,10 +40,9 @@ const stagesData = (manage = true): ServiceStages => ({
     { ...stageRef("1st Class", 1), description: null, memberCount: 11, impact: noImpact },
   ],
   archivedStages: [],
-  can: { manageStructure: manage },
 })
 
-function open(data: ServiceStages, write?: () => Response) {
+function open(data: ServiceStages, write?: () => Response, viewer: Me = me.leader) {
   search.value = `id=${SUNDAY_SCHOOL_ID}`
   const sent: { method: string; body: unknown }[] = []
 
@@ -57,17 +59,19 @@ function open(data: ServiceStages, write?: () => Response) {
         )
       )
     }),
-    http.patch(apiUrl("/stages/:id"), async ({ request }) => {
-      sent.push({ method: "PATCH", body: await request.json() })
+    http.put(apiUrl("/stages/:id"), async ({ request }) => {
+      const body = (await request.json()) as StageFields
+      sent.push({ method: "PUT", body })
 
-      return write?.() ?? HttpResponse.json(thirdClass)
+      return write?.() ?? HttpResponse.json({ ...thirdClass, ...body })
     })
   )
 
   renderWithProviders(
     <SidebarProvider>
       <StagesManager />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: viewer }
   )
 
   return sent
@@ -96,7 +100,7 @@ test("rows follow position with member counts and links", async () => {
   )
 })
 
-test("Rename pre-fills the dialog and sends a PATCH", async () => {
+test("Rename pre-fills the dialog and sends the whole stage with a PUT", async () => {
   const sent = open(stagesData())
   await userEvent.click(await screen.findByRole("button", { name: "Actions for 3rd Class" }))
   await userEvent.click(screen.getByRole("menuitem", { name: "Rename" }))
@@ -104,7 +108,12 @@ test("Rename pre-fills the dialog and sends a PATCH", async () => {
   await userEvent.clear(dialog().getByLabelText("Name"))
   await userEvent.type(dialog().getByLabelText("Name"), "Third Class")
   await userEvent.click(dialog().getByRole("button", { name: "Save changes" }))
-  await waitFor(() => expect(sent).toEqual([{ method: "PATCH", body: { name: "Third Class" } }]))
+
+  await waitFor(() =>
+    expect(sent).toEqual([
+      { method: "PUT", body: { name: "Third Class", description: "Ages 8 to 9" } },
+    ])
+  )
 })
 
 test("adding sends a POST and opens the new stage; nameTaken shows under Name", async () => {
@@ -155,8 +164,8 @@ test("409 archivedNoStageChanges keeps the dialog open", async () => {
   expect(screen.getByRole("dialog")).toBeInTheDocument()
 })
 
-test("without manageStructure there is no Add stage and no menu", async () => {
-  open(stagesData(false))
+test("without stages: update there is no Add stage and no menu", async () => {
+  open(stagesData(), undefined, me.servant)
   await screen.findByRole("table")
   expect(screen.queryByRole("button", { name: "Add stage" })).toBeNull()
   expect(screen.queryByRole("button", { name: /^Actions for/ })).toBeNull()
@@ -172,7 +181,8 @@ test("an unknown id shows not found", async () => {
   renderWithProviders(
     <SidebarProvider>
       <StagesManager />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: me.leader }
   )
 
   expect(await screen.findByText("This page doesn’t exist")).toBeInTheDocument()

@@ -12,6 +12,7 @@ import { PageBody, PageHeader } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"
 import { ServiceTag } from "@/components/service-tag"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import { useCan } from "@/features/identity/auth/session"
 import { servicesQuery } from "@/features/organization/services/api"
 import { Link } from "@/i18n/navigation"
 import type { ServiceRef } from "@/lib/api/types/common"
@@ -43,19 +44,20 @@ function compareSchedules(a: ScheduleSummary, b: ScheduleSummary) {
 }
 
 function groupByService(schedules: ScheduleSummary[]) {
-  const groups = new Map<string, { service: ServiceRef; schedules: ScheduleSummary[] }>()
+  const groups = new Map<string, { service: ServiceRef | null; schedules: ScheduleSummary[] }>()
 
   for (const schedule of schedules) {
-    const group = groups.get(schedule.service.id) ?? { service: schedule.service, schedules: [] }
+    const key = schedule.service?.id ?? ""
+    const group = groups.get(key) ?? { service: schedule.service, schedules: [] }
     group.schedules.push(schedule)
-    groups.set(schedule.service.id, group)
+    groups.set(key, group)
   }
 
   return [...groups.values()]
     .sort(
       (a, b) =>
-        Number(a.service.archived) - Number(b.service.archived) ||
-        a.service.name.localeCompare(b.service.name, "de")
+        Number(a.service?.archived ?? true) - Number(b.service?.archived ?? true) ||
+        (a.service?.name ?? "").localeCompare(b.service?.name ?? "", "de")
     )
     .map((group) => ({ ...group, schedules: group.schedules.sort(compareSchedules) }))
 }
@@ -70,7 +72,8 @@ function Schedules({
   serviceId: string | null
 }) {
   const t = useTranslations("meetings.schedules")
-  const inService = list.items.filter((s) => !serviceId || s.service.id === serviceId)
+  const can = useCan()
+  const inService = list.items.filter((s) => !serviceId || s.service?.id === serviceId)
   const groups = groupByService(inService.filter(STATUSES[status]))
 
   const tabs: { key: Status; label: string }[] = [
@@ -120,8 +123,8 @@ function Schedules({
         <div className="flex flex-col gap-10">
           {groups.map((group) => (
             <section
-              key={group.service.id}
-              aria-label={group.service.name}
+              key={group.service?.id ?? ""}
+              aria-label={group.service?.name}
               className="flex flex-col gap-3"
             >
               <h2 className="font-heading text-base font-semibold tracking-tight">
@@ -133,7 +136,7 @@ function Schedules({
                 showService={false}
                 emptyText={t("emptyService")}
                 trailing={(schedule) =>
-                  schedule.can.manage ? (
+                  can("update", "sessions") ? (
                     <EditScheduleButton schedule={schedule} today={list.today} />
                   ) : null
                 }
@@ -148,6 +151,7 @@ function Schedules({
 
 function SchedulesScreen() {
   const t = useTranslations()
+  const can = useCan()
   const search = useSearchParams()
   const status = statusOf(search.get("status"))
   const serviceId = search.get("service")
@@ -168,7 +172,7 @@ function SchedulesScreen() {
           title={t("nav.meetings")}
           description={t("meetings.schedules.description")}
           actions={
-            schedules.data && active.some((service) => service.can.manageSessions) ? (
+            schedules.data && can("create", "sessions") && active.length > 0 ? (
               <NewScheduleButton today={schedules.data.today} />
             ) : null
           }

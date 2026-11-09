@@ -9,25 +9,29 @@ import { QueryState } from "@/components/page-states"
 import { AgendaRow, SessionCardView } from "@/components/session-bits"
 import { Button } from "@/components/ui/button"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
+import type { CountedSession, SessionView } from "@/lib/api/types/meetings"
 import { routes } from "@/lib/routes"
 
 import {
   type AttendanceOverview as Overview,
-  type OverviewSession,
+  overviewSessionIds,
+  useAttendanceCounts,
   useAttendanceOverview,
+  withCounts,
 } from "./api"
 
-export function CardAction({ session, today }: { session: OverviewSession; today: LocalDate }) {
+type Counted = (session: SessionView) => CountedSession
+
+export function CardAction({ session, today }: { session: SessionView; today: LocalDate }) {
   const t = useTranslations("attendance")
+  const can = useCan()
+  const records = can("create", "attendance")
 
-  if (!session.can.record || session.status === "canceled") {
-    return null
-  }
-
-  if (session.status === "active") {
+  if (session.status === "active" && records) {
     return (
       <Button size="sm" asChild>
         <Link href={routes.takeAttendance(session.id)}>
@@ -38,7 +42,7 @@ export function CardAction({ session, today }: { session: OverviewSession; today
     )
   }
 
-  if (session.status === "scheduled" && session.date <= today) {
+  if (session.status === "scheduled" && session.date <= today && records) {
     return (
       <Button size="sm" variant="outline" asChild>
         <Link href={routes.takeAttendance(session.id)}>{t("open")}</Link>
@@ -46,7 +50,7 @@ export function CardAction({ session, today }: { session: OverviewSession; today
     )
   }
 
-  if (session.status === "completed") {
+  if (session.status === "completed" && can("read", "attendance")) {
     return (
       <Button size="sm" variant="outline" asChild>
         <Link href={routes.attendanceSummary(session.id)}>{t("view")}</Link>
@@ -57,7 +61,7 @@ export function CardAction({ session, today }: { session: OverviewSession; today
   return null
 }
 
-function Today({ overview }: { overview: Overview }) {
+function Today({ overview, counted }: { overview: Overview; counted: Counted }) {
   const t = useTranslations("attendance.home")
 
   if (overview.sessions.length === 0) {
@@ -84,20 +88,19 @@ function Today({ overview }: { overview: Overview }) {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      {overview.sessions.map((session) => (
+      {overview.sessions.map((card) => (
         <SessionCardView
-          key={session.id}
-          session={session}
+          key={card.session.id}
+          session={counted(card.session)}
           today={overview.today}
-          href={session.can.record ? undefined : null}
-          action={<CardAction session={session} today={overview.today} />}
+          action={<CardAction session={card.session} today={overview.today} />}
         />
       ))}
     </div>
   )
 }
 
-function Lists({ overview }: { overview: Overview }) {
+function Lists({ overview, counted }: { overview: Overview; counted: Counted }) {
   const t = useTranslations("attendance.home")
   const f = useFormat()
 
@@ -106,10 +109,10 @@ function Lists({ overview }: { overview: Overview }) {
       {overview.earlier.length > 0 ? (
         <Section id="earlier" title={t("earlier")} description={t("earlierDescription")}>
           <ul className="divide-y border-y">
-            {overview.earlier.map((session) => (
+            {overview.earlier.map(({ session }) => (
               <li key={session.id}>
                 <AgendaRow
-                  item={{ ...session, kind: "session" }}
+                  item={{ ...counted(session), kind: "session" }}
                   today={overview.today}
                   href={routes.takeAttendance(session.id)}
                   trailing={
@@ -129,16 +132,16 @@ function Lists({ overview }: { overview: Overview }) {
           <p className="text-sm text-muted-foreground">{t("recentEmpty")}</p>
         ) : (
           <ul className="divide-y border-y">
-            {overview.closed.map((session) => (
+            {overview.closed.map(({ session, state }) => (
               <li key={session.id}>
                 <AgendaRow
-                  item={{ ...session, kind: "session" }}
+                  item={{ ...counted(session), kind: "session" }}
                   today={overview.today}
                   href={routes.attendanceSummary(session.id)}
                   trailing={
                     <span className="text-xs text-muted-foreground">
-                      {session.closedAt
-                        ? t("closedAt", { when: f.atLabel(session.closedAt, overview.today) })
+                      {state.closedAt
+                        ? t("closedAt", { when: f.atLabel(state.closedAt, overview.today) })
                         : t("closed")}
                     </span>
                   }
@@ -152,31 +155,37 @@ function Lists({ overview }: { overview: Overview }) {
   )
 }
 
-export function AttendanceOverview() {
+function OverviewView({ overview }: { overview: Overview }) {
   const t = useTranslations()
   const f = useFormat()
+  const counts = useAttendanceCounts(overviewSessionIds(overview))
+  const counted = (session: SessionView) => withCounts(session, counts)
+
+  return (
+    <>
+      <PageHeader
+        title={t("nav.attendance")}
+        description={t("attendance.home.description", {
+          date: f.longDate(overview.today),
+        })}
+      />
+      <Section id="today" title={t("attendance.home.today")}>
+        <Today overview={overview} counted={counted} />
+      </Section>
+      <Lists overview={overview} counted={counted} />
+    </>
+  )
+}
+
+export function AttendanceOverview() {
+  const t = useTranslations()
   const query = useAttendanceOverview()
 
   return (
     <>
       <Topbar crumbs={[{ label: t("nav.attendance") }]} />
       <PageBody>
-        <QueryState query={query}>
-          {(overview) => (
-            <>
-              <PageHeader
-                title={t("nav.attendance")}
-                description={t("attendance.home.description", {
-                  date: f.longDate(overview.today),
-                })}
-              />
-              <Section id="today" title={t("attendance.home.today")}>
-                <Today overview={overview} />
-              </Section>
-              <Lists overview={overview} />
-            </>
-          )}
-        </QueryState>
+        <QueryState query={query}>{(overview) => <OverviewView overview={overview} />}</QueryState>
       </PageBody>
     </>
   )

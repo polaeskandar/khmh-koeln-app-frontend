@@ -1,7 +1,17 @@
-import type { AttendanceBoard, Mark } from "@/features/meetings/attendance/api"
-import type { PersonRef } from "@/lib/api/types/common"
+import { http, HttpResponse } from "msw"
 
-import { session, stageRef, sundaySchool } from "@test/support/fixtures/sessions"
+import type {
+  AttendanceBoard,
+  AttendanceSheet,
+  BoardSession,
+  Mark,
+} from "@/features/meetings/attendance/api"
+import type { MeetingSession } from "@/features/meetings/meetings/api"
+import type { PersonRef } from "@/lib/api/types/common"
+import type { SessionView } from "@/lib/api/types/meetings"
+import { apiUrl } from "@test/support/api"
+
+import { session, sessionResponse, stageRef, sundaySchool } from "@test/support/fixtures/sessions"
 
 const person = (
   n: number,
@@ -18,8 +28,12 @@ const person = (
 const mark = (n: number, time: string): Mark => ({
   id: `0192f3a4-7b1c-7d2e-8f41-${String(n).padStart(12, "0")}`,
   recordedAt: `2026-11-08T${time}:00+01:00`,
-  recordedBy: { id: "a1", name: "Daniel Mikhail" },
 })
+
+export const boardSession = (
+  view: SessionView,
+  state: Partial<Pick<BoardSession, "openedAt" | "closedAt" | "closedBy">> = {}
+): BoardSession => ({ ...view, openedAt: null, closedAt: null, closedBy: null, ...state })
 
 const NAMES: [string, string, string | null][] = [
   ["Anna", "Fanous", null],
@@ -44,12 +58,14 @@ export const rosterPeople = NAMES.map(([first, last, display], i) =>
 
 export const visitor = person(99, "Theo", "Mansour")
 
-export const thirdClassBoard = (): AttendanceBoard => ({
+export const thirdClassBoard = (): AttendanceSheet => ({
   today: "2026-11-08",
-  session: session({
-    status: "active",
-    counts: { present: 8, rosterSize: 14, rosterPresent: 7, notMarked: 7, notOnRoster: 1 },
-  }),
+  session: boardSession(
+    session({
+      status: "active",
+      counts: { present: 8, rosterSize: 14, rosterPresent: 7, notMarked: 7, notOnRoster: 1 },
+    })
+  ),
   counts: { present: 8, rosterSize: 14, rosterPresent: 7, notMarked: 7, notOnRoster: 1 },
   roster: rosterPeople.map((p, i) => ({
     person: p,
@@ -77,9 +93,11 @@ export const thirdClassBoard = (): AttendanceBoard => ({
   history: [],
 })
 
-export const openRosterBoard = (): AttendanceBoard => ({
+export const openRosterBoard = (): AttendanceSheet => ({
   ...thirdClassBoard(),
-  session: session({ status: "active", stage: stageRef("Bible study", 0), rosterMode: "open" }),
+  session: boardSession(
+    session({ status: "active", stage: stageRef("Bible study", 0), rosterMode: "open" })
+  ),
   counts: { present: 2, rosterSize: null, rosterPresent: 0, notMarked: 0, notOnRoster: 2 },
   roster: [],
   notOnRoster: [
@@ -90,20 +108,20 @@ export const openRosterBoard = (): AttendanceBoard => ({
 
 const christine = { id: "a3", name: "Christine Adel" }
 
-export const closedFirstNovember = (): AttendanceBoard => {
+export const closedFirstNovember = (): AttendanceSheet => {
   const board = thirdClassBoard()
   const at = (time: string) => `2026-11-01T${time}:00+01:00`
 
   return {
     ...board,
-    session: session({
-      date: "2026-11-01",
-      status: "completed",
-      closedAt: at("13:48"),
-      closedBy: christine,
-      can: { manage: true, record: true, reopen: true },
-      counts: { present: 11, rosterSize: 14, rosterPresent: 11, notMarked: 3, notOnRoster: 0 },
-    }),
+    session: boardSession(
+      session({
+        date: "2026-11-01",
+        status: "completed",
+        counts: { present: 11, rosterSize: 14, rosterPresent: 11, notMarked: 3, notOnRoster: 0 },
+      }),
+      { openedAt: at("12:00"), closedAt: at("13:48"), closedBy: christine }
+    ),
     counts: { present: 11, rosterSize: 14, rosterPresent: 11, notMarked: 3, notOnRoster: 0 },
     roster: rosterPeople.map((p, i) => ({
       person: p,
@@ -112,7 +130,6 @@ export const closedFirstNovember = (): AttendanceBoard => {
           ? {
               id: `m${i}`,
               recordedAt: at(`12:${String(10 + i).padStart(2, "0")}`),
-              recordedBy: christine,
             }
           : null,
     })),
@@ -121,10 +138,8 @@ export const closedFirstNovember = (): AttendanceBoard => {
       {
         id: "c1",
         person: rosterPeople[4],
-        recordedAt: at("12:04"),
-        recordedBy: christine,
-        removedAt: at("13:46"),
-        removedBy: christine,
+        recorded: { at: at("12:04"), by: christine },
+        removed: { at: at("13:46"), by: christine },
         reason: "Tapped the wrong name",
       },
     ],
@@ -149,3 +164,34 @@ export const closedFirstNovember = (): AttendanceBoard => {
     ],
   }
 }
+
+export const detailOf = (sheet: AttendanceSheet): MeetingSession => ({
+  today: sheet.today,
+  session: sessionResponse(sheet.session),
+  state: {
+    id: sheet.session.id,
+    status: sheet.session.status,
+    openedAt: sheet.session.openedAt,
+    closedAt: sheet.session.closedAt,
+    closedBy: sheet.session.closedBy,
+  },
+  schedule: null,
+  history: sheet.history,
+})
+
+export const boardOf = (sheet: AttendanceSheet): AttendanceBoard => ({
+  counts: sheet.counts,
+  roster: sheet.roster,
+  notOnRoster: sheet.notOnRoster,
+  recentlyMarked: sheet.recentlyMarked,
+})
+
+export const sheetHandlers = (sheet: AttendanceSheet) => [
+  http.get(apiUrl(`/sessions/${sheet.session.id}`), () => HttpResponse.json(detailOf(sheet))),
+  http.get(apiUrl(`/sessions/${sheet.session.id}/attendance`), () =>
+    HttpResponse.json(boardOf(sheet))
+  ),
+  http.get(apiUrl(`/sessions/${sheet.session.id}/attendance/corrections`), () =>
+    HttpResponse.json({ items: sheet.corrections })
+  ),
+]

@@ -186,9 +186,11 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
 
     const result = await approve.execute(request.account.id, {
       as: "member",
-      personId,
-      ageCheck,
-      guardianConsentNote: ageCheck === "guardianConsent" ? note.trim() || null : null,
+      member: {
+        personId,
+        ageCheck,
+        guardianConsentNote: ageCheck === "guardianConsent" ? note.trim() || null : null,
+      },
     })
 
     if (!result.ok && result.problem.code && CLOSE_AND_REFETCH.has(result.problem.code)) {
@@ -205,7 +207,7 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
           {request.note}
         </blockquote>
       ) : null}
-      <FieldSet data-invalid={errors.personId ? true : undefined}>
+      <FieldSet data-invalid={errors["member.personId"] ? true : undefined}>
         <FieldLegend variant="label">{t("accountRequests.approve.memberRecord")}</FieldLegend>
         <FieldDescription>
           {t("accountRequests.approve.memberRecordHint", { name: isolate(name) })}
@@ -272,9 +274,9 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
             ))}
           </RadioGroup>
         )}
-        {errors.personId ? <FieldError>{errors.personId}</FieldError> : null}
+        {errors["member.personId"] ? <FieldError>{errors["member.personId"]}</FieldError> : null}
       </FieldSet>
-      <FieldSet data-invalid={errors.ageCheck ? true : undefined}>
+      <FieldSet data-invalid={errors["member.ageCheck"] ? true : undefined}>
         <FieldLegend variant="label">{t("accountRequests.approve.age")}</FieldLegend>
         <FieldDescription>{t("accountRequests.approve.ageHint")}</FieldDescription>
         <RadioGroup
@@ -293,7 +295,7 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
             </label>
           ))}
         </RadioGroup>
-        {errors.ageCheck ? <FieldError>{errors.ageCheck}</FieldError> : null}
+        {errors["member.ageCheck"] ? <FieldError>{errors["member.ageCheck"]}</FieldError> : null}
       </FieldSet>
       {ageCheck === "guardianConsent" ? (
         <TextAreaField
@@ -305,7 +307,7 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
           error={
             noteTooLong
               ? t("errors.validation.tooLong", { max: String(NOTE_MAX) })
-              : errors.guardianConsentNote
+              : errors["member.guardianConsentNote"]
           }
         />
       ) : null}

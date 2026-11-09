@@ -108,7 +108,11 @@
       "unexpectedField": "Dieses Feld ist hier nicht vorgesehen.",
       "invalidRange": "Wählen Sie ein Ende am oder nach dem Beginn, höchstens {max} Tage später.",
       "birthDateInFuture": "Das Geburtsdatum darf nicht in der Zukunft liegen.",
-      "addressIncomplete": "Geben Sie Straße, Postleitzahl und Ort an oder nichts davon."
+      "addressIncomplete": "Geben Sie Straße, Postleitzahl und Ort an oder nichts davon.",
+      "invalidChoice": "Wählen Sie eine der angebotenen Möglichkeiten.",
+      "tooLarge": "Geben Sie eine Zahl bis {max} ein.",
+      "tooMany": "Wählen Sie höchstens {max}.",
+      "tooSmall": "Geben Sie eine Zahl ab {min} ein."
     },
     "services": {
       "adminOnlyCreate": "Sie können keine Dienste anlegen.",
@@ -199,7 +203,8 @@
       "chooseJoinService": "Wählen Sie den Dienst, dem diese Person beitritt.",
       "membershipOutsideServices": "Sie können Zugehörigkeiten nur in den Diensten und Stufen ändern, in denen Sie dienen.",
       "moveOutsideStages": "Sie können Personen nur in Stufen verschieben, in denen Sie dienen.",
-      "personInactive": "{name} ist inaktiv. Aktivieren Sie die Person zuerst wieder."
+      "personInactive": "{name} ist inaktiv. Aktivieren Sie die Person zuerst wieder.",
+      "searchTooShort": "Geben Sie mindestens {min} Buchstaben ein."
     },
     "roles": {
       "adminOnly": "Sie können keine Rollen vergeben oder entziehen.",
@@ -216,7 +221,9 @@
       "chooseService": "Wählen Sie den Dienst, für den diese Rolle gilt.",
       "ownAdminRole": "Sie können Ihre eigene Administratorrolle nicht entfernen. Bitten Sie einen anderen Administrator darum.",
       "stageOnlyForServants": "Nur Diener-Rollen können auf eine Stufe beschränkt werden.",
-      "lastAdministrator": "Der letzte aktive Administrator behält diese Rolle. Machen Sie zuerst jemand anderen zum Administrator."
+      "lastAdministrator": "Der letzte aktive Administrator behält diese Rolle. Machen Sie zuerst jemand anderen zum Administrator.",
+      "accountPending": "Dieses Konto wartet auf Bestätigung. Es erhält seine Rollen bei der Bestätigung.",
+      "notHeld": "{name} hat diese Rolle nicht."
     },
     "materials": {
       "labelTooLong": "Höchstens 120 Zeichen für die Bezeichnung.",
@@ -241,7 +248,8 @@
       "changeNotAllowed": "Sie können keine Lektionen ändern.",
       "deleteNotAllowed": "Sie können keine Lektionen archivieren oder löschen.",
       "prepareStageOnly": "Sie können für diese Stufe keine Lektionen vorbereiten.",
-      "changeStageOnly": "Sie können die Lektionen dieser Stufe nicht ändern."
+      "changeStageOnly": "Sie können die Lektionen dieser Stufe nicht ändern.",
+      "changedMeanwhile": "Jemand anderes hat diese Lektion inzwischen geändert. Laden Sie sie neu und speichern Sie erneut."
     },
     "homework": {
       "titleRequired": "Geben Sie einen Titel ein, z. B. „Merkvers auswendig lernen“.",
@@ -263,14 +271,17 @@
       "changeNotAllowed": "Sie können keine Hausaufgaben ändern.",
       "deleteNotAllowed": "Sie können keine Hausaufgaben archivieren oder löschen.",
       "changeStageOnly": "Sie können die Hausaufgaben dieser Stufe nicht ändern.",
-      "assignStageOnly": "Sie können dieser Stufe keine Hausaufgaben geben."
+      "assignStageOnly": "Sie können dieser Stufe keine Hausaufgaben geben.",
+      "alreadyUndone": "Diese Meldung wurde bereits zurückgenommen.",
+      "changedMeanwhile": "Jemand anderes hat diese Hausaufgabe inzwischen geändert. Laden Sie sie neu und speichern Sie erneut."
     },
     "guardians": {
       "adminOnlyGrant": "Sie können Eltern keinen Zugang zu Kindern geben.",
       "alreadyHasAccess": "{parent} hat bereits Zugang zu {child}.",
       "adminOnlyApprove": "Sie können den Elternzugang nicht freigeben.",
       "adminOnlyRemove": "Sie können den Elternzugang nicht entfernen.",
-      "accountNotActive": "Dieses Konto ist nicht aktiv. Bestätigen oder aktivieren Sie es zuerst."
+      "accountInactive": "Dieses Konto ist nicht aktiv. Bestätigen oder aktivieren Sie es zuerst.",
+      "childInactive": "Diese Person ist inaktiv. Aktivieren Sie sie zuerst wieder."
     },
     "accounts": {
       "firstNameRequired": "Geben Sie Ihren Vornamen ein.",
@@ -299,7 +310,11 @@
       "chooseServiceForRole": "Wählen Sie den Dienst für diese Rolle.",
       "stageNotInService": "Diese Stufe gehört nicht zum gewählten Dienst.",
       "privacyNoticeOutdated": "Die Datenschutzhinweise haben sich geändert. Laden Sie die Seite neu, lesen Sie sie und bestätigen Sie erneut.",
-      "currentPasswordWrong": "Das ist nicht Ihr aktuelles Passwort."
+      "currentPasswordWrong": "Das ist nicht Ihr aktuelles Passwort.",
+      "chooseLanguage": "Wählen Sie Englisch, Deutsch oder Arabisch.",
+      "chooseRegisteredAs": "Wählen Sie Elternteil, Diener oder Mitglied.",
+      "passwordLinkUnavailable": "Passwort-Links gibt es nur für bestätigte, aktive Konten.",
+      "requestDisabled": "Das Konto dieser Anfrage ist deaktiviert. Aktivieren Sie es vor dem Bestätigen oder lehnen Sie die Anfrage ab."
     },
     "privacy": {
       "adminOnly": "Sie können keine Datenschutzanfragen bearbeiten.",
@@ -328,7 +343,8 @@
       "pending": "Ihr Konto wartet auf die Freigabe durch das Gemeindebüro.",
       "disabled": "Mit diesem Konto ist keine Anmeldung mehr möglich. Wenden Sie sich an das Gemeindebüro, wenn Sie das für einen Fehler halten.",
       "tooManyAttempts": "Zu viele Versuche. Warten Sie ein paar Minuten und versuchen Sie es dann noch einmal.",
-      "resetLinkInvalid": "Dieser Link funktioniert nicht mehr. Bitten Sie das Gemeindebüro um einen neuen."
+      "resetLinkInvalid": "Dieser Link funktioniert nicht mehr. Bitten Sie das Gemeindebüro um einen neuen.",
+      "confirmationLinkInvalid": "Dieser Bestätigungslink ist ungültig oder abgelaufen. Registrieren Sie sich erneut, um einen neuen zu erhalten."
     }
   },
   "toast": {
@@ -2033,11 +2049,7 @@
     },
     "keep": {
       "sessionTotals": "{count, plural, one {Anwesenheitszahlen von # Treffen} other {Anwesenheitszahlen von # Treffen}}",
-      "recordedMarks": "{count, plural, one {# von der Person erfasster Anwesenheitseintrag} other {# von der Person erfasste Anwesenheitseinträge}}",
-      "reportedCompletions": "{count, plural, one {# von der Person gemeldete Erledigung} other {# von der Person gemeldete Erledigungen}}",
-      "lessons": "{count, plural, one {# vorbereitete Lektion} other {# vorbereitete Lektionen}}",
-      "homework": "{count, plural, one {# angelegte Hausaufgabe} other {# angelegte Hausaufgaben}}",
-      "sessionHistory": "{count, plural, one {# Eintrag im Verlauf von Treffen} other {# Einträge im Verlauf von Treffen}}"
+      "accountRows": "{count, plural, one {# vom Konto angelegter Eintrag, der ohne es bleibt} other {# vom Konto angelegte Einträge, die ohne es bleiben}}"
     },
     "mention": {
       "sessionNote": "Notiz zum Treffen",

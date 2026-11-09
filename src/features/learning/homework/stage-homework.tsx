@@ -9,6 +9,7 @@ import { QueryState } from "@/components/page-states"
 import { Button } from "@/components/ui/button"
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useCan } from "@/features/identity/auth/session"
 import { CompletionMeter, HomeworkStatusBadge } from "@/features/learning/lessons/lesson-bits"
 import type { Stage } from "@/features/organization/stages/api"
 import { StageLayout } from "@/features/organization/stages/stage-layout"
@@ -110,7 +111,7 @@ function Rows({ data, tab }: { data: StageHomework; tab: Tab }) {
                 )}
               </td>
               <td className="px-3 py-3 text-end">
-                <HomeworkActions homework={row} place="list" />
+                <HomeworkActions homework={row} stageArchived={data.archived} place="list" />
               </td>
             </tr>
           ))}
@@ -122,6 +123,7 @@ function Rows({ data, tab }: { data: StageHomework; tab: Tab }) {
 
 function Homework({ stage }: { stage: Stage }) {
   const t = useTranslations("homework")
+  const can = useCan()
   const search = useSearchParams()
   const router = useRouter()
   const query = useStageHomework(stage.id)
@@ -131,6 +133,7 @@ function Homework({ stage }: { stage: Stage }) {
     <QueryState query={query}>
       {(data) => {
         const tab = TABS.includes(requested as Tab) ? (requested as Tab) : defaultTab(data)
+        const creatable = !data.archived && can("create", "homework")
 
         return (
           <Section
@@ -138,7 +141,7 @@ function Homework({ stage }: { stage: Stage }) {
             title={t("title")}
             description={t("list.description", { stage: stage.name })}
             actions={
-              data.can.create && data.lessons.length > 0 ? (
+              creatable && data.lessons.length > 0 ? (
                 <Button asChild>
                   <Link href={routes.newHomework(stage.id)}>
                     <Plus data-icon="inline-start" />
@@ -148,7 +151,7 @@ function Homework({ stage }: { stage: Stage }) {
               ) : null
             }
           >
-            {data.can.create && data.lessons.length === 0 ? (
+            {creatable && data.lessons.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 {t.rich("list.needsLesson", {
                   link: (chunks) => (

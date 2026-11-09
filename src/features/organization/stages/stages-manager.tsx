@@ -1,5 +1,6 @@
 "use client"
 
+import { useCan } from "@/features/identity/auth/session"
 import {
   type Announcements,
   closestCenter,
@@ -136,7 +137,8 @@ function Manager({ data }: { data: ServiceStages }) {
     [data.stages]
   )
 
-  const manage = data.can.manageStructure
+  const can = useCan()
+  const manage = can("update", "stages") && !service.archived
   const byId = useMemo(() => new Map(stages.map((stage) => [stage.id, stage])), [stages])
   const key = stages.map((stage) => stage.id).join()
   const [order, setOrder] = useState(() => stages.map((stage) => stage.id))
@@ -243,7 +245,11 @@ function Manager({ data }: { data: ServiceStages }) {
         <PageHeader
           title={t("stages.page.title", { name: service.name })}
           description={manage && rows.length > 1 ? t("stages.page.hint") : undefined}
-          actions={manage ? <AddStageButton service={service} /> : null}
+          actions={
+            can("create", "stages") && !service.archived ? (
+              <AddStageButton service={service} />
+            ) : null
+          }
         />
         {rows.length === 0 ? (
           <Empty className="border border-dashed">

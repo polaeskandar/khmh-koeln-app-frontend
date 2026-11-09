@@ -5,8 +5,10 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
 import type { AgendaItem, PlannedItem } from "@/lib/api/types/meetings"
 import { apiUrl, problem } from "@test/support/api"
+import { me } from "@test/support/fixtures/me"
 import { services } from "@test/support/fixtures/services"
 import { session } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
@@ -40,12 +42,7 @@ const youth = {
   archived: false,
 }
 
-const planned = (
-  service: typeof youth,
-  date: string,
-  scheduleId: string,
-  manage = true
-): PlannedItem => ({
+const planned = (service: typeof youth, date: string, scheduleId: string): PlannedItem => ({
   kind: "planned",
   scheduleId,
   date,
@@ -58,12 +55,11 @@ const planned = (
   endsAt: `${date}T21:00:00+01:00`,
   location: null,
   rosterMode: "open",
-  can: { manage },
 })
 
 const bibleWednesday = planned(bibleStudy, "2026-11-11", "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8a01")
 
-function open(date: string, items: AgendaItem[], answer?: () => Response) {
+function open(date: string, items: AgendaItem[], answer?: () => Response, who: Me = me.leader) {
   search.value = `date=${date}`
   let current = items
   const sent: { path: string; body: unknown }[] = []
@@ -110,7 +106,8 @@ function open(date: string, items: AgendaItem[], answer?: () => Response) {
   renderWithProviders(
     <SidebarProvider>
       <AgendaPage />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: who }
   )
 
   return sent
@@ -167,20 +164,25 @@ test("a 409 dateInPast keeps the dialog open with its text and no toast", async 
   expect(screen.getByRole("alertdialog")).toBeInTheDocument()
 })
 
-test("only planned rows with can.manage get the menu, named for their own date", async () => {
-  const youthFriday = planned(youth, "2026-11-13", "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8a02")
-  const readOnly = planned(bibleStudy, "2026-11-13", "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8a03", false)
+const youthFriday = planned(youth, "2026-11-13", "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8a02")
 
-  const generated = {
-    ...session({ date: "2026-11-13", service: youth, stage: null }),
-    kind: "session" as const,
-  }
+const generated = {
+  ...session({ date: "2026-11-13", service: youth, stage: null }),
+  kind: "session" as const,
+}
 
-  open("2026-11-13", [youthFriday, readOnly, generated])
+test("only planned rows get the menu, named for their own date", async () => {
+  open("2026-11-13", [youthFriday, generated])
 
   expect(
     await screen.findByRole("button", { name: "Change Youth Meeting on Friday 13 November" })
   ).toBeInTheDocument()
 
   expect(screen.getAllByRole("button", { name: /^Change / })).toHaveLength(1)
+})
+
+test("without sessions: update no row gets the menu", async () => {
+  open("2026-11-13", [youthFriday, generated], undefined, me.servant)
+  await screen.findByRole("heading", { name: "Friday 13 November 2026" })
+  expect(screen.queryAllByRole("button", { name: /^Change / })).toEqual([])
 })

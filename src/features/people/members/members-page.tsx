@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/input-group"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { RequirePermission } from "@/features/identity/auth/guards"
+import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { fullName, initials, preferredName } from "@/lib/domain/names"
 
@@ -198,6 +199,7 @@ type Status = "active" | "inactive" | "all"
 
 export function MembersScreen() {
   const t = useTranslations()
+  const can = useCan()
   const [selected, setSelected] = useState<{ id: string; key: string } | null>(null)
   const groups = useGroupOptions()
   const [search, setSearch] = useState("")
@@ -257,7 +259,7 @@ export function MembersScreen() {
           ) : null}
         </InputGroup>
         <span className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          {people.data?.can.add ? <AddPersonButton /> : null}
+          {can("create", "members") ? <AddPersonButton /> : null}
           <NativeSelect
             aria-label={t("members.service")}
             className="w-full sm:w-64"

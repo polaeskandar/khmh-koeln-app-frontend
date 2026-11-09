@@ -14,6 +14,7 @@ import {
   type AgendaItem,
   groupOf,
   type PlannedItem,
+  type SessionItem,
   type SessionView,
 } from "@/lib/api/types/meetings"
 import { isolate } from "@/lib/bidi"
@@ -21,7 +22,11 @@ import { addDays } from "@/lib/domain/time"
 import type { Format } from "@/lib/format"
 import { routes } from "@/lib/routes"
 
-export function agendaHref(item: AgendaItem): string | undefined {
+type Linked = Pick<PlannedItem, "kind" | "scheduleId"> | Pick<SessionItem, "kind" | "id" | "status">
+
+type Badged = Pick<PlannedItem, "kind"> | Pick<SessionItem, "kind" | "status" | "scheduleId">
+
+export function agendaHref(item: Linked): string | undefined {
   if (item.kind === "planned") {
     return routes.schedule(item.scheduleId)
   }
@@ -146,7 +151,7 @@ export function SessionWhen({
   )
 }
 
-export function SessionBadges({ item, soft }: { item: AgendaItem; soft?: boolean }) {
+export function SessionBadges({ item, soft }: { item: Badged; soft?: boolean }) {
   if (item.kind === "planned") {
     return <SessionStatusBadge status="planned" soft={soft} />
   }
