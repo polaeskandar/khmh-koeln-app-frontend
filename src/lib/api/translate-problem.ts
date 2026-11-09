@@ -9,6 +9,7 @@ export type Problem = {
   status: number
   code: string | null
   message: string
+  params: Record<string, unknown>
   fieldErrors: Record<string, string>
   extensions: Record<string, unknown>
 }
@@ -76,6 +77,7 @@ export function describeProblem(error: ApiError, t: ProblemTranslator): Problem 
     status: error.status,
     code: error.code,
     message: translateProblem(error, t),
+    params: error.params,
     fieldErrors: fieldErrorsOf(error, t),
     extensions: error.extensions,
   }

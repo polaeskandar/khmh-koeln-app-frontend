@@ -36,6 +36,7 @@ type SessionContext = {
   refresh: () => Promise<unknown>
   signOut: () => Promise<void>
   signingOut: boolean
+  endSession: (to: string) => void
 }
 
 const Context = createContext<SessionContext | null>(null)
@@ -70,14 +71,19 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
   }, [session.status])
 
-  const end = useCallback(
-    (next: string | undefined) => {
+  const endSession = useCallback(
+    (to: string) => {
       ended.current = true
       setClosed(true)
       queryClient.clear()
-      router.replace(routes.signIn(next))
+      router.replace(to)
     },
     [queryClient, router]
+  )
+
+  const end = useCallback(
+    (next: string | undefined) => endSession(routes.signIn(next)),
+    [endSession]
   )
 
   useEffect(
@@ -134,7 +140,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [execute, end])
 
   return (
-    <Context.Provider value={{ session, refresh, signOut, signingOut: pending }}>
+    <Context.Provider value={{ session, refresh, signOut, signingOut: pending, endSession }}>
       {children}
     </Context.Provider>
   )

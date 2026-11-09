@@ -71,17 +71,18 @@ account menu while `me.member.groupCount > 0`.
 
 ## Before signing in (`app/[locale]/(public)`)
 
-| Screen               | Prototype route    | Product route            | Builder               |
-| -------------------- | ------------------ | ------------------------ | --------------------- |
-| Sign in              | `/sign-in`         | `/sign-in/?next=`        | `signIn(next?)`       |
-| Waiting for approval | `/sign-in/pending` | `/sign-in/pending/`      | `signInPending()`     |
-| Confirm email first  | –                  | `/sign-in/unconfirmed/`  | `signInUnconfirmed()` |
-| Register             | `/register`        | `/register/`             | `register()`          |
-| Registered           | `/register/done`   | `/register/done/`        | `registered()`        |
-| Forgot password      | `/forgot-password` | `/forgot-password/`      | `forgotPassword()`    |
-| Set a password       | –                  | `/set-password/#token=`  | `setPassword(token)`  |
-| Confirm email        | –                  | `/confirm-email/#token=` | –                     |
-| Privacy notice       | `/privacy`         | `/privacy/`              | `privacy()`           |
+| Screen               | Prototype route    | Product route                 | Builder                    |
+| -------------------- | ------------------ | ----------------------------- | -------------------------- |
+| Sign in              | `/sign-in`         | `/sign-in/?next=`             | `signIn(next?)`            |
+| Waiting for approval | `/sign-in/pending` | `/sign-in/pending/`           | `signInPending()`          |
+| Confirm email first  | –                  | `/sign-in/unconfirmed/`       | `signInUnconfirmed()`      |
+| Erasure scheduled    | –                  | `/sign-in/erasure-scheduled/` | `signInErasureScheduled()` |
+| Register             | `/register`        | `/register/`                  | `register()`               |
+| Registered           | `/register/done`   | `/register/done/`             | `registered()`             |
+| Forgot password      | `/forgot-password` | `/forgot-password/`           | `forgotPassword()`         |
+| Set a password       | –                  | `/set-password/#token=`       | `setPassword(token)`       |
+| Confirm email        | –                  | `/confirm-email/#token=`      | –                          |
+| Privacy notice       | `/privacy`         | `/privacy/`                   | `privacy()`                |
 
 The prototype's demo sign-in (`/sign-in/demo`) has no product route.
 
@@ -92,6 +93,10 @@ The prototype's demo sign-in (`/sign-in/demo`) has no product route.
 - `/confirm-email/#token=…` is the link the registration email carries (backend #84). The page confirms the
   address once and removes the token from the address. Signing in before that opens `/sign-in/unconfirmed/`
   (`auth.unconfirmed`, backend #313); after it, `/sign-in/pending/` until the office approves the account.
+- `/sign-in/erasure-scheduled/` opens right after an account asked for its own erasure (the request ends every
+  session) or when signing in answers 403 `auth.erasureScheduled` (backend #315). It shows the date the account
+  is erased and cancels the erasure with the email address and password. Like the waiting and confirm-first
+  pages, it is the 404 page unless one of those outcomes just led there.
 
 ## Entry points
 

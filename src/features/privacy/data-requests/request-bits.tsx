@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "cn"
-import { Ban, CheckCheck, CircleAlert, Clock, Hourglass } from "lucide-react"
+import { Ban, CheckCheck, CircleAlert, Clock, Hourglass, Undo2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { StatusBadge } from "@/components/status"
@@ -65,14 +65,19 @@ export function DueLabel({ dueOn, today }: { dueOn: LocalDate; today: LocalDate 
   )
 }
 
+const STATUS_BADGES = {
+  open: { tone: "info", icon: Hourglass },
+  done: { tone: "success", icon: CheckCheck },
+  declined: { tone: "neutral", icon: Ban },
+  withdrawn: { tone: "muted", icon: Undo2 },
+} as const
+
 export function RequestStatusBadge({ status }: { status: DataRequestRow["status"] }) {
   const t = useTranslations("privacy.status")
+  const { tone, icon } = STATUS_BADGES[status]
 
   return (
-    <StatusBadge
-      tone={status === "open" ? "info" : status === "done" ? "success" : "neutral"}
-      icon={status === "open" ? Hourglass : status === "done" ? CheckCheck : Ban}
-    >
+    <StatusBadge tone={tone} icon={icon}>
       {t(status)}
     </StatusBadge>
   )

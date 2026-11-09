@@ -13,7 +13,12 @@ import { renderWithProviders } from "@test/support/providers"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
-import { forgetOutcome, rememberOutcome } from "@/features/identity/auth/auth-outcome"
+import {
+  forgetOutcome,
+  lastOutcome,
+  rememberOutcome,
+  scheduledErasureOn,
+} from "@/features/identity/auth/auth-outcome"
 import { PendingPage, SignInPage, UnconfirmedPage } from "@/features/identity/auth/sign-in-page"
 
 vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
@@ -150,6 +155,20 @@ describe("when signing in fails", () => {
     await signIn()
     await submit()
     await waitFor(() => expect(router.push).toHaveBeenCalledExactlyOnceWith("/sign-in/pending/"))
+  })
+
+  test("an account with a scheduled erasure opens the scheduled page with its date", async () => {
+    backend(() => problem(403, "auth.erasureScheduled", { params: { erasesOn: "2026-11-22" } }))
+    await signIn()
+    await submit()
+
+    await waitFor(() =>
+      expect(router.push).toHaveBeenCalledExactlyOnceWith("/sign-in/erasure-scheduled/")
+    )
+
+    expect(lastOutcome()).toBe("erasureScheduled")
+    expect(scheduledErasureOn()).toBe("2026-11-22")
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
   })
 })
 

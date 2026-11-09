@@ -42,6 +42,7 @@ const row = (id: string, extra: Partial<DataRequestRow>): DataRequestRow => ({
   outcome: null,
   subjectName: "Kirollos Iskander",
   erasedSubject: null,
+  erasesOn: null,
   ...extra,
 })
 
@@ -55,6 +56,14 @@ const mockup: DataRequests = {
       erasedSubject: { kind: "member", group: "Youth Meeting" },
       closedAt: "2026-10-20T10:00:00Z",
       closedBy: { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f01", name: "Mariam Fahmy" },
+    }),
+    row("0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea903", {
+      status: "withdrawn",
+      channel: "app",
+      requestedBy: "Mina Gerges",
+      subjectName: "Mina Gerges",
+      erasesOn: "2026-11-21",
+      closedAt: "2026-11-07T10:00:00Z",
     }),
   ],
 }
@@ -128,6 +137,16 @@ test("shows the open and closed requests as in the mockup", async () => {
   )
 
   expect(screen.getByText("Erased member of Youth Meeting")).toBeInTheDocument()
+})
+
+test("a withdrawn request reads Withdrawn, closed without anyone from the office", async () => {
+  open()
+  const link = await screen.findByRole("link", { name: "Mina Gerges" })
+  const cells = within(link.closest("tr")!)
+  expect(cells.getByText("Withdrawn")).toBeInTheDocument()
+  expect(cells.getByText("yesterday at 11:00")).toBeInTheDocument()
+  expect(cells.getByText("In the app")).toBeInTheDocument()
+  expect(link.closest("tr")).not.toHaveTextContent(/ by /)
 })
 
 describe("the record dialog", () => {
