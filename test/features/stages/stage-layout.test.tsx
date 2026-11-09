@@ -26,7 +26,6 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks()
-  vi.unstubAllEnvs()
 })
 
 const renderPage = (locale: Locale = "en") =>
@@ -81,8 +80,7 @@ describe("the header", () => {
 })
 
 describe("the tabs", () => {
-  test("link to the four routes with registration on; only Overview is current", async () => {
-    vi.stubEnv("NEXT_PUBLIC_REGISTRATION_ENABLED", "true")
+  test("link to the four routes; only Overview is current", async () => {
     answer(() => HttpResponse.json(thirdClass))
     renderPage()
     const tabs = within(await screen.findByRole("navigation", { name: "3rd Class sections" }))
@@ -109,17 +107,6 @@ describe("the tabs", () => {
 
     expect(tabs.getAllByRole("link").filter((link) => link.hasAttribute("aria-current"))).toEqual([
       tabs.getByRole("link", { name: "Overview" }),
-    ])
-  })
-
-  test("show only Overview and Attendance with registration off", async () => {
-    answer(() => HttpResponse.json(thirdClass))
-    renderPage()
-    const tabs = within(await screen.findByRole("navigation", { name: "3rd Class sections" }))
-
-    expect(tabs.getAllByRole("link").map((link) => link.textContent)).toEqual([
-      "Overview",
-      "Attendance",
     ])
   })
 })

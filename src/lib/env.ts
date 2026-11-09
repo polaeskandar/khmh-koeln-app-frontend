@@ -28,8 +28,6 @@ export const apiBaseUrl = () =>
     production: process.env.NODE_ENV === "production",
   })
 
-export const registrationEnabled = () => process.env.NEXT_PUBLIC_REGISTRATION_ENABLED === "true"
-
 export function parseImpressumUrl(
   value: string | undefined,
   { production }: { production: boolean }

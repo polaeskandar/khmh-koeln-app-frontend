@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { Link } from "@/i18n/navigation"
-import { registrationEnabled } from "@/lib/env"
 import { routes } from "@/lib/routes"
 
 import { AuthFrame, AuthHeading, TodayDates } from "./auth-frame"
@@ -21,20 +20,18 @@ export function SignInPage() {
         aside={
           <>
             <TodayDates />
-            {registrationEnabled() ? (
-              <div className="flex flex-col gap-3">
-                <h2 className="font-heading text-base font-semibold tracking-tight">
-                  {t("newHere")}
-                </h2>
-                <p className="max-w-prose text-muted-foreground">{t("newHereText")}</p>
-                <Button variant="outline" asChild className="self-start">
-                  <Link href={routes.register()}>
-                    {t("register")}
-                    <ArrowRight data-icon="inline-end" />
-                  </Link>
-                </Button>
-              </div>
-            ) : null}
+            <div className="flex flex-col gap-3">
+              <h2 className="font-heading text-base font-semibold tracking-tight">
+                {t("newHere")}
+              </h2>
+              <p className="max-w-prose text-muted-foreground">{t("newHereText")}</p>
+              <Button variant="outline" asChild className="self-start">
+                <Link href={routes.register()}>
+                  {t("register")}
+                  <ArrowRight data-icon="inline-end" />
+                </Link>
+              </Button>
+            </div>
           </>
         }
       >

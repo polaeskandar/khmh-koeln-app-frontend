@@ -13,13 +13,14 @@ import { RecordPage } from "@/components/record-page"
 import { ServiceTag } from "@/components/service-tag"
 import { StatusBadge } from "@/components/status"
 import type { ServiceRef, StageRef } from "@/lib/api/types/common"
-import { registrationEnabled } from "@/lib/env"
 import { routes } from "@/lib/routes"
 
 import { type Stage, stageQuery } from "./api"
 import { StageMembers } from "./stage-members"
 
 export type StageTab = "overview" | "attendance" | "lessons" | "homework"
+
+const STAGE_TABS: StageTab[] = ["overview", "attendance", "lessons", "homework"]
 
 function useTabLabels(): Record<StageTab, string> {
   const t = useTranslations()
@@ -65,10 +66,6 @@ function StageHeader({ stage, tab }: { stage: Stage; tab: StageTab }) {
   const t = useTranslations()
   const tabs = useTabLabels()
 
-  const shown: StageTab[] = registrationEnabled()
-    ? ["overview", "attendance", "lessons", "homework"]
-    : ["overview", "attendance"]
-
   return (
     <div className="flex flex-col gap-5">
       <PageHeader
@@ -93,7 +90,11 @@ function StageHeader({ stage, tab }: { stage: Stage; tab: StageTab }) {
       <LinkTabs
         label={t("stages.sections", { name: stage.name })}
         active={tab}
-        items={shown.map((key) => ({ key, label: tabs[key], href: TAB_ROUTES[key](stage.id) }))}
+        items={STAGE_TABS.map((key) => ({
+          key,
+          label: tabs[key],
+          href: TAB_ROUTES[key](stage.id),
+        }))}
       />
     </div>
   )
