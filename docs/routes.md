@@ -25,7 +25,7 @@ stage by its own id, which already names its service.
 | Attendance overview       | –                                  | `/attendance/`                        | `attendance()`                |
 | 07, 10 Manual attendance  | `/attendance/:session`             | `/attendance/take/?session=`          | `takeAttendance(session)`     |
 | 08 Attendance summary     | `/attendance/:session/summary`     | `/attendance/summary/?session=`       | `attendanceSummary(session)`  |
-| 09 Members                | `/members`                         | `/members/`                           | `members()`                   |
+| 09 Members                | `/members`                         | `/members/?q=&group=&status=`         | `members(view?)`              |
 | Settings (all sections)   | `/settings`                        | `/settings/`                          | `settings()`                  |
 | A new role                | `/settings/roles/new`              | `/settings/roles/new/`                | `newRole()`                   |
 | A role                    | `/settings/roles/:role`            | `/settings/roles/view/?id=`           | `role(id)`                    |
@@ -41,6 +41,11 @@ stage by its own id, which already names its service.
 | S05 Homework editor, new  | `…/homework/new?lesson=`           | `/homework/new/?stage=&lesson=`       | `newHomework(stage, lesson?)` |
 | S05 Homework editor, edit | `…/homework/:homework/edit`        | `/homework/edit/?id=`                 | `editHomework(id)`            |
 | S06 Homework progress     | `…/homework/:homework`             | `/homework/view/?id=`                 | `homework(id)`                |
+
+The members list keeps its search (`q`), group filter (`group`, `service:<id>` or `stage:<id>`) and tab
+(`status`, `inactive` or `all`) in the address, as the schedules list keeps its tab, so a refresh, Back and a
+shared link show the same list. Defaults are left out; typing replaces the address after the search delay
+instead of adding a history entry per letter.
 
 ## Parent portal (`app/[locale]/parent`)
 

@@ -30,7 +30,8 @@ export const routes = {
   attendance: () => "/attendance/",
   takeAttendance: (session: Uuid) => href("/attendance/take/", { session }),
   attendanceSummary: (session: Uuid) => href("/attendance/summary/", { session }),
-  members: () => "/members/",
+  members: (view: { q?: string | null; group?: string | null; status?: string | null } = {}) =>
+    href("/members/", view),
   lesson: (id: Uuid) => href("/lessons/view/", { id }),
   newLesson: (stage: Uuid) => href("/lessons/new/", { stage }),
   editLesson: (id: Uuid) => href("/lessons/edit/", { id }),

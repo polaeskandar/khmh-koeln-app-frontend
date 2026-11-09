@@ -22,6 +22,11 @@ describe("routes", () => {
     [routes.takeAttendance(ID), `/attendance/take/?session=${ID}`],
     [routes.attendanceSummary(ID), `/attendance/summary/?session=${ID}`],
     [routes.members(), "/members/"],
+    [
+      routes.members({ q: "kiro", group: `stage:${ID}`, status: "all" }),
+      `/members/?q=kiro&group=stage%3A${ID}&status=all`,
+    ],
+    [routes.members({ q: "", group: null, status: null }), "/members/"],
     [routes.lesson(ID), `/lessons/view/?id=${ID}`],
     [routes.newLesson(ID), `/lessons/new/?stage=${ID}`],
     [routes.editLesson(ID), `/lessons/edit/?id=${ID}`],
