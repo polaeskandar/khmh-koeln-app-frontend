@@ -10,6 +10,7 @@ import { renderWithProviders } from "@test/support/providers"
 import {
   countByTab,
   DataTableColumnHeader,
+  type DataTableFeatures,
   DataTablePagination,
   DataTableTabs,
   DataTableView,
@@ -18,7 +19,7 @@ import {
 
 type Row = { id: string; name: string; archived: boolean }
 
-const columns: ColumnDef<Row, unknown>[] = [
+const columns: ColumnDef<DataTableFeatures, Row, unknown>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
