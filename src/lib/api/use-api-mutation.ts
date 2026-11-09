@@ -14,17 +14,25 @@ type Options<T> = {
   onSuccess?: (data: T) => void
   successMessage?: string | ((data: T) => string)
   invalidate?: QueryKey[]
+  awaitRefetch?: boolean
   toastOnError?: boolean
 }
 
 export function useApiMutation<A extends unknown[], T>(
   fn: (...args: A) => Promise<T>,
-  { onSuccess, successMessage, invalidate = [], toastOnError = true }: Options<T> = {}
+  {
+    onSuccess,
+    successMessage,
+    invalidate = [],
+    awaitRefetch = false,
+    toastOnError = true,
+  }: Options<T> = {}
 ) {
   const t = useTranslations() as unknown as ProblemTranslator
   const queryClient = useQueryClient()
   const mutation = useMutation({ mutationFn: (args: A) => fn(...args), retry: false })
   const [problem, setProblem] = useState<Problem | null>(null)
+  const [refetching, setRefetching] = useState(false)
   const { mutateAsync } = mutation
 
   const execute = useCallback(
@@ -40,8 +48,18 @@ export function useApiMutation<A extends unknown[], T>(
           )
         }
 
-        for (const queryKey of invalidate) {
-          void queryClient.invalidateQueries({ queryKey })
+        const refetched = Promise.all(
+          invalidate.map((queryKey) => queryClient.invalidateQueries({ queryKey }))
+        )
+
+        if (awaitRefetch) {
+          setRefetching(true)
+
+          try {
+            await refetched
+          } finally {
+            setRefetching(false)
+          }
         }
 
         onSuccess?.(data)
@@ -64,12 +82,12 @@ export function useApiMutation<A extends unknown[], T>(
         return { ok: false, problem: found }
       }
     },
-    [mutateAsync, successMessage, invalidate, queryClient, onSuccess, t, toastOnError]
+    [mutateAsync, successMessage, invalidate, awaitRefetch, queryClient, onSuccess, t, toastOnError]
   )
 
   return {
     execute,
-    pending: mutation.isPending,
+    pending: mutation.isPending || refetching,
     problem,
     fieldErrors: problem?.fieldErrors ?? {},
     reset: useCallback(() => setProblem(null), []),

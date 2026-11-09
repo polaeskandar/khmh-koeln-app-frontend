@@ -31,6 +31,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import { Spinner } from "@/components/ui/spinner"
 import { servicesQuery } from "@/features/organization/services/api"
 import { useCan } from "@/features/identity/auth/session"
 import { useInlineEnd } from "@/i18n/direction"
@@ -77,6 +78,7 @@ function NameForm({ person }: { person: PersonRow["person"] }) {
   const rename = useApiMutation((next: PersonNames) => renamePersonRequest(person.id, next), {
     successMessage: t("toast.saved"),
     invalidate: PEOPLE_QUERIES,
+    awaitRefetch: true,
     onSuccess: () => setEdits({}),
   })
 
@@ -128,6 +130,7 @@ function NameForm({ person }: { person: PersonRow["person"] }) {
       </FieldGroup>
       {changed ? (
         <Button type="submit" className="self-start" disabled={rename.pending}>
+          {rename.pending ? <Spinner data-icon="inline-start" /> : null}
           {t("members.sheet.saveName")}
         </Button>
       ) : null}
@@ -166,7 +169,7 @@ function MembershipMenu({
 
   const move = useApiMutation(
     (stageId: string) => moveMembershipRequest(placement.membershipId, stageId),
-    { successMessage: t("toast.membershipMoved"), invalidate: PEOPLE_QUERIES }
+    { successMessage: t("toast.membershipMoved"), invalidate: PEOPLE_QUERIES, awaitRefetch: true }
   )
 
   if (targets.length === 0 && !remove) {
@@ -190,7 +193,7 @@ function MembershipMenu({
           disabled={move.pending}
           aria-label={t("common.actionsFor", { name: where(placement) })}
         >
-          <Ellipsis />
+          {move.pending ? <Spinner /> : <Ellipsis />}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -229,6 +232,7 @@ function Placements({ person }: { person: PersonRow }) {
   const end = useApiMutation(endMembershipRequest, {
     successMessage: t("toast.membershipEnded"),
     invalidate: PEOPLE_QUERIES,
+    awaitRefetch: true,
   })
 
   return (
@@ -305,6 +309,7 @@ function AddTo({ person }: { person: PersonRow }) {
   const join = useApiMutation(joinRequest, {
     successMessage: t("toast.membershipAdded"),
     invalidate: PEOPLE_QUERIES,
+    awaitRefetch: true,
     onSuccess: () => setChosen(""),
   })
 
@@ -337,6 +342,7 @@ function AddTo({ person }: { person: PersonRow }) {
           disabled={join.pending}
           onClick={() => void join.execute(person.person.id, option.placement)}
         >
+          {join.pending ? <Spinner data-icon="inline-start" /> : null}
           {t("members.sheet.add")}
         </Button>
       </div>
@@ -390,11 +396,13 @@ function StatusAction({ person }: { person: PersonRow }) {
   const deactivate = useApiMutation(deactivatePersonRequest, {
     successMessage: t("toast.personInactive"),
     invalidate: [["people"]],
+    awaitRefetch: true,
   })
 
   const reactivate = useApiMutation(reactivatePersonRequest, {
     successMessage: t("toast.personReactivated"),
     invalidate: [["people"]],
+    awaitRefetch: true,
   })
 
   if (person.person.status === "inactive") {
@@ -404,6 +412,7 @@ function StatusAction({ person }: { person: PersonRow }) {
         disabled={reactivate.pending}
         onClick={() => void reactivate.execute(person.person.id)}
       >
+        {reactivate.pending ? <Spinner data-icon="inline-start" /> : null}
         {t("members.sheet.reactivate")}
       </Button>
     )

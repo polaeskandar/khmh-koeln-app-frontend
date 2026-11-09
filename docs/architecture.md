@@ -108,10 +108,12 @@ use the same folders.
 - **Query keys** are `["<resource>", "list" | "detail", params]`, e.g. `["services", "list", {status: "all"}]`
   or `["sessions", "detail", id]`. A change invalidates by prefix (`["services"]`), so every list and detail
   of that resource refetches.
-- **Changes** go through `useApiMutation(fn, {successMessage, invalidate, onSuccess, toastOnError})`
+- **Changes** go through `useApiMutation(fn, {successMessage, invalidate, awaitRefetch, onSuccess, toastOnError})`
   (`src/lib/api/use-api-mutation.ts`). `execute()` resolves `{ok: true, data}` or `{ok: false, problem}`
   and never throws for an API problem, so a dialog stays open until it succeeds. Failures are never
-  retried.
+  retried. With `awaitRefetch`, `pending` lasts until the invalidated queries have been fetched again, for
+  a screen that shows the changed data next to the button (the person sheet), so it never offers an
+  action on data it has just changed.
 - **Problems in words:** `translateProblem()` shows `errors.<code>` with the problem's `params`, or the text
   for its status when the catalog has no such code; `fieldErrorsOf()` does the same per field. A 422 with
   field errors shows them on the fields, without a toast; a 401 `auth.unauthenticated` ends the session

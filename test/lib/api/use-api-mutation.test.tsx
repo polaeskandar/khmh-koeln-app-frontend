@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query"
 import { act, renderHook, waitFor } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
@@ -8,6 +9,7 @@ import { apiUrl, problem } from "@test/support/api"
 import { server } from "@test/support/msw"
 import { testProviders } from "@test/support/providers"
 
+import { servicesQuery } from "@/features/organization/services/api"
 import { api, dataOf } from "@/lib/api/client"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
@@ -138,6 +140,55 @@ describe("success", () => {
 
     expect(toast.success).toHaveBeenCalledExactlyOnceWith("Created s1.")
     expect(invalidate).toHaveBeenCalledExactlyOnceWith({ queryKey: ["services"] })
+    expect(onSuccess).toHaveBeenCalledWith({ id: "s1" })
+  })
+
+  test("awaitRefetch stays pending until the invalidated queries are fetched again", async () => {
+    answer(() => HttpResponse.json({ id: "s1" }, { status: 201 }))
+    let release = () => {}
+    const refetched = new Promise<void>((resolve) => (release = resolve))
+    let lists = 0
+    const onSuccess = vi.fn()
+
+    server.use(
+      http.get(apiUrl("/services"), async () => {
+        lists++
+
+        if (lists > 1) {
+          await refetched
+        }
+
+        return HttpResponse.json({ items: [] })
+      })
+    )
+
+    const { wrapper } = testProviders()
+
+    const { result } = renderHook(
+      () => ({
+        list: useQuery(servicesQuery),
+        mutation: useApiMutation(createService, {
+          invalidate: [["services"]],
+          awaitRefetch: true,
+          onSuccess,
+        }),
+      }),
+      { wrapper }
+    )
+
+    await waitFor(() => expect(result.current.list.isSuccess).toBe(true))
+    let running: Promise<unknown> = Promise.resolve()
+
+    act(() => {
+      running = result.current.mutation.execute("Choir")
+    })
+
+    await waitFor(() => expect(lists).toBe(2))
+    expect(result.current.mutation.pending).toBe(true)
+    expect(onSuccess).not.toHaveBeenCalled()
+    release()
+    await act(() => running)
+    expect(result.current.mutation.pending).toBe(false)
     expect(onSuccess).toHaveBeenCalledWith({ id: "s1" })
   })
 

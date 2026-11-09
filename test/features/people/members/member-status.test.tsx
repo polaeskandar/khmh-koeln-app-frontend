@@ -160,6 +160,30 @@ test("reactivating shows the person under Active with no service", async () => {
   expect(posts).toEqual(["reactivate"])
 })
 
+test("Reactivate is disabled with the spinner while it runs", async () => {
+  const row = inactive(lydia())
+  open(row)
+  let release = () => {}
+  const gate = new Promise<void>((resolve) => (release = resolve))
+
+  server.use(
+    http.post(apiUrl(`/people/${row.person.id}/reactivate`), async () => {
+      await gate
+
+      return HttpResponse.json({ ...row.person, status: "active" })
+    })
+  )
+
+  await userEvent.click(await screen.findByRole("tab", { name: /^Inactive/ }))
+  const sheet = await openSheet()
+  const reactivate = sheet.getByRole("button", { name: "Reactivate" })
+  await userEvent.click(reactivate)
+  await waitFor(() => expect(reactivate).toBeDisabled())
+  expect(within(reactivate).getByRole("status", { name: "Loading" })).toBeInTheDocument()
+  release()
+  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Reactivated."))
+})
+
 test("without members: update there is no footer", async () => {
   open(lydia(), { viewer: me.servant })
   const sheet = await openSheet()
