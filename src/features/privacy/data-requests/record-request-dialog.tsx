@@ -288,6 +288,9 @@ function RecordForm({ today, onDone }: { today: LocalDate; onDone: () => void })
         />
       </FieldGroup>
       <DialogFooter>
+        <Button type="button" variant="outline" disabled={record.pending} onClick={onDone}>
+          {t("common.cancel")}
+        </Button>
         <Button type="submit" disabled={record.pending}>
           {record.pending ? <Spinner data-icon="inline-start" /> : null}
           {t("privacy.record.submit")}

@@ -230,6 +230,16 @@ test("Escape doesn't close the dialog while access is being given", async () => 
   expect(screen.getByRole("dialog")).toBeInTheDocument()
 })
 
+test("Cancel closes the dialog without giving access", async () => {
+  const { sent } = open([])
+  await userEvent.click(await screen.findByRole("button", { name: "Give a parent access" }))
+  const dialog = within(await screen.findByRole("dialog"))
+  await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Parent account" }), hoda.id)
+  await userEvent.click(dialog.getByRole("button", { name: "Cancel" }))
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
+  expect(sent).toEqual([])
+})
+
 test("removing asks with both names and sends one revoke", async () => {
   const id = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7eb401"
   const { sent } = open([link(id, mariamFanous, anna)])

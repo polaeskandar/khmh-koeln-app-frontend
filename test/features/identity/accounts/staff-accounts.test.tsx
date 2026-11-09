@@ -146,6 +146,20 @@ test("giving a role offers the ones not held, and sends it once", async () => {
   ).toBeInTheDocument()
 })
 
+test("Cancel closes the role dialog without giving a role", async () => {
+  const { sent } = open()
+
+  await userEvent.click(
+    await within(await rowOf("Rebecca Girgis")).findByRole("button", { name: "Role" })
+  )
+
+  const dialog = within(await screen.findByRole("dialog"))
+  await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Role" }), helper.id)
+  await userEvent.click(dialog.getByRole("button", { name: "Cancel" }))
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
+  expect(sent).toEqual([])
+})
+
 test("removing asks first; the last role manager keeps the role", async () => {
   const { sent } = open({ remove: () => problem(409, "roles.lastAdministrator") })
   const row = within(await rowOf("Mariam Fahmy"))
@@ -258,4 +272,20 @@ test("Sara's dialog gives Attendance helper once and shows the chip", async () =
   ).toBeInTheDocument()
 
   expect(sent).toEqual([`give ${sara.id} ${helper.id}`])
+})
+
+test("Escape doesn't close the role dialog while the role is being given", async () => {
+  open()
+  server.use(http.post(apiUrl("/accounts/:id/roles"), () => new Promise<Response>(() => {})))
+
+  await userEvent.click(
+    await within(await rowOf("Rebecca Girgis")).findByRole("button", { name: "Role" })
+  )
+
+  const dialog = within(await screen.findByRole("dialog"))
+  await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Role" }), helper.id)
+  await userEvent.click(dialog.getByRole("button", { name: "Give role" }))
+  await waitFor(() => expect(dialog.getByRole("button", { name: "Cancel" })).toBeDisabled())
+  await userEvent.keyboard("{Escape}")
+  expect(screen.getByRole("dialog")).toBeInTheDocument()
 })
