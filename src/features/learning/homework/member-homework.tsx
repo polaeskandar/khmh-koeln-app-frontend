@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl"
 
 import { QueryState } from "@/components/page-states"
 import type { TaskState } from "./api"
-import { ListSkeleton, TaskList } from "./task-list"
+import { ListSkeleton, TaskList, useOwnCompletion } from "./task-list"
 import { ApiError } from "@/lib/api/problem"
 import { routes } from "@/lib/routes"
 
@@ -15,6 +15,7 @@ const taskHref = (task: MemberTask) => routes.memberHomeworkTask(task.id)
 function Tasks({ state }: { state: TaskState }) {
   const t = useTranslations("member.homework")
   const query = useMemberHomework(state)
+  const completion = useOwnCompletion()
 
   if (query.error instanceof ApiError && query.error.status === 403) {
     return null
@@ -28,6 +29,7 @@ function Tasks({ state }: { state: TaskState }) {
           tasks={data.items}
           today={data.today}
           href={taskHref}
+          completion={completion}
           empty={state === "todo" ? t("emptyToDo") : t("emptyDone")}
         />
       )}

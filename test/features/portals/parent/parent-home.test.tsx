@@ -6,6 +6,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Locale } from "@/i18n/config"
 import type { Me } from "@/features/identity/auth/api"
+import { isolate } from "@/lib/bidi"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { homeworkOf, MIMI_ID, MINA_ID, mimi, mina } from "@test/support/fixtures/parent"
@@ -157,6 +158,32 @@ test("a network error offers to try again", async () => {
   fail = false
   await userEvent.click(retry)
   expect(await screen.findByRole("region", { name: "To do for Mimi" })).toBeInTheDocument()
+})
+
+test("the square on a card ticks the task off for the selected child", async () => {
+  search.value = `child=${MINA_ID}`
+  open()
+  const task = homeworkOf[MINA_ID].todo[0]
+  const reported: string[] = []
+
+  server.use(
+    http.put(apiUrl("/parent/children/:child/homework/:id/completion"), ({ params }) => {
+      reported.push(`${String(params.child)}:${String(params.id)}`)
+
+      return HttpResponse.json({
+        done: true,
+        completedAt: "2026-11-08T11:08:00Z",
+        completedBy: "Hoda Farag",
+        completedByYou: true,
+      })
+    })
+  )
+
+  const list = within(await screen.findByRole("region", { name: "To do for Mina" }))
+  const name = `Mark “${isolate(task.title)}” done for ${isolate("Mina")}`
+  await userEvent.click(list.getByRole("button", { name }))
+  await vi.waitFor(() => expect(reported).toEqual([`${MINA_ID}:${task.id}`]))
+  expect(list.getByRole("button", { name })).toHaveAttribute("aria-pressed", "true")
 })
 
 test("in Arabic the switcher scrolls sideways and chevrons turn", async () => {

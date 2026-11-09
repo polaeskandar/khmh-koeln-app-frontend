@@ -19,7 +19,7 @@ import {
 } from "@/features/people/children/api"
 import { useChildHomework } from "@/features/learning/homework/api"
 import { ChildSwitcher } from "@/features/people/children/child-switcher"
-import { ListSkeleton, TaskList } from "@/features/learning/homework/task-list"
+import { ListSkeleton, TaskList, useChildCompletion } from "@/features/learning/homework/task-list"
 
 const DONE_RECENTLY = 5
 
@@ -48,6 +48,7 @@ function ChildTasks({ child }: { child: ChildSummary }) {
   const t = useTranslations("parent.home")
   const toDo = useChildHomework(child.id, "todo")
   const done = useChildHomework(child.id, "done")
+  const completion = useChildCompletion(child)
 
   return (
     <div className="flex min-w-0 flex-col gap-8">
@@ -58,6 +59,7 @@ function ChildTasks({ child }: { child: ChildSummary }) {
             tasks={data.items}
             today={data.today}
             href={(task) => routes.parentHomeworkTask(task.id, child.id)}
+            completion={completion}
             empty={t("emptyToDo")}
           />
         )}
@@ -68,6 +70,7 @@ function ChildTasks({ child }: { child: ChildSummary }) {
           tasks={done.data.items.slice(0, DONE_RECENTLY)}
           today={done.data.today}
           href={(task) => routes.parentHomeworkTask(task.id, child.id)}
+          completion={completion}
         />
       ) : null}
       {done.isError ? <QueryErrorState error={done.error} onRetry={() => done.refetch()} /> : null}

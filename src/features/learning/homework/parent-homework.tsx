@@ -14,7 +14,7 @@ import {
 } from "@/features/people/children/api"
 import { type TaskState, useChildHomework } from "./api"
 import { ChildSwitcher } from "@/features/people/children/child-switcher"
-import { ListSkeleton, TaskList } from "./task-list"
+import { ListSkeleton, TaskList, useChildCompletion } from "./task-list"
 
 function UnlinkedChild() {
   const children = useParentChildren()
@@ -29,6 +29,7 @@ function UnlinkedChild() {
 function Tasks({ child, state }: { child: ChildSummary; state: TaskState }) {
   const t = useTranslations("parent.homework")
   const query = useChildHomework(child.id, state)
+  const completion = useChildCompletion(child)
 
   return (
     <QueryState query={query} loading={<ListSkeleton />} notFound={<UnlinkedChild />}>
@@ -38,6 +39,7 @@ function Tasks({ child, state }: { child: ChildSummary; state: TaskState }) {
           tasks={data.items}
           today={data.today}
           href={(task) => routes.parentHomeworkTask(task.id, child.id)}
+          completion={completion}
           empty={state === "todo" ? t("emptyToDo", { name: child.name }) : t("emptyDone")}
         />
       )}
