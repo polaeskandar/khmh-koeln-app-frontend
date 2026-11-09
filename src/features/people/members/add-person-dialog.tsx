@@ -1,6 +1,5 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
 import { CircleAlert, UserPlus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useEffect, useRef, useState } from "react"
@@ -18,10 +17,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { FieldGroup } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
-import { servicesQuery } from "@/features/organization/services/api"
 import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import type { PersonRef, ServiceRef, StageRef } from "@/lib/api/types/common"
@@ -35,6 +32,7 @@ import {
   type NewPerson,
   type PlacementInput,
 } from "./api"
+import { PlacementFields, usePlacement } from "./placement-fields"
 
 type Candidate = PersonRef & { groups: { service: ServiceRef; stage: StageRef | null }[] }
 
@@ -51,16 +49,11 @@ function AddPersonForm({ preset, onDone }: { preset?: PlacementInput; onDone: ()
   const f = useFormat()
   const can = useCan()
   const formRef = useRef<HTMLFormElement>(null)
-  const services = (useQuery(servicesQuery).data?.items ?? []).filter((s) => !s.archived)
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [displayName, setDisplayName] = useState("")
-  const [serviceId, setServiceId] = useState(preset?.serviceId ?? "")
-  const [stageId, setStageId] = useState(preset?.stageId ?? "")
-  const service = services.find((s) => s.id === serviceId) ?? services[0]
-  const stages = service?.stages ?? []
-  const chosenStage = stages.some((stage) => stage.id === stageId) ? stageId : ""
-  const placement = service ? { serviceId: service.id, stageId: chosenStage || null } : null
+  const placementChoice = usePlacement(preset)
+  const placement = placementChoice.placement
 
   const create = useApiMutation(createPersonRequest, {
     toastOnError: false,
@@ -232,50 +225,7 @@ function AddPersonForm({ preset, onDone }: { preset?: PlacementInput; onDone: ()
           onChange={(event) => setDisplayName(event.target.value)}
           error={errors.displayName}
         />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field data-invalid={errors["placement.serviceId"] ? true : undefined}>
-            <FieldLabel htmlFor="person-service">{t("members.service")}</FieldLabel>
-            <NativeSelect
-              id="person-service"
-              className="w-full"
-              value={service?.id ?? ""}
-              aria-invalid={errors["placement.serviceId"] ? true : undefined}
-              onChange={(event) => {
-                setServiceId(event.target.value)
-                setStageId("")
-              }}
-            >
-              {services.map((s) => (
-                <NativeSelectOption key={s.id} value={s.id}>
-                  {s.name}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-            {errors["placement.serviceId"] ? (
-              <FieldError>{errors["placement.serviceId"]}</FieldError>
-            ) : null}
-          </Field>
-          <Field data-invalid={errors["placement.stageId"] ? true : undefined}>
-            <FieldLabel htmlFor="person-stage">{t("members.stage")}</FieldLabel>
-            <NativeSelect
-              id="person-stage"
-              className="w-full"
-              value={chosenStage}
-              aria-invalid={errors["placement.stageId"] ? true : undefined}
-              onChange={(event) => setStageId(event.target.value)}
-            >
-              <NativeSelectOption value="">{t("members.fields.noStage")}</NativeSelectOption>
-              {stages.map((stage) => (
-                <NativeSelectOption key={stage.id} value={stage.id}>
-                  {stage.name}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-            {errors["placement.stageId"] ? (
-              <FieldError>{errors["placement.stageId"]}</FieldError>
-            ) : null}
-          </Field>
-        </div>
+        <PlacementFields choice={placementChoice} errors={errors} />
       </FieldGroup>
       <DialogFooter>
         <Button type="button" variant="outline" disabled={busy} onClick={onDone}>

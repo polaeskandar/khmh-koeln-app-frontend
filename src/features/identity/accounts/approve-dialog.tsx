@@ -2,7 +2,7 @@
 
 import { useIsMutating, useQuery, useQueryClient } from "@tanstack/react-query"
 import { cn } from "cn"
-import { Search } from "lucide-react"
+import { CircleAlert, Search } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useEffect, useId, useState } from "react"
 import { toast } from "sonner"
@@ -16,7 +16,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { TextAreaField } from "@/components/form-fields"
+import { TextAreaField, TextField } from "@/components/form-fields"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   Field,
   FieldDescription,
@@ -35,7 +36,8 @@ import { isolate } from "@/lib/bidi"
 import { fold, fullName, preferredName } from "@/lib/domain/names"
 
 import { type AccountRequest, type AgeCheck, approveRequest, memberCandidatesQuery } from "./api"
-import { type DirectoryPerson } from "@/features/people/members/api"
+import { createPersonRequest, type DirectoryPerson } from "@/features/people/members/api"
+import { PlacementFields, usePlacement } from "@/features/people/members/placement-fields"
 import { parentPortalOnly, rolesQuery } from "@/features/identity/roles/api"
 import { groupsText, PersonSearch } from "@/features/people/members/person-search"
 import { RolesChoice } from "@/features/identity/roles/roles-choice"
@@ -141,6 +143,12 @@ function Approval({ request, onDone }: { request: AccountRequest; onDone: () => 
 
 const NOTE_MAX = 200
 
+function namesOf(displayName: string) {
+  const [firstName = "", ...rest] = displayName.trim().split(/\s+/)
+
+  return { firstName, lastName: rest.join(" ") }
+}
+
 function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: () => void }) {
   const t = useTranslations()
   const f = useFormat()
@@ -153,6 +161,16 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
   const [picked, setPicked] = useState<string | null | undefined>(undefined)
   const [ageCheck, setAgeCheck] = useState<AgeCheck | null>(null)
   const [note, setNote] = useState("")
+  const [newRecord, setNewRecord] = useState(false)
+  const [firstName, setFirstName] = useState(() => namesOf(name).firstName)
+  const [lastName, setLastName] = useState(() => namesOf(name).lastName)
+  const placementChoice = usePlacement()
+  const [createdId, setCreatedId] = useState<string | null>(null)
+
+  const create = useApiMutation(createPersonRequest, {
+    toastOnError: false,
+    invalidate: [["people"], ["services"], ["stages"]],
+  })
 
   const approve = useApiMutation(approveRequest, {
     successMessage: t("toast.accountApproved", { name }),
@@ -171,6 +189,13 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
 
   const noteTooLong = ageCheck === "guardianConsent" && note.length > NOTE_MAX
   const errors = approve.fieldErrors
+  const busy = approve.pending || create.pending
+  const duplicate = create.problem?.code === "people.duplicate"
+
+  const createError =
+    create.problem && !duplicate && Object.keys(create.fieldErrors).length === 0
+      ? create.problem.message
+      : null
 
   const generalError =
     approve.problem &&
@@ -179,15 +204,47 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
       ? approve.problem.message
       : null
 
-  async function submit() {
-    if (!personId || !ageCheck || noteTooLong) {
+  async function recordId(confirmDuplicate?: boolean) {
+    if (!newRecord) {
+      return personId
+    }
+
+    if (createdId) {
+      return createdId
+    }
+
+    const result = await create.execute({
+      firstName,
+      lastName,
+      displayName: null,
+      placement: placementChoice.placement,
+      ...(confirmDuplicate ? { confirmDuplicate } : {}),
+    })
+
+    if (!result.ok) {
+      return null
+    }
+
+    setCreatedId(result.data.person.id)
+
+    return result.data.person.id
+  }
+
+  async function submit(confirmDuplicate?: boolean) {
+    if (busy || !ageCheck || noteTooLong) {
+      return
+    }
+
+    const chosen = await recordId(confirmDuplicate)
+
+    if (!chosen) {
       return
     }
 
     const result = await approve.execute(request.account.id, {
       as: "member",
       member: {
-        personId,
+        personId: chosen,
         ageCheck,
         guardianConsentNote: ageCheck === "guardianConsent" ? note.trim() || null : null,
       },
@@ -207,75 +264,138 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
           {request.note}
         </blockquote>
       ) : null}
-      <FieldSet data-invalid={errors["member.personId"] ? true : undefined}>
-        <FieldLegend variant="label">{t("accountRequests.approve.memberRecord")}</FieldLegend>
-        <FieldDescription>
-          {t("accountRequests.approve.memberRecordHint", { name: isolate(name) })}
-        </FieldDescription>
-        <InputGroup>
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-          <InputGroupInput
-            aria-label={t("accountRequests.approve.findMember")}
-            placeholder={t("accountRequests.approve.findMember")}
-            value={text}
-            onChange={(event) => setText(event.target.value)}
-          />
-        </InputGroup>
-        {namesakes.length > 1 ? (
-          <p role="status" className="text-sm text-warning">
-            {t("accountRequests.approve.sameName", {
-              count: namesakes.length,
-              name: isolate(name),
-            })}
-          </p>
-        ) : null}
-        {q.length < 2 ? (
-          <p className="text-xs text-muted-foreground">
-            {t("accountRequests.approve.searchMember")}
-          </p>
-        ) : candidates.data && items.length === 0 ? (
-          <p className="text-xs text-muted-foreground">
-            {t("accountRequests.approve.noMemberMatches")}
-          </p>
-        ) : (
-          <RadioGroup
-            value={personId ?? ""}
-            onValueChange={(value) => setPicked(value)}
-            className="flex flex-col gap-0 divide-y border-y"
+      {newRecord ? (
+        <FieldSet>
+          <FieldLegend variant="label">{t("accountRequests.approve.newRecord")}</FieldLegend>
+          <FieldDescription>{t("accountRequests.approve.newRecordHint")}</FieldDescription>
+          {duplicate ? (
+            <Alert>
+              <CircleAlert />
+              <AlertDescription className="flex flex-col gap-3">
+                <span>{create.problem?.message}</span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="self-start"
+                  disabled={busy || !ageCheck || noteTooLong}
+                  onClick={() => void submit(true)}
+                >
+                  {t("members.newPerson.addAnyway")}
+                </Button>
+              </AlertDescription>
+            </Alert>
+          ) : null}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <TextField
+              label={t("members.fields.firstName")}
+              maxLength={80}
+              disabled={createdId !== null}
+              value={firstName}
+              onChange={(event) => setFirstName(event.target.value)}
+              error={create.fieldErrors.firstName}
+            />
+            <TextField
+              label={t("members.fields.lastName")}
+              maxLength={80}
+              disabled={createdId !== null}
+              value={lastName}
+              onChange={(event) => setLastName(event.target.value)}
+              error={create.fieldErrors.lastName}
+            />
+          </div>
+          <PlacementFields choice={placementChoice} errors={create.fieldErrors} />
+          {createError ? <FieldError>{createError}</FieldError> : null}
+          {createdId === null ? (
+            <Button
+              type="button"
+              variant="link"
+              className="h-auto self-start p-0"
+              disabled={busy}
+              onClick={() => setNewRecord(false)}
+            >
+              {t("accountRequests.approve.chooseExisting")}
+            </Button>
+          ) : null}
+        </FieldSet>
+      ) : (
+        <FieldSet data-invalid={errors["member.personId"] ? true : undefined}>
+          <FieldLegend variant="label">{t("accountRequests.approve.memberRecord")}</FieldLegend>
+          <FieldDescription>
+            {t("accountRequests.approve.memberRecordHint", { name: isolate(name) })}
+          </FieldDescription>
+          <InputGroup>
+            <InputGroupAddon>
+              <Search />
+            </InputGroupAddon>
+            <InputGroupInput
+              aria-label={t("accountRequests.approve.findMember")}
+              placeholder={t("accountRequests.approve.findMember")}
+              value={text}
+              onChange={(event) => setText(event.target.value)}
+            />
+          </InputGroup>
+          {namesakes.length > 1 ? (
+            <p role="status" className="text-sm text-warning">
+              {t("accountRequests.approve.sameName", {
+                count: namesakes.length,
+                name: isolate(name),
+              })}
+            </p>
+          ) : null}
+          {q.length < 2 ? (
+            <p className="text-xs text-muted-foreground">
+              {t("accountRequests.approve.searchMember")}
+            </p>
+          ) : candidates.data && items.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              {t("accountRequests.approve.noMemberMatches")}
+            </p>
+          ) : (
+            <RadioGroup
+              value={personId ?? ""}
+              onValueChange={(value) => setPicked(value)}
+              className="flex flex-col gap-0 divide-y border-y"
+            >
+              {items.map((person) => (
+                <label
+                  key={person.id}
+                  htmlFor={`${id}-${person.id}`}
+                  className={cn(
+                    "flex items-start gap-3 py-2.5 text-sm",
+                    person.hasAccount ? "cursor-not-allowed opacity-60" : "cursor-pointer"
+                  )}
+                >
+                  <RadioGroupItem
+                    id={`${id}-${person.id}`}
+                    value={person.id}
+                    disabled={person.hasAccount}
+                    className="mt-0.5"
+                  />
+                  <span className="flex min-w-0 flex-col gap-0.5">
+                    <span className="font-medium">
+                      <bdi>{preferredName(person)}</bdi>
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {person.hasAccount
+                        ? t("accountRequests.approve.hasAccount")
+                        : groupsText(person, f.separator, t("accountRequests.approve.noGroup"))}
+                    </span>
+                  </span>
+                </label>
+              ))}
+            </RadioGroup>
+          )}
+          <Button
+            type="button"
+            variant="link"
+            className="h-auto self-start p-0"
+            onClick={() => setNewRecord(true)}
           >
-            {items.map((person) => (
-              <label
-                key={person.id}
-                htmlFor={`${id}-${person.id}`}
-                className={cn(
-                  "flex items-start gap-3 py-2.5 text-sm",
-                  person.hasAccount ? "cursor-not-allowed opacity-60" : "cursor-pointer"
-                )}
-              >
-                <RadioGroupItem
-                  id={`${id}-${person.id}`}
-                  value={person.id}
-                  disabled={person.hasAccount}
-                  className="mt-0.5"
-                />
-                <span className="flex min-w-0 flex-col gap-0.5">
-                  <span className="font-medium">
-                    <bdi>{preferredName(person)}</bdi>
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {person.hasAccount
-                      ? t("accountRequests.approve.hasAccount")
-                      : groupsText(person, f.separator, t("accountRequests.approve.noGroup"))}
-                  </span>
-                </span>
-              </label>
-            ))}
-          </RadioGroup>
-        )}
-        {errors["member.personId"] ? <FieldError>{errors["member.personId"]}</FieldError> : null}
-      </FieldSet>
+            {t("accountRequests.approve.addNew", { name: isolate(name) })}
+          </Button>
+          {errors["member.personId"] ? <FieldError>{errors["member.personId"]}</FieldError> : null}
+        </FieldSet>
+      )}
       <FieldSet data-invalid={errors["member.ageCheck"] ? true : undefined}>
         <FieldLegend variant="label">{t("accountRequests.approve.age")}</FieldLegend>
         <FieldDescription>{t("accountRequests.approve.ageHint")}</FieldDescription>
@@ -313,12 +433,12 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
       ) : null}
       {generalError ? <FieldError>{generalError}</FieldError> : null}
       <DialogFooter>
-        <Button type="button" variant="outline" disabled={approve.pending} onClick={onDone}>
+        <Button type="button" variant="outline" disabled={busy} onClick={onDone}>
           {t("common.cancel")}
         </Button>
         <Button
           type="button"
-          disabled={approve.pending || !personId || !ageCheck || noteTooLong}
+          disabled={busy || (!newRecord && !personId) || !ageCheck || noteTooLong}
           onClick={() => void submit()}
         >
           {approve.pending ? <Spinner data-icon="inline-start" /> : null}

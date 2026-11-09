@@ -107,10 +107,9 @@ const openDialog = async (name = "Add person") => {
   return within(await screen.findByRole("dialog"))
 }
 
-const options = (dialog: { getAllByRole: (role: "option") => HTMLElement[] }, name: string) =>
-  dialog
+const options = (dialog: { getByLabelText: (label: string) => HTMLElement }, label: string) =>
+  within(dialog.getByLabelText(label))
     .getAllByRole("option")
-    .filter((option) => option.closest("select")?.id === name)
     .map((option) => option.textContent)
 
 describe("placements", () => {
@@ -118,7 +117,7 @@ describe("placements", () => {
     open()
     const dialog = await openDialog()
 
-    expect(options(dialog, "person-service")).toEqual(
+    expect(options(dialog, "Service")).toEqual(
       services.items.filter((service) => !service.archived).map((service) => service.name)
     )
   })
@@ -127,7 +126,7 @@ describe("placements", () => {
     open()
     const dialog = await openDialog()
 
-    expect(options(dialog, "person-stage")).toEqual([
+    expect(options(dialog, "Stage")).toEqual([
       "No stage",
       ...sundaySchool.stages.map((stage) => stage.name),
     ])
