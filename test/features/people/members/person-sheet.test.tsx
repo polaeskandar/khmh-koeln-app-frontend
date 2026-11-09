@@ -184,7 +184,7 @@ test("Remove ends the membership once after confirming and moves it under Earlie
   ).toBeInTheDocument()
 })
 
-test("Add to offers the active groups the person lacks", async () => {
+test("Add to offers the active groups the person lacks, but not their stage's service", async () => {
   const sundaySchool = services.items[0]
   const third = sundaySchool.stages.find((stage) => stage.name === "3rd Class")!
   const mina = person("Mina", "Hanna")
@@ -209,7 +209,7 @@ test("Add to offers the active groups the person lacks", async () => {
 
   expect(offered).not.toContain("Sunday School · 3rd Class")
   expect(offered).not.toContain("Choir")
-  expect(offered).toContain("Sunday School")
+  expect(offered).not.toContain("Sunday School")
   expect(offered).toContain("Sunday School · 1st Class")
   await userEvent.selectOptions(select, "Sunday School · 1st Class")
   await userEvent.click(sheet.getByRole("button", { name: "Add" }))
@@ -219,6 +219,30 @@ test("Add to offers the active groups the person lacks", async () => {
   expect(sent).toEqual([
     { path: "join", body: { serviceId: services.items[0].id, stageId: firstClass.id } },
   ])
+})
+
+test("someone on a service itself isn't offered its stages", async () => {
+  const sundaySchool = services.items[0]
+  const mina = person("Mina", "Hanna")
+
+  open({
+    ...mina,
+    placements: [
+      {
+        ...mina.placements[0],
+        service: { id: sundaySchool.id, name: sundaySchool.name, tone: 1, archived: false },
+        stage: null,
+      },
+    ],
+  })
+
+  const sheet = await openSheet("Mina Hanna")
+
+  const offered = within(sheet.getByRole("combobox", { name: "Add to" }))
+    .getAllByRole("option")
+    .map((option) => option.textContent)
+
+  expect(offered.filter((label) => label?.startsWith("Sunday School"))).toEqual([])
 })
 
 test("in Arabic the sheet opens from the left", async () => {

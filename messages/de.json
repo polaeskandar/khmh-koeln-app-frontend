@@ -194,6 +194,7 @@
       "duplicateTitle": "Mögliche Doppelung",
       "duplicate": "{count, plural, one {Es gibt schon eine Person namens {name}.} other {Es gibt schon # Personen namens {name}.}} Prüfen Sie, ob es eine andere Person ist.",
       "alreadyIn": "{name} ist bereits in {where}.",
+      "alreadyInService": "{name} ist bereits in {where}. Innerhalb eines Dienstes ist eine Person im Dienst selbst oder in seinen Stufen, nicht in beidem.",
       "membershipEnded": "Diese Zugehörigkeit ist bereits beendet.",
       "addNotAllowed": "Sie können keine Personen hinzufügen.",
       "changeNotAllowed": "Sie können keine Personen oder ihre Stufen ändern.",

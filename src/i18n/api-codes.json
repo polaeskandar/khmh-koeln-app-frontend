@@ -102,6 +102,7 @@
   "people.chooseJoinService": [],
   "people.duplicate": ["count", "name"],
   "people.alreadyIn": ["name", "where"],
+  "people.alreadyInService": ["name", "where"],
   "people.membershipOutsideServices": [],
   "people.membershipEnded": [],
   "people.moveOutsideStages": [],

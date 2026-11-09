@@ -213,6 +213,27 @@ describe("duplicates", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument()
   })
 
+  test("409 alreadyInService says a person is on the service or its stages", async () => {
+    open({
+      create: duplicate([mina]),
+      join: () =>
+        problem(409, "people.alreadyInService", {
+          params: { name: "Mina Hanna", where: "3rd Class" },
+        }),
+    })
+
+    const dialog = await openDialog()
+    await userEvent.type(dialog.getByLabelText("First name"), "Mina")
+    await userEvent.click(dialog.getByRole("button", { name: "Add person" }))
+    await userEvent.click(await dialog.findByRole("button", { name: "Add" }))
+
+    expect(
+      await dialog.findByText(
+        "Mina Hanna is already in 3rd Class. Within one service, a person is on the service itself or on its stages, not both."
+      )
+    ).toBeInTheDocument()
+  })
+
   describe("a candidate already in the chosen group", () => {
     const third = sundaySchool.stages.find((stage) => stage.name === "3rd Class")!
 
@@ -270,6 +291,17 @@ describe("duplicates", () => {
         path: `/people/${mina.id}/memberships`,
         body: { serviceId: sundaySchool.id, stageId: firstClass.id },
       })
+    })
+
+    test("the service itself reads Already in for someone on its stage", async () => {
+      const sent = open({ create: duplicate([inThirdClass]) })
+      const dialog = await openDialog()
+      await userEvent.selectOptions(dialog.getByLabelText("Stage"), "")
+      await userEvent.type(dialog.getByLabelText("First name"), "Mina")
+      await userEvent.click(dialog.getByRole("button", { name: "Add person" }))
+      expect(await dialog.findByText("Already in ⁨3rd Class⁩")).toBeInTheDocument()
+      expect(dialog.queryByRole("button", { name: "Add" })).toBeNull()
+      expect(sent.map((request) => request.path)).toEqual(["/people"])
     })
   })
 
