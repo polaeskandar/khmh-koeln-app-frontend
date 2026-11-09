@@ -213,6 +213,66 @@ describe("duplicates", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument()
   })
 
+  describe("a candidate already in the chosen group", () => {
+    const third = sundaySchool.stages.find((stage) => stage.name === "3rd Class")!
+
+    const inThirdClass: Schemas["DirectoryEntry"] = {
+      ...mina,
+      groups: [
+        {
+          service: { id: sundaySchool.id, name: sundaySchool.name, tone: 1, archived: false },
+          stage: { id: third.id, name: third.name, position: third.position, archived: false },
+        },
+      ],
+    }
+
+    const kiro: Schemas["DirectoryEntry"] = {
+      ...mina,
+      id: "0192f3a4-7b1c-7d2e-8f60-000000000002",
+    }
+
+    test.each([
+      ["en", "Add person", "Already in ⁨3rd Class⁩"],
+      ["de", "Person hinzufügen", "Bereits in ⁨3rd Class⁩"],
+      ["ar", "إضافة شخص", "موجود بالفعل في «⁨3rd Class⁩»"],
+    ] as const)(
+      "%s reads Already in instead of Add and sends nothing",
+      async (locale, button, text) => {
+        const sent = open({ create: duplicate([inThirdClass, kiro]), locale })
+        const dialog = await openDialog(button)
+        await userEvent.selectOptions(dialog.getAllByRole("combobox")[1], third.id)
+        await userEvent.type(dialog.getAllByRole("textbox")[0], "Mina")
+        await userEvent.click(dialog.getByRole("button", { name: button }))
+        const already = await dialog.findByText(text)
+        const rows = dialog.getAllByRole("listitem")
+        expect(rows[0]).toContainElement(already)
+        expect(within(rows[0]).queryByRole("button")).toBeNull()
+        expect(within(rows[1]).getByRole("button")).toBeInTheDocument()
+        expect(sent.map((request) => request.path)).toEqual(["/people"])
+      }
+    )
+
+    test("choosing another stage offers Add again", async () => {
+      const sent = open({ create: duplicate([inThirdClass]) })
+      const dialog = await openDialog()
+      await userEvent.selectOptions(dialog.getByLabelText("Stage"), "3rd Class")
+      await userEvent.type(dialog.getByLabelText("First name"), "Mina")
+      await userEvent.click(dialog.getByRole("button", { name: "Add person" }))
+      expect(await dialog.findByText("Already in ⁨3rd Class⁩")).toBeInTheDocument()
+      expect(dialog.queryByRole("button", { name: "Add" })).toBeNull()
+      await userEvent.selectOptions(dialog.getByLabelText("Stage"), "1st Class")
+      expect(dialog.queryByText(/Already in/)).toBeNull()
+      await userEvent.click(dialog.getByRole("button", { name: "Add" }))
+      await waitFor(() => expect(sent).toHaveLength(2))
+      const firstClass = sundaySchool.stages.find((stage) => stage.name === "1st Class")!
+
+      expect(sent[1]).toEqual({
+        path: `/people/${mina.id}/memberships`,
+        body: { serviceId: sundaySchool.id, stageId: firstClass.id },
+      })
+    })
+  })
+
   test("while Add saves, adding a different person waits", async () => {
     open({ create: duplicate([mina]), join: () => new Promise<Response>(() => {}) })
     const dialog = await openDialog()

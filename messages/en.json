@@ -1075,7 +1075,8 @@
       "description": "Name and where they belong. Nothing else is needed for attendance.",
       "duplicateFallback": "Someone with this name already exists.",
       "duplicateHint": "Search for them first; namesakes are common.",
-      "addAnyway": "It’s a different person, add anyway"
+      "addAnyway": "It’s a different person, add anyway",
+      "alreadyIn": "Already in {where}"
     },
     "addMember": {
       "trigger": "Add member",
