@@ -142,11 +142,27 @@ describe("closing", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Close attendance" }))
     const dialog = within(screen.getByRole("alertdialog"))
     expect(dialog.getByText("7 of 14 on the roster marked present")).toBeInTheDocument()
-    expect(dialog.getByText("1 person present who are not on the roster")).toBeInTheDocument()
+    expect(dialog.getByText("1 person present who is not on the roster")).toBeInTheDocument()
 
     expect(
       dialog.getByText(/7 people not marked present\. That is not the same as absent\./)
     ).toBeInTheDocument()
+  })
+
+  test("two people not on the roster read in the plural", async () => {
+    const board = thirdClassBoard()
+    const [theo] = board.notOnRoster
+    const lea = { ...theo.person, id: "0192f3a4-7b1c-7d2e-8f40-000000000098", firstName: "Lea" }
+
+    open({
+      ...board,
+      counts: { ...board.counts, present: 9, notOnRoster: 2 },
+      notOnRoster: [theo, { ...theo, person: lea }],
+    })
+
+    await userEvent.click(await screen.findByRole("button", { name: "Close attendance" }))
+    const dialog = within(screen.getByRole("alertdialog"))
+    expect(dialog.getByText("2 people present who are not on the roster")).toBeInTheDocument()
   })
 
   test("one request per confirm, then the summary", async () => {

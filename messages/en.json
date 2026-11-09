@@ -995,7 +995,7 @@
         "description": "The list is saved as it is now. Service leaders can reopen it for corrections.",
         "presentOf": "{present, plural, other {#}} of {total, plural, other {#}} on the roster marked present",
         "present": "{count, plural, other {# marked present}}",
-        "extra": "{count, plural, one {# person} other {# people}} present who are not on the roster",
+        "extra": "{count, plural, one {# person present who is not on the roster} other {# people present who are not on the roster}}",
         "notMarked": "{count, plural, one {# person} other {# people}} not marked present. That is not the same as absent."
       },
       "correct": {
