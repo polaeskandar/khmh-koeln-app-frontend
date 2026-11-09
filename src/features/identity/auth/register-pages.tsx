@@ -51,6 +51,7 @@ export function RegisteredPage() {
         <CircleCheck className="size-5" aria-hidden="true" />
       </span>
       <AuthHeading title={t("title")}>
+        <p className="max-w-prose">{t("confirm")}</p>
         <p className="max-w-prose">{t("text")}</p>
       </AuthHeading>
       <p className="max-w-prose text-sm">{t("email")}</p>

@@ -66,15 +66,17 @@ account menu while `me.member.groupCount > 0`.
 
 ## Before signing in (`app/[locale]/(public)`)
 
-| Screen               | Prototype route    | Product route           | Builder              |
-| -------------------- | ------------------ | ----------------------- | -------------------- |
-| Sign in              | `/sign-in`         | `/sign-in/?next=`       | `signIn(next?)`      |
-| Waiting for approval | `/sign-in/pending` | `/sign-in/pending/`     | `signInPending()`    |
-| Register             | `/register`        | `/register/`            | `register()`         |
-| Registered           | `/register/done`   | `/register/done/`       | `registered()`       |
-| Forgot password      | `/forgot-password` | `/forgot-password/`     | `forgotPassword()`   |
-| Set a password       | –                  | `/set-password/#token=` | `setPassword(token)` |
-| Privacy notice       | `/privacy`         | `/privacy/`             | `privacy()`          |
+| Screen               | Prototype route    | Product route            | Builder               |
+| -------------------- | ------------------ | ------------------------ | --------------------- |
+| Sign in              | `/sign-in`         | `/sign-in/?next=`        | `signIn(next?)`       |
+| Waiting for approval | `/sign-in/pending` | `/sign-in/pending/`      | `signInPending()`     |
+| Confirm email first  | –                  | `/sign-in/unconfirmed/`  | `signInUnconfirmed()` |
+| Register             | `/register`        | `/register/`             | `register()`          |
+| Registered           | `/register/done`   | `/register/done/`        | `registered()`        |
+| Forgot password      | `/forgot-password` | `/forgot-password/`      | `forgotPassword()`    |
+| Set a password       | –                  | `/set-password/#token=`  | `setPassword(token)`  |
+| Confirm email        | –                  | `/confirm-email/#token=` | –                     |
+| Privacy notice       | `/privacy`         | `/privacy/`              | `privacy()`           |
 
 The prototype's demo sign-in (`/sign-in/demo`) has no product route.
 
@@ -82,6 +84,9 @@ The prototype's demo sign-in (`/sign-in/demo`) has no product route.
   paths are followed (#14).
 - `/set-password/#token=…` is the one-time link the church office hands out (backend #30, #81). The token
   sits in the fragment, so it never reaches a server or its logs.
+- `/confirm-email/#token=…` is the link the registration email carries (backend #84). The page confirms the
+  address once and removes the token from the address. Signing in before that opens `/sign-in/unconfirmed/`
+  (`auth.unconfirmed`, backend #313); after it, `/sign-in/pending/` until the office approves the account.
 
 ## Entry points
 

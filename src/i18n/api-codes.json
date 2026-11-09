@@ -9,6 +9,7 @@
   "auth.unauthenticated": [],
   "auth.invalidCredentials": [],
   "auth.pending": [],
+  "auth.unconfirmed": [],
   "auth.disabled": [],
   "auth.tooManyAttempts": [],
   "auth.resetLinkInvalid": [],

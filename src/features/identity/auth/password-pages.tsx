@@ -15,21 +15,12 @@ import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { resetByEmail } from "@/lib/env"
 import { routes } from "@/lib/routes"
 
+import { forgetAddressFragment, tokenInAddress } from "./address-token"
 import { forgotPasswordRequest, MIN_PASSWORD_LENGTH, setPasswordRequest } from "./api"
 import { AuthFrame, AuthHeading } from "./auth-frame"
 import { PasswordField } from "./password-field"
 
 const subscribeNothing = () => () => {}
-
-const tokenInAddress = () => new URLSearchParams(window.location.hash.slice(1)).get("token") || null
-
-function forgetAddressFragment() {
-  window.history.replaceState(
-    window.history.state,
-    "",
-    window.location.pathname + window.location.search
-  )
-}
 
 function StateIcon({ icon: Icon, tone }: { icon: typeof KeyRound; tone: string }) {
   return (

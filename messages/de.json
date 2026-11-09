@@ -343,7 +343,8 @@
       "disabled": "Mit diesem Konto ist keine Anmeldung mehr möglich. Wenden Sie sich an das Gemeindebüro, wenn Sie das für einen Fehler halten.",
       "tooManyAttempts": "Zu viele Versuche. Warten Sie ein paar Minuten und versuchen Sie es dann noch einmal.",
       "resetLinkInvalid": "Dieser Link funktioniert nicht mehr. Bitten Sie das Gemeindebüro um einen neuen.",
-      "confirmationLinkInvalid": "Dieser Bestätigungslink ist ungültig oder abgelaufen. Registrieren Sie sich erneut, um einen neuen zu erhalten."
+      "confirmationLinkInvalid": "Dieser Bestätigungslink ist ungültig oder abgelaufen. Registrieren Sie sich erneut, um einen neuen zu erhalten.",
+      "unconfirmed": "Bestätigen Sie zuerst Ihre E-Mail-Adresse: Öffnen Sie den Link, den wir Ihnen bei der Registrierung geschickt haben."
     }
   },
   "toast": {
@@ -1788,6 +1789,7 @@
     },
     "registered": {
       "title": "Vielen Dank für Ihre Registrierung",
+      "confirm": "Wir haben Ihnen eine E-Mail geschickt. Öffnen Sie den Link darin, um Ihre Adresse zu bestätigen; erst dann sieht das Gemeindebüro Ihre Registrierung.",
       "text": "Das Gemeindebüro prüft jedes neue Konto von Hand, meist innerhalb weniger Tage. Bis dahin können Sie sich nicht anmelden.",
       "email": "Das Gemeindebüro sagt Ihnen Bescheid, sobald Ihr Konto bereit ist.",
       "back": "Zurück zur Anmeldung"
@@ -1822,6 +1824,23 @@
       "title": "Ihr Konto hat noch keine Rolle",
       "text": "Ihr Konto ist freigegeben, hat aber noch keine Rolle. Bitten Sie das Gemeindebüro, Ihnen eine zu geben, und laden Sie die Seite dann neu.",
       "signOut": "Abmelden"
+    },
+    "unconfirmed": {
+      "title": "Bestätigen Sie zuerst Ihre E-Mail-Adresse",
+      "text": "E-Mail-Adresse und Passwort stimmen, aber die Adresse ist noch nicht bestätigt. Das Gemeindebüro sieht Ihre Registrierung erst, wenn Sie den Link in der E-Mail öffnen, die wir Ihnen geschickt haben.",
+      "valid": "Der Link gilt 7 Tage. Sehen Sie auch im Spam-Ordner nach.",
+      "again": "Keine E-Mail bekommen oder ist der Link abgelaufen? Registrieren Sie sich mit derselben Adresse erneut, um einen neuen Link zu erhalten.",
+      "register": "Erneut registrieren",
+      "back": "Zurück zur Anmeldung"
+    },
+    "confirmEmail": {
+      "title": "E-Mail-Adresse bestätigen",
+      "confirming": "Ihre E-Mail-Adresse wird bestätigt …",
+      "confirmedTitle": "Ihre E-Mail-Adresse ist bestätigt",
+      "confirmedText": "Das Gemeindebüro prüft Ihre Registrierung jetzt von Hand, meist innerhalb weniger Tage, und sagt Ihnen Bescheid, sobald Ihr Konto bereit ist.",
+      "register": "Erneut registrieren",
+      "back": "Zurück zur Anmeldung",
+      "linkInvalid": "Dieser Bestätigungslink ist ungültig oder abgelaufen. Registrieren Sie sich erneut, um einen neuen zu erhalten."
     }
   },
   "privacyNotice": {

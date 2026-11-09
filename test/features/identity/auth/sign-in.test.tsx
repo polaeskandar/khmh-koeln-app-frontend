@@ -13,7 +13,7 @@ import { renderWithProviders } from "@test/support/providers"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
-import { PendingPage, SignInPage } from "@/features/identity/auth/sign-in-page"
+import { PendingPage, SignInPage, UnconfirmedPage } from "@/features/identity/auth/sign-in-page"
 
 vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
 
@@ -133,6 +133,16 @@ describe("when signing in fails", () => {
     expect(router.replace).not.toHaveBeenCalled()
   })
 
+  test("an address that isn't confirmed yet opens the confirm-first page", async () => {
+    backend(() => problem(403, "auth.unconfirmed"))
+    await signIn()
+    await submit()
+
+    await waitFor(() =>
+      expect(router.push).toHaveBeenCalledExactlyOnceWith("/sign-in/unconfirmed/")
+    )
+  })
+
   test("an account waiting for approval opens the waiting page", async () => {
     backend(() => problem(403, "auth.pending"))
     await signIn()
@@ -200,6 +210,21 @@ test("the sign-in page links to self-registration", async () => {
     "href",
     "/register/"
   )
+})
+
+test("the confirm-first page explains the link and offers to register again", () => {
+  renderWithProviders(<UnconfirmedPage />)
+
+  expect(
+    screen.getByRole("heading", { name: "Confirm your email address first" })
+  ).toBeInTheDocument()
+
+  expect(
+    screen.getByText("The link works for 7 days. Check your spam folder too.")
+  ).toBeInTheDocument()
+
+  expect(screen.getByRole("link", { name: "Register again" })).toHaveAttribute("href", "/register/")
+  expect(screen.getByRole("link", { name: "Back to sign-in" })).toHaveAttribute("href", "/sign-in/")
 })
 
 test("the waiting page promises no email", () => {

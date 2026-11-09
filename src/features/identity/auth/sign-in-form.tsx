@@ -38,6 +38,8 @@ export function SignInForm() {
 
     if (result.ok) {
       await refresh()
+    } else if (result.problem.code === "auth.unconfirmed") {
+      router.push(routes.signInUnconfirmed())
     } else if (result.problem.code === "auth.pending") {
       router.push(routes.signInPending())
     } else {

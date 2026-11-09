@@ -228,7 +228,14 @@ test("in Arabic the email and password are typed left to right", () => {
 test("the thank-you page promises no email and links back to sign-in", () => {
   renderWithProviders(<RegisteredPage />)
   expect(screen.getByRole("heading", { name: "Thank you for registering" })).toBeInTheDocument()
-  expect(document.body).not.toHaveTextContent(/email|prototype/i)
+
+  expect(
+    screen.getByText(
+      "We’ve sent you an email. Open the link in it to confirm your address; only then does the church office see your registration."
+    )
+  ).toBeInTheDocument()
+
+  expect(document.body).not.toHaveTextContent(/prototype/i)
   expect(screen.getByRole("link", { name: "Back to sign-in" })).toHaveAttribute("href", "/sign-in/")
 })
 
