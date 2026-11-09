@@ -26,13 +26,14 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/c
 import { Input } from "@/components/ui/input"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
+import { useCan } from "@/features/identity/auth/session"
 import { HomeworkStatusBadge } from "@/features/learning/lessons/lesson-bits"
 import { stageQuery } from "@/features/organization/stages/api"
 import { useStageCrumbs } from "@/features/organization/stages/stage-layout"
 import { useSearchParamId } from "@/hooks/use-search-param-id"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
-import type { LessonRef, LocalDate, ServiceRef, StageRef, Uuid } from "@/lib/api/types/common"
+import type { LessonRef, LocalDate, ServiceRef, Uuid } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { addDays } from "@/lib/domain/time"
 import { routes } from "@/lib/routes"
@@ -40,6 +41,7 @@ import { routes } from "@/lib/routes"
 import {
   createHomeworkRequest,
   type HomeworkDetail,
+  homeworkFlagsFor,
   type HomeworkInput,
   homeworkQuery,
   type Resource,
@@ -55,8 +57,10 @@ const EMPTY_RESOURCE: Resource = { label: "", url: null }
 const weekAfter = (date: LocalDate) => addDays(date, 7)
 const isBlank = (resource: Resource) => !resource.label.trim() && !(resource.url ?? "").trim()
 
+type HomeworkStage = StageHomework["stage"]
+
 type FormProps = {
-  stage: StageRef
+  stage: HomeworkStage
   audienceSize: number
 } & ({ lessons: LessonRef[]; lessonId: Uuid; homework?: never } | { homework: HomeworkDetail })
 
@@ -66,6 +70,7 @@ function HomeworkForm(props: FormProps) {
   const t = useTranslations()
   const f = useFormat()
   const router = useRouter()
+  const can = useCan()
   const formRef = useRef<HTMLFormElement>(null)
   const dueId = useId()
   const lessonSelectId = useId()
@@ -81,19 +86,26 @@ function HomeworkForm(props: FormProps) {
   const [resources, setResources] = useState<Resource[]>(homework?.resources ?? [])
   const [sent, setSent] = useState<number[]>([])
   const [savedId, setSavedId] = useState<Uuid | null>(homework?.id ?? null)
+  const [version, setVersion] = useState(homework?.version ?? 0)
   const [intent, setIntent] = useState<"save" | "publish">("save")
   const busy = useRef(false)
 
   const mutation = useApiMutation(
     (input: HomeworkInput) =>
-      savedId ? updateHomeworkRequest(savedId, input) : createHomeworkRequest(lessonId, input),
+      savedId
+        ? updateHomeworkRequest(savedId, version, input)
+        : createHomeworkRequest(lessonId, input),
     { invalidate: [["homework"]] }
   )
 
   const publisher = usePublishHomework(t("toast.homeworkPublishedNew"))
   const errors = mutation.fieldErrors
   const published = homework?.status === "published"
-  const canPublish = homework ? homework.can.publish : true
+
+  const canPublish = homework
+    ? homeworkFlagsFor(can, homework, homework.archived).publish
+    : can("update", "homework")
+
   const pending = mutation.pending || publisher.pending
   const listOn = (status: string) => `${routes.stageHomework(stage.id)}&status=${status}`
   const lessonLabel = (l: LessonRef) => `${f.dayMonth(l.teachingDate)} · ${l.title}`
@@ -161,6 +173,7 @@ function HomeworkForm(props: FormProps) {
       }
 
       setSavedId(saved.data.id)
+      setVersion(saved.data.version)
 
       if (next === "save") {
         toast.success(
@@ -410,20 +423,24 @@ function HomeworkForm(props: FormProps) {
 
 function EditorPage({
   stage,
+  archived,
   service,
   title,
   description,
   children,
 }: {
-  stage: StageRef
+  stage: HomeworkStage
+  archived: boolean
   service: ServiceRef
   title: string
   description?: string
   children: React.ReactNode
 }) {
+  const crumbs = useStageCrumbs({ ...stage, archived, service }, "homework", [{ label: title }])
+
   return (
     <>
-      <Topbar crumbs={useStageCrumbs({ ...stage, service }, "homework", [{ label: title }])} />
+      <Topbar crumbs={crumbs} />
       <PageBody>
         <PageHeader title={title} description={description} />
         {children}
@@ -474,6 +491,7 @@ function firstLesson(data: StageHomework, wanted: Uuid | null): Uuid {
 
 function NewHomework({ stageId }: { stageId: Uuid }) {
   const t = useTranslations("homework")
+  const can = useCan()
   const wanted = useSearchParamId("lesson")
   const stage = useQuery(stageQuery(stageId))
   const list = useQuery(stageHomeworkQuery(stageId))
@@ -483,13 +501,14 @@ function NewHomework({ stageId }: { stageId: Uuid }) {
       {(s) => (
         <EditorPage
           stage={s}
+          archived={s.archived}
           service={s.service}
           title={t("newHomework")}
           description={t("new.description")}
         >
           <QueryState query={list}>
             {(data) =>
-              !data.can.create ? (
+              data.archived || !can("create", "homework") ? (
                 <NoAccess title={t("new.noAccessTitle")}>
                   {t("new.noAccess", { stage: s.name })}
                 </NoAccess>
@@ -513,6 +532,7 @@ function NewHomework({ stageId }: { stageId: Uuid }) {
 
 function EditHomework({ id }: { id: Uuid }) {
   const t = useTranslations("homework")
+  const can = useCan()
   const query = useQuery(homeworkQuery(id))
 
   return (
@@ -520,6 +540,7 @@ function EditHomework({ id }: { id: Uuid }) {
       {(data) => (
         <EditorPage
           stage={data.stage}
+          archived={data.archived}
           service={data.service}
           title={t("edit.title", { title: data.title })}
         >
@@ -530,7 +551,7 @@ function EditHomework({ id }: { id: Uuid }) {
             >
               {t("edit.archived")}
             </NoAccess>
-          ) : !data.can.edit ? (
+          ) : !homeworkFlagsFor(can, data, data.archived).edit ? (
             <NoAccess title={t("edit.noAccessTitle")}>
               {t("edit.noAccess", { stage: data.stage.name })}
             </NoAccess>

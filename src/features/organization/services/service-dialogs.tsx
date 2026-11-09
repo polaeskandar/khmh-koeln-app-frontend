@@ -1,5 +1,6 @@
 "use client"
 
+import { useCan } from "@/features/identity/auth/session"
 import { Archive, ArchiveRestore, Ellipsis, PencilLine, Plus, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useEffect, useRef, useState } from "react"
@@ -36,6 +37,7 @@ import {
   type ServiceFields,
   type ServiceRow,
   updateServiceRequest,
+  useServiceInsight,
 } from "./api"
 import { StructureChangeDialog } from "./structure-change"
 
@@ -77,7 +79,7 @@ function ServiceForm({
   })
 
   const update = useApiMutation(
-    (changes: Partial<ServiceFields>) => updateServiceRequest(service!.id, changes),
+    (fields: ServiceFields) => updateServiceRequest(service!.id, fields),
     { successMessage: t("toast.saved"), invalidate: SERVICE_QUERIES, onSuccess: onDone }
   )
 
@@ -106,7 +108,7 @@ function ServiceForm({
     if (Object.keys(changes).length === 0) {
       onDone()
     } else {
-      await update.execute(changes)
+      await update.execute(fields)
     }
   }
 
@@ -209,14 +211,20 @@ export function ServiceActionsMenu({ service }: { service: ServiceRow }) {
   const t = useTranslations()
   const router = useRouter()
   const [open, setOpen] = useState<"edit" | "archive" | "restore" | "delete" | null>(null)
-  const edit = service.can.edit && !service.archived
+  const can = useCan()
+  const edit = can("update", "services") && !service.archived
+  const archive = can("delete", "services")
 
-  if (!edit && !service.can.archive) {
+  const impact = useServiceInsight(service.id)?.impact ?? {
+    activeSchedules: 0,
+    upcomingSessions: 0,
+  }
+
+  if (!edit && !archive) {
     return null
   }
 
   const name = isolate(service.name)
-  const impact = service.impact ?? { activeSchedules: 0, upcomingSessions: 0 }
   const close = (next: boolean) => !next && setOpen(null)
 
   return (
@@ -238,19 +246,19 @@ export function ServiceActionsMenu({ service }: { service: ServiceRow }) {
               {t("services.actions.editDetails")}
             </DropdownMenuItem>
           ) : null}
-          {service.can.archive && !service.archived ? (
+          {archive && !service.archived ? (
             <DropdownMenuItem onSelect={() => setOpen("archive")}>
               <Archive />
               {t("common.archive")}
             </DropdownMenuItem>
           ) : null}
-          {service.can.archive && service.archived ? (
+          {archive && service.archived ? (
             <DropdownMenuItem onSelect={() => setOpen("restore")}>
               <ArchiveRestore />
               {t("common.restore")}
             </DropdownMenuItem>
           ) : null}
-          {service.can.archive ? (
+          {archive ? (
             <DropdownMenuItem variant="destructive" onSelect={() => setOpen("delete")}>
               <Trash2 />
               {t("common.delete")}

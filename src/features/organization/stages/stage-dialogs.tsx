@@ -69,15 +69,12 @@ function StageForm({
     onSuccess: (created) => router.push(routes.stage(created.id)),
   })
 
-  const update = useApiMutation(
-    (changes: Partial<StageFields>) => updateStageRequest(stage!.id, changes),
-    {
-      successMessage: t("toast.saved"),
-      invalidate: STAGE_QUERIES,
-      toastOnError: false,
-      onSuccess: onDone,
-    }
-  )
+  const update = useApiMutation((fields: StageFields) => updateStageRequest(stage!.id, fields), {
+    successMessage: t("toast.saved"),
+    invalidate: STAGE_QUERIES,
+    toastOnError: false,
+    onSuccess: onDone,
+  })
 
   const mutation = stage ? update : add
   const errors = mutation.fieldErrors
@@ -111,7 +108,7 @@ function StageForm({
     if (Object.keys(changes).length === 0) {
       onDone()
     } else {
-      await update.execute(changes)
+      await update.execute(fields)
     }
   }
 

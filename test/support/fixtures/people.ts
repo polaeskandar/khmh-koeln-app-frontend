@@ -37,7 +37,6 @@ export function person(
       },
     ],
     pastPlacements: [],
-    can: { edit: true },
   }
 }
 
@@ -50,5 +49,4 @@ export const peopleList = (
   page,
   pageSize: 25,
   total,
-  can: { add: true },
 })

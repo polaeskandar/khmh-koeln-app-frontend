@@ -5,7 +5,7 @@ export type Placement = Schemas["PlacementRow"]
 
 export type PersonRow = Schemas["PersonRow"]
 
-export type PeopleList = Schemas["PeoplePage"]
+export type PeopleList = Schemas["PeoplePageResponse"]
 
 export type PeopleFilter = {
   status?: "active" | "inactive" | "all"
@@ -49,8 +49,8 @@ export const addMembershipRequest = (person: Uuid, placement: PlacementInput) =>
 
 export type PersonNames = { firstName: string; lastName: string; displayName: string | null }
 
-export const renamePersonRequest = (person: Uuid, changes: Partial<PersonNames>) =>
-  dataOf(api.PATCH("/people/{id}", { params: { path: { id: person } }, body: changes }))
+export const renamePersonRequest = (person: Uuid, names: PersonNames) =>
+  dataOf(api.PUT("/people/{id}", { params: { path: { id: person } }, body: names }))
 
 export const joinRequest = (person: Uuid, placement: { serviceId: Uuid; stageId: Uuid | null }) =>
   dataOf(

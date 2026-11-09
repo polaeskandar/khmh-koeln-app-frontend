@@ -1,16 +1,18 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { http, HttpResponse } from "msw"
+import { http } from "msw"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
-import { openRosterBoard, thirdClassBoard } from "@test/support/fixtures/board"
+import { openRosterBoard, sheetHandlers, thirdClassBoard } from "@test/support/fixtures/board"
+import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { AttendanceBoard } from "@/features/meetings/attendance/api"
+import type { AttendanceSheet } from "@/features/meetings/attendance/api"
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
 
 const search = vi.hoisted(() => ({ value: "" }))
@@ -19,21 +21,35 @@ vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation
 
 beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => {}))
 
-function open(board: AttendanceBoard | (() => Response), locale: Locale = "en") {
+const viewer: Me = {
+  ...me.servant,
+  permissions: me.servant.permissions.filter(
+    (p) => p.resource !== "attendance" || p.action === "read"
+  ),
+}
+
+function open(
+  board: AttendanceSheet | (() => Response),
+  { locale = "en", who = me.servant }: { locale?: Locale; who?: Me } = {}
+) {
   const id = typeof board === "function" ? "0192f3a4-7b1c-7d2e-8f3a-000000000999" : board.session.id
   search.value = `session=${id}`
 
   server.use(
-    http.get(apiUrl(`/sessions/${id}/attendance`), () =>
-      typeof board === "function" ? board() : HttpResponse.json(board)
-    )
+    ...(typeof board === "function"
+      ? [
+          http.get(apiUrl(`/sessions/${id}`), board),
+          http.get(apiUrl(`/sessions/${id}/attendance`), board),
+          http.get(apiUrl(`/sessions/${id}/attendance/corrections`), board),
+        ]
+      : sheetHandlers(board))
   )
 
   renderWithProviders(
     <SidebarProvider>
       <TakeAttendancePage />
     </SidebarProvider>,
-    { locale }
+    { locale, me: who }
   )
 }
 
@@ -125,9 +141,7 @@ describe("other boards", () => {
   })
 
   test("view only: no PRESENT, undo or Close", async () => {
-    const board = thirdClassBoard()
-    board.session = { ...board.session, can: { manage: false, record: false, reopen: false } }
-    open(board)
+    open(thirdClassBoard(), { who: viewer })
     await roster()
     expect(screen.queryByRole("button", { name: /^Mark .* present$/ })).toBeNull()
     expect(screen.queryByRole("button", { name: /^Undo/ })).toBeNull()
@@ -136,7 +150,7 @@ describe("other boards", () => {
   })
 
   test("reads right to left in Arabic", async () => {
-    open(thirdClassBoard(), "ar")
+    open(thirdClassBoard(), { locale: "ar" })
     expect(await screen.findByRole("tab", { name: /14/ })).toBeInTheDocument()
   })
 

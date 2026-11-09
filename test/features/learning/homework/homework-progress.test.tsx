@@ -4,13 +4,18 @@ import { http, HttpResponse } from "msw"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
 import { apiUrl, problem } from "@test/support/api"
+import { me } from "@test/support/fixtures/me"
 import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
-import { homeworkFlags } from "@test/support/fixtures/homework"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { HomeworkProgress, ProgressRow } from "@/features/learning/homework/api"
+import type {
+  HomeworkDetail,
+  HomeworkProgress,
+  ProgressRow,
+} from "@/features/learning/homework/api"
 import { HomeworkProgressPage } from "@/features/learning/homework/homework-progress"
 
 const search = vi.hoisted(() => ({ value: "" }))
@@ -77,12 +82,15 @@ const lesson = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e9002",
   title: "The Good Samaritan",
   teachingDate: "2026-11-01",
+  archived: false,
 }
+
+const stage = { id: THIRD_CLASS_ID, name: "3rd Class", position: 2 }
 
 const progress = (extra: Partial<HomeworkProgress> = {}): HomeworkProgress => ({
   today: "2026-11-08",
   service: thirdClass.service,
-  stage: { id: THIRD_CLASS_ID, name: "3rd Class", position: 2, archived: false },
+  stage,
   homework: {
     id: HOMEWORK_ID,
     title: "Learn the memory verse",
@@ -99,15 +107,6 @@ const progress = (extra: Partial<HomeworkProgress> = {}): HomeworkProgress => ({
       withoutAccount: 4,
       reportedTotal: 1,
     },
-    can: homeworkFlags({
-      edit: true,
-      publish: false,
-      unpublish: false,
-      archive: false,
-      restore: false,
-      delete: false,
-      viewProgress: true,
-    }),
     instructions: "Say it once a day.\nAt bedtime is easiest.",
     resources: [
       { label: "The story as a video", url: "https://example.org/story" },
@@ -128,17 +127,33 @@ const progress = (extra: Partial<HomeworkProgress> = {}): HomeworkProgress => ({
   ...extra,
 })
 
-function open(body: HomeworkProgress | (() => Response)) {
+const detailOf = ({ today, service, homework }: HomeworkProgress): HomeworkDetail => ({
+  ...homework,
+  today,
+  minDueDate: lesson.teachingDate,
+  lesson: { ...lesson, passage: null, memoryVerse: null },
+  service,
+  stage,
+  archived: false,
+  audienceSize: 14,
+  version: 1,
+})
+
+function open(body: HomeworkProgress | (() => Response), account: Me = me.servant) {
   server.use(
     http.get(apiUrl(`/homework/${HOMEWORK_ID}/progress`), () =>
       typeof body === "function" ? body() : HttpResponse.json(body)
+    ),
+    http.get(apiUrl(`/homework/${HOMEWORK_ID}`), () =>
+      HttpResponse.json(detailOf(typeof body === "function" ? progress() : body))
     )
   )
 
   renderWithProviders(
     <SidebarProvider>
       <HomeworkProgressPage />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: account }
   )
 }
 
@@ -245,7 +260,7 @@ test("shows what parents read, the lesson and Edit", async () => {
     `/lessons/view/?id=${lesson.id}`
   )
 
-  expect(screen.getByRole("link", { name: "Edit" })).toHaveAttribute(
+  expect(await screen.findByRole("link", { name: "Edit" })).toHaveAttribute(
     "href",
     `/homework/edit/?id=${HOMEWORK_ID}`
   )
@@ -256,25 +271,10 @@ test("shows what parents read, the lesson and Edit", async () => {
   )
 })
 
-test("a draft shows its note instead of figures, and no Edit without the flag", async () => {
+test("a draft shows its note instead of figures, and no Edit without homework: update", async () => {
   const data = progress({ counts: null })
-
-  data.homework = {
-    ...data.homework,
-    status: "draft",
-    counts: null,
-    can: homeworkFlags({
-      edit: false,
-      publish: false,
-      unpublish: false,
-      archive: false,
-      restore: false,
-      delete: false,
-      viewProgress: true,
-    }),
-  }
-
-  open(data)
+  data.homework = { ...data.homework, status: "draft", counts: null }
+  open(data, me.churchOffice)
 
   expect(
     await screen.findByText("This homework is a draft. Parents and members can’t see it yet.")

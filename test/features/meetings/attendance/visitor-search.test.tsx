@@ -7,7 +7,15 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 import type { DirectoryPerson } from "@/features/people/members/api"
 import type { Locale } from "@/i18n/config"
 import { apiUrl } from "@test/support/api"
-import { openRosterBoard, rosterPeople, thirdClassBoard } from "@test/support/fixtures/board"
+import {
+  boardOf,
+  detailOf,
+  openRosterBoard,
+  rosterPeople,
+  thirdClassBoard,
+} from "@test/support/fixtures/board"
+import { me } from "@test/support/fixtures/me"
+import { sundaySchool } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
@@ -26,8 +34,6 @@ const youth = {
   tone: 2,
   archived: false,
 }
-
-const sundaySchool = thirdClassBoard().session.service
 
 const directoryPerson = (
   n: number,
@@ -55,7 +61,13 @@ function open(
   let found: DirectoryPerson[] = []
 
   server.use(
-    http.get(apiUrl(`/sessions/${board.session.id}/attendance`), () => HttpResponse.json(current)),
+    http.get(apiUrl(`/sessions/${board.session.id}`), () => HttpResponse.json(detailOf(board))),
+    http.get(apiUrl(`/sessions/${board.session.id}/attendance/corrections`), () =>
+      HttpResponse.json({ items: [] })
+    ),
+    http.get(apiUrl(`/sessions/${board.session.id}/attendance`), () =>
+      HttpResponse.json(boardOf(current))
+    ),
     http.get(apiUrl("/people/directory"), async ({ request }) => {
       const q = new URL(request.url).searchParams.get("q") ?? ""
       queries.push(q)
@@ -70,11 +82,7 @@ function open(
       return HttpResponse.json({ items: found })
     }),
     http.put(apiUrl(`/sessions/${board.session.id}/attendance/:person`), ({ params }) => {
-      const mark = {
-        id: "m-visitor",
-        recordedAt: "2026-11-08T12:40:00+01:00",
-        recordedBy: { id: "a1", name: "Daniel Mikhail" },
-      }
+      const mark = { id: "m-visitor", recordedAt: "2026-11-08T12:40:00+01:00" }
 
       const { groups, ...person } = found.find((candidate) => candidate.id === params.person)!
 
@@ -83,7 +91,15 @@ function open(
         notOnRoster: [...current.notOnRoster, { person, mark, placements: groups }],
       }
 
-      return HttpResponse.json(mark, { status: 201 })
+      return HttpResponse.json(
+        {
+          ...mark,
+          sessionId: board.session.id,
+          personId: person.id,
+          recordedBy: { id: "a1", name: "Daniel Mikhail" },
+        },
+        { status: 201 }
+      )
     })
   )
 
@@ -91,7 +107,7 @@ function open(
     <SidebarProvider>
       <TakeAttendancePage />
     </SidebarProvider>,
-    { locale }
+    { locale, me: me.servant }
   )
 
   return { queries, aborted }

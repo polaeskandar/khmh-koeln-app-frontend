@@ -8,7 +8,7 @@ import { type ReactNode, useEffect, useState } from "react"
 import { ReasonDialog } from "@/components/confirm-dialog"
 import { HistoryTimeline } from "@/components/history-timeline"
 import { MemberAvatar } from "@/components/member-avatar"
-import { NotFoundState, QueryState } from "@/components/page-states"
+import { NotFoundState } from "@/components/page-states"
 import { Section } from "@/components/page-header"
 import { RecordPage } from "@/components/record-page"
 import { RosterCells } from "@/components/roster-cells"
@@ -16,6 +16,7 @@ import { useSessionLines } from "@/components/session-bits"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Topbar } from "@/components/app-shell/topbar"
+import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
 import { isolate } from "@/lib/bidi"
@@ -25,7 +26,8 @@ import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { initials, preferredName } from "@/lib/domain/names"
 import { routes } from "@/lib/routes"
 
-import { type AttendanceBoard as Board, reopenAttendanceRequest, useAttendanceBoard } from "./api"
+import { type AttendanceSheet as Board, reopenAttendanceRequest } from "./api"
+import { SheetState } from "./sheet-state"
 import { BoardFrame } from "./take-attendance-page"
 
 function People({ people }: { people: { person: PersonRef; at?: Instant }[] }) {
@@ -85,6 +87,7 @@ function ReopenButton({ board }: { board: Board }) {
 
         if (!result.ok && result.problem.code === "meetings.onlyCompletedCanReopen") {
           void queryClient.invalidateQueries({ queryKey: ["attendance"] })
+          void queryClient.invalidateQueries({ queryKey: ["sessions"] })
         }
 
         return result.ok
@@ -107,14 +110,20 @@ function Corrections({ board }: { board: Board }) {
   return (
     <ul className="flex flex-col gap-2 text-sm">
       {board.corrections.map((correction) => {
+        const { recorded, removed } = correction
+
+        if (!recorded.at || !removed.at) {
+          return null
+        }
+
         const values = {
           name: preferredName(correction.person),
-          time: f.instantTime(correction.recordedAt),
-          when: f.atLabel(correction.removedAt, board.today),
+          time: f.instantTime(recorded.at),
+          when: f.atLabel(removed.at, board.today),
           person: (chunks: ReactNode) => <span className="text-foreground">{chunks}</span>,
         }
 
-        const by = correction.removedBy?.name
+        const by = removed.by?.name
         const reason = correction.reason ? isolate(correction.reason) : null
 
         return (
@@ -239,12 +248,15 @@ function Summary({ board }: { board: Board }) {
 
 function SummaryActions({ board }: { board: Board }) {
   const t = useTranslations("attendance.summary")
+  const can = useCan()
   const { session } = board
 
   return (
     <div className="flex flex-wrap gap-2">
-      {session.status === "completed" && session.can.reopen ? <ReopenButton board={board} /> : null}
-      {session.status === "active" && session.can.record ? (
+      {session.status === "completed" && can("update", "sessions") ? (
+        <ReopenButton board={board} />
+      ) : null}
+      {session.status === "active" && can("create", "attendance") ? (
         <Button asChild>
           <Link href={routes.takeAttendance(session.id)}>{t("continue")}</Link>
         </Button>
@@ -272,10 +284,8 @@ function NotFoundPage() {
 }
 
 function LoadedSummary({ id }: { id: string }) {
-  const query = useAttendanceBoard(id)
-
   return (
-    <QueryState query={query} notFound={<NotFoundPage />}>
+    <SheetState id={id} notFound={<NotFoundPage />}>
       {(board) =>
         board.session.status === "scheduled" || board.session.status === "canceled" ? (
           <ToBoard session={id} />
@@ -286,7 +296,7 @@ function LoadedSummary({ id }: { id: string }) {
           </BoardFrame>
         )
       }
-    </QueryState>
+    </SheetState>
   )
 }
 

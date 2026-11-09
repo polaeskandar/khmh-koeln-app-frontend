@@ -79,7 +79,7 @@ const request = (displayName: string): AccountRequest => ({
 function open(
   name: string,
   items: MemberCandidate[],
-  approve: () => Response = () => HttpResponse.json({ id: "a1" })
+  approve: () => Response = () => HttpResponse.json(request(name).account)
 ) {
   const bodies: unknown[] = []
 
@@ -144,9 +144,11 @@ test("two Mina Hannas: a warning, nothing preselected, and the youth sent with c
 
   expect(bodies[0]).toEqual({
     as: "member",
-    personId: youngMina.id,
-    ageCheck: "guardianConsent",
-    guardianConsentNote: "His mother agreed in person.",
+    member: {
+      personId: youngMina.id,
+      ageCheck: "guardianConsent",
+      guardianConsentNote: "His mother agreed in person.",
+    },
   })
 })
 
@@ -154,7 +156,10 @@ test("a record with an account is disabled, and a 422 stays under the list", asy
   open("Nevine Boulos", [nevine, nevineTwin], () =>
     problem(422, "validation.failed", {
       fieldErrors: {
-        personId: { code: "accounts.personHasAccount", params: { name: "Nevine Boulos" } },
+        "member.personId": {
+          code: "accounts.personHasAccount",
+          params: { name: "Nevine Boulos" },
+        },
       },
     })
   )
@@ -201,5 +206,9 @@ test("a long note is refused before sending, and 16 or older sends no note", asy
 
   await userEvent.click(dialog.getByRole("button", { name: "Approve account" }))
   await waitFor(() => expect(bodies).toHaveLength(1))
-  expect(bodies[0]).toMatchObject({ ageCheck: "sixteenOrOlder", guardianConsentNote: null })
+
+  expect(bodies[0]).toEqual({
+    as: "member",
+    member: { personId: youngMina.id, ageCheck: "sixteenOrOlder", guardianConsentNote: null },
+  })
 })

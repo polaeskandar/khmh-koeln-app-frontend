@@ -17,7 +17,7 @@ import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
-import { toLink } from "@/features/learning/lessons/api"
+import { toMeeting } from "@/features/learning/lessons/api"
 import { EditLessonPage, NewLessonPage } from "@/features/learning/lessons/lesson-editor"
 
 const search = vi.hoisted(() => ({ value: "" }))
@@ -118,26 +118,23 @@ describe("the meeting select", () => {
   })
 })
 
-describe("toLink", () => {
+describe("toMeeting", () => {
   const options = lessonOptions().options
 
-  test("a schedule date links its schedule and date", () => {
-    expect(toLink(`${SCHEDULE_ID}:2026-11-22`, "2026-11-08", options)).toEqual({
-      teachingDate: "2026-11-22",
+  test("a schedule date sends its schedule and date", () => {
+    expect(toMeeting(`${SCHEDULE_ID}:2026-11-22`, "2026-11-08", options)).toEqual({
       scheduleId: SCHEDULE_ID,
-      sessionId: null,
+      date: "2026-11-22",
     })
   })
 
-  test("another date links only the date", () => {
-    expect(toLink("other", "2026-12-24", options)).toEqual({
-      teachingDate: "2026-12-24",
-      scheduleId: null,
-      sessionId: null,
-    })
+  test("another date sends only the date", () => {
+    expect(toMeeting("other", "2026-12-24", options)).toEqual({ date: "2026-12-24" })
   })
 
   test("switching from a session's date to another schedule date sends no session", () => {
-    expect(toLink(`${SCHEDULE_ID}:2026-11-08`, "2026-11-08", options).sessionId).toBeNull()
+    expect(toMeeting(`${SCHEDULE_ID}:2026-11-08`, "2026-11-08", options)).not.toHaveProperty(
+      "sessionId"
+    )
   })
 })

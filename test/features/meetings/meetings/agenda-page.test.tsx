@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { AgendaItem, PlannedItem } from "@/lib/api/types/meetings"
 import { apiUrl } from "@test/support/api"
+import { me } from "@test/support/fixtures/me"
 import { services } from "@test/support/fixtures/services"
 import { session, stageRef, sundaySchool } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
@@ -34,7 +35,6 @@ const planned = (date: string, stage = stageRef("4th Class", 4)): PlannedItem =>
   endsAt: `${date}T13:00:00+01:00`,
   location: null,
   rosterMode: "expected",
-  can: { manage: true },
 })
 
 const window = (from: string, to: string, items: AgendaItem[] = []): Agenda => ({
@@ -61,7 +61,8 @@ function open(query: string, answer: (url: URL) => Agenda) {
   renderWithProviders(
     <SidebarProvider>
       <AgendaPage />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: me.leader }
   )
 
   return requests

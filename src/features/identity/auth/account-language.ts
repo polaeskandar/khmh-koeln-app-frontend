@@ -28,7 +28,7 @@ export function saveAccountLanguage(queryClient: QueryClient, language: Locale) 
     return
   }
 
-  dataOf(api.PATCH("/me", { body: { language } })).then(
+  dataOf(api.PUT("/me/language", { body: { language } })).then(
     (me) => {
       if (accountOf(queryClient) === account) {
         queryClient.setQueryData(meQuery.queryKey, me)

@@ -1,6 +1,6 @@
-import { api, dataOf } from "@/lib/api/client"
+import { api, dataOf, type Schemas } from "@/lib/api/client"
 
-export type PasswordChange = { currentPassword: string; newPassword: string }
+export type PasswordChange = Schemas["ChangePasswordRequest"]
 
 export const MIN_PASSWORD_LENGTH = 10
 

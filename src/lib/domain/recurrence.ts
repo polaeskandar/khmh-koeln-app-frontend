@@ -122,7 +122,7 @@ export function nextOccurrence(r: Recurrence, onOrAfter: LocalDate): LocalDate |
 
 const MONTH_WEEKS: MonthWeek[] = [1, 2, 3, 4, -1]
 
-export function recurrenceOf(view: Schemas["RecurrenceView"]): Recurrence {
+export function recurrenceOf(view: Schemas["RecurrenceSummary"]): Recurrence {
   return {
     ...view,
     weekdays: normalizeWeekdays(view.weekdays),

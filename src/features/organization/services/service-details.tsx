@@ -1,5 +1,6 @@
 "use client"
 
+import { useCan } from "@/features/identity/auth/session"
 import { useQuery } from "@tanstack/react-query"
 import { Archive, ArrowRight, PencilLine } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -26,7 +27,13 @@ import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 
-import { type ServiceRow, type ServiceStages, serviceQuery, serviceStagesQuery } from "./api"
+import {
+  type ServiceRow,
+  type ServiceStages,
+  serviceQuery,
+  serviceStagesQuery,
+  useServiceInsight,
+} from "./api"
 import { AddStageButton } from "@/features/organization/stages/stage-dialogs"
 
 import { trendText } from "./service-bits"
@@ -61,6 +68,8 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
 function Stages({ service, stages }: { service: ServiceRow; stages: ServiceStages }) {
   const t = useTranslations()
   const f = useFormat()
+  const can = useCan()
+  const addStages = can("create", "stages") && !service.archived
 
   return (
     <Section
@@ -69,7 +78,7 @@ function Stages({ service, stages }: { service: ServiceRow; stages: ServiceStage
       description={t("services.detail.stages.description")}
       actions={
         <span className="flex items-center gap-4">
-          {stages.can.manageStructure && stages.stages.length > 0 ? (
+          {addStages && stages.stages.length > 0 ? (
             <AddStageButton service={stages.service} variant="outline" />
           ) : null}
           <Link
@@ -93,7 +102,7 @@ function Stages({ service, stages }: { service: ServiceRow; stages: ServiceStage
               })}
             </EmptyDescription>
           </EmptyHeader>
-          {stages.can.manageStructure ? (
+          {addStages ? (
             <EmptyContent>
               <AddStageButton
                 service={stages.service}
@@ -145,6 +154,8 @@ function Details({ service }: { service: ServiceRow }) {
   const f = useFormat()
   const stages = useQuery(serviceStagesQuery(service.id))
   const schedules = useQuery(serviceSchedulesQuery(service.id))
+  const can = useCan()
+  const insight = useServiceInsight(service.id)
   const activeSchedules = schedules.data?.items.filter((schedule) => schedule.active).length ?? 0
 
   return (
@@ -164,10 +175,12 @@ function Details({ service }: { service: ServiceRow }) {
           description={service.description ? <span dir="auto">{service.description}</span> : null}
           actions={
             <>
-              {service.can.manageSessions && !service.archived && schedules.data ? (
+              {can("create", "sessions") && !service.archived && schedules.data ? (
                 <NewScheduleButton today={schedules.data.today} fixedServiceId={service.id} />
               ) : null}
-              {service.can.edit && !service.archived ? <EditButton service={service} /> : null}
+              {can("update", "services") && !service.archived ? (
+                <EditButton service={service} />
+              ) : null}
               <ServiceActionsMenu service={service} />
             </>
           }
@@ -187,7 +200,10 @@ function Details({ service }: { service: ServiceRow }) {
           <Stat label={t("services.detail.stats.stages")} value={stages.data?.stages.length ?? 0} />
           <Stat label={t("services.detail.stats.members")} value={service.memberCount} />
           <Stat label={t("services.detail.stats.activeSchedules")} value={activeSchedules} />
-          <Stat label={t("services.detail.stats.attendance")} value={trendText(service, f)} />
+          <Stat
+            label={t("services.detail.stats.attendance")}
+            value={trendText(insight?.trend, f)}
+          />
         </div>
         <QueryState query={stages}>
           {(data) => <Stages service={service} stages={data} />}

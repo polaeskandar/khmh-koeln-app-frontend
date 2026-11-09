@@ -1,7 +1,7 @@
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import { can } from "@/lib/permissions"
 
-export type Me = Schemas["CurrentAccount"]
+export type Me = Schemas["MeResponse"]
 
 export function areasOf(me: Me) {
   return {
@@ -23,9 +23,9 @@ export const signOutRequest = () => dataOf(api.POST("/auth/sign-out", { body: {}
 
 export const MIN_PASSWORD_LENGTH = 10
 
-export type RegisteredAs = "parent" | "member" | "servant"
+export type RegisteredAs = Schemas["RegisteredAs"]
 
-export type Registration = Schemas["RegisterAccountCommand"]
+export type Registration = Schemas["RegisterAccountRequest"]
 
 export const registrationServicesQuery = {
   queryKey: ["registrationServices", "list"] as const,
@@ -35,7 +35,7 @@ export const registrationServicesQuery = {
 
 export const registerRequest = (body: Registration) => dataOf(api.POST("/auth/register", { body }))
 
-export const setPasswordRequest = (body: { token: string; password: string }) =>
+export const setPasswordRequest = (body: Schemas["SetPasswordFromLinkRequest"]) =>
   dataOf(api.POST("/auth/password-links", { body }))
 
 export const forgotPasswordRequest = (email: string) =>

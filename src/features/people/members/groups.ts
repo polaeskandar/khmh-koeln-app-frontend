@@ -16,7 +16,7 @@ export function useGroupOptions(): GroupOption[] {
   const services = useQuery(servicesQuery)
 
   return (services.data?.items ?? [])
-    .filter((service) => !service.archived && service.can.manageMembers)
+    .filter((service) => !service.archived)
     .flatMap((service) => [
       {
         value: `service:${service.id}`,
@@ -24,13 +24,11 @@ export function useGroupOptions(): GroupOption[] {
         filter: { serviceId: service.id },
         placement: { serviceId: service.id, stageId: null },
       },
-      ...service.stages
-        .filter((stage) => stage.can.manageMembers)
-        .map((stage) => ({
-          value: `stage:${stage.id}`,
-          label: `${service.name} · ${stage.name}`,
-          filter: { stageId: stage.id },
-          placement: { serviceId: service.id, stageId: stage.id },
-        })),
+      ...service.stages.map((stage) => ({
+        value: `stage:${stage.id}`,
+        label: `${service.name} · ${stage.name}`,
+        filter: { stageId: stage.id },
+        placement: { serviceId: service.id, stageId: stage.id },
+      })),
     ])
 }

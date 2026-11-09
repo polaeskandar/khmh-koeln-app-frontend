@@ -47,7 +47,8 @@ function editor(page: React.ReactNode, servants = [daniel, christine], write?: (
     sent.push((await request.json()) as Record<string, unknown>)
 
     return (
-      write?.() ?? HttpResponse.json({ id: goodSamaritan.id, status: "ready" }, { status: 201 })
+      write?.() ??
+      HttpResponse.json({ id: goodSamaritan.id, status: "ready", version: 1 }, { status: 201 })
     )
   }
 
@@ -58,7 +59,7 @@ function editor(page: React.ReactNode, servants = [daniel, christine], write?: (
       HttpResponse.json(lessonOptions({ servants }))
     ),
     http.post(apiUrl(`/stages/${lessonStage.id}/lessons`), save),
-    http.patch(apiUrl(`/lessons/${goodSamaritan.id}`), save)
+    http.put(apiUrl(`/lessons/${goodSamaritan.id}`), save)
   )
 
   renderWithProviders(
@@ -93,7 +94,11 @@ test("checking Christine sends her as a helper", async () => {
   await userEvent.click(group.getByRole("checkbox", { name: "Christine Adel" }))
   await userEvent.click(screen.getByRole("button", { name: "Mark ready" }))
   await vi.waitFor(() => expect(sent).toHaveLength(1))
-  expect(sent[0]).toMatchObject({ responsibleId: daniel.id, collaboratorIds: [christine.id] })
+
+  expect(sent[0]).toMatchObject({
+    responsibleId: daniel.id,
+    details: { collaboratorIds: [christine.id] },
+  })
 })
 
 test("making a helper responsible removes her from the helpers", async () => {
@@ -108,10 +113,10 @@ test("making a helper responsible removes her from the helpers", async () => {
   await userEvent.type(screen.getByLabelText("Title"), "Zacchaeus")
   await userEvent.click(screen.getByRole("button", { name: "Mark ready" }))
   await vi.waitFor(() => expect(sent).toHaveLength(1))
-  expect(sent[0]).toMatchObject({ responsibleId: christine.id, collaboratorIds: [] })
+  expect(sent[0]).toMatchObject({ responsibleId: christine.id, details: { collaboratorIds: [] } })
 })
 
-test("an unchanged edit keeps helpers out of the PATCH, and a saved helper stays checked", async () => {
+test("an unchanged edit puts the saved helpers again, and a saved helper stays checked", async () => {
   const sent = openEdit(
     lessonDetail({ status: "ready", responsible: daniel, collaborators: [christine] }),
     [daniel, bishoy]
@@ -122,13 +127,19 @@ test("an unchanged edit keeps helpers out of the PATCH, and a saved helper stays
   expect(group.getByRole("checkbox", { name: "Bishoy Tadros" })).not.toBeChecked()
   await userEvent.click(screen.getByRole("button", { name: "Save" }))
   await vi.waitFor(() => expect(sent).toHaveLength(1))
-  expect(sent[0]).not.toHaveProperty("collaboratorIds")
+
+  expect(sent[0]).toMatchObject({
+    responsibleId: daniel.id,
+    details: { collaboratorIds: [christine.id] },
+  })
 })
 
 test("a 422 on the helpers shows under the group", async () => {
   openNew(undefined, () =>
     problem(422, "validation.failed", {
-      fieldErrors: { collaboratorIds: { code: "lessons.helpersInStage", params: {} } },
+      fieldErrors: {
+        "details.collaboratorIds": { code: "lessons.helpersInStage", params: {} },
+      },
     })
   )
 
@@ -194,7 +205,7 @@ function list(locale: Locale = "en") {
     <SidebarProvider>
       <StageLessonsPage />
     </SidebarProvider>,
-    { locale }
+    { locale, me: me.servant }
   )
 }
 
@@ -228,7 +239,8 @@ test("the lesson page lists Christine as Helping", async () => {
   renderWithProviders(
     <SidebarProvider>
       <LessonPage />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: me.churchOffice }
   )
 
   const helper = (await screen.findByText("Christine Adel")).closest("li")!

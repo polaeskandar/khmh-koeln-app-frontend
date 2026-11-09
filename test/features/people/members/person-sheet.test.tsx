@@ -5,8 +5,11 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
 import type { Locale } from "@/i18n/config"
+import type { Schemas } from "@/lib/api/client"
 import { apiUrl } from "@test/support/api"
+import { me } from "@test/support/fixtures/me"
 import { peopleList, person } from "@test/support/fixtures/people"
 import { services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
@@ -24,17 +27,26 @@ beforeEach(() => {
 
 afterEach(() => vi.restoreAllMocks())
 
-function open(initial: PersonRow, locale: Locale = "en") {
+function open(initial: PersonRow, locale: Locale = "en", viewer: Me = me.administrator) {
   let current = initial
   const sent: { path: string; body: unknown }[] = []
 
   server.use(
     http.get(apiUrl("/services"), () => HttpResponse.json(services)),
     http.get(apiUrl("/people"), () => HttpResponse.json(peopleList(current ? [current] : []))),
-    http.patch(apiUrl(`/people/${initial.person.id}`), async ({ request }) => {
-      const body = (await request.json()) as Partial<PersonRow["person"]>
-      sent.push({ path: "patch", body })
-      current = { ...current, person: { ...current.person, ...body } }
+    http.put(apiUrl(`/people/${initial.person.id}`), async ({ request }) => {
+      const body = (await request.json()) as Schemas["RenamePersonRequest"]
+      sent.push({ path: "put", body })
+
+      current = {
+        ...current,
+        person: {
+          ...current.person,
+          firstName: body.firstName ?? "",
+          lastName: body.lastName ?? "",
+          displayName: body.displayName ?? null,
+        },
+      }
 
       return HttpResponse.json(current.person)
     }),
@@ -51,9 +63,21 @@ function open(initial: PersonRow, locale: Locale = "en") {
       return new HttpResponse(null, { status: 204 })
     }),
     http.post(apiUrl(`/people/${initial.person.id}/memberships`), async ({ request }) => {
-      sent.push({ path: "join", body: await request.json() })
+      const body = (await request.json()) as Schemas["PlacementRequest"]
+      sent.push({ path: "join", body })
+      const service = services.items.find((item) => item.id === body.serviceId)!
+      const stage = service.stages.find((item) => item.id === body.stageId)
 
-      return HttpResponse.json({ id: "m-new" }, { status: 201 })
+      const added: Schemas["AddedMembershipResponse"] = {
+        id: "m-new",
+        personId: initial.person.id,
+        service: { id: service.id, name: service.name, tone: service.tone, archived: false },
+        stage: stage ? { ...stage, archived: false } : null,
+        startsOn: "2026-11-08",
+        endsOn: null,
+      }
+
+      return HttpResponse.json(added, { status: 201 })
     })
   )
 
@@ -61,7 +85,7 @@ function open(initial: PersonRow, locale: Locale = "en") {
     <SidebarProvider>
       <MembersScreen />
     </SidebarProvider>,
-    { locale }
+    { locale, me: viewer }
   )
 
   return sent
@@ -82,15 +106,41 @@ test("a corrected name toasts Saved. and appears in the row", async () => {
   await userEvent.type(sheet.getByLabelText("Last name"), "Hanna")
   await userEvent.click(sheet.getByRole("button", { name: "Save name" }))
   await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Saved."))
-  expect(sent).toEqual([{ path: "patch", body: { lastName: "Hanna" } }])
+
+  expect(sent).toEqual([
+    { path: "put", body: { firstName: "Mina", lastName: "Hanna", displayName: null } },
+  ])
 
   expect(
     await within(screen.getByRole("table", { hidden: true })).findByText("Mina Hanna")
   ).toBeInTheDocument()
 })
 
-test("without can.edit there is no name form or Add to", async () => {
-  open({ ...person("Mina", "Hanna"), can: { edit: false } })
+test("typing the old name again hides Save name and sends nothing", async () => {
+  const sent = open(person("Mina", "Hanna", { displayName: "Mimi" }))
+  const sheet = await openSheet("Mimi")
+  await userEvent.clear(sheet.getByLabelText("Last name"))
+  await userEvent.type(sheet.getByLabelText("Last name"), "Hanna")
+  expect(sheet.queryByRole("button", { name: "Save name" })).toBeNull()
+  await userEvent.type(sheet.getByLabelText("Last name"), "{Enter}")
+  expect(sent).toEqual([])
+})
+
+test("a cleared display name is sent as null with the other names", async () => {
+  const sent = open(person("Mina", "Hanna", { displayName: "Mimi" }))
+  const sheet = await openSheet("Mimi")
+  await userEvent.clear(sheet.getByLabelText(/Display name/))
+  await userEvent.click(sheet.getByRole("button", { name: "Save name" }))
+
+  await waitFor(() =>
+    expect(sent).toEqual([
+      { path: "put", body: { firstName: "Mina", lastName: "Hanna", displayName: null } },
+    ])
+  )
+})
+
+test("without members: update there is no name form or Add to", async () => {
+  open(person("Mina", "Hanna"), "en", me.servant)
   const sheet = await openSheet("Mina Hanna")
   expect(sheet.queryByLabelText("First name")).toBeNull()
   expect(sheet.queryByRole("combobox", { name: "Add to" })).toBeNull()
@@ -125,7 +175,7 @@ test("Remove ends the membership once after confirming and moves it under Earlie
   ).toBeInTheDocument()
 })
 
-test("Add to offers only managed placements the person lacks", async () => {
+test("Add to offers the active groups the person lacks", async () => {
   const sundaySchool = services.items[0]
   const third = sundaySchool.stages.find((stage) => stage.name === "3rd Class")!
   const mina = person("Mina", "Hanna")
@@ -149,6 +199,8 @@ test("Add to offers only managed placements the person lacks", async () => {
     .map((option) => option.textContent)
 
   expect(offered).not.toContain("Sunday School · 3rd Class")
+  expect(offered).not.toContain("Choir")
+  expect(offered).toContain("Sunday School")
   expect(offered).toContain("Sunday School · 1st Class")
   await userEvent.selectOptions(select, "Sunday School · 1st Class")
   await userEvent.click(sheet.getByRole("button", { name: "Add" }))

@@ -21,6 +21,7 @@ import {
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
+import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
@@ -126,7 +127,7 @@ function GiveAccessDialog({
   )
 }
 
-function LinkRow({ link, today }: { link: GuardianLink; today: string }) {
+function LinkRow({ link, today, manage }: { link: GuardianLink; today: string; manage: boolean }) {
   const t = useTranslations()
   const f = useFormat()
   const queryClient = useQueryClient()
@@ -165,9 +166,11 @@ function LinkRow({ link, today }: { link: GuardianLink; today: string }) {
         })}
       </td>
       <td className="px-3 py-3 text-end">
-        <Button variant="ghost" size="sm" onClick={() => setRemoving(true)}>
-          {t("settings.parents.remove")}
-        </Button>
+        {manage ? (
+          <Button variant="ghost" size="sm" onClick={() => setRemoving(true)}>
+            {t("settings.parents.remove")}
+          </Button>
+        ) : null}
         <ConfirmDialog
           open={removing}
           onOpenChange={setRemoving}
@@ -197,6 +200,7 @@ function LinkRow({ link, today }: { link: GuardianLink; today: string }) {
 
 export function ParentAccess() {
   const t = useTranslations("settings.parents")
+  const manage = useCan()("update", "users")
   const query = useQuery(guardianLinksQuery)
   const [giving, setGiving] = useState(false)
 
@@ -206,7 +210,7 @@ export function ParentAccess() {
       title={t("title")}
       description={t("description")}
       actions={
-        query.data ? (
+        query.data && manage ? (
           <Button variant="outline" onClick={() => setGiving(true)}>
             <Plus data-icon="inline-start" />
             {t("give")}
@@ -241,7 +245,7 @@ export function ParentAccess() {
                   </thead>
                   <tbody>
                     {data.items.map((link) => (
-                      <LinkRow key={link.id} link={link} today={data.today} />
+                      <LinkRow key={link.id} link={link} today={data.today} manage={manage} />
                     ))}
                   </tbody>
                 </table>

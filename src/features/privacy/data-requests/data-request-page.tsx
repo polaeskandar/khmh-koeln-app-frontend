@@ -10,11 +10,11 @@ import { ConfirmDialog } from "@/components/confirm-dialog"
 import { FormPanel } from "@/components/form-panel"
 import { NoAccess } from "@/components/no-access"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
-import { NotFoundState, QueryState } from "@/components/page-states"
+import { NotFoundState, QueryErrorState, QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { useCan } from "@/features/identity/auth/session"
+import { useCan, useSession } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
@@ -23,17 +23,18 @@ import { routes } from "@/lib/routes"
 
 import {
   accountRecordOf,
+  type Counts,
   type DataRequestDetail,
   dataRequestQuery,
-  type EraseCounts,
   eraseRequest,
-  isMentionPlace,
-  type KeepCounts,
+  type ErasureReview,
+  erasureReviewQuery,
   memberRecordOf,
+  mentionLabelOf,
 } from "./api"
 import { DueLabel, RequestStatusBadge, useSubjectLabel } from "./request-bits"
 
-const ERASE_KEYS: (keyof EraseCounts)[] = [
+const ERASE_KEYS = [
   "person",
   "memberships",
   "attendance",
@@ -41,21 +42,14 @@ const ERASE_KEYS: (keyof EraseCounts)[] = [
   "guardianLinks",
   "account",
   "roles",
-]
+] as const
 
-const KEEP_KEYS: (keyof KeepCounts)[] = [
-  "sessionTotals",
-  "recordedMarks",
-  "reportedCompletions",
-  "lessons",
-  "homework",
-  "sessionHistory",
-]
+const KEEP_KEYS = ["sessionTotals", "accountRows"] as const
 
 function useEraseLines() {
   const t = useTranslations("privacy.erase")
 
-  return (counts: Partial<EraseCounts>) =>
+  return (counts: Counts) =>
     ERASE_KEYS.flatMap((key) => {
       const count = counts[key] ?? 0
 
@@ -73,12 +67,20 @@ function Lines({ lines }: { lines: string[] }) {
   )
 }
 
-function EraseAction({ data, name }: { data: DataRequestDetail; name: string }) {
+function EraseAction({
+  data,
+  review,
+  name,
+}: {
+  data: DataRequestDetail
+  review: ErasureReview | undefined
+  name: string
+}) {
   const t = useTranslations()
   const queryClient = useQueryClient()
   const eraseLines = useEraseLines()
   const [open, setOpen] = useState(false)
-  const mentions = data.inventory?.mentions.length ?? 0
+  const mentions = review?.mentions.length ?? 0
   const [clearNotes, setClearNotes] = useState(true)
 
   const erase = useApiMutation((clear: boolean) => eraseRequest(data.request.id, clear), {
@@ -87,7 +89,7 @@ function EraseAction({ data, name }: { data: DataRequestDetail; name: string }) 
 
   return (
     <>
-      <Button variant="destructive" disabled={!data.can.erase} onClick={() => setOpen(true)}>
+      <Button variant="destructive" disabled={!review} onClick={() => setOpen(true)}>
         <Eraser data-icon="inline-start" />
         {t("privacy.actions.erase")}
       </Button>
@@ -97,7 +99,7 @@ function EraseAction({ data, name }: { data: DataRequestDetail; name: string }) 
         tone="destructive"
         title={t("privacy.actions.eraseTitle", { name: isolate(name) })}
         description={t("privacy.actions.eraseDescription")}
-        consequences={[...eraseLines(data.inventory?.erase ?? {}), t("privacy.actions.eraseKeeps")]}
+        consequences={[...eraseLines(review?.erase ?? {}), t("privacy.actions.eraseKeeps")]}
         note={
           mentions > 0 ? (
             <label className="flex cursor-pointer items-center gap-2 text-foreground">
@@ -126,53 +128,54 @@ function EraseAction({ data, name }: { data: DataRequestDetail; name: string }) 
   )
 }
 
-function Review({ data }: { data: DataRequestDetail }) {
+function Review({ review }: { review: ErasureReview }) {
   const t = useTranslations("privacy.detail")
   const tm = useTranslations("privacy.mention")
   const tk = useTranslations("privacy.keep")
   const f = useFormat()
   const eraseLines = useEraseLines()
-  const inventory = data.inventory
 
-  if (!inventory) {
-    return null
-  }
+  const keep = KEEP_KEYS.flatMap((key) => {
+    const count = review.keep[key] ?? 0
 
-  const keep = KEEP_KEYS.flatMap((key) =>
-    inventory.keep[key] > 0 ? [tk(key, { count: inventory.keep[key] })] : []
-  )
+    return count > 0 ? [tk(key, { count })] : []
+  })
 
   return (
     <>
       <Section id="erases" title={t("erases")} description={t("erasesDescription")}>
-        <Lines lines={eraseLines(inventory.erase)} />
+        <Lines lines={eraseLines(review.erase)} />
       </Section>
       <Section id="keeps" title={t("keeps")} description={t("keepsDescription")}>
         <Lines lines={keep} />
       </Section>
       <Section
         id="mentions"
-        title={t("mentions", { count: inventory.mentions.length })}
+        title={t("mentions", { count: review.mentions.length })}
         description={t("mentionsDescription")}
       >
-        {inventory.mentions.length === 0 ? (
+        {review.mentions.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t("noMentions")}</p>
         ) : (
           <ul className="flex flex-col divide-y border-y">
-            {inventory.mentions.map((mention) => (
-              <li key={mention.id} className="flex flex-col gap-1 py-3 text-sm">
-                <span className="text-xs text-muted-foreground">
-                  {t("mentionWhere", {
-                    where: isMentionPlace(mention.where) ? tm(mention.where) : mention.where,
-                    group: mention.group ?? "",
-                    date: mention.date ? f.mediumDate(mention.date) : "",
-                  })}
-                </span>
-                <blockquote dir="auto" className="border-s-2 ps-3">
-                  {mention.text}
-                </blockquote>
-              </li>
-            ))}
+            {review.mentions.map((mention) => {
+              const label = mentionLabelOf(mention.where)
+
+              return (
+                <li key={mention.id} className="flex flex-col gap-1 py-3 text-sm">
+                  <span className="text-xs text-muted-foreground">
+                    {t("mentionWhere", {
+                      where: label ? tm(label) : mention.where,
+                      group: mention.group ?? "",
+                      date: mention.date ? f.mediumDate(mention.date) : "",
+                    })}
+                  </span>
+                  <blockquote dir="auto" className="border-s-2 ps-3">
+                    {mention.text}
+                  </blockquote>
+                </li>
+              )
+            })}
           </ul>
         )}
       </Section>
@@ -267,12 +270,30 @@ function Subject({ data }: { data: DataRequestDetail }) {
   )
 }
 
+function useBlocked(data: DataRequestDetail) {
+  const t = useTranslations()
+  const { session } = useSession()
+  const me = session.status === "authenticated" ? session.me.account.id : null
+
+  if (data.account !== null && data.account.id === me) {
+    return t("privacy.detail.ownAccount")
+  }
+
+  if (data.member === null && data.account === null) {
+    return t("errors.privacy.subjectGone")
+  }
+
+  return null
+}
+
 function RequestView({ data }: { data: DataRequestDetail }) {
   const t = useTranslations()
   const subject = useSubjectLabel()
   const { request } = data
   const name = subject(request)
-  const open = request.status === "open"
+  const erasure = request.status === "open" && request.kind === "erasure"
+  const blocked = useBlocked(data)
+  const review = useQuery({ ...erasureReviewQuery(request.id), enabled: erasure && !blocked })
 
   return (
     <>
@@ -294,17 +315,20 @@ function RequestView({ data }: { data: DataRequestDetail }) {
           title={name}
           description={t("privacy.detail.requestedBy", { name: isolate(request.requestedBy) })}
           actions={
-            open && request.kind === "erasure" ? <EraseAction data={data} name={name} /> : null
+            erasure ? (
+              <EraseAction data={data} review={blocked ? undefined : review.data} name={name} />
+            ) : null
           }
         />
-        {open && request.kind === "erasure" && !data.can.erase ? (
-          <p className="border border-dashed p-4 text-sm text-muted-foreground">
-            {t("privacy.detail.ownAccount")}
-          </p>
+        {erasure && blocked ? (
+          <p className="border border-dashed p-4 text-sm text-muted-foreground">{blocked}</p>
         ) : null}
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
           <div className="flex min-w-0 flex-col gap-8">
-            {open && request.kind === "erasure" ? <Review data={data} /> : null}
+            {erasure && !blocked && review.data ? <Review review={review.data} /> : null}
+            {erasure && !blocked && review.isError ? (
+              <QueryErrorState error={review.error} onRetry={() => review.refetch()} />
+            ) : null}
             <Outcome data={data} />
           </div>
           <aside className="flex min-w-0 flex-col gap-6 lg:self-start">
@@ -372,7 +396,7 @@ export function DataRequestPage() {
   const t = useTranslations("privacy.list")
   const can = useCan()
 
-  if (!can("delete", "users")) {
+  if (!can("update", "users")) {
     return (
       <PageBody>
         <NoAccess title={t("adminsOnly")}>{t("adminsOnlyHint")}</NoAccess>

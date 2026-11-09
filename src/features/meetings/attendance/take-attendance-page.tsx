@@ -1,27 +1,27 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
 import { type ReactNode, useEffect, useState } from "react"
 
 import { Topbar } from "@/components/app-shell/topbar"
 import { PageBody, PageHeader } from "@/components/page-header"
-import { NotFoundState, QueryState } from "@/components/page-states"
+import { NotFoundState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { ServiceTag } from "@/components/service-tag"
 import { SessionBadges, SessionWhen } from "@/components/session-bits"
 import { Button } from "@/components/ui/button"
+import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
 import { groupOf } from "@/lib/api/types/meetings"
 import { routes } from "@/lib/routes"
 
-import { type AttendanceBoard as Board, attendanceBoardQuery } from "./api"
+import type { AttendanceSheet as Board } from "./api"
 import { AttendanceBoard } from "./attendance-board"
 import { CloseDialog, CorrectionDialog } from "./board-dialogs"
 import { applyWrites, useMarkWrites, useOnline } from "./mark-writes"
 import { OpenAttendanceButton } from "./open-attendance-button"
-
+import { SheetState } from "./sheet-state"
 import { VisitorSearch } from "./visitor-search"
 
 export function BoardFrame({ board, children }: { board: Board; children: ReactNode }) {
@@ -79,6 +79,7 @@ function NotFoundPage() {
 
 function ActiveBoard({ board, boardAt }: { board: Board; boardAt: number }) {
   const t = useTranslations("attendance.board")
+  const can = useCan()
   const online = useOnline()
   const writes = useMarkWrites(board.session.id)
   const shown = applyWrites(board, writes.writes, boardAt)
@@ -102,7 +103,7 @@ function ActiveBoard({ board, boardAt }: { board: Board; boardAt: number }) {
           saving: writes.pending.size > 0,
         }}
         below={(query) =>
-          board.session.can.record ? (
+          can("create", "attendance") ? (
             <VisitorSearch
               board={shown}
               query={query}
@@ -129,6 +130,8 @@ function ActiveBoard({ board, boardAt }: { board: Board; boardAt: number }) {
 function NotOpen({ board }: { board: Board }) {
   const t = useTranslations("attendance.session")
   const f = useFormat()
+  const can = useCan()
+  const records = can("create", "attendance")
   const { session, today } = board
   const due = session.date <= today
 
@@ -138,11 +141,11 @@ function NotOpen({ board }: { board: Board }) {
       <p className="max-w-prose text-sm text-muted-foreground">
         {!due
           ? t("opensOn", { date: f.longDate(session.date) })
-          : session.can.record
+          : records
             ? t("openWhenStarts")
             : t("servantsOpen")}
       </p>
-      {due && session.can.record ? <OpenAttendanceButton session={session.id} /> : null}
+      {due && records ? <OpenAttendanceButton session={session.id} /> : null}
     </div>
   )
 }
@@ -167,19 +170,12 @@ function ToSummary({ session }: { session: string }) {
 }
 
 function LoadedBoard({ id }: { id: string }) {
-  const query = useQuery({
-    ...attendanceBoardQuery(id),
-    refetchInterval: 30_000,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
-  })
-
   return (
-    <QueryState query={query} notFound={<NotFoundPage />}>
-      {(board) => (
+    <SheetState id={id} live notFound={<NotFoundPage />}>
+      {(board, boardAt) => (
         <BoardFrame board={board}>
           {board.session.status === "active" ? (
-            <ActiveBoard key={board.session.id} board={board} boardAt={query.dataUpdatedAt} />
+            <ActiveBoard key={board.session.id} board={board} boardAt={boardAt} />
           ) : board.session.status === "scheduled" ? (
             <NotOpen board={board} />
           ) : board.session.status === "canceled" ? (
@@ -189,7 +185,7 @@ function LoadedBoard({ id }: { id: string }) {
           )}
         </BoardFrame>
       )}
-    </QueryState>
+    </SheetState>
   )
 }
 

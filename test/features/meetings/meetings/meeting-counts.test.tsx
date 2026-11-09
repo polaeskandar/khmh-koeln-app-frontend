@@ -6,6 +6,7 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Locale } from "@/i18n/config"
 import type { AgendaItem, ScheduleSummary, SessionView } from "@/lib/api/types/meetings"
 import { apiUrl } from "@test/support/api"
+import { me } from "@test/support/fixtures/me"
 import { schedule } from "@test/support/fixtures/schedules"
 import { services } from "@test/support/fixtures/services"
 import { session, stageRef } from "@test/support/fixtures/sessions"
@@ -46,7 +47,7 @@ function agenda(items: AgendaItem[], locale: Locale = "en") {
     <SidebarProvider>
       <AgendaPage />
     </SidebarProvider>,
-    { locale }
+    { locale, me: me.leader }
   )
 }
 
@@ -103,7 +104,7 @@ function schedules(items: ScheduleSummary[], locale: Locale = "en") {
     <SidebarProvider>
       <SchedulesPage />
     </SidebarProvider>,
-    { locale }
+    { locale, me: me.leader }
   )
 }
 

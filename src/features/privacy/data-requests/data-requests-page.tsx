@@ -158,7 +158,7 @@ export function DataRequestsPage() {
         ]}
       />
       <PageBody>
-        {can("delete", "users") ? (
+        {can("update", "users") ? (
           <Requests />
         ) : (
           <NoAccess title={t("privacy.list.adminsOnly")}>

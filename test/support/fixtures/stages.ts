@@ -11,5 +11,4 @@ export const thirdClass: Stage = {
   archived: false,
   service: { id: SUNDAY_SCHOOL_ID, name: "Sunday School", tone: 1, archived: false },
   memberCount: 14,
-  can: { manageStructure: true, manageMembers: true },
 }

@@ -10,14 +10,14 @@ import { isolate } from "@/lib/bidi"
 
 import { recurrenceOf } from "@/lib/domain/recurrence"
 
-import type { MemberGroup } from "./api"
+import { type MemberGroup, useMemberServants } from "./api"
 
 export function GroupCard({ group, today }: { group: MemberGroup; today: LocalDate }) {
   const t = useTranslations("member.groups")
   const f = useFormat()
   const name = group.stage?.name ?? group.service.name
 
-  const servants = group.servants.map((servant) =>
+  const servants = useMemberServants().map((servant) =>
     servant.role === "service_leader"
       ? t("serviceLeader", { name: isolate(servant.name) })
       : isolate(servant.name)

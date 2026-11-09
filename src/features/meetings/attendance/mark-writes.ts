@@ -74,13 +74,13 @@ export function writesReducer(writes: Writes, action: WriteAction): Writes {
   }
 }
 
-const PENDING_MARK: Mark = { id: "", recordedAt: "", recordedBy: null }
+const PENDING_MARK: Mark = { id: "", recordedAt: "" }
 
-export function applyWrites(
-  board: AttendanceBoard,
+export function applyWrites<Board extends AttendanceBoard>(
+  board: Board,
   writes: Writes,
   boardAt: number
-): AttendanceBoard {
+): Board {
   const live = (personId: Uuid) => {
     const write = writes[personId]
 
@@ -173,12 +173,21 @@ export function useMarkWrites(sessionId: Uuid) {
     [queryClient]
   )
 
+  const refetchSession = useCallback(
+    () =>
+      Promise.all([
+        refetchBoard(),
+        queryClient.invalidateQueries({ queryKey: ["sessions", "detail", sessionId] }),
+      ]),
+    [queryClient, refetchBoard, sessionId]
+  )
+
   async function send(person: PersonRef, present: boolean, visitor?: Visitor) {
     dispatch({ type: "start", personId: person.id, present, visitor })
     const params = { path: { sessionId, personId: person.id } }
 
     try {
-      const saved = await withRetries<Schemas["MarkView"] | void>((signal) =>
+      const saved = await withRetries<Schemas["MarkResponse"] | void>((signal) =>
         present
           ? dataOf(
               api.PUT("/sessions/{sessionId}/attendance/{personId}", { params, body: {}, signal })
@@ -195,9 +204,7 @@ export function useMarkWrites(sessionId: Uuid) {
       dispatch({
         type: "confirm",
         personId: person.id,
-        mark: saved
-          ? { id: saved.id, recordedAt: saved.recordedAt, recordedBy: saved.recordedBy }
-          : null,
+        mark: saved ? { id: saved.id, recordedAt: saved.recordedAt } : null,
         at: Date.now(),
       })
 
@@ -217,7 +224,7 @@ export function useMarkWrites(sessionId: Uuid) {
       toast.error(translateProblem(problem, t as unknown as ProblemTranslator))
 
       if (problem.code && REFETCH_CODES.has(problem.code)) {
-        void refetchBoard()
+        void refetchSession()
       }
     }
   }

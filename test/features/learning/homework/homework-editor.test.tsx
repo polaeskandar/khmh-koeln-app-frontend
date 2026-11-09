@@ -5,10 +5,11 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
+import { me } from "@test/support/fixtures/me"
 import { SUNDAY_SCHOOL_ID, THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
-import { homeworkFlags } from "@test/support/fixtures/homework"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
@@ -31,34 +32,44 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks())
 
 const HOMEWORK_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea001"
-const stageRef = { id: THIRD_CLASS_ID, name: "3rd Class", position: 2, archived: false }
+const stageRef = { id: THIRD_CLASS_ID, name: "3rd Class", position: 2 }
 
 const zacchaeus = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e9001",
   title: "Zacchaeus",
   teachingDate: "2026-11-08",
+  archived: false,
 }
 
 const samaritan = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e9002",
   title: "The Good Samaritan",
   teachingDate: "2026-11-15",
+  archived: false,
 }
 
 const sheep = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e9003",
   title: "The Lost Sheep",
   teachingDate: "2026-11-29",
+  archived: false,
+}
+
+const servantWithoutUpdate: Me = {
+  ...me.servant,
+  permissions: me.servant.permissions.filter(
+    (p) => !(p.resource === "homework" && p.action === "update")
+  ),
 }
 
 const list = (extra: Partial<StageHomework> = {}): StageHomework => ({
   today: "2026-11-10",
   stage: stageRef,
+  archived: false,
   tabs: { published: 0, draft: 0, archived: 0 },
   lessons: [sheep, samaritan, zacchaeus],
   defaultLessonId: samaritan.id,
   audienceSize: 14,
-  can: { create: true },
   items: [],
   ...extra,
 })
@@ -77,6 +88,7 @@ const detail = (extra: Partial<HomeworkDetail> = {}): HomeworkDetail => ({
   lesson: { ...samaritan, passage: "Luke 10:25-37", memoryVerse: "Love your neighbour." },
   service: thirdClass.service,
   stage: stageRef,
+  archived: false,
   audienceSize: 14,
   counts: {
     assigned: 14,
@@ -87,19 +99,10 @@ const detail = (extra: Partial<HomeworkDetail> = {}): HomeworkDetail => ({
     withoutAccount: 2,
     reportedTotal: 3,
   },
-  can: homeworkFlags({
-    edit: true,
-    publish: false,
-    unpublish: false,
-    archive: false,
-    restore: false,
-    delete: false,
-    viewProgress: true,
-  }),
   ...extra,
 })
 
-function openNew(data: StageHomework, query = "", locale: Locale = "en") {
+function openNew(data: StageHomework, query = "", locale: Locale = "en", account: Me = me.servant) {
   search.value = `stage=${THIRD_CLASS_ID}${query}`
   const posted: { lesson: string; body: unknown }[] = []
 
@@ -109,7 +112,7 @@ function openNew(data: StageHomework, query = "", locale: Locale = "en") {
     http.post(apiUrl("/lessons/:lesson/homework"), async ({ params, request }) => {
       posted.push({ lesson: String(params.lesson), body: await request.json() })
 
-      return HttpResponse.json({ id: HOMEWORK_ID, status: "draft" }, { status: 201 })
+      return HttpResponse.json({ id: HOMEWORK_ID, status: "draft", version: 1 }, { status: 201 })
     })
   )
 
@@ -117,32 +120,37 @@ function openNew(data: StageHomework, query = "", locale: Locale = "en") {
     <SidebarProvider>
       <NewHomeworkPage />
     </SidebarProvider>,
-    { locale }
+    { locale, me: account }
   )
 
   return posted
 }
 
-function openEdit(data: HomeworkDetail) {
+const versions: (string | null)[] = []
+
+function openEdit(data: HomeworkDetail, account: Me = me.servant) {
   search.value = `id=${HOMEWORK_ID}`
-  const patched: unknown[] = []
+  const put: unknown[] = []
+  versions.length = 0
 
   server.use(
     http.get(apiUrl(`/homework/${HOMEWORK_ID}`), () => HttpResponse.json(data)),
-    http.patch(apiUrl(`/homework/${HOMEWORK_ID}`), async ({ request }) => {
-      patched.push(await request.json())
+    http.put(apiUrl(`/homework/${HOMEWORK_ID}`), async ({ request }) => {
+      put.push(await request.json())
+      versions.push(new URL(request.url).searchParams.get("version"))
 
-      return HttpResponse.json({ id: HOMEWORK_ID, status: data.status })
+      return HttpResponse.json({ id: HOMEWORK_ID, status: data.status, version: data.version + 1 })
     })
   )
 
   renderWithProviders(
     <SidebarProvider>
       <EditHomeworkPage />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: account }
   )
 
-  return patched
+  return put
 }
 
 const lessonSelect = () => screen.findByRole("combobox", { name: "Given with the lesson" })
@@ -335,9 +343,14 @@ test("a 409 on save is a toast", async () => {
 })
 
 test("someone who can't create homework sees no form", async () => {
-  openNew(list({ can: { create: false } }))
+  openNew(list(), "", "en", me.churchOffice)
   expect(await screen.findByText("You can’t assign homework here")).toBeInTheDocument()
   expect(screen.queryByRole("textbox", { name: "Title" })).not.toBeInTheDocument()
+})
+
+test("an archived stage takes no new homework", async () => {
+  openNew(list({ archived: true }))
+  expect(await screen.findByText("You can’t assign homework here")).toBeInTheDocument()
 })
 
 test("a stage without lessons asks for a lesson first", async () => {
@@ -350,8 +363,8 @@ test("a stage without lessons asks for a lesson first", async () => {
   )
 })
 
-test("editing published homework only saves changes, with minDueDate as min", async () => {
-  const patched = openEdit(detail())
+test("editing published homework puts the whole task at its version, with minDueDate as min", async () => {
+  const patched = openEdit(detail({ version: 3 }))
   const title = await screen.findByRole("textbox", { name: "Title" })
   expect(title).toHaveValue("Learn the memory verse")
 
@@ -383,6 +396,8 @@ test("editing published homework only saves changes, with minDueDate as min", as
     resources: [{ label: "The story as a video", url: "https://example.org/story" }],
   })
 
+  expect(versions).toEqual(["3"])
+
   await vi.waitFor(() =>
     expect(toast.success).toHaveBeenCalledWith("Saved. Parents and members see the new version.")
   )
@@ -393,21 +408,7 @@ test("editing published homework only saves changes, with minDueDate as min", as
 })
 
 test("archived homework shows its notice instead of the form", async () => {
-  openEdit(
-    detail({
-      status: "archived",
-      can: homeworkFlags({
-        edit: false,
-        publish: false,
-        unpublish: false,
-        archive: false,
-        restore: false,
-        delete: false,
-        viewProgress: true,
-      }),
-    })
-  )
-
+  openEdit(detail({ status: "archived" }))
   expect(await screen.findByText("This homework is archived")).toBeInTheDocument()
 
   expect(screen.getByRole("link", { name: "Back to the homework" })).toHaveAttribute(
@@ -418,21 +419,18 @@ test("archived homework shows its notice instead of the form", async () => {
   expect(screen.queryByRole("textbox", { name: "Title" })).not.toBeInTheDocument()
 })
 
-test("without edit rights there is no form", async () => {
-  openEdit(
-    detail({
-      can: homeworkFlags({
-        edit: false,
-        publish: false,
-        unpublish: false,
-        archive: false,
-        restore: false,
-        delete: false,
-        viewProgress: false,
-      }),
-    })
-  )
+test("without homework: update there is no form", async () => {
+  openEdit(detail(), servantWithoutUpdate)
+  expect(await screen.findByText("You can’t change this homework")).toBeInTheDocument()
+})
 
+test("homework of an archived lesson can't be edited", async () => {
+  openEdit(detail({ lesson: { ...samaritan, archived: true, passage: null, memoryVerse: null } }))
+  expect(await screen.findByText("You can’t change this homework")).toBeInTheDocument()
+})
+
+test("homework in an archived stage can't be edited", async () => {
+  openEdit(detail({ archived: true }))
   expect(await screen.findByText("You can’t change this homework")).toBeInTheDocument()
 })
 
@@ -501,10 +499,11 @@ test("a refused publish keeps the saved draft, and a retry creates no second tas
 
       return problem(409, "homework.lessonArchived")
     }),
-    http.patch(apiUrl(`/homework/${HOMEWORK_ID}`), async ({ request }) => {
+    http.put(apiUrl(`/homework/${HOMEWORK_ID}`), async ({ request }) => {
       patched.push(await request.json())
+      versions.push(new URL(request.url).searchParams.get("version"))
 
-      return HttpResponse.json({ id: HOMEWORK_ID, status: "draft" })
+      return HttpResponse.json({ id: HOMEWORK_ID, status: "draft", version: 2 })
     })
   )
 
@@ -525,48 +524,17 @@ test("a refused publish keeps the saved draft, and a retry creates no second tas
   await vi.waitFor(() => expect(publishes).toBe(2))
   expect(posted).toHaveLength(1)
   expect(patched).toHaveLength(1)
+  expect(versions.at(-1)).toBe("1")
 })
 
-test("a draft offers Publish only with can.publish", async () => {
-  const draft = { status: "draft" as const, publishedAt: null, counts: null }
-
-  openEdit(
-    detail({
-      ...draft,
-      can: homeworkFlags({
-        edit: true,
-        publish: true,
-        unpublish: false,
-        archive: false,
-        restore: false,
-        delete: false,
-        viewProgress: true,
-      }),
-    })
-  )
-
+test("a draft offers Publish", async () => {
+  openEdit(detail({ status: "draft", publishedAt: null, counts: null }))
   const status = within(await screen.findByRole("group", { name: "Status" }))
   expect(status.getAllByRole("button").map((b) => b.textContent)).toEqual(["Publish", "Save draft"])
 })
 
-test("a draft without can.publish only saves", async () => {
-  const draft = { status: "draft" as const, publishedAt: null, counts: null }
-
-  openEdit(
-    detail({
-      ...draft,
-      can: homeworkFlags({
-        edit: true,
-        publish: false,
-        unpublish: false,
-        archive: false,
-        restore: false,
-        delete: false,
-        viewProgress: true,
-      }),
-    })
-  )
-
+test("new homework from someone who can't change homework only saves a draft", async () => {
+  openNew(list(), "", "en", servantWithoutUpdate)
   const status = within(await screen.findByRole("group", { name: "Status" }))
   expect(status.getAllByRole("button").map((b) => b.textContent)).toEqual(["Save draft"])
 })

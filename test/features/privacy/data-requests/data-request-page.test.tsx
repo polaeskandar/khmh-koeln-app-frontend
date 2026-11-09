@@ -12,7 +12,7 @@ import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { DataRequestDetail } from "@/features/privacy/data-requests/api"
+import type { DataRequestDetail, ErasureReview } from "@/features/privacy/data-requests/api"
 import { DataRequestPage } from "@/features/privacy/data-requests/data-request-page"
 
 const search = vi.hoisted(() => ({ value: "" }))
@@ -58,35 +58,29 @@ const review = (extra: Partial<DataRequestDetail> = {}): DataRequestDetail => ({
     ],
   },
   account: null,
-  can: { erase: true },
-  inventory: {
-    erase: {
-      person: 1,
-      memberships: 1,
-      attendance: 34,
-      completions: 5,
-      guardianLinks: 1,
-      account: 0,
-      roles: 0,
-    },
-    keep: {
-      sessionTotals: 8,
-      recordedMarks: 0,
-      reportedCompletions: 0,
-      lessons: 0,
-      homework: 0,
-      sessionHistory: 0,
-    },
-    mentions: [
-      {
-        id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea121",
-        where: "lessonNote",
-        text: "Kirollos needs extra help with reading.",
-        date: "2026-11-01",
-        group: "3rd Class",
-      },
-    ],
+  ...extra,
+})
+
+const lessonNote = {
+  id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea121",
+  where: "lessonNote",
+  text: "Kirollos needs extra help with reading.",
+  date: "2026-11-01",
+  group: "3rd Class",
+}
+
+const erasure = (extra: Partial<ErasureReview> = {}): ErasureReview => ({
+  erase: {
+    person: 1,
+    memberships: 1,
+    attendance: 34,
+    completions: 5,
+    guardianLinks: 1,
+    account: 0,
+    roles: 0,
   },
+  keep: { sessionTotals: 8, accountRows: 0 },
+  mentions: [lessonNote],
   ...extra,
 })
 
@@ -109,15 +103,19 @@ const erased: DataRequestDetail = {
     },
   },
   member: null,
-  inventory: null,
 }
 
 function open(
   first: DataRequestDetail,
-  { who = me.churchOffice, erase }: { who?: Me; erase?: () => Response } = {}
+  {
+    who = me.administrator,
+    erase,
+    review = () => HttpResponse.json(erasure()),
+  }: { who?: Me; erase?: () => Response; review?: () => Response } = {}
 ) {
   let current = first
   let reads = 0
+  let reviews = 0
   const bodies: unknown[] = []
 
   server.use(
@@ -126,6 +124,11 @@ function open(
       reads++
 
       return HttpResponse.json(current)
+    }),
+    http.get(apiUrl(`/data-requests/${ID}/erasure`), () => {
+      reviews++
+
+      return review()
     }),
     http.post(apiUrl(`/data-requests/${ID}/erase`), async ({ request }) => {
       bodies.push(await request.json())
@@ -149,7 +152,7 @@ function open(
     </SessionProvider>
   )
 
-  return { bodies, reads: () => reads }
+  return { bodies, reads: () => reads, reviews: () => reviews }
 }
 
 const section = async (name: string | RegExp) =>
@@ -215,9 +218,18 @@ test("unticking keeps the notes", async () => {
   await waitFor(() => expect(bodies).toEqual([{ clearNotes: false }]))
 })
 
+test("a removal reason reads as a correction note", async () => {
+  open(review(), {
+    review: () =>
+      HttpResponse.json(erasure({ mentions: [{ ...lessonNote, where: "removalReason" }] })),
+  })
+
+  const mentions = await section("Notes that may mention them (1)")
+  expect(mentions.getByText("Correction note · 3rd Class · Sun 1 Nov 2026")).toBeInTheDocument()
+})
+
 test("without mentions there is no checkbox", async () => {
-  const data = review()
-  open({ ...data, inventory: { ...data.inventory!, mentions: [] } })
+  open(review(), { review: () => HttpResponse.json(erasure({ mentions: [] })) })
   await userEvent.click(await screen.findByRole("button", { name: "Erase data…" }))
 
   expect(
@@ -227,10 +239,42 @@ test("without mentions there is no checkbox", async () => {
   expect(screen.getByText("No notes mention their name.")).toBeInTheDocument()
 })
 
-test("one's own account can't be erased here", async () => {
-  open(review({ can: { erase: false } }))
+test("one's own account can't be erased here, and is not reviewed", async () => {
+  const page = open(
+    review({
+      member: null,
+      account: {
+        id: me.administrator.account.id,
+        name: me.administrator.account.displayName,
+        email: me.administrator.account.email,
+        roles: ["Administrator"],
+      },
+    })
+  )
+
   expect(await screen.findByRole("button", { name: "Erase data…" })).toBeDisabled()
   expect(screen.getByText(/This request is about your own account/)).toBeInTheDocument()
+  expect(screen.queryByRole("heading", { name: "What erasing deletes" })).toBeNull()
+  expect(page.reviews()).toBe(0)
+})
+
+test("a subject that is gone can't be erased", async () => {
+  const page = open(review({ member: null, account: null }))
+  expect(await screen.findByRole("button", { name: "Erase data…" })).toBeDisabled()
+  expect(screen.getByText("The data this request is about no longer exists.")).toBeInTheDocument()
+  expect(page.reviews()).toBe(0)
+})
+
+test("a review the API refuses says why, and Erase stays disabled", async () => {
+  open(review(), { review: () => problem(409, "roles.lastAdministrator") })
+
+  expect(
+    await screen.findByText(
+      "The last active administrator keeps this role. Make someone else an administrator first."
+    )
+  ).toBeInTheDocument()
+
+  expect(screen.getByRole("button", { name: "Erase data…" })).toBeDisabled()
 })
 
 test("a request closed meanwhile toasts and refetches", async () => {
@@ -251,6 +295,7 @@ test("a request closed meanwhile toasts and refetches", async () => {
 test.each([
   ["leaders", me.leader],
   ["servants", me.servant],
+  ["the church office", me.churchOffice],
 ])("%s get NoAccess without a request", async (_, who) => {
   const page = open(review(), { who })
   expect(await screen.findByText("You can’t handle data protection requests")).toBeInTheDocument()

@@ -17,9 +17,9 @@ export type Recurrence = {
   span: { startsOn: LocalDate; endsOn: LocalDate | null }
 }
 
-export type ServiceRef = Schemas["ServiceRef"]
-export type StageRef = Schemas["StageRef"]
-export type AccountRef = Schemas["AccountRef"] | null
-export type PersonRef = Schemas["PersonRef"]
-export type LessonRef = Schemas["LessonRef"]
-export type Counts = Schemas["SessionCounts"]
+export type ServiceRef = Schemas["ServiceReference"]
+export type StageRef = Schemas["StageReference"]
+export type AccountRef = Schemas["AccountReference"] | null
+export type PersonRef = Schemas["PersonReference"]
+export type LessonRef = Schemas["LessonOnDate"]
+export type Counts = Schemas["AttendanceCounts"]

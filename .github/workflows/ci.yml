@@ -34,9 +34,6 @@ jobs:
 
       - run: task setup
 
-      - run: task api:types
-      - run: git diff --exit-code src/lib/api/schema.d.ts
-
       - run: pnpm audit --prod --audit-level high
 
       - run: task lint

@@ -3,19 +3,21 @@ import { useQuery } from "@tanstack/react-query"
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { LocalDate, Uuid } from "@/lib/api/types/common"
 import type { LessonStatus } from "@/lib/api/types/learning"
+import type { Can } from "@/lib/permissions"
 
-export type Material = { label: string; url: string | null }
+export type LessonRow = Schemas["LessonRowResponse"]
 
-export type HomeworkCounts = { total: number; published: number; drafts: number }
+export type LessonDetail = Schemas["LessonDetailResponse"]
 
-export type LessonRow = Schemas["LessonRow"]
-export type Lesson = Schemas["LessonView"]
+export type Lesson = LessonDetail["lesson"]
 
-export type LessonDetail = Schemas["LessonDetail"]
+export type LessonStage = LessonDetail["stage"]
+
+export type Material = Lesson["materials"][number]
 
 export type LessonTab = "upcoming" | "previous" | "archived"
 
-export type StageLessons = Schemas["LessonList"]
+export type StageLessons = Schemas["LessonListResponse"]
 
 export const lessonQuery = (id: Uuid) => ({
   queryKey: ["lessons", "detail", id] as const,
@@ -36,34 +38,25 @@ export const stageLessonsQuery = (stage: Uuid, tab: LessonTab = "upcoming", q = 
     ),
 })
 
-export type LessonInput = {
-  title: string
-  teachingDate?: LocalDate
-  scheduleId?: Uuid | null
-  sessionId?: Uuid | null
-  summary: string | null
-  passage: string | null
-  memoryVerse: string | null
-  objectives: string | null
-  teachingPoints: string | null
-  activities: string | null
-  materials: Material[]
-  notes?: string | null
-  responsibleId?: Uuid
-  collaboratorIds?: Uuid[]
-  status?: "draft" | "ready"
-}
+export type LessonInput = Schemas["LessonRequest"]
+
+export type MeetingChoice = Schemas["LessonMeetingRequest"]
 
 export const createLessonRequest = (stage: Uuid, input: LessonInput) =>
   dataOf(
     api.POST("/stages/{stageId}/lessons", { params: { path: { stageId: stage } }, body: input })
   )
 
-export const updateLessonRequest = (lesson: Uuid, input: LessonInput) =>
-  dataOf(api.PATCH("/lessons/{id}", { params: { path: { id: lesson } }, body: input }))
+export const updateLessonRequest = (lesson: Uuid, version: number, input: LessonInput) =>
+  dataOf(
+    api.PUT("/lessons/{id}", {
+      params: { path: { id: lesson }, query: { version } },
+      body: input,
+    })
+  )
 
-export type MeetingOption = Schemas["LessonOption"]
-export type LessonOptions = Schemas["LessonOptions"]
+export type MeetingOption = Schemas["LessonOptionResponse"]
+export type LessonOptions = Schemas["LessonOptionsResponse"]
 
 export const lessonOptionsQuery = (stage: Uuid, lesson?: Uuid) => ({
   queryKey: ["lessons", "options", { stage, lesson }] as const,
@@ -81,13 +74,20 @@ export const OTHER_DATE = "other"
 export const optionValue = (option: Pick<MeetingOption, "scheduleId" | "date">) =>
   `${option.scheduleId}:${option.date}`
 
-export function toLink(value: string, otherDate: LocalDate, options: MeetingOption[]) {
+export function toMeeting(
+  value: string,
+  otherDate: LocalDate,
+  options: MeetingOption[]
+): MeetingChoice {
   const option = options.find((o) => optionValue(o) === value)
 
-  return option
-    ? { teachingDate: option.date, scheduleId: option.scheduleId, sessionId: null }
-    : { teachingDate: otherDate, scheduleId: null, sessionId: null }
+  return option ? { scheduleId: option.scheduleId, date: option.date } : { date: otherDate }
 }
+
+export const meetingOf = (lesson: Lesson): MeetingChoice =>
+  lesson.scheduleId
+    ? { scheduleId: lesson.scheduleId, date: lesson.teachingDate }
+    : { date: lesson.teachingDate }
 
 export const changeLessonStatusRequest = (lesson: Uuid, status: LessonStatus) =>
   dataOf(api.POST("/lessons/{id}/status", { params: { path: { id: lesson } }, body: { status } }))
@@ -106,3 +106,27 @@ export const restoreLessonRequest = (id: Uuid) =>
 
 export const deleteLessonRequest = (id: Uuid) =>
   dataOf(api.DELETE("/lessons/{id}", { params: { path: { id } } }))
+
+export type LessonFlags = Record<
+  "manage" | "markCompleted" | "addHomework" | "archive" | "restore" | "delete",
+  boolean
+>
+
+export function lessonFlagsFor(
+  can: Can,
+  { archived, today, lesson }: LessonDetail,
+  everPublished: boolean | null
+): LessonFlags {
+  const update = can("update", "lessons") && !archived
+  const open = !archived && lesson.archivedAt === null
+  const manage = update && open
+
+  return {
+    manage,
+    markCompleted: manage && lesson.status === "ready" && lesson.teachingDate <= today,
+    addHomework: can("create", "homework") && open,
+    archive: manage,
+    restore: update && lesson.archivedAt !== null,
+    delete: update && lesson.status === "draft" && everPublished === false,
+  }
+}

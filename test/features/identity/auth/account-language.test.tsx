@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { LanguageMenu } from "@/components/language-switch"
 import type { Locale } from "@/i18n/config"
+import type { Schemas } from "@/lib/api/client"
 import { makeQueryClient } from "@/lib/api/query-provider"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -32,9 +33,9 @@ afterEach(() => {
 
 function backend(
   account: () => Me | null,
-  patch: (language: string) => Response | Promise<Response>
+  save: (language: string) => Response | Promise<Response>
 ) {
-  const calls = { me: 0, patches: [] as unknown[] }
+  const calls = { me: 0, saves: [] as unknown[] }
 
   server.use(
     http.get(apiUrl("/me"), () => {
@@ -43,11 +44,11 @@ function backend(
 
       return current ? HttpResponse.json(current) : problem(401, "auth.unauthenticated")
     }),
-    http.patch(apiUrl("/me"), async ({ request }) => {
-      const body = (await request.json()) as { language: string }
-      calls.patches.push(body)
+    http.put(apiUrl("/me/language"), async ({ request }) => {
+      const body = (await request.json()) as Schemas["ChangeLanguageRequest"]
+      calls.saves.push(body)
 
-      return patch(body.language)
+      return save(body.language ?? "")
     })
   )
 
@@ -69,7 +70,7 @@ async function chooseGerman() {
 }
 
 describe("choosing a language while signed in", () => {
-  test("switches at once and saves it with exactly one PATCH", async () => {
+  test("switches at once and saves it with exactly one PUT", async () => {
     let answer: () => void = () => {}
 
     const calls = backend(
@@ -89,7 +90,7 @@ describe("choosing a language while signed in", () => {
     await waitFor(() => expect(client.getQueryData(["me"])).toBeDefined())
     await chooseGerman()
     expect(router.replace).toHaveBeenCalledExactlyOnceWith("/", { locale: "de" })
-    await waitFor(() => expect(calls.patches).toEqual([{ language: "de" }]))
+    await waitFor(() => expect(calls.saves).toEqual([{ language: "de" }]))
     answer()
     await waitFor(() => expect(client.getQueryData<Me>(["me"])?.account.language).toBe("de"))
     expect(calls.me).toBe(1)
@@ -124,7 +125,7 @@ describe("choosing a language while signed in", () => {
     await waitFor(() => expect(client.getQueryState(["me"])?.status).toBe("error"))
     await chooseGerman()
     expect(router.replace).toHaveBeenCalledOnce()
-    expect(calls.patches).toEqual([])
+    expect(calls.saves).toEqual([])
   })
 
   test.each([
@@ -182,7 +183,7 @@ describe("the account's language after sign-in or app start", () => {
 
     expect(screen.queryByText("Service page")).toBeNull()
     expect(localStorage.getItem("khmk.locale")).toBe("ar")
-    expect(calls.patches).toEqual([])
+    expect(calls.saves).toEqual([])
   })
 
   test.each(["en"] as const)("language %s doesn't navigate", async (language) => {

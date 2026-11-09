@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -29,15 +30,16 @@ afterEach(() => vi.restoreAllMocks())
 function open(
   initial: PersonRow,
   {
-    deactivate = () => new HttpResponse(null, { status: 204 }),
-  }: { deactivate?: () => Response } = {}
+    deactivate = () => HttpResponse.json({ ...initial.person, status: "inactive" }),
+    viewer = me.administrator,
+  }: { deactivate?: () => Response; viewer?: Me } = {}
 ) {
   let lydia = initial
   const requests: URLSearchParams[] = []
   const posts: string[] = []
 
   server.use(
-    http.get(apiUrl("/me"), () => HttpResponse.json(me.administrator)),
+    http.get(apiUrl("/me"), () => HttpResponse.json(viewer)),
     http.get(apiUrl("/services"), () => HttpResponse.json(services)),
     http.get(apiUrl("/people"), ({ request }) => {
       const params = new URL(request.url).searchParams
@@ -62,7 +64,7 @@ function open(
       posts.push("reactivate")
       lydia = { ...lydia, person: { ...lydia.person, status: "active" }, placements: [] }
 
-      return new HttpResponse(null, { status: 204 })
+      return HttpResponse.json(lydia.person)
     })
   )
 
@@ -158,16 +160,15 @@ test("reactivating shows the person under Active with no service", async () => {
   expect(posts).toEqual(["reactivate"])
 })
 
-test("without can.edit there is no footer", async () => {
-  open({ ...lydia(), can: { edit: false } })
+test("without members: update there is no footer", async () => {
+  open(lydia(), { viewer: me.servant })
   const sheet = await openSheet()
   expect(sheet.queryByRole("button", { name: "Mark as inactive" })).not.toBeInTheDocument()
 })
 
 test("a 403 on deactivate toasts and changes nothing", async () => {
   open(lydia(), {
-    deactivate: () =>
-      problem(403, "people.editOutsideServices", { params: { name: "Lydia Aziz" } }),
+    deactivate: () => problem(403, "people.changeNotAllowed"),
   })
 
   const sheet = await openSheet()

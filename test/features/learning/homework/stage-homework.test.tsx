@@ -5,9 +5,10 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
 import { apiUrl, problem } from "@test/support/api"
+import { me } from "@test/support/fixtures/me"
 import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
-import { homeworkFlags } from "@test/support/fixtures/homework"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
@@ -30,6 +31,7 @@ const lesson = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e9001",
   title: "The Good Samaritan",
   teachingDate: "2026-11-01",
+  archived: false,
 }
 
 const row = (
@@ -56,13 +58,13 @@ const row = (
           withoutAccount: 2,
           reportedTotal: 3,
         },
-  can: homeworkFlags({ edit: true, publish: status === "draft", viewProgress: true }),
   ...extra,
 })
 
 const data = (items: HomeworkRow[], extra: Partial<StageHomework> = {}): StageHomework => ({
   today: "2026-11-01",
-  stage: { id: THIRD_CLASS_ID, name: "Third class", position: 3, archived: false },
+  stage: { id: THIRD_CLASS_ID, name: "Third class", position: 3 },
+  archived: false,
   tabs: {
     published: items.filter((i) => i.status === "published").length,
     draft: items.filter((i) => i.status === "draft").length,
@@ -71,7 +73,6 @@ const data = (items: HomeworkRow[], extra: Partial<StageHomework> = {}): StageHo
   lessons: [lesson],
   defaultLessonId: lesson.id,
   audienceSize: 12,
-  can: { create: true },
   items,
   ...extra,
 })
@@ -83,7 +84,7 @@ const prayer = row("0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea003", "Pray for a neighbour
   counts: null,
 })
 
-function open(body: StageHomework | (() => StageHomework)) {
+function open(body: StageHomework | (() => StageHomework), account: Me = me.servant) {
   server.use(
     http.get(apiUrl(`/stages/${THIRD_CLASS_ID}`), () => HttpResponse.json(thirdClass)),
     http.get(apiUrl(`/stages/${THIRD_CLASS_ID}/homework`), () =>
@@ -94,7 +95,8 @@ function open(body: StageHomework | (() => StageHomework)) {
   renderWithProviders(
     <SidebarProvider>
       <StageHomeworkPage />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: account }
   )
 }
 
@@ -150,10 +152,16 @@ test("asks for a lesson first when the stage has none", async () => {
 })
 
 test("hides new homework from someone who cannot create it", async () => {
-  open(data([verse], { can: { create: false } }))
+  open(data([verse]), me.churchOffice)
   await table()
   expect(screen.queryByRole("link", { name: "New homework" })).not.toBeInTheDocument()
   expect(screen.queryByRole("link", { name: "Prepare a lesson" })).not.toBeInTheDocument()
+})
+
+test("an archived stage offers no new homework", async () => {
+  open(data([verse], { archived: true }))
+  await table()
+  expect(screen.queryByRole("link", { name: "New homework" })).not.toBeInTheDocument()
 })
 
 const publishToast = (title: string) =>
@@ -174,6 +182,8 @@ test("publishes a draft row once, even on a double click, and it moves to Publis
         id: drawing.id,
         status: "published",
         publishedAt: "2026-11-01T12:00:00Z",
+        archivedAt: null,
+        version: 2,
       })
     })
   )
@@ -192,22 +202,9 @@ test("publishes a draft row once, even on a double click, and it moves to Publis
   expect(posts).toEqual([{}])
 })
 
-test("the actions menu offers what each row's flags allow", async () => {
+test("the actions menu offers what the viewer may do with each row", async () => {
   search.value = `id=${THIRD_CLASS_ID}&status=published`
-
-  const locked = row("0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea004", "Sing the hymn", "published", {
-    can: homeworkFlags({
-      edit: false,
-      publish: false,
-      unpublish: false,
-      archive: false,
-      restore: false,
-      delete: false,
-      viewProgress: false,
-    }),
-  })
-
-  open(data([verse, drawing, locked]))
+  open(data([verse, drawing]))
   const rows = (await table()).getAllByRole("row").slice(1)
 
   await userEvent.click(
@@ -220,15 +217,19 @@ test("the actions menu offers what each row's flags allow", async () => {
     within(menu)
       .getAllByRole("menuitem")
       .map((i) => i.textContent)
-  ).toEqual(["Who reported it done", "Edit"])
+  ).toEqual(["Who reported it done", "Edit", "Archive"])
 
   expect(within(menu).getByRole("menuitem", { name: "Who reported it done" })).toHaveAttribute(
     "href",
     `/homework/view/?id=${verse.id}`
   )
+})
 
-  await userEvent.keyboard("{Escape}")
-  expect(within(rows[1]!).queryByRole("button")).not.toBeInTheDocument()
+test("someone who may neither change homework nor read members gets no actions", async () => {
+  search.value = `id=${THIRD_CLASS_ID}&status=published`
+  open(data([verse]), me.attendanceOnly)
+  const rows = (await table()).getAllByRole("row").slice(1)
+  expect(within(rows[0]!).queryByRole("button")).not.toBeInTheDocument()
 })
 
 test("the draft menu offers Edit and Publish and works from the keyboard", async () => {
@@ -239,7 +240,7 @@ test("the draft menu offers Edit and Publish and works from the keyboard", async
   await userEvent.keyboard("{Enter}")
   const menu = await screen.findByRole("menu")
   const items = within(menu).getAllByRole("menuitem")
-  expect(items.map((i) => i.textContent)).toEqual(["Edit", "Publish"])
+  expect(items.map((i) => i.textContent)).toEqual(["Edit", "Publish", "Archive", "Delete draft"])
   expect(items[0]).toHaveAttribute("href", `/homework/edit/?id=${drawing.id}`)
   await vi.waitFor(() => expect(items[0]).toHaveFocus())
   await userEvent.keyboard("{ArrowDown}")

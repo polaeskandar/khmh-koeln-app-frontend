@@ -30,14 +30,18 @@ export function SettingsPage() {
         <PageHeader title={t("nav.settings")} description={t("settings.description")} />
         <RequirePermission action="read" resource="users">
           <AccountRequests
-            decide={can("create", "users")}
-            approve={(request) => <ApproveButton request={request} />}
+            decline={can("delete", "users")}
+            approve={
+              can("update", "users") && can("update", "roles")
+                ? (request) => <ApproveButton request={request} />
+                : undefined
+            }
           />
         </RequirePermission>
-        <RequirePermission action="update" resource="users" fallback={null}>
+        <RequirePermission action="read" resource="users" fallback={null}>
           <ParentAccess />
         </RequirePermission>
-        <RequirePermission action="update" resource="users" fallback={null}>
+        <RequirePermission action="read" resource="users" fallback={null}>
           <MemberAccounts />
         </RequirePermission>
         <RequirePermission action="read" resource="users" fallback={null}>
@@ -46,7 +50,7 @@ export function SettingsPage() {
         <RequirePermission action="read" resource="roles" fallback={null}>
           <RolesOverview />
         </RequirePermission>
-        <RequirePermission action="delete" resource="users" fallback={null}>
+        <RequirePermission action="update" resource="users" fallback={null}>
           <DataProtectionSummary />
         </RequirePermission>
       </PageBody>

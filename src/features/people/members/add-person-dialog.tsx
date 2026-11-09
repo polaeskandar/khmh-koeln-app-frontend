@@ -21,7 +21,8 @@ import {
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
-import { type ServiceRow, servicesQuery } from "@/features/organization/services/api"
+import { servicesQuery } from "@/features/organization/services/api"
+import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import type { PersonRef, ServiceRef, StageRef } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -33,30 +34,20 @@ type Candidate = PersonRef & { groups: { service: ServiceRef; stage: StageRef | 
 
 const PEOPLE_QUERIES = [["people"], ["services"]]
 
-const canPlaceIn = (service: ServiceRow) =>
-  !service.archived &&
-  (service.can.manageMembers || service.stages.some((stage) => stage.can.manageMembers))
-
 function AddPersonForm({ onDone }: { onDone: () => void }) {
   const t = useTranslations()
   const f = useFormat()
+  const can = useCan()
   const formRef = useRef<HTMLFormElement>(null)
-  const services = (useQuery(servicesQuery).data?.items ?? []).filter(canPlaceIn)
+  const services = (useQuery(servicesQuery).data?.items ?? []).filter((s) => !s.archived)
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [displayName, setDisplayName] = useState("")
   const [serviceId, setServiceId] = useState("")
   const [stageId, setStageId] = useState("")
   const service = services.find((s) => s.id === serviceId) ?? services[0]
-  const stages = service?.stages.filter((stage) => stage.can.manageMembers) ?? []
-  const noStageAllowed = service?.can.manageMembers ?? false
-
-  const chosenStage = stages.some((stage) => stage.id === stageId)
-    ? stageId
-    : noStageAllowed
-      ? ""
-      : (stages[0]?.id ?? "")
-
+  const stages = service?.stages ?? []
+  const chosenStage = stages.some((stage) => stage.id === stageId) ? stageId : ""
   const placement = service ? { serviceId: service.id, stageId: chosenStage || null } : null
 
   const create = useApiMutation(createPersonRequest, {
@@ -155,15 +146,17 @@ function AddPersonForm({ onDone }: { onDone: () => void }) {
                               .join(f.separator)}
                       </span>
                     </span>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      disabled={busy}
-                      onClick={() => void addExisting(candidate)}
-                    >
-                      {t("members.addMember.add")}
-                    </Button>
+                    {placement && can("update", "members") ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={busy}
+                        onClick={() => void addExisting(candidate)}
+                      >
+                        {t("members.addMember.add")}
+                      </Button>
+                    ) : null}
                   </li>
                 ))}
               </ul>
@@ -249,9 +242,7 @@ function AddPersonForm({ onDone }: { onDone: () => void }) {
               aria-invalid={errors["placement.stageId"] ? true : undefined}
               onChange={(event) => setStageId(event.target.value)}
             >
-              {noStageAllowed ? (
-                <NativeSelectOption value="">{t("members.fields.noStage")}</NativeSelectOption>
-              ) : null}
+              <NativeSelectOption value="">{t("members.fields.noStage")}</NativeSelectOption>
               {stages.map((stage) => (
                 <NativeSelectOption key={stage.id} value={stage.id}>
                   {stage.name}

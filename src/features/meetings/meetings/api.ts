@@ -1,10 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 
 import { api, dataOf, type Schemas } from "@/lib/api/client"
-import type { AgendaItem } from "@/lib/api/types/meetings"
-import type { LocalDate, Recurrence, Uuid } from "@/lib/api/types/common"
+import type { LocalDate, Uuid } from "@/lib/api/types/common"
 
-export type ScheduleList = Schemas["ScheduleList"]
+export type ScheduleList = Schemas["ScheduleListResponse"]
 
 export const schedulesQuery = {
   queryKey: ["schedules", "list"] as const,
@@ -19,7 +18,7 @@ export const serviceSchedulesQuery = (serviceId: Uuid) => ({
     dataOf(api.GET("/schedules", { params: { query: { serviceId } }, signal })),
 })
 
-export type Agenda = Omit<Schemas["Agenda"], "items"> & { items: AgendaItem[] }
+export type Agenda = Schemas["AgendaResponse"]
 
 export type AgendaFilter = { from?: LocalDate; to?: LocalDate; serviceId?: Uuid; scheduleId?: Uuid }
 
@@ -31,7 +30,7 @@ export const agendaQuery = (filter: AgendaFilter) => ({
 
 export const useAgenda = (filter: AgendaFilter) => useQuery(agendaQuery(filter))
 
-export type MeetingSession = Schemas["SessionDetail"]
+export type MeetingSession = Schemas["SessionDetailResponse"]
 
 export const meetingSessionQuery = (id: Uuid) => ({
   queryKey: ["sessions", "detail", id] as const,
@@ -52,27 +51,17 @@ export const cancelOccurrenceRequest = (schedule: Uuid, date: LocalDate, reason:
     })
   )
 
-export type ScheduleInput = {
-  serviceId: Uuid
-  stageId: Uuid | null
-  name: string
-  description: string | null
-  location: string | null
-  recurrence: Recurrence
-  startTime: string
-  endTime: string | null
-  rosterMode: "expected" | "open"
-}
+export type ScheduleRequest = Schemas["CreateScheduleRequest"]
 
-export type ScheduleSaved = Schemas["ScheduleWritten"]
+export type ScheduleChanges = Schemas["ScheduleChangesRequest"]
 
-export const createScheduleRequest = (input: ScheduleInput) =>
-  dataOf(api.POST("/schedules", { body: input }))
+export type ScheduleSaved = Schemas["WrittenScheduleResponse"]
 
-export const updateScheduleRequest = (
-  id: Uuid,
-  changes: Omit<ScheduleInput, "serviceId" | "stageId">
-) => dataOf(api.PATCH("/schedules/{id}", { params: { path: { id } }, body: changes }))
+export const createScheduleRequest = (request: ScheduleRequest) =>
+  dataOf(api.POST("/schedules", { body: request }))
+
+export const updateScheduleRequest = (id: Uuid, changes: ScheduleChanges) =>
+  dataOf(api.PUT("/schedules/{id}", { params: { path: { id } }, body: changes }))
 
 export const scheduleQuery = (id: Uuid) => ({
   queryKey: ["schedules", "detail", id] as const,
@@ -89,7 +78,7 @@ export const deactivateScheduleRequest = (id: Uuid) =>
 export const deleteScheduleRequest = (id: Uuid) =>
   dataOf(api.DELETE("/schedules/{id}", { params: { path: { id } } }))
 
-export type MemberMeeting = Schemas["MemberMeeting"]
+export type MemberMeeting = Schemas["MemberMeetingResponse"]
 
 export const memberMeetingsQuery = () => ({
   queryKey: ["member", "meetings"] as const,

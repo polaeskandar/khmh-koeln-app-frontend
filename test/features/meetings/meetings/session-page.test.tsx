@@ -3,9 +3,11 @@ import { http, HttpResponse } from "msw"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
 import type { HistoryEntry } from "@/lib/api/types/meetings"
 import { apiUrl, problem } from "@test/support/api"
-import { session } from "@test/support/fixtures/sessions"
+import { me } from "@test/support/fixtures/me"
+import { session, sessionDetail } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
@@ -31,7 +33,11 @@ const schedule: MeetingSession["schedule"] = {
   active: true,
 }
 
-function open(view: Parameters<typeof session>[0] = {}, extra: Partial<MeetingSession> = {}) {
+function open(
+  view: Parameters<typeof session>[0] = {},
+  extra: Partial<MeetingSession> = {},
+  who: Me = me.leader
+) {
   const base = session(view)
   search.value = `id=${base.id}`
   let requests = 0
@@ -40,20 +46,15 @@ function open(view: Parameters<typeof session>[0] = {}, extra: Partial<MeetingSe
     http.get(apiUrl(`/sessions/${base.id}`), () => {
       requests++
 
-      return HttpResponse.json({
-        today: "2026-11-08",
-        session: base,
-        schedule,
-        history: [],
-        ...extra,
-      })
+      return HttpResponse.json(sessionDetail(base, { schedule, ...extra }))
     })
   )
 
   renderWithProviders(
     <SidebarProvider>
       <SessionPage />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: who }
   )
 
   return { id: base.id, requests: () => requests }
@@ -93,10 +94,16 @@ describe("attendance by state", () => {
     expect(action("View attendance")).toHaveAttribute("href", `/attendance/summary/?session=${id}`)
   })
 
-  test("without can.record there is no attendance link", async () => {
-    open({ status: "active", can: { manage: false, record: false, reopen: false } })
+  test("without attendance: create there is no attendance link", async () => {
+    open({ status: "active" }, {}, me.churchOffice)
     await header()
     expect(action("Take attendance")).toBeNull()
+  })
+
+  test("a completed session needs attendance: read for its summary link", async () => {
+    open({ status: "completed" }, {}, me.churchOffice)
+    await header()
+    expect(action("View attendance")).toBeNull()
   })
 
   test.each([

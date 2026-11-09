@@ -7,7 +7,7 @@ export type UpcomingEntry =
       kind: "group"
       date: LocalDate
       startTime: LocalTime
-      service: ServiceRef
+      service: ServiceRef | null
       title: string
       planned: boolean
       groups: string[]
@@ -16,7 +16,7 @@ export type UpcomingEntry =
 const mergeable = (item: AgendaItem) => item.kind === "planned" || item.status === "scheduled"
 
 const keyOf = (item: AgendaItem) =>
-  [item.kind, item.date, item.startTime, item.service.id, item.title].join("|")
+  [item.kind, item.date, item.startTime, item.service?.id ?? "", item.title].join("|")
 
 export function groupUpcoming(items: AgendaItem[]): UpcomingEntry[] {
   const entries: UpcomingEntry[] = []

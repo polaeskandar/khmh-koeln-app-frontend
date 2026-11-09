@@ -6,7 +6,7 @@ import {
   type AgendaItem,
   compareAgenda,
   type HistoryEntry,
-  type SessionView,
+  type SessionItem,
 } from "@/lib/api/types/meetings"
 import { physicalClasses } from "@test/support/physical-classes"
 import { renderWithProviders } from "@test/support/providers"
@@ -24,11 +24,10 @@ const youth: ServiceRef = { id: "s2", name: "Youth Meeting", tone: 2, archived: 
 const third: StageRef = { id: "st3", name: "3rd Class", position: 2, archived: false }
 const first: StageRef = { id: "st1", name: "1st Class", position: 0, archived: false }
 
-const session = (overrides: Partial<SessionView> = {}): SessionView & { kind: "session" } => ({
+const session = (overrides: Partial<SessionItem> = {}): SessionItem => ({
   kind: "session",
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f99",
   scheduleId: "sch1",
-  oneOff: false,
   occurrenceDate: TODAY,
   title: "Sunday class",
   service: sundaySchool,
@@ -42,7 +41,7 @@ const session = (overrides: Partial<SessionView> = {}): SessionView & { kind: "s
   status: "scheduled",
   rosterMode: "expected",
   cancelReason: null,
-  can: { manage: true, record: true, reopen: false },
+  counts: null,
   ...overrides,
 })
 
@@ -59,7 +58,6 @@ const planned = (date: string): AgendaItem => ({
   endsAt: `${date}T13:15:00+01:00`,
   location: "Room 4",
   rosterMode: "expected",
-  can: { manage: true },
 })
 
 describe("AgendaRow", () => {

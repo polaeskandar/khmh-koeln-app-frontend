@@ -14,16 +14,24 @@ import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { preferredName } from "@/lib/domain/names"
 import { routes } from "@/lib/routes"
 
-import { type AttendanceBoard, closeAttendanceRequest, type Mark, removeMarkRequest } from "./api"
+import {
+  type AttendanceBoard,
+  type AttendanceSheet,
+  closeAttendanceRequest,
+  type Mark,
+  removeMarkRequest,
+} from "./api"
 
 const SESSION_QUERIES = [["attendance"], ["sessions"], ["agenda"]]
+
+const STATE_QUERIES = [["attendance"], ["sessions"]]
 
 export function CloseDialog({
   board,
   open,
   onOpenChange,
 }: {
-  board: AttendanceBoard
+  board: AttendanceSheet
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
@@ -66,7 +74,7 @@ export function CloseDialog({
         const result = await close.execute(session.id)
 
         if (!result.ok && result.problem.code === "meetings.onlyActiveCanClose") {
-          void queryClient.invalidateQueries({ queryKey: ["attendance"] })
+          STATE_QUERIES.forEach((queryKey) => void queryClient.invalidateQueries({ queryKey }))
         }
 
         return result.ok
@@ -86,7 +94,7 @@ export function CorrectionDialog({
   open,
   onOpenChange,
 }: {
-  board: AttendanceBoard
+  board: AttendanceSheet
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
@@ -124,7 +132,7 @@ export function CorrectionDialog({
         const result = await remove.execute(board.session.id, personId, reason)
 
         if (result.ok || result.problem.code === "attendance.closedReopen") {
-          void queryClient.invalidateQueries({ queryKey: ["attendance"] })
+          STATE_QUERIES.forEach((queryKey) => void queryClient.invalidateQueries({ queryKey }))
         }
 
         return result.ok

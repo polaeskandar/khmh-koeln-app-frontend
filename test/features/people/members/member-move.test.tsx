@@ -6,8 +6,11 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { ServiceList, ServiceRow } from "@/features/organization/services/api"
+import type { Me } from "@/features/identity/auth/api"
 import type { Locale } from "@/i18n/config"
+import type { Schemas } from "@/lib/api/client"
 import { apiUrl, problem } from "@test/support/api"
+import { me } from "@test/support/fixtures/me"
 import { peopleList } from "@test/support/fixtures/people"
 import { services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
@@ -28,34 +31,30 @@ afterEach(() => vi.restoreAllMocks())
 
 const base = services.items[0]!
 
-const stage = (
-  name: string,
-  position: number,
-  extra: Partial<ServiceRow["stages"][number]> = {}
-) => ({
+const stage = (name: string, position: number): ServiceRow["stages"][number] => ({
   id: `0192f3a4-7b1c-7d2e-8f3d-${String(position).padStart(12, "0")}`,
   name,
   position,
-  archived: false,
-  can: { manageMembers: true },
-  ...extra,
 })
 
 const kindergarten = stage("Kindergarten", 0)
 const second = stage("2nd Class", 2)
 const third = stage("3rd Class", 3)
-const fourth = stage("4th Class", 4, { archived: true })
-const fifth = stage("5th Class", 5, { can: { manageMembers: false } })
 
-const sundaySchool: ServiceRow = {
-  ...base,
-  stages: [kindergarten, second, third, fourth, fifth],
-  can: { ...base.can, manageMembers: true },
+const sundaySchool: ServiceRow = { ...base, stages: [kindergarten, second, third] }
+
+const list: ServiceList = { items: [sundaySchool] }
+
+const ref = ({ id, name, position }: typeof second) => ({ id, name, position, archived: false })
+
+const removeOnly: Me = {
+  ...me.churchOffice,
+  permissions: [
+    { action: "read", resource: "services" },
+    { action: "read", resource: "members" },
+    { action: "delete", resource: "members" },
+  ],
 }
-
-const list: ServiceList = { items: [sundaySchool], can: { create: true } }
-
-const ref = ({ id, name, position, archived }: typeof second) => ({ id, name, position, archived })
 
 const lydia = (
   placements: PersonRow["placements"],
@@ -70,7 +69,6 @@ const lydia = (
   },
   placements,
   pastPlacements: past,
-  can: { edit: true },
 })
 
 const inSecond = {
@@ -86,10 +84,20 @@ const inSecond = {
   endsOn: null,
 }
 
+const moved: Schemas["AddedMembershipResponse"] = {
+  id: "m2",
+  personId: "0192f3a4-7b1c-7d2e-8f3b-00000000a001",
+  service: inSecond.service,
+  stage: ref(third),
+  startsOn: "2026-11-08",
+  endsOn: null,
+}
+
 function open(
   initial: PersonRow,
-  move: () => Response = () => HttpResponse.json({ id: "m2" }),
-  locale: Locale = "en"
+  move: () => Response = () => HttpResponse.json(moved),
+  locale: Locale = "en",
+  viewer: Me = me.administrator
 ) {
   let current = initial
   const moves: unknown[] = []
@@ -116,7 +124,7 @@ function open(
     <SidebarProvider>
       <MembersScreen />
     </SidebarProvider>,
-    { locale }
+    { locale, me: viewer }
   )
 
   return moves
@@ -155,7 +163,7 @@ test("moving from 2nd to 3rd Class sends one move and shows the new stage since 
   expect(await sheet.findByText(/Sun 8 Nov 2026/)).toBeInTheDocument()
 })
 
-test("the targets leave out the current, other, archived and unmanaged stages", async () => {
+test("the targets leave out the current stage and the others the person is in", async () => {
   open(
     lydia([
       inSecond,
@@ -193,6 +201,28 @@ test("with no stage left only Remove remains", async () => {
   ])
 })
 
+test("without members: update there is no Move, only Remove", async () => {
+  open(lydia([inSecond]), undefined, "en", removeOnly)
+  await openMenu()
+  const menu = within(await screen.findByRole("menu"))
+
+  expect(menu.getAllByRole("menuitem").map((item) => item.textContent)).toEqual([
+    "Remove from 2nd Class (Sunday School)",
+  ])
+})
+
+test("without members: update or delete there is no menu", async () => {
+  open(lydia([inSecond]), undefined, "en", me.servant)
+  const table = within(await screen.findByRole("table"))
+  await userEvent.click(table.getByRole("button", { name: /Lydia Aziz/ }))
+  const sheet = within(await screen.findByRole("dialog"))
+  expect(sheet.getByText("2nd Class (Sunday School)")).toBeInTheDocument()
+
+  expect(
+    sheet.queryByRole("button", { name: "Actions for 2nd Class (Sunday School)" })
+  ).not.toBeInTheDocument()
+})
+
 test("a refusal toasts and leaves the sheet as it was", async () => {
   open(lydia([inSecond]), () =>
     problem(409, "people.alreadyIn", { params: { name: "Lydia Aziz", where: "3rd Class" } })
@@ -223,7 +253,7 @@ test("a 422 on the stage is toasted", async () => {
 })
 
 test("in German the 403 reads in German", async () => {
-  open(lydia([inSecond]), () => problem(403, "people.moveOutsideStages"), "de")
+  open(lydia([inSecond]), () => problem(403, "people.changeNotAllowed"), "de")
   const table = within(await screen.findByRole("table"))
   await userEvent.click(table.getByRole("button", { name: /Lydia Aziz/ }))
   const sheet = within(await screen.findByRole("dialog"))
@@ -237,8 +267,6 @@ test("in German the 403 reads in German", async () => {
   await userEvent.click(targets[0]!)
 
   await waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith(
-      "Sie können Personen nur in Stufen verschieben, in denen Sie dienen."
-    )
+    expect(toast.error).toHaveBeenCalledWith("Sie können keine Personen oder ihre Stufen ändern.")
   )
 })

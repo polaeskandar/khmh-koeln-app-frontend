@@ -108,7 +108,11 @@
       "unexpectedField": "This field isn’t accepted here.",
       "invalidRange": "Choose an end on or after the start, at most {max} days later.",
       "birthDateInFuture": "The birth date can’t be in the future.",
-      "addressIncomplete": "Enter street, postal code and city, or none of them."
+      "addressIncomplete": "Enter street, postal code and city, or none of them.",
+      "invalidChoice": "Choose one of the offered options.",
+      "tooLarge": "Enter a number up to {max}.",
+      "tooMany": "Choose at most {max}.",
+      "tooSmall": "Enter a number of at least {min}."
     },
     "services": {
       "adminOnlyCreate": "You can’t create services.",
@@ -199,7 +203,8 @@
       "chooseJoinService": "Choose the service this person joins.",
       "membershipOutsideServices": "You can only change memberships in the services and stages you serve in.",
       "moveOutsideStages": "You can only move people into stages you serve in.",
-      "personInactive": "{name} is inactive. Reactivate them first."
+      "personInactive": "{name} is inactive. Reactivate them first.",
+      "searchTooShort": "Type at least {min} letters."
     },
     "roles": {
       "adminOnly": "You can’t give or remove roles.",
@@ -216,7 +221,9 @@
       "chooseService": "Choose the service this role applies to.",
       "ownAdminRole": "You can’t remove your own administrator role. Ask another administrator.",
       "stageOnlyForServants": "Only servant roles can be limited to a stage.",
-      "lastAdministrator": "The last active administrator keeps this role. Make someone else an administrator first."
+      "lastAdministrator": "The last active administrator keeps this role. Make someone else an administrator first.",
+      "accountPending": "This account is waiting for approval. It gets its roles when it is approved.",
+      "notHeld": "{name} doesn’t have this role."
     },
     "materials": {
       "labelTooLong": "Use at most 120 characters for the label.",
@@ -241,7 +248,8 @@
       "changeNotAllowed": "You can’t change lessons.",
       "deleteNotAllowed": "You can’t archive or delete lessons.",
       "prepareStageOnly": "You can’t prepare lessons for this stage.",
-      "changeStageOnly": "You can’t change lessons of this stage."
+      "changeStageOnly": "You can’t change lessons of this stage.",
+      "changedMeanwhile": "Someone else changed this lesson in the meantime. Reload it and save again."
     },
     "homework": {
       "titleRequired": "Enter a title, e.g. “Learn the memory verse”.",
@@ -263,14 +271,17 @@
       "changeNotAllowed": "You can’t change homework.",
       "deleteNotAllowed": "You can’t archive or delete homework.",
       "changeStageOnly": "You can’t change homework of this stage.",
-      "assignStageOnly": "You can’t give homework to this stage."
+      "assignStageOnly": "You can’t give homework to this stage.",
+      "alreadyUndone": "This report was already undone.",
+      "changedMeanwhile": "Someone else changed this homework in the meantime. Reload it and save again."
     },
     "guardians": {
       "adminOnlyGrant": "You can’t give parents access to children.",
       "alreadyHasAccess": "{parent} already has access to {child}.",
       "adminOnlyApprove": "You can’t approve parent access.",
       "adminOnlyRemove": "You can’t remove parent access.",
-      "accountNotActive": "This account isn’t active. Approve or reactivate it first."
+      "accountInactive": "This account isn’t active. Approve or reactivate it first.",
+      "childInactive": "This person is inactive. Reactivate them first."
     },
     "accounts": {
       "firstNameRequired": "Enter your first name.",
@@ -299,7 +310,11 @@
       "chooseServiceForRole": "Choose the service for this role.",
       "stageNotInService": "This stage doesn’t belong to the chosen service.",
       "privacyNoticeOutdated": "The privacy notice has changed. Reload the page, read it and confirm again.",
-      "currentPasswordWrong": "This is not your current password."
+      "currentPasswordWrong": "This is not your current password.",
+      "chooseLanguage": "Choose English, German or Arabic.",
+      "chooseRegisteredAs": "Choose parent, servant or member.",
+      "passwordLinkUnavailable": "Password links are only for approved, active accounts.",
+      "requestDisabled": "This request’s account is disabled. Enable it before approving it, or decline it."
     },
     "privacy": {
       "adminOnly": "You can’t handle data protection requests.",
@@ -328,7 +343,8 @@
       "pending": "Your account is waiting for approval by the church office.",
       "disabled": "This account can no longer sign in. Ask the church office if you think this is a mistake.",
       "tooManyAttempts": "Too many attempts. Wait a few minutes and try again.",
-      "resetLinkInvalid": "This link no longer works. Ask the church office for a new one."
+      "resetLinkInvalid": "This link no longer works. Ask the church office for a new one.",
+      "confirmationLinkInvalid": "This confirmation link is invalid or has expired. Register again to get a new one."
     }
   },
   "toast": {
@@ -2033,11 +2049,7 @@
     },
     "keep": {
       "sessionTotals": "{count, plural, one {Attendance totals of # meeting} other {Attendance totals of # meetings}}",
-      "recordedMarks": "{count, plural, one {# attendance mark they recorded} other {# attendance marks they recorded}}",
-      "reportedCompletions": "{count, plural, one {# homework report they made} other {# homework reports they made}}",
-      "lessons": "{count, plural, one {# lesson they prepared} other {# lessons they prepared}}",
-      "homework": "{count, plural, one {# homework task they created} other {# homework tasks they created}}",
-      "sessionHistory": "{count, plural, one {# entry in meeting histories} other {# entries in meeting histories}}"
+      "accountRows": "{count, plural, one {# record the account made, which stays without it} other {# records the account made, which stay without it}}"
     },
     "mention": {
       "sessionNote": "Meeting note",

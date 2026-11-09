@@ -12,6 +12,7 @@ import { RecordPage } from "@/components/record-page"
 import { ServiceTag } from "@/components/service-tag"
 import { SessionBadges, SessionWhen } from "@/components/session-bits"
 import { Button } from "@/components/ui/button"
+import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
 import { isolate } from "@/lib/bidi"
@@ -28,12 +29,10 @@ import { SessionManageMenu } from "./session-dialogs"
 function AttendanceAction({ session, today }: { session: SessionView; today: LocalDate }) {
   const t = useTranslations()
   const router = useRouter()
+  const can = useCan()
+  const records = can("create", "attendance")
 
-  if (!session.can.record) {
-    return null
-  }
-
-  if (session.status === "active") {
+  if (session.status === "active" && records) {
     return (
       <Button asChild>
         <Link href={routes.takeAttendance(session.id)}>
@@ -44,7 +43,7 @@ function AttendanceAction({ session, today }: { session: SessionView; today: Loc
     )
   }
 
-  if (session.status === "scheduled" && session.date <= today) {
+  if (session.status === "scheduled" && session.date <= today && records) {
     return (
       <OpenAttendanceButton
         session={session.id}
@@ -53,7 +52,7 @@ function AttendanceAction({ session, today }: { session: SessionView; today: Loc
     )
   }
 
-  if (session.status === "completed") {
+  if (session.status === "completed" && can("read", "attendance")) {
     return (
       <Button variant="outline" asChild>
         <Link href={routes.attendanceSummary(session.id)}>
@@ -69,6 +68,7 @@ function AttendanceAction({ session, today }: { session: SessionView; today: Loc
 function SessionDetail({ data, actions }: { data: MeetingSession; actions?: ReactNode }) {
   const t = useTranslations()
   const f = useFormat()
+  const can = useCan()
   const { session, schedule, today } = data
   const canceled = session.status === "canceled"
 
@@ -110,7 +110,7 @@ function SessionDetail({ data, actions }: { data: MeetingSession; actions?: Reac
           actions={
             <>
               <AttendanceAction session={session} today={today} />
-              {session.status === "scheduled" && session.can.manage ? (
+              {session.status === "scheduled" && can("update", "sessions") ? (
                 <SessionManageMenu session={session} />
               ) : null}
               {actions}

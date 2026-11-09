@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { useNow } from "@/hooks/use-today"
 import { useFormat } from "@/i18n/format"
 
-import type { ServiceRow } from "./api"
+import { type ServiceRow, type Trend, useServiceInsight, useServiceInsights } from "./api"
 
 const DASH = "—"
 
@@ -20,12 +20,13 @@ export function NextMeetingCell({ service }: { service: ServiceRow }) {
   const t = useTranslations()
   const f = useFormat()
   const now = useNow()
+  const insight = useServiceInsight(service.id)
 
   if (service.archived) {
     return <span className="text-muted-foreground">{DASH}</span>
   }
 
-  const next = service.next
+  const next = insight?.next
 
   if (!next) {
     return <span className="text-muted-foreground">{t("services.nothingPlanned")}</span>
@@ -52,13 +53,16 @@ export function useNextAt() {
   const t = useTranslations("services.table")
   const f = useFormat()
   const today = useNow()?.date ?? null
+  const insights = useServiceInsights()
 
   return (service: ServiceRow): string | null => {
-    if (service.archived || !service.next) {
+    const next = insights.get(service.id)?.next
+
+    if (service.archived || !next) {
       return null
     }
 
-    const { date, startTime } = service.next
+    const { date, startTime } = next
 
     return t("nextAt", {
       when: today ? f.relativeDayInline(date, today) : f.dayMonth(date),
@@ -70,7 +74,7 @@ export function useNextAt() {
 export function AttendanceCell({ service }: { service: ServiceRow }) {
   const t = useTranslations("services.table")
   const f = useFormat()
-  const trend = service.trend
+  const trend = useServiceInsight(service.id)?.trend
 
   if (!trend) {
     return <span className="text-muted-foreground">{DASH}</span>
@@ -108,9 +112,7 @@ export function AttendanceCell({ service }: { service: ServiceRow }) {
   return <span className="text-muted-foreground">{DASH}</span>
 }
 
-export function trendText(service: ServiceRow, f: ReturnType<typeof useFormat>): string {
-  const trend = service.trend
-
+export function trendText(trend: Trend | undefined, f: ReturnType<typeof useFormat>): string {
   if (trend?.rate != null) {
     return f.percent(trend.rate)
   }

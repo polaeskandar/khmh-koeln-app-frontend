@@ -1,8 +1,7 @@
-import type { DirectoryPerson } from "@/features/people/members/api"
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { Uuid } from "@/lib/api/types/common"
 
-export type AccountRequest = Schemas["AccountRequest"]
+export type AccountRequest = Schemas["AccountRequestListResponse"]["items"][number]
 
 export const accountRequestsQuery = {
   queryKey: ["accountRequests", "list"] as const,
@@ -22,12 +21,9 @@ export const staffAccountsQuery = {
   queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/staff-accounts", { signal })),
 }
 
-export type AgeCheck = "sixteenOrOlder" | "guardianConsent"
+export type AgeCheck = Schemas["AgeCheck"]
 
-export type Approval =
-  | { as: "parent"; childIds: Uuid[]; roleIds: Uuid[] }
-  | { as: "servant"; roleIds: Uuid[] }
-  | { as: "member"; personId: Uuid; ageCheck: AgeCheck; guardianConsentNote: string | null }
+export type Approval = Schemas["ApprovalRequest"]
 
 export const approveRequest = (account: Uuid, approval: Approval) =>
   dataOf(
@@ -37,7 +33,7 @@ export const approveRequest = (account: Uuid, approval: Approval) =>
     })
   )
 
-export type MemberCandidate = DirectoryPerson & { hasAccount: boolean }
+export type MemberCandidate = Schemas["MemberCandidateResponse"]
 
 export const memberCandidatesQuery = (q: string) => ({
   queryKey: ["accountRequests", "memberCandidates", q] as const,
@@ -45,7 +41,7 @@ export const memberCandidatesQuery = (q: string) => ({
     dataOf(api.GET("/account-requests/member-candidates", { params: { query: { q } }, signal })),
 })
 
-export type MemberAccount = Schemas["MemberAccountItem"]
+export type MemberAccount = Schemas["MemberAccountItemResponse"]
 
 export const memberAccountsQuery = {
   queryKey: ["member-accounts"] as const,
@@ -61,7 +57,7 @@ export const giveRoleRequest = (account: Uuid, roleId: Uuid) =>
 export const removeRoleRequest = (account: Uuid, roleId: Uuid) =>
   dataOf(api.DELETE("/accounts/{id}/roles/{roleId}", { params: { path: { id: account, roleId } } }))
 
-export type PasswordLink = Schemas["PasswordLink"]
+export type PasswordLink = Schemas["IssuedPasswordLink"]
 
 export const passwordLinkRequest = (account: Uuid) =>
   dataOf(api.POST("/accounts/{id}/password-link", { params: { path: { id: account } }, body: {} }))

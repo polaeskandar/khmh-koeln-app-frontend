@@ -5,12 +5,16 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
 import { apiUrl, problem } from "@test/support/api"
+import { homeworkRow, stageHomework } from "@test/support/fixtures/homework"
 import { goodSamaritan, lessonDetail, lessonStage } from "@test/support/fixtures/lessons"
+import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
+import type { HomeworkRow } from "@/features/learning/homework/api"
 import type { LessonDetail } from "@/features/learning/lessons/api"
 import { LessonPage } from "@/features/learning/lessons/lesson-page"
 
@@ -31,7 +35,12 @@ beforeEach(() => {
 
 afterEach(() => vi.restoreAllMocks())
 
-function open(detail: LessonDetail | (() => LessonDetail)) {
+type Options = { account?: Me; tasks?: HomeworkRow[] }
+
+function open(
+  detail: LessonDetail | (() => LessonDetail),
+  { account = me.servant, tasks = [] }: Options = {}
+) {
   const current = typeof detail === "function" ? detail : () => detail
   let reads = 0
 
@@ -40,13 +49,17 @@ function open(detail: LessonDetail | (() => LessonDetail)) {
       reads++
 
       return HttpResponse.json(current())
-    })
+    }),
+    http.get(apiUrl(`/stages/${lessonStage.id}/homework`), () =>
+      HttpResponse.json(stageHomework({ items: tasks }))
+    )
   )
 
   renderWithProviders(
     <SidebarProvider>
       <LessonPage />
-    </SidebarProvider>
+    </SidebarProvider>,
+    { me: account }
   )
 
   return { reads: () => reads }
@@ -60,28 +73,51 @@ async function menuItems() {
     .map((item) => item.textContent)
 }
 
-test("a draft that may be deleted offers Archive and Delete draft", async () => {
-  open(lessonDetail({ status: "draft" }, { archive: true, delete: true }))
+test("a draft without published homework offers Archive and Delete draft", async () => {
+  open(lessonDetail({ status: "draft" }), { tasks: [homeworkRow()] })
+  expect(await menuItems()).toEqual(["Archive", "Delete draft"])
+})
+
+test("a draft whose homework was ever published can't be deleted", async () => {
+  const archived = homeworkRow({ status: "archived", publishedAt: "2026-11-01T10:00:00Z" })
+  open(lessonDetail({ status: "draft" }), { tasks: [archived] })
+  expect(await menuItems()).toEqual(["Archive"])
+})
+
+test("homework of another lesson doesn't keep a draft from being deleted", async () => {
+  const other = homeworkRow({
+    publishedAt: "2026-11-01T10:00:00Z",
+    lesson: { id: "l-other", title: "Zacchaeus", teachingDate: "2026-11-01", archived: false },
+  })
+
+  open(lessonDetail({ status: "draft" }), { tasks: [other] })
   expect(await menuItems()).toEqual(["Archive", "Delete draft"])
 })
 
 test("a ready lesson offers Back to draft and Archive", async () => {
-  open(lessonDetail({ status: "ready" }, { archive: true }))
+  open(lessonDetail({ status: "ready" }))
   expect(await menuItems()).toEqual(["Back to draft", "Archive"])
 })
 
 test("an archived lesson shows the badge and only Restore", async () => {
-  open(lessonDetail({ archivedAt: "2026-11-01T10:00:00Z" }, { restore: true, archive: true }))
+  open(lessonDetail({ archivedAt: "2026-11-01T10:00:00Z" }))
   expect(await screen.findByRole("button", { name: "Restore" })).toBeInTheDocument()
   expect(screen.getAllByText("Archived").length).toBeGreaterThan(0)
   expect(screen.queryByRole("link", { name: "Edit" })).not.toBeInTheDocument()
   expect(screen.queryByRole("button", { name: "More actions" })).not.toBeInTheDocument()
 })
 
-test("false flags hide their items", async () => {
-  open(lessonDetail({ status: "draft" }, { manage: false }))
+test("without lessons: update there are no actions", async () => {
+  open(lessonDetail({ status: "draft" }), { account: me.churchOffice })
   await screen.findByRole("heading", { name: goodSamaritan.title })
   expect(screen.queryByRole("button", { name: "More actions" })).not.toBeInTheDocument()
+  expect(screen.queryByRole("link", { name: "Edit" })).not.toBeInTheDocument()
+})
+
+test("in an archived stage there are no actions, not even Restore", async () => {
+  open(lessonDetail({ archivedAt: "2026-11-01T10:00:00Z" }, { archived: true }))
+  await screen.findByRole("heading", { name: goodSamaritan.title })
+  expect(screen.queryByRole("button", { name: "Restore" })).not.toBeInTheDocument()
   expect(screen.queryByRole("link", { name: "Edit" })).not.toBeInTheDocument()
 })
 
@@ -89,13 +125,11 @@ test("archiving lists the homework consequences, posts once and shows Archived",
   let archived = false
   const posts: unknown[] = []
 
-  const base = () => ({
-    ...lessonDetail(
+  const base = () =>
+    lessonDetail(
       { status: "ready", archivedAt: archived ? "2026-11-08T12:00:00Z" : null },
-      { archive: !archived, restore: archived }
-    ),
-    homework: { total: 3, published: 2, drafts: 1 },
-  })
+      { homework: { total: 3, published: 2, drafts: 1 } }
+    )
 
   open(base)
 
@@ -104,7 +138,12 @@ test("archiving lists the homework consequences, posts once and shows Archived",
       posts.push(await request.json())
       archived = true
 
-      return HttpResponse.json({ id: ID, archivedAt: "2026-11-08T12:00:00Z", homeworkArchived: 2 })
+      return HttpResponse.json({
+        id: ID,
+        archivedAt: "2026-11-08T12:00:00Z",
+        homeworkArchived: 2,
+        version: 2,
+      })
     })
   )
 
@@ -125,7 +164,7 @@ test("archiving lists the homework consequences, posts once and shows Archived",
 })
 
 test("archiving without published homework lists no consequences", async () => {
-  open(lessonDetail({ status: "ready" }, { archive: true }))
+  open(lessonDetail({ status: "ready" }))
   await menuItems()
   await userEvent.click(screen.getByRole("menuitem", { name: "Archive" }))
   const dialog = await screen.findByRole("alertdialog")
@@ -134,7 +173,7 @@ test("archiving without published homework lists no consequences", async () => {
 })
 
 test("a refused restore toasts the meeting's lesson", async () => {
-  open(lessonDetail({ archivedAt: "2026-11-01T10:00:00Z" }, { restore: true }))
+  open(lessonDetail({ archivedAt: "2026-11-01T10:00:00Z" }))
 
   server.use(
     http.post(apiUrl(`${path}/restore`), () =>
@@ -153,7 +192,7 @@ test("a refused restore toasts the meeting's lesson", async () => {
 
 test("deleting a draft toasts and opens the stage's lessons", async () => {
   let deletes = 0
-  open(lessonDetail({ status: "draft" }, { archive: true, delete: true }))
+  open(lessonDetail({ status: "draft" }))
 
   server.use(
     http.delete(apiUrl(path), () => {
@@ -177,7 +216,7 @@ test("deleting a draft toasts and opens the stage's lessons", async () => {
 })
 
 test("a refused delete toasts and keeps the dialog open", async () => {
-  const page = open(lessonDetail({ status: "draft" }, { delete: true }))
+  const page = open(lessonDetail({ status: "draft" }))
   server.use(http.delete(apiUrl(path), () => problem(409, "lessons.homeworkPublished")))
   await menuItems()
   await userEvent.click(screen.getByRole("menuitem", { name: "Delete draft" }))

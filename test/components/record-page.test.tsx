@@ -7,6 +7,7 @@ import { RecordPage } from "@/components/record-page"
 
 const search = vi.hoisted(() => ({ value: "" }))
 vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
+vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
 
 const ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f10"
 

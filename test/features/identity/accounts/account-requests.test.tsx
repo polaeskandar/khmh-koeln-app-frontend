@@ -7,6 +7,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
+import type { Schemas } from "@/lib/api/client"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { services } from "@test/support/fixtures/services"
@@ -68,7 +69,11 @@ function open(account: Me = me.administrator, decline?: () => Response) {
     http.get(apiUrl("/account-requests"), () => {
       calls.list++
 
-      return HttpResponse.json({ items, today: "2026-11-08" })
+      return HttpResponse.json({
+        items,
+        roles: [],
+        today: "2026-11-08",
+      } satisfies Schemas["AccountRequestListResponse"])
     }),
     http.post(apiUrl("/account-requests/:id/decline"), async ({ request: req, params }) => {
       calls.decline.push(await req.json())
@@ -131,9 +136,16 @@ test("a 409 alreadyApproved toasts and refetches", async () => {
 })
 
 test("staff who may only read requests are not offered Decline", async () => {
-  open(me.churchOffice)
+  open({ ...me.churchOffice, permissions: [{ action: "read", resource: "users" }] })
   expect(await screen.findByText(requests[0].account.email)).toBeInTheDocument()
   expect(screen.queryByRole("button", { name: /Decline/ })).toBeNull()
+})
+
+test("users: delete may decline without approving", async () => {
+  open(me.churchOffice)
+  await screen.findByRole("heading", { name: "Account requests (3)" })
+  expect(within(rows()[0]).getByRole("button", { name: "Decline" })).toBeInTheDocument()
+  expect(screen.queryByRole("button", { name: "Approve…" })).toBeNull()
 })
 
 test("an empty list says so", async () => {
