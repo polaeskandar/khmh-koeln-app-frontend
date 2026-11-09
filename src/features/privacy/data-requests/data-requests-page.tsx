@@ -79,10 +79,14 @@ function Table({
               <td className="px-3 py-3">
                 {closed ? (
                   row.closedAt ? (
-                    t("list.closedBy", {
-                      when: f.atLabel(row.closedAt, today),
-                      name: row.closedBy?.name ?? t("list.erasedCrumb"),
-                    })
+                    row.closedBy ? (
+                      t("list.closedBy", {
+                        when: f.atLabel(row.closedAt, today),
+                        name: row.closedBy.name,
+                      })
+                    ) : (
+                      f.atLabel(row.closedAt, today)
+                    )
                   ) : null
                 ) : (
                   <DueLabel dueOn={row.dueOn} today={today} />

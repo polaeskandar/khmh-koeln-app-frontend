@@ -49,6 +49,7 @@ describe("routes", () => {
     [routes.parentAccount(), "/parent/account/"],
     [routes.signIn(), "/sign-in/"],
     [routes.signInPending(), "/sign-in/pending/"],
+    [routes.signInErasureScheduled(), "/sign-in/erasure-scheduled/"],
     [routes.register(), "/register/"],
     [routes.registered(), "/register/done/"],
     [routes.forgotPassword(), "/forgot-password/"],

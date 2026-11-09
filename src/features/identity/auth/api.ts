@@ -43,3 +43,6 @@ export const setPasswordRequest = (body: Schemas["SetPasswordFromLinkRequest"]) 
 
 export const forgotPasswordRequest = (email: string) =>
   dataOf(api.POST("/auth/forgot-password", { body: { email } }))
+
+export const cancelErasureRequest = (credentials: Schemas["CancelErasureRequest"]) =>
+  dataOf(api.POST("/auth/erasure-cancellation", { body: credentials }))

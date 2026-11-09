@@ -13,7 +13,7 @@ import { Link, useRouter } from "@/i18n/navigation"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { routes } from "@/lib/routes"
 
-import { forgetOutcome, rememberOutcome } from "./auth-outcome"
+import { forgetOutcome, rememberErasureScheduled, rememberOutcome } from "./auth-outcome"
 import { signInRequest } from "./api"
 import { PasswordField } from "./password-field"
 import { useSession } from "./session"
@@ -46,6 +46,12 @@ export function SignInForm() {
     } else if (result.problem.code === "auth.pending") {
       rememberOutcome("pending")
       router.push(routes.signInPending())
+    } else if (
+      result.problem.code === "auth.erasureScheduled" &&
+      typeof result.problem.params.erasesOn === "string"
+    ) {
+      rememberErasureScheduled(result.problem.params.erasesOn)
+      router.push(routes.signInErasureScheduled())
     } else {
       setError(
         result.problem.code === "auth.invalidCredentials"

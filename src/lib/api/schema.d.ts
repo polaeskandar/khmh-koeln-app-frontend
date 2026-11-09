@@ -1534,6 +1534,40 @@ export type paths = {
     patch?: never
     trace?: never
   }
+  "/data-copies": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+
+    post: operations["post_api_data_copies"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/data-requests/{id}/copy-link": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+
+    post: operations["post_api_data_requests_copy_link"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/data-requests/{id}/erasure": {
     parameters: {
       query?: never
@@ -1597,6 +1631,23 @@ export type paths = {
     get: operations["get_api_data_requests_show"]
     put?: never
     post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/auth/erasure-cancellation": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+
+    post: operations["post_api_auth_erasure_cancellation"]
     delete?: never
     options?: never
     head?: never
@@ -1998,6 +2049,9 @@ export type components = {
 
       displayName?: string | null
     }
+    DataCopyRequest: {
+      token?: string | null
+    }
     EraseRequestRequest: {
       clearNotes?: boolean | null
     }
@@ -2022,7 +2076,14 @@ export type components = {
 
       note?: string | null
     }
+    CancelErasureRequest: {
+      email?: string | null
+
+      password?: string | null
+    }
     OwnErasureRequestRequest: {
+      password?: string | null
+
       note?: string | null
     }
     StageSummary: {
@@ -3010,85 +3071,6 @@ export type components = {
       displayName: string | null
       status: components["schemas"]["PersonStatus"]
     }
-    Mention: {
-      id: string
-      where: string
-      text: string
-      date: string | null
-      group: string | null
-    }
-    ErasureReviewResponse: {
-      erase: {
-        [key: string]: number
-      }
-      keep: {
-        [key: string]: number
-      }
-      mentions: components["schemas"]["Mention"][]
-    }
-
-    RequestChannel: "app" | "email" | "letter" | "in_person"
-
-    ErasedSubjectKind: "member" | "account"
-    ErasedSubjectView: {
-      kind: components["schemas"]["ErasedSubjectKind"]
-      group: string | null
-    }
-
-    RequestKind: "erasure" | "copy"
-
-    RequestStatus: "open" | "done" | "declined"
-    DataRequestRowResponse: {
-      channel: components["schemas"]["RequestChannel"]
-
-      closedAt: string | null
-      closedBy: components["schemas"]["AccountReference"] | null
-      declineReason: string | null
-      dueOn: string
-      erasedSubject: components["schemas"]["ErasedSubjectView"] | null
-      id: string
-      kind: components["schemas"]["RequestKind"]
-      note: string | null
-      outcome: {
-        [key: string]: number
-      } | null
-
-      receivedAt: string
-      requestedBy: string
-      status: components["schemas"]["RequestStatus"]
-      subjectName: string | null
-    }
-    DataRequestListResponse: {
-      today: string
-      open: components["schemas"]["DataRequestRowResponse"][]
-      closed: components["schemas"]["DataRequestRowResponse"][]
-    }
-    MembershipRow: {
-      service: string | null
-      stage: string | null
-      from: string
-      until: string | null
-    }
-    RequestMemberResponse: {
-      displayName: string | null
-      firstName: string
-      id: string
-      lastName: string
-      memberships: components["schemas"]["MembershipRow"][]
-      status: components["schemas"]["PersonStatus"]
-    }
-    RequestAccount: {
-      id: string
-      name: string
-      email: string
-      roles: string[]
-    }
-    DataRequestDetailResponse: {
-      today: string
-      request: components["schemas"]["DataRequestRowResponse"]
-      member: components["schemas"]["RequestMemberResponse"] | null
-      account: components["schemas"]["RequestAccount"] | null
-    }
     PrivacyAcceptance: {
       at: string | null
       version: string | null
@@ -3126,6 +3108,12 @@ export type components = {
       completedAt: string
 
       undoneAt: string | null
+    }
+    MembershipRow: {
+      service: string | null
+      stage: string | null
+      from: string
+      until: string | null
     }
     MemberDataResponse: {
       attendance: components["schemas"]["AttendanceRow"][]
@@ -3172,12 +3160,103 @@ export type components = {
       kind: "account"
       memberRecord: components["schemas"]["MemberDataResponse"] | null
     }
+    CopyLinkResponse: {
+      url: string
+
+      expiresAt: string
+      emailedTo: string | null
+    }
+    Mention: {
+      id: string
+      where: string
+      text: string
+      date: string | null
+      group: string | null
+    }
+    ErasureReviewResponse: {
+      erase: {
+        [key: string]: number
+      }
+      keep: {
+        [key: string]: number
+      }
+      mentions: components["schemas"]["Mention"][]
+    }
+
+    RequestChannel: "app" | "email" | "letter" | "in_person"
+
+    ErasedSubjectKind: "member" | "account"
+    ErasedSubjectView: {
+      kind: components["schemas"]["ErasedSubjectKind"]
+      group: string | null
+    }
+
+    RequestKind: "erasure" | "copy"
+
+    RequestStatus: "open" | "done" | "declined" | "withdrawn"
+    DataRequestRowResponse: {
+      channel: components["schemas"]["RequestChannel"]
+
+      closedAt: string | null
+      closedBy: components["schemas"]["AccountReference"] | null
+      declineReason: string | null
+      dueOn: string
+      erasedSubject: components["schemas"]["ErasedSubjectView"] | null
+      erasesOn: string | null
+      id: string
+      kind: components["schemas"]["RequestKind"]
+      note: string | null
+      outcome: {
+        [key: string]: number
+      } | null
+
+      receivedAt: string
+      requestedBy: string
+      status: components["schemas"]["RequestStatus"]
+      subjectName: string | null
+    }
+    DataRequestListResponse: {
+      today: string
+      open: components["schemas"]["DataRequestRowResponse"][]
+      closed: components["schemas"]["DataRequestRowResponse"][]
+    }
+    RequestMemberResponse: {
+      displayName: string | null
+      firstName: string
+      id: string
+      lastName: string
+      memberships: components["schemas"]["MembershipRow"][]
+      status: components["schemas"]["PersonStatus"]
+    }
+    RequestAccount: {
+      id: string
+      name: string
+      email: string
+      roles: string[]
+    }
+    CopyLinkStatus: {
+      expiresAt: string
+      emailedTo: string | null
+
+      usedAt: string | null
+    }
+    DataRequestDetailResponse: {
+      today: string
+      request: components["schemas"]["DataRequestRowResponse"]
+      member: components["schemas"]["RequestMemberResponse"] | null
+      account: components["schemas"]["RequestAccount"] | null
+      copyLink: components["schemas"]["CopyLinkStatus"] | null
+    }
     OwnErasureRequest: {
       receivedAt: string
       dueOn: string
     }
     OwnErasureStatus: {
       erasureRequested: components["schemas"]["OwnErasureRequest"] | null
+    }
+    ScheduledErasureResponse: {
+      receivedAt: string
+      erasesOn: string
     }
     LivenessResponse: {
       status: string
@@ -5892,6 +5971,58 @@ export interface operations {
       default: components["responses"]["Problem"]
     }
   }
+  post_api_data_copies: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DataCopyRequest"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json":
+            | components["schemas"]["AccountDataResponse"]
+            | components["schemas"]["MemberDataResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_data_requests_copy_link: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["CopyLinkResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
   get_api_data_requests_erasure_review: {
     parameters: {
       query?: never
@@ -6008,6 +6139,28 @@ export interface operations {
       default: components["responses"]["Problem"]
     }
   }
+  post_api_auth_erasure_cancellation: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CancelErasureRequest"]
+      }
+    }
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
   get_api_me_personal_data: {
     parameters: {
       query?: never
@@ -6066,7 +6219,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["OwnErasureRequest"]
+          "application/json": components["schemas"]["ScheduledErasureResponse"]
         }
       }
       default: components["responses"]["Problem"]

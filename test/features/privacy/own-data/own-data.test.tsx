@@ -1,16 +1,23 @@
-import { screen, within } from "@testing-library/react"
+import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import { type Me, meQuery } from "@/features/identity/auth/api"
+import {
+  forgetOutcome,
+  lastOutcome,
+  scheduledErasureOn,
+} from "@/features/identity/auth/auth-outcome"
 import { SessionProvider } from "@/features/identity/auth/session"
 import { ParentAccount } from "@/features/portals/parent/parent-account"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
+import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import { AccountPage } from "@/features/identity/account/account-page"
@@ -18,7 +25,9 @@ import { OwnData } from "@/features/privacy/own-data/own-data"
 
 vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
 
+const PASSWORD = "correct horse battery"
 const requested = { receivedAt: "2026-11-08T11:08:00Z", dueOn: "2026-12-08" }
+const scheduled = { receivedAt: "2026-11-08T11:08:00Z", erasesOn: "2026-11-22" }
 let clicks: { href: string; download: string }[] = []
 
 beforeEach(() => {
@@ -36,11 +45,16 @@ beforeEach(() => {
   })
 })
 
-afterEach(() => vi.restoreAllMocks())
+afterEach(() => {
+  forgetOutcome()
+  vi.restoreAllMocks()
+  router.replace.mockClear()
+})
 
 function open(
   erasure: () => Record<string, unknown> = () => ({ erasureRequested: null }),
-  locale: Locale = "en"
+  locale: Locale = "en",
+  who: Me = me.servant
 ) {
   let reads = 0
 
@@ -52,9 +66,9 @@ function open(
     })
   )
 
-  renderWithProviders(<OwnData today="2026-11-08" />, { locale })
+  const { client } = renderWithProviders(<OwnData today="2026-11-08" />, { locale, me: who })
 
-  return { reads: () => reads }
+  return { client, reads: () => reads }
 }
 
 test("downloads the data with the session cookie and frees the file", async () => {
@@ -90,45 +104,202 @@ test("a failed download toasts and saves nothing", async () => {
   expect(URL.createObjectURL).not.toHaveBeenCalled()
 })
 
-test.each([
-  [
-    "with a note",
-    "Please delete my children’s data too.",
-    { note: "Please delete my children’s data too." },
-  ],
-  ["without a note", "", {}],
-])("asking to delete %s sends it, then shows the request", async (_, note, body) => {
+async function openDialog() {
+  await userEvent.click(await screen.findByRole("button", { name: "Delete account…" }))
+
+  return within(await screen.findByRole("alertdialog"))
+}
+
+function answerErasure(...answers: (() => Response)[]) {
   const posted: unknown[] = []
 
   server.use(
     http.post(apiUrl("/me/erasure-request"), async ({ request }) => {
       posted.push(await request.json())
 
-      return HttpResponse.json(requested, { status: 201 })
+      return (answers[posted.length - 1] ?? answers.at(-1)!)()
+    })
+  )
+
+  return posted
+}
+
+const scheduledAnswer = () => HttpResponse.json(scheduled, { status: 201 })
+
+test.each([
+  [
+    "with a note",
+    "Please delete my children’s data too.",
+    { password: PASSWORD, note: "Please delete my children’s data too." },
+  ],
+  ["without a note", "", { password: PASSWORD }],
+])(
+  "deleting %s sends the password, ends the session and opens the scheduled page",
+  async (_, note, body) => {
+    const posted = answerErasure(scheduledAnswer)
+    const page = open()
+    const dialog = await openDialog()
+    await userEvent.type(dialog.getByLabelText("Your password"), PASSWORD)
+
+    if (note) {
+      await userEvent.type(
+        dialog.getByRole("textbox", { name: /Anything the office should know/ }),
+        note
+      )
+    }
+
+    await userEvent.click(dialog.getByRole("button", { name: "Delete my account" }))
+
+    await waitFor(() =>
+      expect(router.replace).toHaveBeenCalledExactlyOnceWith("/sign-in/erasure-scheduled/")
+    )
+
+    expect(posted).toEqual([body])
+    expect(lastOutcome()).toBe("erasureScheduled")
+    expect(scheduledErasureOn()).toBe("2026-11-22")
+    expect(page.client.getQueryData(meQuery.queryKey)).toBeUndefined()
+    expect(toast.error).not.toHaveBeenCalled()
+  }
+)
+
+test("the dialog says what goes and that the account locks at once for 14 days", async () => {
+  open()
+  const dialog = await openDialog()
+
+  expect(
+    dialog.getByText(
+      "Your account is locked at once. After 14 days it is deleted for good, unless you cancel the erasure on the sign-in page before then."
+    )
+  ).toBeInTheDocument()
+
+  expect(dialog.getByText("Your account and its sign-in")).toBeInTheDocument()
+  expect(dialog.queryByText(/Your own member record/)).not.toBeInTheDocument()
+  expect(dialog.queryByText(/Your children’s records stay/)).not.toBeInTheDocument()
+
+  expect(
+    dialog.getByText("Attendance totals of past meetings stay, without your name.")
+  ).toBeInTheDocument()
+
+  expect(dialog.getByRole("button", { name: "Cancel" })).toBeInTheDocument()
+})
+
+test("a parent with a member record reads that the record goes and the children stay", async () => {
+  open(undefined, "en", {
+    ...me.parent,
+    member: { personId: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea111", groupCount: 1 },
+  })
+
+  const dialog = await openDialog()
+
+  expect(
+    dialog.getByText("Your own member record, with your attendance marks and homework reports")
+  ).toBeInTheDocument()
+
+  expect(dialog.getByText(/Your children’s records stay\./)).toBeInTheDocument()
+})
+
+test("a wrong password shows under the field and keeps the dialog and the session", async () => {
+  const posted = answerErasure(() =>
+    problem(422, "validation.failed", {
+      fieldErrors: { password: { code: "accounts.currentPasswordWrong", params: {} } },
     })
   )
 
   open()
-  await userEvent.click(await screen.findByRole("button", { name: "Ask to delete…" }))
-  const dialog = within(await screen.findByRole("alertdialog"))
+  const dialog = await openDialog()
+  await userEvent.type(dialog.getByLabelText("Your password"), "wrong horse")
+  await userEvent.click(dialog.getByRole("button", { name: "Delete my account" }))
 
-  if (note) {
-    await userEvent.type(dialog.getByRole("textbox"), note)
-  }
+  expect(await dialog.findByText("This is not your current password.")).toBeInTheDocument()
+  expect(dialog.getByLabelText("Your password")).toHaveAttribute("aria-invalid", "true")
+  await waitFor(() => expect(dialog.getByLabelText("Your password")).toHaveFocus())
+  expect(posted).toHaveLength(1)
+  expect(toast.error).not.toHaveBeenCalled()
+  expect(router.replace).not.toHaveBeenCalled()
+  expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+  expect(lastOutcome()).toBeNull()
+})
 
-  await userEvent.click(dialog.getByRole("button", { name: "Send request" }))
+test.each([
+  [
+    "too many attempts",
+    () => problem(429, "auth.tooManyAttempts", { headers: { "Retry-After": "60" } }),
+    "Too many attempts. Wait a few minutes and try again.",
+  ],
+  [
+    "the last administrator",
+    () => problem(409, "roles.lastAdministrator"),
+    "At least one active account must be able to change roles. Give that permission to someone else first.",
+  ],
+])("%s toasts and keeps the dialog open", async (_, answer, text) => {
+  answerErasure(answer)
+  open()
+  const dialog = await openDialog()
+  await userEvent.type(dialog.getByLabelText("Your password"), PASSWORD)
+  await userEvent.click(dialog.getByRole("button", { name: "Delete my account" }))
+  await waitFor(() => expect(toast.error).toHaveBeenCalledWith(text))
+  expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+  expect(router.replace).not.toHaveBeenCalled()
+})
 
-  expect(await screen.findByRole("status")).toHaveTextContent(
-    "You asked today at 12:08 for your account and data to be deleted. The church office will answer by Tue 8 Dec 2026."
+test("a request made meanwhile toasts its text, closes the dialog and refetches", async () => {
+  let made = false
+
+  answerErasure(() => {
+    made = true
+
+    return problem(409, "privacy.alreadyRequested")
+  })
+
+  const page = open(() => ({ erasureRequested: made ? requested : null }))
+  const dialog = await openDialog()
+  await userEvent.type(dialog.getByLabelText("Your password"), PASSWORD)
+  await userEvent.click(dialog.getByRole("button", { name: "Delete my account" }))
+
+  await waitFor(() =>
+    expect(toast.error).toHaveBeenCalledWith(
+      "You have already asked for your account and data to be deleted. The church office will answer within one month of your request."
+    )
   )
 
-  expect(posted).toEqual([body])
+  expect(await screen.findByRole("status")).toHaveTextContent("You asked today at 12:08")
+  expect(page.reads()).toBe(2)
+  expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument()
+})
 
-  expect(toast.success).toHaveBeenCalledWith(
-    "Your request was sent to the church office. It will answer within one month."
+test("while deleting, a second click sends nothing and Escape doesn't close the dialog", async () => {
+  let answer = () => {}
+  const posted: unknown[] = []
+
+  server.use(
+    http.post(apiUrl("/me/erasure-request"), async ({ request }) => {
+      posted.push(await request.json())
+      await new Promise<void>((resolve) => (answer = resolve))
+
+      return HttpResponse.json(scheduled, { status: 201 })
+    })
   )
 
-  expect(screen.queryByRole("button", { name: "Ask to delete…" })).not.toBeInTheDocument()
+  open()
+  const dialog = await openDialog()
+  await userEvent.type(dialog.getByLabelText("Your password"), PASSWORD)
+  await userEvent.dblClick(dialog.getByRole("button", { name: "Delete my account" }))
+  await waitFor(() => expect(dialog.getByRole("button", { name: "Cancel" })).toBeDisabled())
+  await userEvent.keyboard("{Escape}")
+  expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+  answer()
+  await waitFor(() => expect(router.replace).toHaveBeenCalled())
+  expect(posted).toHaveLength(1)
+})
+
+test("Cancel closes the dialog without sending anything", async () => {
+  const posted = answerErasure(scheduledAnswer)
+  open()
+  const dialog = await openDialog()
+  await userEvent.type(dialog.getByLabelText("Your password"), PASSWORD)
+  await userEvent.click(dialog.getByRole("button", { name: "Cancel" }))
+  await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument())
+  expect(posted).toEqual([])
 })
 
 test("an erasure status that fails to load says so and can be retried", async () => {
@@ -141,33 +312,7 @@ test("an erasure status that fails to load says so and can be retried", async ()
 test("an open request shows on load without the button", async () => {
   open(() => ({ erasureRequested: requested }))
   expect(await screen.findByRole("status")).toHaveTextContent("You asked today at 12:08")
-  expect(screen.queryByRole("button", { name: "Ask to delete…" })).not.toBeInTheDocument()
-})
-
-test("a request made meanwhile toasts its text and refetches", async () => {
-  let made = false
-
-  server.use(
-    http.post(apiUrl("/me/erasure-request"), () => {
-      made = true
-
-      return problem(409, "privacy.alreadyRequested")
-    })
-  )
-
-  const page = open(() => ({ erasureRequested: made ? requested : null }))
-  await userEvent.click(await screen.findByRole("button", { name: "Ask to delete…" }))
-  const dialog = within(await screen.findByRole("alertdialog"))
-  await userEvent.click(dialog.getByRole("button", { name: "Send request" }))
-
-  await vi.waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith(
-      "You have already asked for your account and data to be deleted. The church office will answer within one month of your request."
-    )
-  )
-
-  expect(await screen.findByRole("status")).toHaveTextContent("You asked today at 12:08")
-  expect(page.reads()).toBe(2)
+  expect(screen.queryByRole("button", { name: "Delete account…" })).not.toBeInTheDocument()
 })
 
 test.each([
@@ -189,7 +334,7 @@ test.each([
   )
 
   const groups = await screen.findAllByRole("group")
-  await screen.findByRole("button", { name: "Ask to delete…" })
+  await screen.findByRole("button", { name: "Delete account…" })
   const panels = groups.filter((g) => g.getAttribute("aria-labelledby") && g.querySelector("h2"))
   expect(panels.at(-1)).toHaveTextContent(/^Your data/)
 })

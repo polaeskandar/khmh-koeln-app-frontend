@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { Eraser } from "lucide-react"
+import { CalendarClock, Eraser } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
@@ -189,9 +189,28 @@ function Outcome({ data }: { data: DataRequestDetail }) {
   const eraseLines = useEraseLines()
   const { request } = data
 
+  if (request.status === "withdrawn" && request.closedAt) {
+    return (
+      <Section id="outcome" title={t("detail.outcome")}>
+        <p className="text-sm">
+          {t("detail.withdrawnOn", { when: f.atLabel(request.closedAt, data.today) })}
+        </p>
+      </Section>
+    )
+  }
+
   if (request.status !== "done" || !request.closedAt) {
     return null
   }
+
+  const when = f.atLabel(request.closedAt, data.today)
+
+  const closed =
+    request.kind === "copy"
+      ? t("detail.sentOn", { when })
+      : !request.closedBy && request.erasesOn
+        ? t("detail.erasedAutomatically", { when })
+        : t("detail.erasedOn", { when })
 
   const lines = request.outcome
     ? [
@@ -203,10 +222,7 @@ function Outcome({ data }: { data: DataRequestDetail }) {
   return (
     <Section id="outcome" title={t("detail.outcome")}>
       <p className="text-sm">
-        {request.kind === "erasure"
-          ? t("detail.erasedOn", { when: f.atLabel(request.closedAt, data.today) })
-          : t("detail.sentOn", { when: f.atLabel(request.closedAt, data.today) })}{" "}
-        {request.closedBy ? t("detail.by", { name: request.closedBy.name }) : null}
+        {closed} {request.closedBy ? t("detail.by", { name: request.closedBy.name }) : null}
       </p>
       {lines.length > 0 ? <Lines lines={lines} /> : null}
       {request.kind === "erasure" && !request.subjectName ? (
@@ -288,6 +304,7 @@ function useBlocked(data: DataRequestDetail) {
 
 function RequestView({ data }: { data: DataRequestDetail }) {
   const t = useTranslations()
+  const f = useFormat()
   const subject = useSubjectLabel()
   const { request } = data
   const name = subject(request)
@@ -320,6 +337,12 @@ function RequestView({ data }: { data: DataRequestDetail }) {
             ) : null
           }
         />
+        {erasure && request.erasesOn ? (
+          <p className="flex items-start gap-2 border p-4 text-sm">
+            <CalendarClock className="mt-0.5 size-4 shrink-0 text-info" aria-hidden="true" />
+            {t("privacy.detail.erasesOn", { date: f.longDate(request.erasesOn) })}
+          </p>
+        ) : null}
         {erasure && blocked ? (
           <p className="border border-dashed p-4 text-sm text-muted-foreground">{blocked}</p>
         ) : null}

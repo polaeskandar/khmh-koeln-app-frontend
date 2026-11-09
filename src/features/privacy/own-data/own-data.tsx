@@ -3,15 +3,32 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Download, Hourglass, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useEffect, useRef, useState } from "react"
 
-import { ReasonDialog } from "@/components/confirm-dialog"
+import { focusFirstInvalid } from "@/components/focus-first-invalid"
+import { TextAreaField } from "@/components/form-fields"
 import { FormPanel } from "@/components/form-panel"
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import { FieldGroup } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
+import { rememberErasureScheduled } from "@/features/identity/auth/auth-outcome"
+import { PasswordField } from "@/features/identity/auth/password-field"
+import { useSession } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
-import { api, apiDownload, dataOf } from "@/lib/api/client"
+import { api, apiDownload, dataOf, type Schemas } from "@/lib/api/client"
 import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
+import { routes } from "@/lib/routes"
 
 const erasureRequestQuery = {
   queryKey: ["me", "erasure-request"] as const,
@@ -19,24 +36,153 @@ const erasureRequestQuery = {
     dataOf(api.GET("/me/erasure-request", { signal })),
 }
 
-const requestErasure = (note: string | null) =>
-  dataOf(api.POST("/me/erasure-request", { body: note ? { note } : {} }))
+const requestErasure = (body: Schemas["OwnErasureRequestRequest"]) =>
+  dataOf(api.POST("/me/erasure-request", { body }))
+
+function DeleteAccountForm({
+  onAlreadyRequested,
+  onPendingChange,
+}: {
+  onAlreadyRequested: () => void
+  onPendingChange: (pending: boolean) => void
+}) {
+  const t = useTranslations()
+  const { endSession } = useSession()
+  const formRef = useRef<HTMLFormElement>(null)
+  const busy = useRef(false)
+  const [password, setPassword] = useState("")
+  const [note, setNote] = useState("")
+
+  const erase = useApiMutation(requestErasure, {
+    onSuccess: (scheduled) => {
+      rememberErasureScheduled(scheduled.erasesOn)
+      endSession(routes.signInErasureScheduled())
+    },
+  })
+
+  const errors = erase.fieldErrors
+
+  useEffect(() => {
+    if (erase.problem) {
+      focusFirstInvalid(formRef.current)
+    }
+  }, [erase.problem])
+
+  useEffect(() => onPendingChange(erase.pending), [erase.pending, onPendingChange])
+
+  async function submit() {
+    if (busy.current) {
+      return
+    }
+
+    busy.current = true
+    const trimmed = note.trim()
+
+    try {
+      const result = await erase.execute(
+        trimmed === "" ? { password } : { password, note: trimmed }
+      )
+
+      if (!result.ok && result.problem.code === "privacy.alreadyRequested") {
+        onAlreadyRequested()
+      }
+    } finally {
+      busy.current = false
+    }
+  }
+
+  return (
+    <form
+      ref={formRef}
+      method="post"
+      noValidate
+      className="flex flex-col gap-6"
+      onSubmit={(event) => {
+        event.preventDefault()
+        void submit()
+      }}
+    >
+      <FieldGroup>
+        <PasswordField
+          label={t("privacy.own.password")}
+          description={t("privacy.own.passwordHint")}
+          autoComplete="current-password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          error={errors.password}
+        />
+        <TextAreaField
+          label={t("privacy.own.noteLabel")}
+          description={t("privacy.own.noteHint")}
+          optional
+          maxLength={2000}
+          value={note}
+          onChange={(event) => setNote(event.target.value)}
+          error={errors.note}
+        />
+      </FieldGroup>
+      <AlertDialogFooter>
+        <AlertDialogCancel disabled={erase.pending}>{t("common.cancel")}</AlertDialogCancel>
+        <Button type="submit" variant="destructive" disabled={erase.pending}>
+          {erase.pending ? <Spinner data-icon="inline-start" /> : null}
+          {t("privacy.own.confirm")}
+        </Button>
+      </AlertDialogFooter>
+    </form>
+  )
+}
+
+function DeleteAccountDialog() {
+  const t = useTranslations("privacy.own")
+  const queryClient = useQueryClient()
+  const { session } = useSession()
+  const areas = session.status === "authenticated" ? session.areas : null
+  const [open, setOpen] = useState(false)
+  const [pending, setPending] = useState(false)
+
+  return (
+    <AlertDialog open={open} onOpenChange={(next) => !pending && setOpen(next)}>
+      <AlertDialogTrigger asChild>
+        <Button variant="outline" className="shrink-0">
+          <Trash2 data-icon="inline-start" />
+          {t("delete")}
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{t("confirmTitle")}</AlertDialogTitle>
+          <AlertDialogDescription>{t("confirmText")}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <div className="flex flex-col gap-2 text-sm">
+          <ul className="flex list-disc flex-col gap-1 bg-destructive/10 py-4 ps-8 pe-4 text-destructive marker:text-muted-foreground">
+            <li>{t("goesAccount")}</li>
+            {areas?.member ? <li>{t("goesMember")}</li> : null}
+          </ul>
+          <p className="text-muted-foreground">
+            {areas?.parent ? `${t("staysChildren")} ` : null}
+            {t("staysTotals")}
+          </p>
+        </div>
+        <DeleteAccountForm
+          onPendingChange={setPending}
+          onAlreadyRequested={() => {
+            setOpen(false)
+            void queryClient.invalidateQueries({ queryKey: erasureRequestQuery.queryKey })
+          }}
+        />
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}
 
 export function OwnData({ today }: { today: LocalDate }) {
   const t = useTranslations()
   const f = useFormat()
-  const queryClient = useQueryClient()
   const erasure = useQuery(erasureRequestQuery)
 
   const download = useApiMutation(() =>
     apiDownload(api.GET("/me/personal-data", { parseAs: "blob" }), "khmk-my-data.json")
   )
-
-  const ask = useApiMutation(requestErasure, {
-    successMessage: t("toast.erasureRequested"),
-    onSuccess: (requested) =>
-      queryClient.setQueryData(erasureRequestQuery.queryKey, { erasureRequested: requested }),
-  })
 
   const requested = erasure.data?.erasureRequested ?? null
 
@@ -85,37 +231,7 @@ export function OwnData({ today }: { today: LocalDate }) {
             </Button>
           </span>
         ) : null}
-        {erasure.data && !requested ? (
-          <ReasonDialog
-            trigger={
-              <Button variant="outline" className="shrink-0">
-                <Trash2 data-icon="inline-start" />
-                {t("privacy.own.delete")}
-              </Button>
-            }
-            title={t("privacy.own.confirmTitle")}
-            description={t("privacy.own.confirmText")}
-            reasonLabel={t("privacy.own.noteLabel")}
-            reasonHint={t("privacy.own.noteHint")}
-            confirmLabel={t("privacy.own.confirm")}
-            tone="destructive"
-            onConfirm={async (note) => {
-              const result = await ask.execute(note)
-
-              if (result.ok) {
-                return true
-              }
-
-              if (result.problem.code !== "privacy.alreadyRequested") {
-                return false
-              }
-
-              await queryClient.invalidateQueries({ queryKey: erasureRequestQuery.queryKey })
-
-              return true
-            }}
-          />
-        ) : null}
+        {erasure.data && !requested ? <DeleteAccountDialog /> : null}
       </div>
     </FormPanel>
   )

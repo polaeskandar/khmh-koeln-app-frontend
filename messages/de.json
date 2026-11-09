@@ -327,7 +327,8 @@
       "notCopy": "Dies ist keine Anfrage nach einer Kopie.",
       "subjectGone": "Die Daten, um die es in dieser Anfrage geht, gibt es nicht mehr.",
       "ownAccount": "Sie können Ihr eigenes Konto nicht löschen. Bitten Sie jemand anderen, der Datenschutzanfragen bearbeitet.",
-      "declineReasonRequired": "Geben Sie den Grund an. Die Person muss ihn erfahren und darauf hingewiesen werden, dass sie sich bei der Datenschutzaufsicht beschweren kann."
+      "declineReasonRequired": "Geben Sie den Grund an. Die Person muss ihn erfahren und darauf hingewiesen werden, dass sie sich bei der Datenschutzaufsicht beschweren kann.",
+      "nothingScheduled": "Für dieses Konto ist keine Löschung vorgemerkt."
     },
     "loadFailed": "Das konnte nicht geladen werden.",
     "notSaved": "Nicht gespeichert. Prüfen Sie Ihre Verbindung und versuchen Sie es noch einmal.",
@@ -345,7 +346,8 @@
       "tooManyAttempts": "Zu viele Versuche. Warten Sie ein paar Minuten und versuchen Sie es dann noch einmal.",
       "resetLinkInvalid": "Dieser Link funktioniert nicht mehr. Bitten Sie das Gemeindebüro um einen neuen.",
       "confirmationLinkInvalid": "Dieser Bestätigungslink ist ungültig oder abgelaufen. Registrieren Sie sich erneut, um einen neuen zu erhalten.",
-      "unconfirmed": "Bestätigen Sie zuerst Ihre E-Mail-Adresse: Öffnen Sie den Link, den wir Ihnen bei der Registrierung geschickt haben."
+      "unconfirmed": "Bestätigen Sie zuerst Ihre E-Mail-Adresse: Öffnen Sie den Link, den wir Ihnen bei der Registrierung geschickt haben.",
+      "erasureScheduled": "Dieses Konto wird am {erasesOn} gelöscht. Widerrufen Sie die Löschung, um sich wieder anzumelden."
     }
   },
   "toast": {
@@ -406,7 +408,6 @@
     "dataErased": "Daten gelöscht. Die Anfrage bleibt ohne Namen im Protokoll.",
     "copySent": "Als verschickt markiert.",
     "dataRequestDeclined": "Anfrage abgelehnt. Teilen Sie der Person den Grund mit und dass sie sich bei der Datenschutzaufsicht beschweren kann.",
-    "erasureRequested": "Ihre Anfrage ist beim Gemeindebüro eingegangen. Es antwortet innerhalb eines Monats.",
     "memberUnlinked": "Verknüpfung für {name} entfernt.",
     "roleCreated": "Rolle „{name}“ angelegt.",
     "roleSaved": "Rolle gespeichert.",
@@ -1851,6 +1852,17 @@
       "register": "Erneut registrieren",
       "back": "Zurück zur Anmeldung",
       "linkInvalid": "Dieser Bestätigungslink ist ungültig oder abgelaufen. Registrieren Sie sich erneut, um einen neuen zu erhalten."
+    },
+    "erasureScheduled": {
+      "title": "Ihr Konto wird gelöscht",
+      "text": "Sie haben die Löschung Ihres Kontos und Ihrer Daten beantragt. Das Konto ist gesperrt, und alles wird am {date} gelöscht.",
+      "cancelTitle": "Haben Sie es sich anders überlegt?",
+      "cancelText": "Widerrufen Sie die Löschung bis dahin mit Ihrer E-Mail-Adresse und Ihrem Passwort. Ihr Konto funktioniert dann wie vorher.",
+      "submit": "Löschung widerrufen",
+      "back": "Zurück zur Anmeldung",
+      "canceledTitle": "Ihr Konto ist wieder da",
+      "canceledText": "Die Löschung ist widerrufen, nichts wurde gelöscht. Melden Sie sich wie gewohnt an.",
+      "signIn": "Anmelden"
     }
   },
   "privacyNotice": {
@@ -1955,7 +1967,8 @@
     "status": {
       "open": "Offen",
       "done": "Erledigt",
-      "declined": "Abgelehnt"
+      "declined": "Abgelehnt",
+      "withdrawn": "Zurückgezogen"
     },
     "channel": {
       "app": "In der App",
@@ -2067,7 +2080,10 @@
       "sentOn": "Kopie verschickt {when}",
       "declinedOn": "Abgelehnt {when}",
       "by": "von {name}",
-      "erasedNote": "Der Name wurde auch aus diesem Protokoll entfernt."
+      "erasedNote": "Der Name wurde auch aus diesem Protokoll entfernt.",
+      "erasesOn": "Wird am {date} automatisch gelöscht, außer die Person widerruft vorher. Sie können die Daten auch jetzt schon löschen.",
+      "erasedAutomatically": "Automatisch gelöscht {when}",
+      "withdrawnOn": "Zurückgezogen {when}: Die Person hat die Löschung widerrufen und ihr Konto behalten."
     },
     "erase": {
       "person": "{count, plural, one {Die Mitgliedsdaten} other {# Mitgliedsdatensätze}}",
@@ -2094,14 +2110,20 @@
       "copyText": "Alles, was die App über Sie speichert, als Datei zum Aufbewahren oder Mitnehmen.",
       "download": "Herunterladen (JSON)",
       "deleteTitle": "Konto löschen",
-      "deleteText": "Bitten Sie das Gemeindebüro, Ihr Konto und Ihre gespeicherten Daten zu löschen. Die Anwesenheitszahlen früherer Treffen bleiben, ohne Ihren Namen.",
-      "delete": "Löschung beantragen…",
+      "deleteText": "Ihr Konto wird sofort gesperrt und nach 14 Tagen gelöscht, zusammen mit dem, was die App über Sie speichert. Bis dahin können Sie die Löschung widerrufen.",
+      "delete": "Konto löschen…",
       "requested": "Sie haben {when} die Löschung Ihres Kontos und Ihrer Daten beantragt. Das Gemeindebüro antwortet bis {due}.",
-      "confirmTitle": "Löschung von Konto und Daten beantragen?",
-      "confirmText": "Das Gemeindebüro löscht Ihr Konto und Ihre gespeicherten Daten innerhalb eines Monats und gibt Ihnen Bescheid. Bis dahin können Sie die App weiter nutzen.",
+      "confirmTitle": "Konto und Daten löschen?",
+      "confirmText": "Ihr Konto wird sofort gesperrt. Nach 14 Tagen wird es endgültig gelöscht, außer Sie widerrufen die Löschung vorher auf der Anmeldeseite.",
       "noteLabel": "Möchten Sie dem Büro etwas mitteilen?",
-      "noteHint": "Optional. Zum Beispiel, ob auch die Daten Ihrer Kinder gelöscht werden sollen.",
-      "confirm": "Anfrage senden"
+      "noteHint": "Zum Beispiel, ob auch die Daten Ihrer Kinder gelöscht werden sollen.",
+      "confirm": "Mein Konto löschen",
+      "goesAccount": "Ihr Konto mit seiner Anmeldung",
+      "goesMember": "Ihre eigenen Mitgliedsdaten, mit Ihren Anwesenheitseinträgen und gemeldeten Erledigungen",
+      "staysChildren": "Die Daten Ihrer Kinder bleiben. Fragen Sie das Gemeindebüro, wenn sie auch gelöscht werden sollen.",
+      "staysTotals": "Die Anwesenheitszahlen früherer Treffen bleiben, ohne Ihren Namen.",
+      "password": "Ihr Passwort",
+      "passwordHint": "Zur Bestätigung, dass Sie es sind."
     }
   },
   "member": {

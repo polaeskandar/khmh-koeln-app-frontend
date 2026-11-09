@@ -327,7 +327,8 @@
       "notCopy": "This is not a request for a copy.",
       "subjectGone": "The data this request is about no longer exists.",
       "ownAccount": "You can’t erase your own account. Ask someone else who handles data protection requests.",
-      "declineReasonRequired": "Give the reason. The person must be told why, and that they can complain to the data protection authority."
+      "declineReasonRequired": "Give the reason. The person must be told why, and that they can complain to the data protection authority.",
+      "nothingScheduled": "Nothing is waiting to be deleted for this account."
     },
     "loadFailed": "This couldn’t be loaded.",
     "notSaved": "Not saved. Check your connection and try again.",
@@ -345,7 +346,8 @@
       "tooManyAttempts": "Too many attempts. Wait a few minutes and try again.",
       "resetLinkInvalid": "This link no longer works. Ask the church office for a new one.",
       "confirmationLinkInvalid": "This confirmation link is invalid or has expired. Register again to get a new one.",
-      "unconfirmed": "Confirm your email address first: open the link we sent you when you registered."
+      "unconfirmed": "Confirm your email address first: open the link we sent you when you registered.",
+      "erasureScheduled": "This account will be deleted on {erasesOn}. Cancel the erasure to sign in again."
     }
   },
   "toast": {
@@ -406,7 +408,6 @@
     "dataErased": "Data erased. The request stays in the log, without the name.",
     "copySent": "Marked as sent.",
     "dataRequestDeclined": "Request declined. Tell the person why, and that they can complain to the data protection authority.",
-    "erasureRequested": "Your request was sent to the church office. It will answer within one month.",
     "memberUnlinked": "Link removed for {name}.",
     "roleCreated": "Role “{name}” created.",
     "roleSaved": "Role saved.",
@@ -1851,6 +1852,17 @@
       "register": "Register again",
       "back": "Back to sign-in",
       "linkInvalid": "This confirmation link is invalid or has expired. Register again to get a new one."
+    },
+    "erasureScheduled": {
+      "title": "Your account will be deleted",
+      "text": "You asked for your account and data to be deleted. The account is locked, and everything is deleted on {date}.",
+      "cancelTitle": "Changed your mind?",
+      "cancelText": "Cancel the erasure with your email address and password before then. Your account then works as before.",
+      "submit": "Cancel the erasure",
+      "back": "Back to sign-in",
+      "canceledTitle": "Your account is back",
+      "canceledText": "The erasure is canceled and nothing was deleted. Sign in as usual.",
+      "signIn": "Sign in"
     }
   },
   "privacyNotice": {
@@ -1955,7 +1967,8 @@
     "status": {
       "open": "Open",
       "done": "Done",
-      "declined": "Declined"
+      "declined": "Declined",
+      "withdrawn": "Withdrawn"
     },
     "channel": {
       "app": "In the app",
@@ -2067,7 +2080,10 @@
       "sentOn": "Copy sent {when}",
       "declinedOn": "Declined {when}",
       "by": "by {name}",
-      "erasedNote": "The name was removed from this log as well."
+      "erasedNote": "The name was removed from this log as well.",
+      "erasesOn": "Erased automatically on {date}, unless the person cancels before then. You can also erase the data now.",
+      "erasedAutomatically": "Erased automatically {when}",
+      "withdrawnOn": "Withdrawn {when}: the person canceled the erasure and kept their account."
     },
     "erase": {
       "person": "{count, plural, one {The member record} other {# member records}}",
@@ -2094,14 +2110,20 @@
       "copyText": "Everything the app stores about you, as a file you can keep or take elsewhere.",
       "download": "Download (JSON)",
       "deleteTitle": "Delete your account",
-      "deleteText": "Ask the church office to delete your account and what the app stores about you. Attendance totals of past meetings stay, without your name.",
-      "delete": "Ask to delete…",
+      "deleteText": "Your account is locked at once and deleted after 14 days, together with what the app stores about you. Until then you can cancel.",
+      "delete": "Delete account…",
       "requested": "You asked {when} for your account and data to be deleted. The church office will answer by {due}.",
-      "confirmTitle": "Ask to delete your account and data?",
-      "confirmText": "The church office deletes your account and what the app stores about you within one month, and tells you when it is done. Until then you can keep using the app.",
+      "confirmTitle": "Delete your account and data?",
+      "confirmText": "Your account is locked at once. After 14 days it is deleted for good, unless you cancel the erasure on the sign-in page before then.",
       "noteLabel": "Anything the office should know?",
-      "noteHint": "Optional. For example, whether your children’s data should be deleted too.",
-      "confirm": "Send request"
+      "noteHint": "For example, whether your children’s data should be deleted too.",
+      "confirm": "Delete my account",
+      "goesAccount": "Your account and its sign-in",
+      "goesMember": "Your own member record, with your attendance marks and homework reports",
+      "staysChildren": "Your children’s records stay. Ask the church office if they should be deleted too.",
+      "staysTotals": "Attendance totals of past meetings stay, without your name.",
+      "password": "Your password",
+      "passwordHint": "To confirm that it’s you."
     }
   },
   "member": {

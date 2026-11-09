@@ -44,6 +44,7 @@ const review = (extra: Partial<DataRequestDetail> = {}): DataRequestDetail => ({
     declineReason: null,
     subjectName: "Kirollos Iskander",
     erasedSubject: null,
+    erasesOn: null,
     note: null,
     outcome: null,
   },
@@ -58,6 +59,7 @@ const review = (extra: Partial<DataRequestDetail> = {}): DataRequestDetail => ({
     ],
   },
   account: null,
+  copyLink: null,
   ...extra,
 })
 
@@ -300,4 +302,52 @@ test.each([
   const page = open(review(), { who })
   expect(await screen.findByText("You can’t handle data protection requests")).toBeInTheDocument()
   expect(page.reads()).toBe(0)
+})
+
+test("a self-service erasure says when it is erased automatically, and Erase stays", async () => {
+  open(review({ request: { ...review().request, channel: "app", erasesOn: "2026-11-22" } }))
+
+  expect(
+    await screen.findByText(
+      "Erased automatically on Sunday 22 November 2026, unless the person cancels before then. You can also erase the data now."
+    )
+  ).toBeInTheDocument()
+
+  await waitFor(() => expect(screen.getByRole("button", { name: "Erase data…" })).toBeEnabled())
+})
+
+test("an erasure done on its date reads as erased automatically, by nobody", async () => {
+  open({
+    ...erased,
+    request: { ...erased.request, erasesOn: "2026-11-08", closedBy: null },
+  })
+
+  const outcome = await section("Outcome")
+  expect(outcome.getByText(/^Erased automatically today at 12:00/)).toBeInTheDocument()
+  expect(outcome.queryByText(/ by /)).not.toBeInTheDocument()
+})
+
+test("a withdrawn erasure reads Withdrawn and says the person kept the account", async () => {
+  open(
+    review({
+      request: {
+        ...review().request,
+        status: "withdrawn",
+        channel: "app",
+        erasesOn: "2026-11-21",
+        closedAt: "2026-11-07T10:00:00Z",
+      },
+    })
+  )
+
+  expect(await screen.findByText("Withdrawn")).toBeInTheDocument()
+
+  expect(
+    (await section("Outcome")).getByText(
+      "Withdrawn yesterday at 11:00: the person canceled the erasure and kept their account."
+    )
+  ).toBeInTheDocument()
+
+  expect(screen.queryByRole("button", { name: "Erase data…" })).not.toBeInTheDocument()
+  expect(screen.queryByText(/Erased automatically/)).not.toBeInTheDocument()
 })
