@@ -82,6 +82,7 @@ account menu while `me.member.groupCount > 0`.
 | Forgot password      | `/forgot-password` | `/forgot-password/`           | `forgotPassword()`         |
 | Set a password       | –                  | `/set-password/#token=`       | `setPassword(token)`       |
 | Confirm email        | –                  | `/confirm-email/#token=`      | –                          |
+| Download your data   | –                  | `/data-copy/#token=`          | –                          |
 | Privacy notice       | `/privacy`         | `/privacy/`                   | `privacy()`                |
 
 The prototype's demo sign-in (`/sign-in/demo`) has no product route.
@@ -97,6 +98,9 @@ The prototype's demo sign-in (`/sign-in/demo`) has no product route.
   session) or when signing in answers 403 `auth.erasureScheduled` (backend #315). It shows the date the account
   is erased and cancels the erasure with the email address and password. Like the waiting and confirm-first
   pages, it is the 404 page unless one of those outcomes just led there.
+- `/data-copy/#token=…` is the one-time link to a copy of someone's data, which the office creates on the data
+  protection request (backend #315). The page removes the token from the address at once and downloads the
+  file only when the person presses the button, so a link preview can't spend the link.
 
 ## Entry points
 

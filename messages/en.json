@@ -328,7 +328,8 @@
       "subjectGone": "The data this request is about no longer exists.",
       "ownAccount": "You can’t erase your own account. Ask someone else who handles data protection requests.",
       "declineReasonRequired": "Give the reason. The person must be told why, and that they can complain to the data protection authority.",
-      "nothingScheduled": "Nothing is waiting to be deleted for this account."
+      "nothingScheduled": "Nothing is waiting to be deleted for this account.",
+      "copyLinkInvalid": "This download link is invalid, was already used or has expired. Ask the church office for a new one."
     },
     "loadFailed": "This couldn’t be loaded.",
     "notSaved": "Not saved. Check your connection and try again.",
@@ -2083,6 +2084,7 @@
       "erasedNote": "The name was removed from this log as well.",
       "erasesOn": "Erased automatically on {date}, unless the person cancels before then. You can also erase the data now.",
       "erasedAutomatically": "Erased automatically {when}",
+      "downloadedOn": "Copy downloaded by the person {when}",
       "withdrawnOn": "Withdrawn {when}: the person canceled the erasure and kept their account."
     },
     "erase": {
@@ -2124,6 +2126,34 @@
       "staysTotals": "Attendance totals of past meetings stay, without your name.",
       "password": "Your password",
       "passwordHint": "To confirm that it’s you."
+    },
+    "copyLink": {
+      "title": "Download link",
+      "description": "A one-time link for the person to download their data themselves. It works once, for 7 days, and the request closes when it is used.",
+      "create": "Create download link",
+      "createNew": "Create a new link",
+      "newTitle": "Create a new link?",
+      "newText": "The current link stops working at once.",
+      "newConfirm": "Create new link",
+      "link": "Link",
+      "copy": "Copy",
+      "copied": "Link copied.",
+      "copyFailed": "Couldn’t copy. Select the link and copy it yourself.",
+      "shownOnce": "Copy it now: the link is shown only this once.",
+      "emailedTo": "Emailed to <email></email>.",
+      "handOver": "Not emailed, because there is no account to send it to. Hand it over yourself in a safe way, for example in person.",
+      "expires": "Works until {date}, {time}.",
+      "expired": "Expired {when}.",
+      "used": "Used {when}.",
+      "hidden": "The link itself was shown only once, when it was created."
+    },
+    "copy": {
+      "title": "Download your data",
+      "intro": "A copy of everything the app stores about you, as a JSON file. The link works only once, so keep the file somewhere safe.",
+      "download": "Download your data",
+      "savedTitle": "Your data is downloaded",
+      "savedText": "The file is in your downloads. This link no longer works; for another copy, ask the church office.",
+      "linkInvalid": "This link is invalid, was already used or has expired. Ask the church office for a new one."
     }
   },
   "member": {
