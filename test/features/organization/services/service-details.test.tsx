@@ -111,13 +111,24 @@ test("Family Meeting meets as one group and has no schedules", async () => {
 
   expect(
     await screen.findByText(
-      /Family Meeting meets as one group\. Its 0 members belong to the service itself/
+      "Family Meeting meets as one group. It has no members yet. Add stages if it splits into classes or levels."
     )
   ).toBeInTheDocument()
 
+  expect(screen.queryByText(/0 members/)).toBeNull()
   expect(await screen.findByText("No schedules yet.")).toBeInTheDocument()
   expect(stat("Stages")).toHaveTextContent("0")
   expect(stat("Members")).toHaveTextContent("0")
+})
+
+test("a service without stages counts the members that belong to it", async () => {
+  open({ ...familyMeeting, memberCount: 1, serviceLevelMemberCount: 1 }, [], 0)
+
+  expect(
+    await screen.findByText(
+      /Family Meeting meets as one group\. Its 1 member belongs to the service itself\./
+    )
+  ).toBeInTheDocument()
 })
 
 test("Edit opens the pre-filled dialog when allowed, and is absent otherwise", async () => {
