@@ -72,11 +72,14 @@ test("an invalid or expired link says so and offers to register again", async ()
   expect(screen.getByRole("link", { name: "Register again" })).toHaveAttribute("href", "/register/")
 })
 
-test("without a token nothing is sent and the link counts as invalid", async () => {
+test("without a token the page is a 404 and nothing is sent", async () => {
   const sent = backend(confirmed)
   open("/en/confirm-email/")
 
-  expect(await screen.findByRole("link", { name: "Register again" })).toBeInTheDocument()
+  expect(
+    await screen.findByRole("heading", { name: "This page doesn’t exist" })
+  ).toBeInTheDocument()
+
   expect(sent).toEqual([])
 })
 

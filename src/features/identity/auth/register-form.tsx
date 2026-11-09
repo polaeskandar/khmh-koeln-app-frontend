@@ -37,6 +37,7 @@ import {
   registerRequest,
   registrationServicesQuery,
 } from "./api"
+import { rememberOutcome } from "./auth-outcome"
 import { PasswordField } from "./password-field"
 
 const SHOWN_FIELDS = [
@@ -168,6 +169,7 @@ export function RegisterForm() {
     submitting.current = false
 
     if (result.ok) {
+      rememberOutcome("registered")
       router.push(routes.registered())
     } else if (!SHOWN_FIELDS.some((field) => result.problem.fieldErrors[field])) {
       setAlert(result.problem.message)

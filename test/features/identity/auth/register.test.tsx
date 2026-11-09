@@ -9,6 +9,7 @@ import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { Registration } from "@/features/identity/auth/api"
+import { forgetOutcome, rememberOutcome } from "@/features/identity/auth/auth-outcome"
 import { RegisteredPage, RegisterPage } from "@/features/identity/auth/register-pages"
 
 vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
@@ -25,6 +26,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  forgetOutcome()
   vi.restoreAllMocks()
   router.push.mockReset()
 })
@@ -226,6 +228,7 @@ test("in Arabic the email and password are typed left to right", () => {
 })
 
 test("the thank-you page promises no email and links back to sign-in", () => {
+  rememberOutcome("registered")
   renderWithProviders(<RegisteredPage />)
   expect(screen.getByRole("heading", { name: "Thank you for registering" })).toBeInTheDocument()
 
@@ -289,4 +292,10 @@ describe("members", () => {
     await waitFor(() => expect(groups).toHaveFocus())
     expect(groups).toHaveAccessibleDescription(/Write which groups you take part in/)
   })
+})
+
+test("the thank-you page is a 404 unless a registration just led there", () => {
+  renderWithProviders(<RegisteredPage />)
+
+  expect(screen.getByRole("heading", { name: "This page doesn’t exist" })).toBeInTheDocument()
 })

@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 
 import { TextField } from "@/components/form-fields"
+import { NotFoundPage } from "@/components/not-found-page"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
@@ -85,6 +86,10 @@ function SetPasswordFlow() {
     }
   }
 
+  if (token === null) {
+    return <NotFoundPage />
+  }
+
   if (outcome === "saved") {
     return (
       <AuthFrame>
@@ -97,7 +102,7 @@ function SetPasswordFlow() {
     )
   }
 
-  if (token === null || outcome === "invalid") {
+  if (outcome === "invalid") {
     return (
       <AuthFrame>
         <StateIcon icon={Link2Off} tone="bg-warning-soft text-warning" />

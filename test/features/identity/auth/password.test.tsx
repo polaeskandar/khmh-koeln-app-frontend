@@ -90,12 +90,12 @@ test("choosing another language keeps the link usable", async () => {
   navigation.pathname = "/"
 })
 
-test("without a token the link is invalid and nothing is sent", async () => {
+test("without a token the page is a 404 and nothing is sent", async () => {
   const sent = backend(saved)
   open("/en/set-password/")
 
   expect(
-    await screen.findByText("This link no longer works; ask the church office for a new one.")
+    await screen.findByRole("heading", { name: "This page doesn’t exist" })
   ).toBeInTheDocument()
 
   expect(screen.queryByLabelText("New password")).not.toBeInTheDocument()

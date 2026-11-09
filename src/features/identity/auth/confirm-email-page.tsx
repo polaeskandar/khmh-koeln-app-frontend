@@ -4,6 +4,7 @@ import { CircleAlert, CircleCheck, Link2Off, MailCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 
+import { NotFoundPage } from "@/components/not-found-page"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { Link } from "@/i18n/navigation"
@@ -79,6 +80,10 @@ function ConfirmEmailFlow() {
     started.current = true
     void send(token)
   })
+
+  if (token === null) {
+    return <NotFoundPage />
+  }
 
   if (outcome.kind === "confirmed") {
     return (
