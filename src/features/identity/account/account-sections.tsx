@@ -101,8 +101,15 @@ export function PreferencesFields() {
   )
 }
 
-function PasswordForm({ onDone }: { onDone: () => void }) {
+function PasswordForm({
+  onDone,
+  onPendingChange,
+}: {
+  onDone: () => void
+  onPendingChange: (pending: boolean) => void
+}) {
   const t = useTranslations("account.password")
+  const tCommon = useTranslations("common")
   const formRef = useRef<HTMLFormElement>(null)
   const busy = useRef(false)
   const [currentPassword, setCurrent] = useState("")
@@ -124,6 +131,8 @@ function PasswordForm({ onDone }: { onDone: () => void }) {
       focusFirstInvalid(formRef.current)
     }
   }, [mutation.problem])
+
+  useEffect(() => onPendingChange(mutation.pending), [mutation.pending, onPendingChange])
 
   async function submit() {
     if (busy.current) {
@@ -172,6 +181,9 @@ function PasswordForm({ onDone }: { onDone: () => void }) {
         />
       </FieldGroup>
       <DialogFooter>
+        <Button type="button" variant="outline" disabled={mutation.pending} onClick={onDone}>
+          {tCommon("cancel")}
+        </Button>
         <Button type="submit" disabled={mutation.pending}>
           {mutation.pending ? <Spinner data-icon="inline-start" /> : null}
           {t("submit")}
@@ -184,11 +196,12 @@ function PasswordForm({ onDone }: { onDone: () => void }) {
 export function PasswordSection() {
   const t = useTranslations("account.password")
   const [open, setOpen] = useState(false)
+  const [pending, setPending] = useState(false)
 
   return (
     <FormPanel title={t("title")}>
       <p className="text-sm text-muted-foreground">{t("intro")}</p>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(next) => (next || !pending) && setOpen(next)}>
         <DialogTrigger asChild>
           <Button variant="outline" className="self-start">
             <KeyRound data-icon="inline-start" />
@@ -200,7 +213,7 @@ export function PasswordSection() {
             <DialogTitle>{t("submit")}</DialogTitle>
             <DialogDescription>{t("intro")}</DialogDescription>
           </DialogHeader>
-          <PasswordForm onDone={() => setOpen(false)} />
+          <PasswordForm onDone={() => setOpen(false)} onPendingChange={setPending} />
         </DialogContent>
       </Dialog>
     </FormPanel>

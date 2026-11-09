@@ -72,7 +72,7 @@ function GiveRoleDialog({
   }
 
   return (
-    <Dialog open onOpenChange={onOpenChange}>
+    <Dialog open onOpenChange={(next) => (next || !give.pending) && onOpenChange(next)}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
@@ -126,6 +126,14 @@ function GiveRoleDialog({
             )}
           </Field>
           <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={give.pending}
+              onClick={() => onOpenChange(false)}
+            >
+              {t("common.cancel")}
+            </Button>
             <Button type="submit" disabled={!roleId || give.pending}>
               {give.pending ? <Spinner data-icon="inline-start" /> : null}
               {t("settings.users.assign.submit")}

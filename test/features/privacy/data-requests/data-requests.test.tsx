@@ -215,4 +215,22 @@ describe("the record dialog", () => {
       },
     })
   })
+
+  test("Cancel closes it without recording", async () => {
+    const calls = open()
+
+    server.use(
+      http.post(apiUrl("/data-requests"), async ({ request }) => {
+        calls.posts.push(await request.json())
+
+        return HttpResponse.json({ id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea999" }, { status: 201 })
+      })
+    )
+
+    const dialog = await openDialog()
+    await userEvent.type(dialog.getByRole("textbox", { name: "Asked by" }), "The mother")
+    await userEvent.click(dialog.getByRole("button", { name: "Cancel" }))
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
+    expect(calls.posts).toEqual([])
+  })
 })

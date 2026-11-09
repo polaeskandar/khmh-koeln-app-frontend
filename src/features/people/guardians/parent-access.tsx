@@ -52,6 +52,7 @@ function GiveAccessDialog({
   const [userId, setUserId] = useState("")
   const [child, setChild] = useState<DirectoryPerson | null>(null)
   const toastText = useTranslations("toast")
+  const tCommon = useTranslations("common")
 
   const give = useApiMutation(giveAccessRequest, {
     successMessage: toastText("accessGiven"),
@@ -116,6 +117,14 @@ function GiveAccessDialog({
             </Field>
           </FieldGroup>
           <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={give.pending}
+              onClick={() => onOpenChange(false)}
+            >
+              {tCommon("cancel")}
+            </Button>
             <Button type="submit" disabled={!userId || !child || give.pending}>
               {give.pending ? <Spinner data-icon="inline-start" /> : null}
               {t("giveAccess")}

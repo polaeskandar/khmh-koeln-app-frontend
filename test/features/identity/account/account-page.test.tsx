@@ -166,6 +166,37 @@ test("a 429 shows an alert in the open dialog", async () => {
   expect(screen.getByRole("dialog")).toBeInTheDocument()
 })
 
+test("Cancel closes the password dialog without a request", async () => {
+  let posts = 0
+
+  server.use(
+    http.post(apiUrl("/me/password"), () => {
+      posts++
+
+      return new HttpResponse(null, { status: 204 })
+    })
+  )
+
+  open()
+  const dialog = await openDialog()
+  await userEvent.type(dialog.getByLabelText("Current password"), "old-password-1")
+  await userEvent.click(dialog.getByRole("button", { name: "Cancel" }))
+  await vi.waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
+  expect(posts).toBe(0)
+})
+
+test("Escape doesn't close the password dialog while it saves", async () => {
+  server.use(http.post(apiUrl("/me/password"), () => new Promise<Response>(() => {})))
+  open()
+  const dialog = await openDialog()
+  await userEvent.type(dialog.getByLabelText("Current password"), "old-password-1")
+  await userEvent.type(dialog.getByLabelText("New password"), "new-password-12")
+  await userEvent.click(dialog.getByRole("button", { name: "Change password" }))
+  await vi.waitFor(() => expect(dialog.getByRole("button", { name: "Cancel" })).toBeDisabled())
+  await userEvent.keyboard("{Escape}")
+  expect(screen.getByRole("dialog")).toBeInTheDocument()
+})
+
 test("in Arabic the email and password inputs stay left to right", async () => {
   open("ar")
   expect(await screen.findByText("daniel@example.org")).toHaveAttribute("dir", "ltr")
