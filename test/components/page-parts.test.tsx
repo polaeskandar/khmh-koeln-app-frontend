@@ -36,3 +36,18 @@ test("LinkTabs marks the current tab as the current page", () => {
   expect(screen.getByRole("link", { name: "Overview" })).not.toHaveAttribute("aria-current")
   expect(screen.getByRole("navigation", { name: "Tabs" })).toBeInTheDocument()
 })
+
+test("LinkTabs scroll sideways but never vertically", () => {
+  renderWithProviders(
+    <LinkTabs
+      label="Tabs"
+      active="overview"
+      items={[{ key: "overview", label: "Overview", href: "/stages/view/?id=1" }]}
+    />
+  )
+
+  expect(screen.getByRole("navigation", { name: "Tabs" })).toHaveClass(
+    "overflow-x-auto",
+    "overflow-y-hidden"
+  )
+})
