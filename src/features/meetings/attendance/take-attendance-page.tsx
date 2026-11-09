@@ -134,16 +134,15 @@ function NotOpen({ board }: { board: Board }) {
   const records = can("create", "attendance")
   const { session, today } = board
   const due = session.date <= today
+  const past = session.date < today
+  const onTheDay = records ? t("openWhenStarts") : t("servantsOpen")
+  const afterTheDay = records ? t("openNow") : t("servantsCanStillOpen")
 
   return (
     <div className="flex flex-col items-start gap-3 border border-dashed p-6">
-      <h2 className="font-heading text-lg font-semibold">{t("notOpen")}</h2>
+      <h2 className="font-heading text-lg font-semibold">{past ? t("notTaken") : t("notOpen")}</h2>
       <p className="max-w-prose text-sm text-muted-foreground">
-        {!due
-          ? t("opensOn", { date: f.longDate(session.date) })
-          : records
-            ? t("openWhenStarts")
-            : t("servantsOpen")}
+        {!due ? t("opensOn", { date: f.longDate(session.date) }) : past ? afterTheDay : onTheDay}
       </p>
       {due && records ? <OpenAttendanceButton session={session.id} /> : null}
     </div>
