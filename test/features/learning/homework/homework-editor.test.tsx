@@ -227,6 +227,24 @@ test("takes the lesson from the address and offers a week after it", async () =>
   expect(dueInput()).toHaveAttribute("min", "2026-11-29")
 })
 
+test.each([
+  ["en", /^One week after the lesson/, "No due date"],
+  ["de", /^Eine Woche nach der Lektion/, "Ohne Fälligkeitsdatum"],
+  ["ar", /^بعد الدرس بأسبوع/, "بلا موعد تسليم"],
+] as const)(
+  "in %s the due-date quick picks wrap inside their column",
+  async (locale, week, none) => {
+    openNew(list(), "", locale)
+    await screen.findAllByRole("combobox")
+
+    for (const name of [week, none]) {
+      const pick = screen.getByRole("button", { name })
+      expect(pick).toHaveClass("h-auto", "shrink", "text-start", "whitespace-normal")
+      expect(pick).not.toHaveClass("h-9", "shrink-0", "whitespace-nowrap")
+    }
+  }
+)
+
 test("choosing another lesson moves the default due date with it", async () => {
   openNew(list())
   await userEvent.selectOptions(await lessonSelect(), sheep.id)

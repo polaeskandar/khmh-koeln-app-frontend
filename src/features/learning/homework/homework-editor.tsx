@@ -53,6 +53,7 @@ import { usePublishHomework } from "./use-publish-homework"
 
 const MAX_RESOURCES = 10
 const EMPTY_RESOURCE: Resource = { label: "", url: null }
+const QUICK_PICK = "h-auto min-h-9 shrink py-2 text-start whitespace-normal"
 
 const weekAfter = (date: LocalDate) => addDays(date, 7)
 const isBlank = (resource: Resource) => !resource.label.trim() && !(resource.url ?? "").trim()
@@ -356,13 +357,20 @@ function HomeworkForm(props: FormProps) {
                 type="button"
                 variant="outline"
                 size="sm"
+                className={QUICK_PICK}
                 onClick={() => setDueDate(weekAfter(lesson.teachingDate))}
               >
                 {t("homework.editor.weekAfter", {
                   date: f.dayMonth(weekAfter(lesson.teachingDate)),
                 })}
               </Button>
-              <Button type="button" variant="ghost" size="sm" onClick={() => setDueDate("")}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className={QUICK_PICK}
+                onClick={() => setDueDate("")}
+              >
                 {t("homework.editor.clearDue")}
               </Button>
             </div>
