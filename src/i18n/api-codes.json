@@ -112,7 +112,7 @@
   "roles.lastAdministrator": [],
   "roles.nameRequired": [],
   "roles.unknown": [],
-  "roles.lastRoleManager": [],
+  "roles.nameTaken": ["name"],
   "materials.labelTooLong": [],
   "materials.url": [],
   "materials.tooMany": [],

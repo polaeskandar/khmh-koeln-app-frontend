@@ -1,7 +1,7 @@
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { Uuid } from "@/lib/api/types/common"
 
-export type Role = Schemas["RoleRow"]
+export type Role = Schemas["RoleRowResponse"]
 
 export type RoleRow = Role
 
@@ -18,7 +18,7 @@ export const parentPortalOnly = (role: Role) =>
 export const deleteRoleRequest = (role: Uuid) =>
   dataOf(api.DELETE("/roles/{id}", { params: { path: { id: role } }, body: {} }))
 
-export type RoleDetail = Schemas["RoleDetail"]
+export type RoleDetail = Schemas["RoleDetailsResponse"]
 
 export const roleQuery = (id: Uuid) => ({
   queryKey: ["roles", "detail", id] as const,
@@ -26,7 +26,7 @@ export const roleQuery = (id: Uuid) => ({
     dataOf(api.GET("/roles/{id}", { params: { path: { id } }, signal })),
 })
 
-export type RoleInput = Schemas["RoleInput"]
+export type RoleInput = Schemas["RoleRequest"]
 
 export const createRoleRequest = (input: RoleInput) => dataOf(api.POST("/roles", { body: input }))
 

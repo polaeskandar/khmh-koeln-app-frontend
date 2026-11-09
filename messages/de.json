@@ -212,7 +212,6 @@
       "chooseRole": "Wählen Sie mindestens eine Rolle.",
       "nameRequired": "Geben Sie einen Namen für die Rolle ein.",
       "nameTaken": "Eine Rolle namens „{name}“ gibt es bereits.",
-      "lastRoleManager": "Mindestens ein aktives Konto muss Rollen ändern können. Geben Sie diese Berechtigung zuerst jemand anderem.",
       "unknownPermission": "Einige dieser Berechtigungen gibt es nicht.",
       "createNotAllowed": "Sie können keine Rollen anlegen.",
       "updateNotAllowed": "Sie können keine Rollen ändern.",
@@ -221,7 +220,7 @@
       "chooseService": "Wählen Sie den Dienst, für den diese Rolle gilt.",
       "ownAdminRole": "Sie können Ihre eigene Administratorrolle nicht entfernen. Bitten Sie einen anderen Administrator darum.",
       "stageOnlyForServants": "Nur Diener-Rollen können auf eine Stufe beschränkt werden.",
-      "lastAdministrator": "Der letzte aktive Administrator behält diese Rolle. Machen Sie zuerst jemand anderen zum Administrator.",
+      "lastAdministrator": "Mindestens ein aktives Konto muss Rollen ändern können. Geben Sie diese Berechtigung zuerst jemand anderem.",
       "accountPending": "Dieses Konto wartet auf Bestätigung. Es erhält seine Rollen bei der Bestätigung.",
       "notHeld": "{name} hat diese Rolle nicht."
     },

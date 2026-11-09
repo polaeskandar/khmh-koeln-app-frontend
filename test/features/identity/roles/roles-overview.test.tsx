@@ -182,7 +182,7 @@ test("deleting a role says who loses it and refetches", async () => {
 })
 
 test("the last role manager's role stays", async () => {
-  open(withRoles(all), () => problem(409, "roles.lastRoleManager"))
+  open(withRoles(all), () => problem(409, "roles.lastAdministrator"))
   const admin = await rowOf("Administrator")
   await userEvent.click(within(admin).getByRole("button", { name: "Actions for Administrator" }))
   await userEvent.click(await screen.findByRole("menuitem", { name: "Delete" }))
