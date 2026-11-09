@@ -946,7 +946,7 @@
       "extraTitle": "Anwesend, nicht auf der Liste ({count, number})",
       "extraDescription": "Gäste oder Mitglieder anderer Gruppen.",
       "notMarkedTitle": "Nicht als anwesend markiert ({count, number})",
-      "notMarkedNote": "„Nicht als anwesend markiert“ heißt nicht abwesend: Jemand kann da gewesen sein, ohne abgehakt worden zu sein. Diese erste Version erfasst weder Abwesenheiten noch Entschuldigungen.",
+      "notMarkedNote": "„Nicht als anwesend markiert“ heißt nicht abwesend: Jemand kann da gewesen sein, ohne abgehakt worden zu sein. Die App erfasst weder Abwesenheiten noch Entschuldigungen.",
       "everyoneMarked": "Alle auf der Liste wurden als anwesend markiert.",
       "corrections": "Korrekturen",
       "correction": "<person>{name}</person> wurde um {time} markiert und {when} entfernt.",

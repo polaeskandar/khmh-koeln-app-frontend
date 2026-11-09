@@ -68,6 +68,19 @@ describe("the 1 Nov summary", () => {
     )
   })
 
+  test("says the app does not record absences, without internal words", async () => {
+    open(closedFirstNovember())
+    const notMarked = await section("Not marked present (3)")
+
+    expect(
+      notMarked.getByText(
+        "Not marked present is not the same as absent: someone may have been there without being ticked. The app does not record absences or excuses."
+      )
+    ).toBeInTheDocument()
+
+    expect(screen.queryByText(/MVP/)).toBeNull()
+  })
+
   test("the correction and the history read as in mockup 08", async () => {
     open(closedFirstNovember())
 

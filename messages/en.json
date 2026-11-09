@@ -946,7 +946,7 @@
       "extraTitle": "Present, not on the roster ({count, number})",
       "extraDescription": "Visitors or members of other groups.",
       "notMarkedTitle": "Not marked present ({count, number})",
-      "notMarkedNote": "Not marked present is not the same as absent: someone may have been there without being ticked. The MVP does not record absences or excuses.",
+      "notMarkedNote": "Not marked present is not the same as absent: someone may have been there without being ticked. The app does not record absences or excuses.",
       "everyoneMarked": "Everyone on the roster was marked present.",
       "corrections": "Corrections",
       "correction": "<person>{name}</person> was marked at {time} and removed {when}.",
