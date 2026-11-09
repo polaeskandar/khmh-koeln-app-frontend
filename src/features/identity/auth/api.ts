@@ -35,6 +35,9 @@ export const registrationServicesQuery = {
 
 export const registerRequest = (body: Registration) => dataOf(api.POST("/auth/register", { body }))
 
+export const confirmEmailRequest = (token: string) =>
+  dataOf(api.POST("/auth/email-confirmations", { body: { token } }))
+
 export const setPasswordRequest = (body: Schemas["SetPasswordFromLinkRequest"]) =>
   dataOf(api.POST("/auth/password-links", { body }))
 

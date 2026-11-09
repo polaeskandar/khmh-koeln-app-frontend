@@ -56,6 +56,7 @@ export const routes = {
 
   signIn: (next?: string) => href("/sign-in/", { next }),
   signInPending: () => "/sign-in/pending/",
+  signInUnconfirmed: () => "/sign-in/unconfirmed/",
   register: () => "/register/",
   registered: () => "/register/done/",
   forgotPassword: () => "/forgot-password/",
