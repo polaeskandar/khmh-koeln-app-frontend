@@ -9,7 +9,7 @@ export function ApiMocking({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(!enabled)
 
   useEffect(() => {
-    if (!enabled) {
+    if (import.meta.env.SSR || !enabled) {
       return
     }
 
