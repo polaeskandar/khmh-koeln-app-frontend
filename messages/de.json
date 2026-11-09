@@ -1075,7 +1075,8 @@
       "description": "Name und Zugehörigkeit. Mehr braucht es für die Anwesenheit nicht.",
       "duplicateFallback": "Es gibt schon eine Person mit diesem Namen.",
       "duplicateHint": "Suchen Sie zuerst nach der Person; gleiche Namen sind häufig.",
-      "addAnyway": "Andere Person – trotzdem hinzufügen"
+      "addAnyway": "Andere Person – trotzdem hinzufügen",
+      "alreadyIn": "Bereits in {where}"
     },
     "addMember": {
       "trigger": "Mitglied hinzufügen",

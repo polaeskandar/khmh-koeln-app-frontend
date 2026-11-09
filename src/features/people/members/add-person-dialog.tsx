@@ -26,13 +26,25 @@ import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import type { PersonRef, ServiceRef, StageRef } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
+import { isolate } from "@/lib/bidi"
 import { preferredName } from "@/lib/domain/names"
 
-import { addMembershipRequest, createPersonRequest, type NewPerson } from "./api"
+import {
+  addMembershipRequest,
+  createPersonRequest,
+  type NewPerson,
+  type PlacementInput,
+} from "./api"
 
 type Candidate = PersonRef & { groups: { service: ServiceRef; stage: StageRef | null }[] }
 
 const PEOPLE_QUERIES = [["people"], ["services"]]
+
+const groupAt = (candidate: Candidate, placement: PlacementInput) =>
+  candidate.groups.find(
+    (group) =>
+      group.service.id === placement.serviceId && (group.stage?.id ?? null) === placement.stageId
+  )
 
 function AddPersonForm({ onDone }: { onDone: () => void }) {
   const t = useTranslations()
@@ -130,35 +142,45 @@ function AddPersonForm({ onDone }: { onDone: () => void }) {
             <span>{problem.message}</span>
             {candidates.length > 0 ? (
               <ul className="flex flex-col divide-y border-y">
-                {candidates.map((candidate) => (
-                  <li key={candidate.id} className="flex items-center justify-between gap-3 py-2">
-                    <span className="flex min-w-0 flex-col">
-                      <span className="truncate font-medium">{preferredName(candidate)}</span>
-                      <span className="truncate text-xs text-muted-foreground">
-                        {candidate.groups.length === 0
-                          ? t("members.addMember.notInAnyService")
-                          : candidate.groups
-                              .map((group) =>
-                                group.stage
-                                  ? `${group.service.name} · ${group.stage.name}`
-                                  : group.service.name
-                              )
-                              .join(f.separator)}
+                {candidates.map((candidate) => {
+                  const there = placement ? groupAt(candidate, placement) : undefined
+
+                  return (
+                    <li key={candidate.id} className="flex items-center justify-between gap-3 py-2">
+                      <span className="flex min-w-0 flex-col">
+                        <span className="truncate font-medium">{preferredName(candidate)}</span>
+                        <span className="truncate text-xs text-muted-foreground">
+                          {candidate.groups.length === 0
+                            ? t("members.addMember.notInAnyService")
+                            : candidate.groups
+                                .map((group) =>
+                                  group.stage
+                                    ? `${group.service.name} · ${group.stage.name}`
+                                    : group.service.name
+                                )
+                                .join(f.separator)}
+                        </span>
                       </span>
-                    </span>
-                    {placement && can("update", "members") ? (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        disabled={busy}
-                        onClick={() => void addExisting(candidate)}
-                      >
-                        {t("members.addMember.add")}
-                      </Button>
-                    ) : null}
-                  </li>
-                ))}
+                      {there ? (
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          {t("members.newPerson.alreadyIn", {
+                            where: isolate(there.stage?.name ?? there.service.name),
+                          })}
+                        </span>
+                      ) : placement && can("update", "members") ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={busy}
+                          onClick={() => void addExisting(candidate)}
+                        >
+                          {t("members.addMember.add")}
+                        </Button>
+                      ) : null}
+                    </li>
+                  )
+                })}
               </ul>
             ) : null}
             {join.problem ? (
