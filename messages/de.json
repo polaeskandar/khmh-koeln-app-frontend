@@ -1061,6 +1061,9 @@
     "empty": {
       "noMatch": "Keine Treffer für „{query}“",
       "noMatchHint": "Prüfen Sie die Schreibweise oder sehen Sie in den anderen Tabs nach.",
+      "filteredHint": "Filter gesetzt: {filters}. Setzen Sie die Filter zurück, um alle zu sehen.",
+      "noMatchFilteredHint": "Prüfen Sie die Schreibweise oder setzen Sie die Filter ({filters}) zurück, um in allen zu suchen.",
+      "clearFilters": "Filter zurücksetzen",
       "title": "Hier ist niemand",
       "hint": "Personen, die Sie hinzufügen, erscheinen hier."
     },

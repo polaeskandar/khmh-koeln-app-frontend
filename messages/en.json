@@ -1061,6 +1061,9 @@
     "empty": {
       "noMatch": "Nobody matches “{query}”",
       "noMatchHint": "Check the spelling, or look in the other tabs.",
+      "filteredHint": "Filters are on: {filters}. Clear them to see everyone.",
+      "noMatchFilteredHint": "Check the spelling, or clear the filters ({filters}) to search everyone.",
+      "clearFilters": "Clear filters",
       "title": "Nobody here",
       "hint": "People you add appear here."
     },
