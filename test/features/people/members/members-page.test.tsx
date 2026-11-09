@@ -1,7 +1,7 @@
-import { screen, waitFor, within } from "@testing-library/react"
+import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -11,14 +11,20 @@ import { me } from "@test/support/fixtures/me"
 import { peopleList, person } from "@test/support/fixtures/people"
 import { services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
+import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { PeopleList } from "@/features/people/members/api"
 import { MembersPage } from "@/features/people/members/members-page"
 
 vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
+vi.mock("next/navigation", async () => (await import("@test/support/navigation")).searchParamsMock)
 
-beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => {}))
+beforeEach(() => {
+  vi.spyOn(console, "error").mockImplementation(() => {})
+  router.replace.mockClear()
+  router.push.mockClear()
+})
 
 const sundaySchool = services.items[0]
 const thirdClassStage = sundaySchool.stages.find((stage) => stage.name === "3rd Class")!
@@ -135,4 +141,90 @@ test("in Arabic the phone rows join groups with the Arabic comma", async () => {
   open(() => peopleList([twoGroups]), "ar")
   const list = within(await screen.findByRole("list", { name: "المخدومون" }))
   expect(list.getByRole("listitem")).toHaveTextContent("3rd Class (Sunday School)، Sunday School")
+})
+
+describe("the address keeps the list", () => {
+  const thirdClassGroup = `stage:${thirdClassStage.id}`
+
+  test("a link with q, group and tab shows them and sends them", async () => {
+    address.set(`q=saad&group=${thirdClassGroup}&status=all`)
+    const requests = open(() => peopleList([demi]))
+    expect(await screen.findByRole("textbox", { name: "Search people" })).toHaveValue("saad")
+
+    await waitFor(() =>
+      expect(screen.getByRole("combobox", { name: "Service" })).toHaveValue(thirdClassGroup)
+    )
+
+    expect(screen.getByRole("tab", { name: "All" })).toHaveAttribute("aria-selected", "true")
+    await waitFor(() => expect(requests).toHaveLength(3))
+
+    expect(requests.map((params) => params.get("status")).sort()).toEqual([
+      "active",
+      "all",
+      "inactive",
+    ])
+
+    expect(requests.every((params) => params.get("q") === "saad")).toBe(true)
+    expect(requests.every((params) => params.get("stageId") === thirdClassStage.id)).toBe(true)
+  })
+
+  test("typing replaces the address; a filter or a tab adds a history entry", async () => {
+    open(() => peopleList([demi]))
+    await screen.findAllByText("Demi Fanous")
+    await userEvent.type(screen.getByRole("textbox", { name: "Search people" }), "mina")
+
+    await waitFor(() =>
+      expect(router.replace).toHaveBeenLastCalledWith("/members/?q=mina", { scroll: false })
+    )
+
+    expect(router.replace).toHaveBeenCalledTimes(1)
+
+    await userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Service" }),
+      "Sunday School · 3rd Class"
+    )
+
+    expect(router.push).toHaveBeenLastCalledWith(
+      `/members/?q=mina&group=stage%3A${thirdClassStage.id}`,
+      { scroll: false }
+    )
+
+    await userEvent.click(screen.getByRole("tab", { name: /^Inactive/ }))
+
+    expect(router.push).toHaveBeenLastCalledWith(
+      `/members/?q=mina&group=stage%3A${thirdClassStage.id}&status=inactive`,
+      { scroll: false }
+    )
+
+    await userEvent.click(screen.getByRole("button", { name: "Clear search" }))
+
+    expect(router.replace).toHaveBeenLastCalledWith(
+      `/members/?group=stage%3A${thirdClassStage.id}&status=inactive`,
+      { scroll: false }
+    )
+
+    expect(router.replace).toHaveBeenCalledTimes(2)
+    expect(router.push).toHaveBeenCalledTimes(2)
+  })
+
+  test("going back and forward puts the search back into the field", async () => {
+    const requests = open(() => peopleList([demi]))
+    const field = await screen.findByRole("textbox", { name: "Search people" })
+    act(() => address.set("q=mina"))
+    await waitFor(() => expect(field).toHaveValue("mina"))
+    await waitFor(() => expect(requests.at(-1)?.get("q")).toBe("mina"))
+    act(() => address.set(""))
+    await waitFor(() => expect(field).toHaveValue(""))
+    expect(router.replace).not.toHaveBeenCalled()
+  })
+
+  test("an unknown group or status falls back to all services on Active", async () => {
+    address.set("group=stage:0192f3a4-7b1c-7d2e-8f3b-0000000009ff&status=archived")
+    const requests = open(() => peopleList([demi]))
+    await screen.findAllByText("Demi Fanous")
+    expect(screen.getByRole("combobox", { name: "Service" })).toHaveValue("")
+    expect(screen.getByRole("tab", { name: /^Active/ })).toHaveAttribute("aria-selected", "true")
+    expect(requests.every((params) => params.get("stageId") === null)).toBe(true)
+    expect(requests.map((params) => params.get("status")).sort()).toEqual(["active", "inactive"])
+  })
 })

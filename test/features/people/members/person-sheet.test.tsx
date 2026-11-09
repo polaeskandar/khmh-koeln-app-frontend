@@ -19,6 +19,7 @@ import type { PersonRow } from "@/features/people/members/api"
 import { MembersScreen } from "@/features/people/members/members-page"
 
 vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
+vi.mock("next/navigation", async () => (await import("@test/support/navigation")).searchParamsMock)
 
 beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {})

@@ -4,6 +4,7 @@ import { cleanup, configure } from "@testing-library/react"
 import { afterAll, afterEach, beforeAll, vi } from "vitest"
 
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 
 configure({ asyncUtilTimeout: 3000 })
 
@@ -35,6 +36,7 @@ beforeAll(() => server.listen({ onUnhandledFrame: "error" }))
 afterEach(() => {
   cleanup()
   server.resetHandlers()
+  address.set("")
 })
 
 afterAll(() => server.close())

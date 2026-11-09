@@ -3,8 +3,9 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import type { ColumnDef } from "@tanstack/react-table"
 import { Search, X } from "lucide-react"
+import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { useEffect, useMemo, useState } from "react"
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { Topbar } from "@/components/app-shell/topbar"
 import {
@@ -36,8 +37,11 @@ import {
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { RequirePermission } from "@/features/identity/auth/guards"
 import { useCan } from "@/features/identity/auth/session"
+import { servicesQuery } from "@/features/organization/services/api"
 import { useFormat } from "@/i18n/format"
+import { useRouter } from "@/i18n/navigation"
 import { fullName, initials, preferredName } from "@/lib/domain/names"
+import { routes } from "@/lib/routes"
 
 import { type PeopleList, peopleQuery, type PersonRow, personRowQuery, type Placement } from "./api"
 import { AddPersonButton } from "./add-person-dialog"
@@ -49,18 +53,6 @@ const SEARCH_DELAY_MS = 300
 
 const placementLabel = (p: Placement) =>
   p.stage ? `${p.stage.name} (${p.service.name})` : p.service.name
-
-function useDebounced(value: string, ms: number) {
-  const [debounced, setDebounced] = useState(value)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), ms)
-
-    return () => clearTimeout(timer)
-  }, [value, ms])
-
-  return debounced
-}
 
 function PersonName({ person: { person } }: { person: PersonRow }) {
   return (
@@ -198,6 +190,91 @@ function PeopleTable({
 
 type Status = "active" | "inactive" | "all"
 
+const STATUSES: Status[] = ["active", "inactive", "all"]
+
+type ListView = { q: string; group: string; status: Status }
+
+type Show = (next: Partial<ListView>, history: "push" | "replace") => void
+
+const viewOf = (params: URLSearchParams): ListView => ({
+  q: params.get("q")?.trim() ?? "",
+  group: params.get("group") ?? "",
+  status: STATUSES.find((status) => status === params.get("status")) ?? "active",
+})
+
+const addressOf = (view: ListView) =>
+  routes.members({
+    q: view.q || null,
+    group: view.group || null,
+    status: view.status === "active" ? null : view.status,
+  })
+
+function useListView() {
+  const params = useSearchParams()
+  const router = useRouter()
+  const requested = useRef("")
+
+  const show = useCallback<Show>(
+    (next, history) => {
+      const current = viewOf(params)
+      const address = addressOf({ ...current, ...next })
+      const request = `${params.toString()} ${address}`
+
+      if (address === addressOf(current) || requested.current === request) {
+        return
+      }
+
+      requested.current = request
+      router[history](address, { scroll: false })
+    },
+    [params, router]
+  )
+
+  return [viewOf(params), show] as const
+}
+
+function useSearchField(q: string, show: Show) {
+  const [text, setText] = useState(q)
+  const [seen, setSeen] = useState(q)
+  const [sent, setSent] = useState<string | null>(null)
+
+  if (seen !== q) {
+    setSeen(q)
+
+    if (q === sent) {
+      setSent(null)
+    } else {
+      setText(q)
+    }
+  }
+
+  useEffect(() => {
+    const term = text.trim()
+
+    if (term === q) {
+      return
+    }
+
+    const timer = setTimeout(() => {
+      setSent(term)
+      show({ q: term }, "replace")
+    }, SEARCH_DELAY_MS)
+
+    return () => clearTimeout(timer)
+  }, [text, q, show])
+
+  const clear = () => {
+    setText("")
+
+    if (q !== "") {
+      setSent("")
+      show({ q: "" }, "replace")
+    }
+  }
+
+  return { text, setText, clear }
+}
+
 type Selected = { row: PersonRow; key: string; version: number }
 
 function SelectedPersonSheet({
@@ -229,11 +306,14 @@ export function MembersScreen() {
   const t = useTranslations()
   const can = useCan()
   const [selected, setSelected] = useState<Selected | null>(null)
+  const [view, show] = useListView()
+  const search = useSearchField(view.q, show)
+  const services = useQuery(servicesQuery)
   const groups = useGroupOptions()
-  const [search, setSearch] = useState("")
-  const [group, setGroup] = useState("")
-  const q = useDebounced(search.trim(), SEARCH_DELAY_MS)
-  const [status, setStatus] = useState<Status>("active")
+  const option = groups.find((candidate) => candidate.value === view.group)
+  const group = option?.value ?? ""
+  const ready = view.group === "" || !services.isPending
+  const { q, status } = view
   const filterKey = `${q}|${group}|${status}`
   const [paging, setPaging] = useState({ key: filterKey, page: 1 })
 
@@ -243,21 +323,23 @@ export function MembersScreen() {
 
   const page = paging.key === filterKey ? paging.page : 1
   const setPage = (next: number) => setPaging({ key: filterKey, page: next })
-  const filter = groups.find((option) => option.value === group)?.filter ?? {}
-  const scope = { ...filter, ...(q ? { q } : {}) }
+  const scope = { ...option?.filter, ...(q ? { q } : {}) }
 
   const people = useQuery({
     ...peopleQuery({ ...scope, status, page }),
+    enabled: ready,
     placeholderData: keepPreviousData,
   })
 
   const active = useQuery({
     ...peopleQuery({ ...scope, status: "active", page: 1 }),
+    enabled: ready,
     placeholderData: keepPreviousData,
   })
 
   const inactive = useQuery({
     ...peopleQuery({ ...scope, status: "inactive", page: 1 }),
+    enabled: ready,
     placeholderData: keepPreviousData,
   })
 
@@ -278,15 +360,15 @@ export function MembersScreen() {
           <InputGroupInput
             aria-label={t("members.search")}
             placeholder={t("members.searchPlaceholder")}
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            value={search.text}
+            onChange={(event) => search.setText(event.target.value)}
           />
-          {search ? (
+          {search.text ? (
             <InputGroupAddon align="inline-end">
               <InputGroupButton
                 size="icon-xs"
                 aria-label={t("common.clearSearch")}
-                onClick={() => setSearch("")}
+                onClick={search.clear}
               >
                 <X />
               </InputGroupButton>
@@ -299,7 +381,7 @@ export function MembersScreen() {
             aria-label={t("members.service")}
             className="w-full sm:w-64"
             value={group}
-            onChange={(event) => setGroup(event.target.value)}
+            onChange={(event) => show({ group: event.target.value }, "push")}
           >
             <NativeSelectOption value="">{t("members.allServices")}</NativeSelectOption>
             {groups.map((option) => (
@@ -310,7 +392,7 @@ export function MembersScreen() {
           </NativeSelect>
         </span>
       </div>
-      <Tabs value={status} onValueChange={(value) => setStatus(value as Status)}>
+      <Tabs value={status} onValueChange={(value) => show({ status: value as Status }, "push")}>
         <TabsList>
           <TabsTrigger value="active">
             {t("members.tabs.active", { count: active.data?.total ?? 0 })}
@@ -327,7 +409,7 @@ export function MembersScreen() {
             list={list}
             query={q}
             onPage={setPage}
-            onClear={() => setSearch("")}
+            onClear={search.clear}
             onSelect={(row) => setSelected({ row, key: filterKey, version: 0 })}
           />
         )}
@@ -357,7 +439,9 @@ export function MembersPage() {
           resource="members"
           fallback={<NoAccess title={t("members.noAccess")}>{t("members.noAccessHint")}</NoAccess>}
         >
-          <MembersScreen />
+          <Suspense>
+            <MembersScreen />
+          </Suspense>
         </RequirePermission>
       </PageBody>
     </>
