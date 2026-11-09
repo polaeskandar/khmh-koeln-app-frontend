@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
@@ -216,4 +216,86 @@ test("in Arabic the sheet opens from the left", async () => {
   open(person("Mina", "Hanna"), "ar")
   await openSheet("Mina Hanna")
   expect(document.querySelector("[data-slot='sheet-content']")).toHaveAttribute("data-side", "left")
+})
+
+describe("pending", () => {
+  const held = () => {
+    let release = () => {}
+    const gate = new Promise<void>((resolve) => (release = resolve))
+
+    return { gate, release: () => release() }
+  }
+
+  test("a second click on Add during the request sends it once", async () => {
+    open(person("Mina", "Hanna"))
+    const sheet = await openSheet("Mina Hanna")
+    const request = held()
+    let joins = 0
+
+    server.use(
+      http.post(apiUrl("/people/:id/memberships"), async () => {
+        joins++
+        await request.gate
+
+        return HttpResponse.json({ id: "m-new" }, { status: 201 })
+      })
+    )
+
+    const add = sheet.getByRole("button", { name: "Add" })
+    await userEvent.click(add)
+    await waitFor(() => expect(add).toBeDisabled())
+    expect(within(add).getByRole("status", { name: "Loading" })).toBeInTheDocument()
+    await userEvent.click(add)
+    request.release()
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Added."))
+    expect(joins).toBe(1)
+  })
+
+  test("Add stays pending until the list has been fetched again", async () => {
+    const mina = person("Mina", "Hanna")
+    const sent = open(mina)
+    const sheet = await openSheet("Mina Hanna")
+    const refetch = held()
+
+    server.use(
+      http.get(apiUrl("/people"), async () => {
+        await refetch.gate
+
+        return HttpResponse.json(peopleList([mina]))
+      })
+    )
+
+    const add = sheet.getByRole("button", { name: "Add" })
+    await userEvent.click(add)
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Added."))
+    expect(add).toBeDisabled()
+    expect(within(add).getByRole("status", { name: "Loading" })).toBeInTheDocument()
+    await userEvent.click(add)
+    refetch.release()
+    await waitFor(() => expect(add).toBeEnabled())
+    expect(sent.filter((request) => request.path === "join")).toHaveLength(1)
+  })
+
+  test("Save name is disabled with the spinner while it saves", async () => {
+    const mina = person("Mina", "Hana")
+    open(mina)
+    const sheet = await openSheet("Mina Hana")
+    const request = held()
+
+    server.use(
+      http.put(apiUrl(`/people/${mina.person.id}`), async () => {
+        await request.gate
+
+        return HttpResponse.json({ ...mina.person, lastName: "Hanan" })
+      })
+    )
+
+    await userEvent.type(sheet.getByLabelText("Last name"), "n")
+    const save = sheet.getByRole("button", { name: "Save name" })
+    await userEvent.click(save)
+    await waitFor(() => expect(save).toBeDisabled())
+    expect(within(save).getByRole("status", { name: "Loading" })).toBeInTheDocument()
+    request.release()
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Saved."))
+  })
 })
