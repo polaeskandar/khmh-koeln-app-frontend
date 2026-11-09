@@ -33,7 +33,15 @@ function open(initial: PersonRow, locale: Locale = "en", viewer: Me = me.adminis
 
   server.use(
     http.get(apiUrl("/services"), () => HttpResponse.json(services)),
-    http.get(apiUrl("/people"), () => HttpResponse.json(peopleList(current ? [current] : []))),
+    http.get(apiUrl("/people"), ({ request }) => {
+      const params = new URL(request.url).searchParams
+      const name = `${current.person.firstName} ${current.person.lastName}`.toLowerCase()
+      const words = (params.get("q") ?? "").toLowerCase().split(" ").filter(Boolean)
+      const inGroup = !params.get("stageId") || current.placements.length > 0
+      const shown = inGroup && words.every((word) => name.includes(word))
+
+      return HttpResponse.json(peopleList(shown ? [current] : []))
+    }),
     http.put(apiUrl(`/people/${initial.person.id}`), async ({ request }) => {
       const body = (await request.json()) as Schemas["RenamePersonRequest"]
       sent.push({ path: "put", body })
@@ -216,6 +224,42 @@ test("in Arabic the sheet opens from the left", async () => {
   open(person("Mina", "Hanna"), "ar")
   await openSheet("Mina Hanna")
   expect(document.querySelector("[data-slot='sheet-content']")).toHaveAttribute("data-side", "left")
+})
+
+test("renamed, then removed from the filtered stage, the sheet stays on the new name", async () => {
+  open(person("Mina", "Hana"))
+  await screen.findByRole("table")
+
+  await userEvent.selectOptions(
+    screen.getByRole("combobox", { name: "Service" }),
+    "Sunday School · 3rd Class"
+  )
+
+  const sheet = await openSheet("Mina Hana")
+  await userEvent.clear(sheet.getByLabelText("Last name"))
+  await userEvent.type(sheet.getByLabelText("Last name"), "Hanna")
+  await userEvent.click(sheet.getByRole("button", { name: "Save name" }))
+  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Saved."))
+
+  await userEvent.click(
+    sheet.getByRole("button", { name: "Actions for 3rd Class (Sunday School)" })
+  )
+
+  await userEvent.click(
+    await screen.findByRole("menuitem", { name: "Remove from 3rd Class (Sunday School)" })
+  )
+
+  await userEvent.click(
+    within(screen.getByRole("alertdialog")).getByRole("button", { name: "Remove" })
+  )
+
+  await waitFor(() =>
+    expect(toast.success).toHaveBeenCalledWith("Removed. Past attendance is kept.")
+  )
+
+  expect(await sheet.findByText("No service at the moment.")).toBeInTheDocument()
+  expect(sheet.getByRole("heading", { name: "Mina Hanna" })).toBeInTheDocument()
+  expect(sheet.getByText(/3rd Class \(Sunday School\), Sun 6 Sep 2026 to/)).toBeInTheDocument()
 })
 
 describe("pending", () => {

@@ -7,6 +7,8 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
+import type { Locale } from "@/i18n/config"
+import type { Schemas } from "@/lib/api/client"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { peopleList, person } from "@test/support/fixtures/people"
@@ -32,7 +34,8 @@ function open(
   {
     deactivate = () => HttpResponse.json({ ...initial.person, status: "inactive" }),
     viewer = me.administrator,
-  }: { deactivate?: () => Response; viewer?: Me } = {}
+    locale = "en",
+  }: { deactivate?: () => Response; viewer?: Me; locale?: Locale } = {}
 ) {
   let lydia = initial
   const requests: URLSearchParams[] = []
@@ -55,7 +58,12 @@ function open(
       const response = deactivate()
 
       if (response.ok) {
-        lydia = { ...lydia, person: { ...lydia.person, status: "inactive" } }
+        lydia = {
+          ...lydia,
+          person: { ...lydia.person, status: "inactive" },
+          placements: [],
+          pastPlacements: lydia.placements.map((p) => ({ ...p, endsOn: "2026-11-07" })),
+        }
       }
 
       return response
@@ -65,6 +73,30 @@ function open(
       lydia = { ...lydia, person: { ...lydia.person, status: "active" }, placements: [] }
 
       return HttpResponse.json(lydia.person)
+    }),
+    http.post(apiUrl(`/people/${initial.person.id}/memberships`), async ({ request }) => {
+      const body = (await request.json()) as Schemas["PlacementRequest"]
+      posts.push("join")
+      const service = services.items.find((item) => item.id === body.serviceId)!
+      const stage = service.stages.find((item) => item.id === body.stageId)!
+
+      lydia = {
+        ...lydia,
+        placements: [
+          {
+            membershipId: "m-new",
+            service: { id: service.id, name: service.name, tone: service.tone, archived: false },
+            stage: { ...stage, archived: false },
+            startsOn: "2026-11-08",
+            endsOn: null,
+          },
+        ],
+      }
+
+      return HttpResponse.json(
+        { id: "m-new", personId: initial.person.id, startsOn: "2026-11-08", endsOn: null },
+        { status: 201 }
+      )
     })
   )
 
@@ -73,7 +105,8 @@ function open(
       <SidebarProvider>
         <MembersPage />
       </SidebarProvider>
-    </SessionProvider>
+    </SessionProvider>,
+    { locale }
   )
 
   return { requests, posts }
@@ -103,7 +136,7 @@ test("tabs show each status's total, and Inactive asks for page 1 of the inactiv
   expect(requests.at(-1)?.get("page")).toBe("1")
 })
 
-test("marking as inactive on Active drops the person and closes the sheet", async () => {
+test("marking as inactive on Active keeps the sheet on the person while the row leaves", async () => {
   const { posts } = open(lydia())
   const sheet = await openSheet()
   await userEvent.click(sheet.getByRole("button", { name: "Mark as inactive" }))
@@ -117,13 +150,21 @@ test("marking as inactive on Active drops the person and closes the sheet", asyn
   expect(dialog.getByText(/You can reactivate them at any time/)).toBeInTheDocument()
   await userEvent.click(dialog.getByRole("button", { name: "Mark as inactive" }))
 
-  await waitFor(() =>
-    expect(toast.success).toHaveBeenCalledWith(
-      "Marked as inactive. They no longer appear on rosters."
-    )
-  )
+  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Marked Lydia Aziz as inactive."))
 
-  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
+  await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument())
+  expect(await sheet.findByRole("button", { name: "Reactivate" })).toBeInTheDocument()
+  expect(sheet.getByRole("heading", { name: "Lydia Aziz" })).toBeInTheDocument()
+  expect(sheet.getByText("Inactive")).toBeInTheDocument()
+  expect(await sheet.findByText("No service at the moment.")).toBeInTheDocument()
+
+  expect(
+    await sheet.findByText(/3rd Class \(Sunday School\), Sun 6 Sep 2026 to/)
+  ).toBeInTheDocument()
+
+  expect(await screen.findByRole("tab", { name: "Active (120)", hidden: true })).toBeInTheDocument()
+  expect(screen.getByRole("tab", { name: "Inactive (2)", hidden: true })).toBeInTheDocument()
+  expect(screen.queryByRole("button", { name: /Lydia Aziz/, hidden: true })).toBeNull()
   expect(posts).toEqual(["deactivate"])
 })
 
@@ -143,21 +184,43 @@ test("on All the sheet stays open with the badge and Reactivate, and no Add to",
   expect(sheet.queryByRole("button", { name: /^Remove from/ })).not.toBeInTheDocument()
 })
 
-test("reactivating shows the person under Active with no service", async () => {
-  const { posts } = open(inactive(lydia()))
+test("reactivating keeps the sheet open, so a group can be added straight away", async () => {
+  const { posts } = open({ ...inactive(lydia()), placements: [] })
   await userEvent.click(await screen.findByRole("tab", { name: /^Inactive/ }))
   const sheet = await openSheet()
   await userEvent.click(sheet.getByRole("button", { name: "Reactivate" }))
-  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Reactivated."))
-  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
+  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Reactivated Lydia Aziz."))
+  const addTo = await sheet.findByRole("combobox", { name: "Add to" })
+  expect(sheet.queryByText("Inactive")).toBeNull()
+  expect(sheet.getByText("No service at the moment.")).toBeInTheDocument()
+  await userEvent.selectOptions(addTo, "Sunday School · 1st Class")
+  await userEvent.click(sheet.getByRole("button", { name: "Add" }))
+  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Added."))
+  expect(await sheet.findByText("1st Class (Sunday School)")).toBeInTheDocument()
+  expect(posts).toEqual(["reactivate", "join"])
+  await userEvent.keyboard("{Escape}")
   await userEvent.click(screen.getByRole("tab", { name: /^Active/ }))
 
   const row = (
     await within(await screen.findByRole("table")).findByRole("button", { name: /Lydia Aziz/ })
   ).closest("tr")!
 
-  expect(row).toHaveTextContent("No service")
-  expect(posts).toEqual(["reactivate"])
+  expect(row).toHaveTextContent("1st Class (Sunday School)")
+})
+
+test.each([
+  ["de", "Als inaktiv markieren", "Lydia Aziz als inaktiv markiert."],
+  ["ar", "تعيين كغير نشط", "تم تعيين «Lydia Aziz» كغير نشط."],
+] as const)("the toast names the person in %s", async (locale, button, text) => {
+  open(lydia(), { locale })
+  const sheet = await openSheet()
+  await userEvent.click(sheet.getByRole("button", { name: button }))
+
+  await userEvent.click(
+    within(await screen.findByRole("alertdialog")).getByRole("button", { name: button })
+  )
+
+  await waitFor(() => expect(toast.success).toHaveBeenCalledWith(text))
 })
 
 test("Reactivate is disabled with the spinner while it runs", async () => {
@@ -181,7 +244,7 @@ test("Reactivate is disabled with the spinner while it runs", async () => {
   await waitFor(() => expect(reactivate).toBeDisabled())
   expect(within(reactivate).getByRole("status", { name: "Loading" })).toBeInTheDocument()
   release()
-  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Reactivated."))
+  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Reactivated Lydia Aziz."))
 })
 
 test("without members: update there is no footer", async () => {

@@ -39,7 +39,7 @@ import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { fullName, initials, preferredName } from "@/lib/domain/names"
 
-import { type PeopleList, peopleQuery, type PersonRow, type Placement } from "./api"
+import { type PeopleList, peopleQuery, type PersonRow, personRowQuery, type Placement } from "./api"
 import { AddPersonButton } from "./add-person-dialog"
 import { useGroupOptions } from "./groups"
 import { InactiveBadge, PersonSheet } from "./person-sheet"
@@ -198,10 +198,37 @@ function PeopleTable({
 
 type Status = "active" | "inactive" | "all"
 
+type Selected = { row: PersonRow; key: string; version: number }
+
+function SelectedPersonSheet({
+  selected,
+  listed,
+  onClose,
+  onStatusChange,
+}: {
+  selected: Selected
+  listed: PersonRow | undefined
+  onClose: () => void
+  onStatusChange: (person: PersonRow) => void
+}) {
+  const elsewhere = useQuery({
+    ...personRowQuery(selected.row.person, selected.version),
+    enabled: listed === undefined,
+  })
+
+  return (
+    <PersonSheet
+      person={listed ?? elsewhere.data ?? selected.row}
+      onOpenChange={(open) => !open && onClose()}
+      onStatusChange={onStatusChange}
+    />
+  )
+}
+
 export function MembersScreen() {
   const t = useTranslations()
   const can = useCan()
-  const [selected, setSelected] = useState<{ id: string; key: string } | null>(null)
+  const [selected, setSelected] = useState<Selected | null>(null)
   const groups = useGroupOptions()
   const [search, setSearch] = useState("")
   const [group, setGroup] = useState("")
@@ -233,6 +260,13 @@ export function MembersScreen() {
     ...peopleQuery({ ...scope, status: "inactive", page: 1 }),
     placeholderData: keepPreviousData,
   })
+
+  const open = selected?.key === filterKey ? selected : null
+  const listed = people.data?.items.find((row) => row.person.id === open?.row.person.id)
+
+  if (open && listed && listed !== open.row) {
+    setSelected({ ...open, row: listed })
+  }
 
   return (
     <>
@@ -294,18 +328,18 @@ export function MembersScreen() {
             query={q}
             onPage={setPage}
             onClear={() => setSearch("")}
-            onSelect={(row) => setSelected({ id: row.person.id, key: filterKey })}
+            onSelect={(row) => setSelected({ row, key: filterKey, version: 0 })}
           />
         )}
       </QueryState>
-      <PersonSheet
-        person={
-          selected?.key === filterKey
-            ? (people.data?.items.find((row) => row.person.id === selected.id) ?? null)
-            : null
-        }
-        onOpenChange={(open) => !open && setSelected(null)}
-      />
+      {open ? (
+        <SelectedPersonSheet
+          selected={open}
+          listed={listed}
+          onClose={() => setSelected(null)}
+          onStatusChange={(row) => setSelected({ ...open, row, version: open.version + 1 })}
+        />
+      ) : null}
     </>
   )
 }
