@@ -82,6 +82,12 @@ describe("attendance by state", () => {
     expect(screen.getByRole("button", { name: "Open attendance" })).toBeInTheDocument()
   })
 
+  test("a scheduled session from an earlier day says attendance wasn't taken", async () => {
+    open({ status: "scheduled", date: "2026-11-01" })
+    expect(await screen.findByText("Attendance wasn’t taken.")).toBeInTheDocument()
+    expect(screen.queryByText("Attendance isn’t open yet.")).toBeNull()
+  })
+
   test("an active session takes attendance", async () => {
     const { id } = open({ status: "active" })
     await header()

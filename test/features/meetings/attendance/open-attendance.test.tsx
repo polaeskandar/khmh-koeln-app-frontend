@@ -136,6 +136,40 @@ describe("the board route before and after", () => {
     expect(screen.queryByRole("button", { name: "Open attendance" })).toBeNull()
   })
 
+  test("today's session isn't open yet and opens when the meeting starts", async () => {
+    openBoard(scheduled())
+
+    expect(
+      await screen.findByRole("heading", { name: "Attendance isn’t open yet" })
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByText("Open it when the meeting starts. You can mark people present right after.")
+    ).toBeInTheDocument()
+  })
+
+  test("an earlier day's session says attendance wasn't taken and offers to open it now", async () => {
+    openBoard(scheduled({ date: "2026-11-01" }))
+
+    expect(
+      await screen.findByRole("heading", { name: "Attendance wasn’t taken" })
+    ).toBeInTheDocument()
+
+    expect(screen.getByText("Open it now to record who came.")).toBeInTheDocument()
+    expect(screen.queryByText(/isn’t open yet|when the meeting starts/)).toBeNull()
+    expect(screen.getByRole("button", { name: "Open attendance" })).toBeInTheDocument()
+  })
+
+  test("without attendance: create an earlier day's session says the servants can still open it", async () => {
+    openBoard(scheduled({ date: "2026-11-01" }), { who: viewer })
+
+    expect(
+      await screen.findByText("The servants of this group can still open it to record who came.")
+    ).toBeInTheDocument()
+
+    expect(screen.queryByRole("button", { name: "Open attendance" })).toBeNull()
+  })
+
   test("a completed session replaces itself with the summary", async () => {
     const board = scheduled({ status: "completed" })
     openBoard(board)

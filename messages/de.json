@@ -926,9 +926,12 @@
       "canceled": "Dieser Termin wurde abgesagt.",
       "noAttendance": "Es wird keine Anwesenheit erfasst.",
       "notOpen": "Die Anwesenheit ist noch nicht geöffnet",
+      "notTaken": "Die Anwesenheit wurde nicht erfasst",
       "opensOn": "Sie kann am Tag des Termins geöffnet werden, am {date}.",
       "openWhenStarts": "Öffnen Sie sie, wenn das Treffen beginnt. Danach können Sie sofort Personen als anwesend markieren.",
-      "servantsOpen": "Die Diener dieser Gruppe öffnen sie, wenn das Treffen beginnt."
+      "openNow": "Öffnen Sie sie jetzt, um festzuhalten, wer da war.",
+      "servantsOpen": "Die Diener dieser Gruppe öffnen sie, wenn das Treffen beginnt.",
+      "servantsCanStillOpen": "Die Diener dieser Gruppe können sie noch öffnen, um festzuhalten, wer da war."
     },
     "summary": {
       "metaTitle": "Zusammenfassung der Anwesenheit",
@@ -1681,6 +1684,7 @@
       "noReason": "Es wurde kein Grund angegeben.",
       "noAttendance": "Für einen abgesagten Termin gibt es keine Anwesenheit.",
       "notOpenYet": "Die Anwesenheit ist noch nicht geöffnet.",
+      "notTaken": "Die Anwesenheit wurde nicht erfasst.",
       "takenOn": "Die Anwesenheit kann am {date} erfasst werden.",
       "rosterIs": "{count, plural, one {Auf der Liste steht das eine Mitglied} other {Auf der Liste stehen die # Mitglieder}} von {group} an diesem Tag.",
       "lesson": "Lektion",

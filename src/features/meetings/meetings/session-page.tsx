@@ -76,9 +76,11 @@ function SessionDetail({ data, actions }: { data: MeetingSession; actions?: Reac
     ? t("meetings.session.noAttendance")
     : session.status !== "scheduled"
       ? null
-      : session.date <= today
-        ? t("meetings.session.notOpenYet")
-        : t("meetings.session.takenOn", { date: f.longDate(session.date) })
+      : session.date < today
+        ? t("meetings.session.notTaken")
+        : session.date === today
+          ? t("meetings.session.notOpenYet")
+          : t("meetings.session.takenOn", { date: f.longDate(session.date) })
 
   return (
     <>

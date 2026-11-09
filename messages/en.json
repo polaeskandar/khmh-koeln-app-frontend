@@ -926,9 +926,12 @@
       "canceled": "This session was canceled.",
       "noAttendance": "No attendance is taken.",
       "notOpen": "Attendance isn’t open yet",
+      "notTaken": "Attendance wasn’t taken",
       "opensOn": "It can be opened on {date}, the day of the session.",
       "openWhenStarts": "Open it when the meeting starts. You can mark people present right after.",
-      "servantsOpen": "The servants of this group open it when the meeting starts."
+      "openNow": "Open it now to record who came.",
+      "servantsOpen": "The servants of this group open it when the meeting starts.",
+      "servantsCanStillOpen": "The servants of this group can still open it to record who came."
     },
     "summary": {
       "metaTitle": "Attendance summary",
@@ -1681,6 +1684,7 @@
       "noReason": "No reason was given.",
       "noAttendance": "No attendance for a canceled session.",
       "notOpenYet": "Attendance isn’t open yet.",
+      "notTaken": "Attendance wasn’t taken.",
       "takenOn": "Attendance can be taken on {date}.",
       "rosterIs": "The roster is the {count, plural, one {# member} other {# members}} of {group} on that day.",
       "lesson": "Lesson",
