@@ -8,27 +8,48 @@ import { MemberAvatar } from "@/components/member-avatar"
 import { Section } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"
 import { Button } from "@/components/ui/button"
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useCan } from "@/features/identity/auth/session"
 import { peopleQuery, type PeopleList } from "./api"
+import { AddPersonButton } from "./add-person-dialog"
 import { useFormat } from "@/i18n/format"
 import { fullName, initials, preferredName } from "@/lib/domain/names"
 
 import type { Stage } from "@/features/organization/stages/api"
+
+function EmptyRoster({ stage }: { stage: Stage }) {
+  const t = useTranslations("stages.overview")
+  const can = useCan()
+  const addable = !stage.archived && !stage.service.archived && can("create", "members")
+
+  return (
+    <Empty className="border border-dashed">
+      <EmptyHeader>
+        <EmptyTitle>{t("empty")}</EmptyTitle>
+        <EmptyDescription>{t("emptyDescription")}</EmptyDescription>
+      </EmptyHeader>
+      {addable ? (
+        <EmptyContent>
+          <AddPersonButton placement={{ serviceId: stage.service.id, stageId: stage.id }} />
+        </EmptyContent>
+      ) : null}
+    </Empty>
+  )
+}
 
 function MemberRows({ stage, list }: { stage: Stage; list: PeopleList }) {
   const t = useTranslations("stages.overview")
   const f = useFormat()
 
   if (list.total === 0) {
-    return (
-      <Empty className="border border-dashed">
-        <EmptyHeader>
-          <EmptyTitle>{t("empty")}</EmptyTitle>
-          <EmptyDescription>{t("emptyDescription")}</EmptyDescription>
-        </EmptyHeader>
-      </Empty>
-    )
+    return <EmptyRoster stage={stage} />
   }
 
   return (

@@ -38,7 +38,7 @@ import {
 
 type Candidate = PersonRef & { groups: { service: ServiceRef; stage: StageRef | null }[] }
 
-const PEOPLE_QUERIES = [["people"], ["services"]]
+const PEOPLE_QUERIES = [["people"], ["services"], ["stages"]]
 
 const groupAt = (candidate: Candidate, placement: PlacementInput) =>
   candidate.groups.find(
@@ -46,7 +46,7 @@ const groupAt = (candidate: Candidate, placement: PlacementInput) =>
       group.service.id === placement.serviceId && (group.stage?.id ?? null) === placement.stageId
   )
 
-function AddPersonForm({ onDone }: { onDone: () => void }) {
+function AddPersonForm({ preset, onDone }: { preset?: PlacementInput; onDone: () => void }) {
   const t = useTranslations()
   const f = useFormat()
   const can = useCan()
@@ -55,8 +55,8 @@ function AddPersonForm({ onDone }: { onDone: () => void }) {
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [displayName, setDisplayName] = useState("")
-  const [serviceId, setServiceId] = useState("")
-  const [stageId, setStageId] = useState("")
+  const [serviceId, setServiceId] = useState(preset?.serviceId ?? "")
+  const [stageId, setStageId] = useState(preset?.stageId ?? "")
   const service = services.find((s) => s.id === serviceId) ?? services[0]
   const stages = service?.stages ?? []
   const chosenStage = stages.some((stage) => stage.id === stageId) ? stageId : ""
@@ -290,7 +290,7 @@ function AddPersonForm({ onDone }: { onDone: () => void }) {
   )
 }
 
-export function AddPersonButton() {
+export function AddPersonButton({ placement }: { placement?: PlacementInput }) {
   const t = useTranslations("members")
   const [open, setOpen] = useState(false)
 
@@ -306,7 +306,7 @@ export function AddPersonButton() {
             <DialogTitle>{t("newPerson.title")}</DialogTitle>
             <DialogDescription>{t("newPerson.description")}</DialogDescription>
           </DialogHeader>
-          {open ? <AddPersonForm onDone={() => setOpen(false)} /> : null}
+          {open ? <AddPersonForm preset={placement} onDone={() => setOpen(false)} /> : null}
         </DialogContent>
       </Dialog>
     </>
