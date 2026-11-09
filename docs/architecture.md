@@ -76,9 +76,31 @@ production; off unless set, the page says to ask the church office.
   Inside the apps the origin is `capacitor://localhost` on iOS and `https://localhost` on Android, so the
   API will need them in its CORS allowlist then.
 
+### Code layout
+
+`src/features/` follows the backend's bounded contexts (the `backend` repository's `docs/architecture.md`, "Code
+layout"), so the screens for an endpoint sit under the context of its controller. Each context has one folder
+per resource:
+
+| Context        | Folders                                      |
+| -------------- | -------------------------------------------- |
+| `identity`     | `auth`, `account`, `accounts`, `roles`       |
+| `organization` | `services`, `stages`                         |
+| `people`       | `members`, `guardians`, `children`, `groups` |
+| `meetings`     | `meetings`, `attendance`, `dashboard`        |
+| `learning`     | `lessons`, `homework`                        |
+| `privacy`      | `data-requests`, `notice`, `own-data`        |
+
+A file sits in the context whose endpoints it calls, as in the backend's `Interface/Api/<Area>`: the parent and
+member portals' homework is in `learning/homework`, a parent's children in `people/children`, a member's groups
+in `people/groups` and their meetings in `meetings/meetings`. A screen that combines several contexts sits with
+its main one (the Settings page in `identity/accounts`). `portals/parent` and `portals/member` hold only what
+has no backend counterpart: each portal's shell, navigation, home and account page. Tests in `test/features/`
+use the same folders.
+
 ### Data access
 
-- **One `api.ts` per feature** (`src/features/<area>/api.ts`) holds its response types, query options and
+- **One `api.ts` per feature** (`src/features/<context>/<resource>/api.ts`) holds its response types, query options and
   calls; screens never build URLs or call `apiRequest()` themselves.
 - **Query keys** are `["<resource>", "list" | "detail", params]`, e.g. `["services", "list", {status: "all"}]`
   or `["sessions", "detail", id]`. A change invalidates by prefix (`["services"]`), so every list and detail

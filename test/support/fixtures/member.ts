@@ -1,4 +1,6 @@
-import type { MemberGroup, MemberMeeting, MemberTask } from "@/features/member/api"
+import type { MemberGroup } from "@/features/people/groups/api"
+import type { MemberMeeting } from "@/features/meetings/meetings/api"
+import type { MemberTask } from "@/features/learning/homework/api"
 import type { Recurrence } from "@/lib/api/types/common"
 
 const BIBLE_STUDY = {

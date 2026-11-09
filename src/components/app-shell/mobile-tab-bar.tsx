@@ -12,8 +12,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useCan } from "@/features/auth/session"
-import { OpenSessionsBubble } from "@/features/attendance/open-sessions-badge"
+import { useCan } from "@/features/identity/auth/session"
+import { OpenSessionsBubble } from "@/features/meetings/attendance/open-sessions-badge"
 import { Link, usePathname } from "@/i18n/navigation"
 
 import { AccountMenuItems } from "./account-menu"

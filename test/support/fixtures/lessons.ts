@@ -1,4 +1,9 @@
-import type { Lesson, LessonDetail, LessonOptions, StageLessons } from "@/features/lessons/api"
+import type {
+  Lesson,
+  LessonDetail,
+  LessonOptions,
+  StageLessons,
+} from "@/features/learning/lessons/api"
 
 import { thirdClass } from "@test/support/fixtures/stages"
 

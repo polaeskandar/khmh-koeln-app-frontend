@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useSession } from "@/features/auth/session"
+import { useSession } from "@/features/identity/auth/session"
 import { Link } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 

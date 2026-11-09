@@ -1,4 +1,4 @@
-import type { PeopleList, PersonRow } from "@/features/members/api"
+import type { PeopleList, PersonRow } from "@/features/people/members/api"
 
 import { thirdClass } from "@test/support/fixtures/stages"
 

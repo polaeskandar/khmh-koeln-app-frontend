@@ -5,7 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server"
 
 import { Providers } from "@/components/providers"
 import { UnsupportedBrowser } from "@/components/unsupported-browser"
-import { SessionProvider } from "@/features/auth/session"
+import { SessionProvider } from "@/features/identity/auth/session"
 import { directionOf } from "@/i18n/config"
 import { HtmlLangDir } from "@/i18n/html-lang-dir"
 import { routing } from "@/i18n/routing"

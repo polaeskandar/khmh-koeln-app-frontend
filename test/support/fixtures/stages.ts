@@ -1,4 +1,4 @@
-import type { Stage } from "@/features/stages/api"
+import type { Stage } from "@/features/organization/stages/api"
 
 export const SUNDAY_SCHOOL_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f10"
 export const THIRD_CLASS_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f20"

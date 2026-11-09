@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
-import { TakeAttendancePage } from "@/features/attendance/take-attendance-page"
+import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
 import { pageLocale } from "@/i18n/page"
 
 export async function generateMetadata({

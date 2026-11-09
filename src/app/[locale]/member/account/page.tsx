@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
-import { MemberAccount } from "@/features/member/member-account"
+import { MemberAccount } from "@/features/portals/member/member-account"
 import { pageLocale } from "@/i18n/page"
 
 export async function generateMetadata({
