@@ -1,13 +1,18 @@
-import { screen, within } from "@testing-library/react"
+import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
+import type { Me } from "@/features/identity/auth/api"
+import type { Stage } from "@/features/organization/stages/api"
+import type { PersonRow } from "@/features/people/members/api"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
+import { me } from "@test/support/fixtures/me"
 import { peopleList, person } from "@test/support/fixtures/people"
-import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
+import { services } from "@test/support/fixtures/services"
+import { SUNDAY_SCHOOL_ID, THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
@@ -30,11 +35,18 @@ const fourteen = [
   ...Array.from({ length: 12 }, (_, i) => person(`Child${i + 1}`, "Girgis")),
 ]
 
-function open(people: (url: URL) => Response, locale: Locale = "en") {
+function open(
+  people: (url: URL) => Response,
+  {
+    locale = "en",
+    viewer = me.administrator,
+    stage = thirdClass,
+  }: { locale?: Locale; viewer?: Me; stage?: Stage } = {}
+) {
   const pages: string[] = []
 
   server.use(
-    http.get(apiUrl(`/stages/${THIRD_CLASS_ID}`), () => HttpResponse.json(thirdClass)),
+    http.get(apiUrl(`/stages/${THIRD_CLASS_ID}`), () => HttpResponse.json(stage)),
     http.get(apiUrl("/people"), ({ request }) => {
       const url = new URL(request.url)
       pages.push(`${url.searchParams.get("stageId")}:${url.searchParams.get("page")}`)
@@ -47,7 +59,7 @@ function open(people: (url: URL) => Response, locale: Locale = "en") {
     <SidebarProvider>
       <StageOverview />
     </SidebarProvider>,
-    { locale }
+    { locale, me: viewer }
   )
 
   return pages
@@ -69,7 +81,7 @@ test("lists the roster in API order with the preferred name and since when", asy
 })
 
 test("says since in German", async () => {
-  open(() => HttpResponse.json(peopleList(fourteen)), "de")
+  open(() => HttpResponse.json(peopleList(fourteen)), { locale: "de" })
 
   const section = within(
     (await screen.findByRole("heading", { name: /^Mitglieder/ })).closest("section")!
@@ -157,6 +169,68 @@ test("an empty roster says so", async () => {
   expect(
     screen.getByText("Add the children or people of this stage to build its roster.")
   ).toBeInTheDocument()
+})
+
+describe("Add person on an empty roster", () => {
+  const sundaySchool = {
+    ...services.items[0],
+    id: SUNDAY_SCHOOL_ID,
+    stages: [
+      ...services.items[0].stages,
+      { ...services.items[0].stages[0], id: THIRD_CLASS_ID, name: "Third Class" },
+    ],
+  }
+
+  test("opens the dialog on this stage and refreshes the roster after adding", async () => {
+    const mina = person("Mina", "Hanna")
+    let roster: PersonRow[] = []
+    const sent: unknown[] = []
+    const pages = open(() => HttpResponse.json(peopleList(roster)))
+
+    server.use(
+      http.get(apiUrl("/services"), () => HttpResponse.json({ items: [sundaySchool] })),
+      http.post(apiUrl("/people"), async ({ request }) => {
+        sent.push(await request.json())
+        roster = [mina]
+
+        return HttpResponse.json({ person: mina.person, membership: null }, { status: 201 })
+      })
+    )
+
+    await userEvent.click(await (await members()).findByRole("button", { name: "Add person" }))
+    const dialog = within(await screen.findByRole("dialog"))
+    expect(await dialog.findByLabelText("Service")).toHaveValue(SUNDAY_SCHOOL_ID)
+    expect(dialog.getByLabelText("Stage")).toHaveValue(THIRD_CLASS_ID)
+    await userEvent.type(dialog.getByLabelText("First name"), "Mina")
+    await userEvent.type(dialog.getByLabelText("Last name"), "Hanna")
+    await userEvent.click(dialog.getByRole("button", { name: "Add person" }))
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull())
+    expect(await (await members()).findByText("Mina Hanna")).toBeInTheDocument()
+
+    expect(sent).toEqual([
+      {
+        firstName: "Mina",
+        lastName: "Hanna",
+        displayName: null,
+        placement: { serviceId: SUNDAY_SCHOOL_ID, stageId: THIRD_CLASS_ID },
+      },
+    ])
+
+    expect(pages).toEqual([`${THIRD_CLASS_ID}:1`, `${THIRD_CLASS_ID}:1`])
+  })
+
+  test.each([
+    ["a servant", { viewer: me.servant }],
+    ["an archived stage", { stage: { ...thirdClass, archived: true } }],
+    [
+      "an archived service",
+      { stage: { ...thirdClass, service: { ...thirdClass.service, archived: true } } },
+    ],
+  ])("%s gets no Add person", async (_, options) => {
+    open(() => HttpResponse.json(peopleList([])), options)
+    expect(await screen.findByText("No members yet")).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Add person" })).toBeNull()
+  })
 })
 
 test("Retry after a 500 asks again", { timeout: 15_000 }, async () => {
