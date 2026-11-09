@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from "react"
 
 import { Topbar } from "@/components/app-shell/topbar"
 import {
+  type DataTableFeatures,
   DataTablePagination,
   DataTableView,
   useDataTable,
@@ -113,7 +114,7 @@ function PeopleTable({
   const t = useTranslations()
   const f = useFormat()
 
-  const columns = useMemo<ColumnDef<PersonRow, unknown>[]>(
+  const columns = useMemo<ColumnDef<DataTableFeatures, PersonRow, unknown>[]>(
     () => [
       {
         id: "name",

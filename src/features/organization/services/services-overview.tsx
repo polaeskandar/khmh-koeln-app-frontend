@@ -11,6 +11,7 @@ import { Topbar } from "@/components/app-shell/topbar"
 import {
   countByTab,
   DataTableColumnHeader,
+  type DataTableFeatures,
   DataTablePagination,
   DataTableTabs,
   DataTableView,
@@ -113,7 +114,7 @@ export function ServicesTable({ rows }: { rows: ServiceRow[] }) {
     )
   }, [rows, tab, search])
 
-  const columns = useMemo<ColumnDef<ServiceRow, unknown>[]>(
+  const columns = useMemo<ColumnDef<DataTableFeatures, ServiceRow, unknown>[]>(
     () => [
       {
         accessorKey: "name",

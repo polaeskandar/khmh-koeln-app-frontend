@@ -4,19 +4,37 @@ import * as React from "react"
 import {
   type Column,
   type ColumnDef,
+  columnFacetingFeature,
+  columnFilteringFeature,
   type ColumnFiltersState,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  type ColumnVisibilityState,
+  createFacetedRowModel,
+  createFacetedUniqueValues,
+  createFilteredRowModel,
+  createPaginatedRowModel,
+  createSortedRowModel,
+  filterFn_arrIncludes,
+  filterFn_equals,
+  filterFn_inDateRange,
+  filterFn_includesString,
+  filterFn_inNumberRange,
+  filterFn_weakEquals,
   flexRender,
-  getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
+  globalFilteringFeature,
+  type ReactTable,
+  type RowData,
+  rowPaginationFeature,
+  rowSelectionFeature,
   type RowSelectionState,
+  rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_datetime,
+  sortFn_text,
   type SortingState,
-  type Table as TableType,
-  useReactTable,
-  type VisibilityState,
+  tableFeatures,
+  useTable,
 } from "@tanstack/react-table"
 import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, ChevronsUpDown } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -34,20 +52,51 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-type UseDataTableOptions<TData> = {
+const dataTableFeatures = tableFeatures({
+  columnFacetingFeature,
+  columnFilteringFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  globalFilteringFeature,
+  rowPaginationFeature,
+  rowSelectionFeature,
+  rowSortingFeature,
+  facetedRowModel: createFacetedRowModel(),
+  facetedUniqueValues: createFacetedUniqueValues(),
+  filteredRowModel: createFilteredRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+  sortedRowModel: createSortedRowModel(),
+  filterFns: {
+    arrIncludes: filterFn_arrIncludes,
+    equals: filterFn_equals,
+    inDateRange: filterFn_inDateRange,
+    includesString: filterFn_includesString,
+    inNumberRange: filterFn_inNumberRange,
+    weakEquals: filterFn_weakEquals,
+  },
+  sortFns: {
+    alphanumeric: sortFn_alphanumeric,
+    datetime: sortFn_datetime,
+    text: sortFn_text,
+  },
+})
+
+export type DataTableFeatures = typeof dataTableFeatures
+
+type UseDataTableOptions<TData extends RowData> = {
   data: TData[]
-  columns: ColumnDef<TData, unknown>[]
+  columns: ColumnDef<DataTableFeatures, TData, unknown>[]
   getRowId?: (row: TData) => string
   initialSorting?: SortingState
   initialGlobalFilter?: string
   initialFilters?: ColumnFiltersState
-  initialVisibility?: VisibilityState
+  initialVisibility?: ColumnVisibilityState
   initialSelection?: RowSelectionState
   pageSize?: number
   manual?: { rowCount: number; page: number; onPageChange: (page: number) => void }
 }
 
-export function useDataTable<TData>(options: UseDataTableOptions<TData>) {
+export function useDataTable<TData extends RowData>(options: UseDataTableOptions<TData>) {
   const {
     data,
     columns,
@@ -64,11 +113,14 @@ export function useDataTable<TData>(options: UseDataTableOptions<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>(initialSorting)
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(initialFilters)
   const [globalFilter, setGlobalFilter] = React.useState<string>(initialGlobalFilter)
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(initialVisibility)
+
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<ColumnVisibilityState>(initialVisibility)
+
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>(initialSelection)
 
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const table = useReactTable({
+  const table = useTable({
+    features: dataTableFeatures,
     data,
     columns,
     getRowId,
@@ -99,23 +151,17 @@ export function useDataTable<TData>(options: UseDataTableOptions<TData>) {
     onRowSelectionChange: setRowSelection,
     onGlobalFilterChange: setGlobalFilter,
     onColumnVisibilityChange: setColumnVisibility,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
   })
 
   return { table, setColumnFilters, setGlobalFilter, globalFilter }
 }
 
-export function DataTableColumnHeader<TData, TValue>({
+export function DataTableColumnHeader<TData extends RowData, TValue>({
   column,
   title,
   className,
 }: {
-  column: Column<TData, TValue>
+  column: Column<DataTableFeatures, TData, TValue>
   title: string
   className?: string
 }) {
@@ -149,17 +195,17 @@ export function DataTableColumnHeader<TData, TValue>({
   )
 }
 
-export function DataTablePagination<TData>({
+export function DataTablePagination<TData extends RowData>({
   table,
   summary,
   totalOverride,
 }: {
-  table: TableType<TData>
+  table: ReactTable<DataTableFeatures, TData>
   summary?: (range: { start: number; end: number; total: number }) => string
   totalOverride?: number
 }) {
   const t = useTranslations("table")
-  const { pageIndex, pageSize } = table.getState().pagination
+  const { pageIndex, pageSize } = table.state.pagination
   const rows = table.getRowCount()
   const total = totalOverride ?? rows
   const start = rows === 0 ? 0 : pageIndex * pageSize + 1
@@ -200,13 +246,13 @@ export function DataTablePagination<TData>({
   )
 }
 
-export function DataTableView<TData>({
+export function DataTableView<TData extends RowData>({
   table,
   className,
   rowClassName,
   emptyMessage,
 }: {
-  table: TableType<TData>
+  table: ReactTable<DataTableFeatures, TData>
   className?: string
   rowClassName?: (row: TData) => string | undefined
   emptyMessage?: React.ReactNode
