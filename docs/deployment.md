@@ -23,11 +23,10 @@ a `http://localhost` URL.
 
 Repository variables, read at build time and written into the bundle (`NEXT_PUBLIC_*` values are public):
 
-| Variable                           | Value                  | Notes                                                                                                                                                                                   |
-| ---------------------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_API_BASE_URL`         | `/api`                 | Required. An absolute URL without a trailing slash only under D2's fallback, an API on its own origin (`https://api.khmk-koeln.com/api`), which then needs that origin in `connect-src` |
-| `NEXT_PUBLIC_IMPRESSUM_URL`        | The church's Impressum | Linked from the pages before sign-in (#29)                                                                                                                                              |
-| `NEXT_PUBLIC_REGISTRATION_ENABLED` | `true` or empty        | Self-registration and the Settings section that approves it (#17, S2); off when empty                                                                                                   |
+| Variable                    | Value                  | Notes                                                                                                                                                                                   |
+| --------------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_API_BASE_URL`  | `/api`                 | Required. An absolute URL without a trailing slash only under D2's fallback, an API on its own origin (`https://api.khmk-koeln.com/api`), which then needs that origin in `connect-src` |
+| `NEXT_PUBLIC_IMPRESSUM_URL` | The church's Impressum | Linked from the pages before sign-in (#29)                                                                                                                                              |
 
 ## Serving rules
 

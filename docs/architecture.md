@@ -42,8 +42,7 @@ The contract is the backend's `docs/api.md`. The web app is served from the same
 `https://app.khmk-koeln.com` serves the static files at `/` and the API at `/api` (D2), so the browser makes
 no cross-origin calls and needs no CORS. `NEXT_PUBLIC_API_BASE_URL` is `/api` in production builds (an
 absolute URL only if the API ever has to move to its own origin) and `http://localhost:8000/api` in
-development; `src/lib/env.ts` checks it, and a production build fails without it. `NEXT_PUBLIC_REGISTRATION_ENABLED=true` shows
-the link to self-registration on the sign-in page (S2); it is off unless set. `NEXT_PUBLIC_RESET_BY_EMAIL=true`
+development; `src/lib/env.ts` checks it, and a production build fails without it. `NEXT_PUBLIC_RESET_BY_EMAIL=true`
 lets people request a password link by email on the forgot-password page once the API can send email in
 production; off unless set, the page says to ask the church office.
 

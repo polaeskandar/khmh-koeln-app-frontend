@@ -192,6 +192,16 @@ describe("in Arabic", () => {
   })
 })
 
+test("the sign-in page links to self-registration", async () => {
+  backend(ok)
+  await signIn()
+
+  expect(screen.getByRole("link", { name: "Create an account" })).toHaveAttribute(
+    "href",
+    "/register/"
+  )
+})
+
 test("the waiting page promises no email", () => {
   renderWithProviders(<PendingPage />)
 
