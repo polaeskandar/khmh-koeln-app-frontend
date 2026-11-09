@@ -346,6 +346,8 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
             <p className="text-xs text-muted-foreground">
               {t("accountRequests.approve.searchMember")}
             </p>
+          ) : candidates.isError ? (
+            <QueryErrorState error={candidates.error} onRetry={() => candidates.refetch()} />
           ) : candidates.data && items.length === 0 ? (
             <p className="text-xs text-muted-foreground">
               {t("accountRequests.approve.noMemberMatches")}

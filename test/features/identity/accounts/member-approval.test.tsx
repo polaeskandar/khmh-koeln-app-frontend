@@ -215,6 +215,25 @@ test("a long note is refused before sending, and 16 or older sends no note", asy
   })
 })
 
+test("a failed record search says so and retries", async () => {
+  let searches = 0
+  open("Kirollos Iskander", [])
+
+  server.use(
+    http.get(apiUrl("/account-requests/member-candidates"), () =>
+      ++searches === 1
+        ? problem(429, "tooManyRequests")
+        : HttpResponse.json({
+            items: [candidate("0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ec705", "Kirollos", "Iskander")],
+          })
+    )
+  )
+
+  const dialog = await openDialog()
+  await userEvent.click(await dialog.findByRole("button", { name: "Try again" }))
+  expect(await dialog.findByRole("radio", { name: /Kirollos Iskander/ })).toBeInTheDocument()
+})
+
 describe("a member without a record", () => {
   const sundaySchool = services.items[0]!
   const thirdClass = sundaySchool.stages.find((stage) => stage.name === "3rd Class")!
