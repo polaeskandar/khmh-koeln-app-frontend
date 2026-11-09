@@ -1,4 +1,4 @@
-import type { ServiceList, ServiceRow } from "@/features/services/api"
+import type { ServiceList, ServiceRow } from "@/features/organization/services/api"
 
 const can = {
   edit: true,

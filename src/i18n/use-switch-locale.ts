@@ -2,7 +2,7 @@
 
 import { useQueryClient } from "@tanstack/react-query"
 
-import { saveAccountLanguage } from "@/features/auth/account-language"
+import { saveAccountLanguage } from "@/features/identity/auth/account-language"
 
 import type { Locale } from "./config"
 import { storeLocale } from "./locale-choice"

@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
-import { StageOverview } from "@/features/stages/stage-layout"
+import { StageOverview } from "@/features/organization/stages/stage-layout"
 import { pageLocale } from "@/i18n/page"
 
 export async function generateMetadata({

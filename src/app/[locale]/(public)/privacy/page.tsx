@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
-import { readPrivacyNotice } from "@/features/privacy/notice"
-import { PrivacyNoticePage } from "@/features/privacy/privacy-notice-page"
+import { readPrivacyNotice } from "@/features/privacy/notice/notice"
+import { PrivacyNoticePage } from "@/features/privacy/notice/privacy-notice-page"
 import { pageLocale } from "@/i18n/page"
 
 export async function generateMetadata({

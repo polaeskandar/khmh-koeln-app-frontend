@@ -1,4 +1,4 @@
-import type { AttendanceBoard, Mark } from "@/features/attendance/api"
+import type { AttendanceBoard, Mark } from "@/features/meetings/attendance/api"
 import type { PersonRef } from "@/lib/api/types/common"
 
 import { session, stageRef, sundaySchool } from "@test/support/fixtures/sessions"

@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
-import { SignInPage } from "@/features/auth/sign-in-page"
+import { SignInPage } from "@/features/identity/auth/sign-in-page"
 import { pageLocale } from "@/i18n/page"
 
 export async function generateMetadata({

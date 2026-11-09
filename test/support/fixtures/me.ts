@@ -1,4 +1,4 @@
-import type { Me } from "@/features/auth/api"
+import type { Me } from "@/features/identity/auth/api"
 import type { Action, Permission, Resource } from "@/lib/permissions"
 
 const ACTIONS: Action[] = ["read", "create", "update", "delete"]
