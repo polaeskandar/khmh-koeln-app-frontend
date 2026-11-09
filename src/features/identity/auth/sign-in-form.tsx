@@ -13,6 +13,7 @@ import { Link, useRouter } from "@/i18n/navigation"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { routes } from "@/lib/routes"
 
+import { forgetOutcome, rememberOutcome } from "./auth-outcome"
 import { signInRequest } from "./api"
 import { PasswordField } from "./password-field"
 import { useSession } from "./session"
@@ -37,10 +38,13 @@ export function SignInForm() {
     const result = await signIn.execute({ email, password })
 
     if (result.ok) {
+      forgetOutcome()
       await refresh()
     } else if (result.problem.code === "auth.unconfirmed") {
+      rememberOutcome("unconfirmed")
       router.push(routes.signInUnconfirmed())
     } else if (result.problem.code === "auth.pending") {
+      rememberOutcome("pending")
       router.push(routes.signInPending())
     } else {
       setError(

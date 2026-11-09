@@ -13,6 +13,7 @@ import { renderWithProviders } from "@test/support/providers"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
+import { forgetOutcome, rememberOutcome } from "@/features/identity/auth/auth-outcome"
 import { PendingPage, SignInPage, UnconfirmedPage } from "@/features/identity/auth/sign-in-page"
 
 vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
@@ -28,6 +29,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  forgetOutcome()
   vi.restoreAllMocks()
   router.replace.mockReset()
   router.push.mockReset()
@@ -213,6 +215,7 @@ test("the sign-in page links to self-registration", async () => {
 })
 
 test("the confirm-first page explains the link and offers to register again", () => {
+  rememberOutcome("unconfirmed")
   renderWithProviders(<UnconfirmedPage />)
 
   expect(
@@ -228,6 +231,7 @@ test("the confirm-first page explains the link and offers to register again", ()
 })
 
 test("the waiting page promises no email", () => {
+  rememberOutcome("pending")
   renderWithProviders(<PendingPage />)
 
   expect(
@@ -240,4 +244,32 @@ test("the waiting page promises no email", () => {
 
   expect(screen.getByText(/links the account to their own record/)).toBeInTheDocument()
   expect(document.body.textContent).not.toMatch(/email as soon|Prototype/)
+})
+
+test.each([
+  ["waiting", <PendingPage key="pending" />],
+  ["confirm-first", <UnconfirmedPage key="unconfirmed" />],
+])("the %s page is a 404 unless sign-in just led there", (_, page) => {
+  renderWithProviders(page)
+
+  expect(screen.getByRole("heading", { name: "This page doesn’t exist" })).toBeInTheDocument()
+})
+
+test("the waiting page is a 404 after the confirm-first outcome, and the other way round", () => {
+  rememberOutcome("unconfirmed")
+  renderWithProviders(<PendingPage />)
+
+  expect(screen.getByRole("heading", { name: "This page doesn’t exist" })).toBeInTheDocument()
+})
+
+test("a successful sign-in forgets the last status outcome", async () => {
+  rememberOutcome("pending")
+  backend(ok)
+  await signIn()
+  await submit()
+
+  await waitFor(() => expect(router.replace).toHaveBeenCalled())
+  renderWithProviders(<PendingPage />)
+
+  expect(screen.getByRole("heading", { name: "This page doesn’t exist" })).toBeInTheDocument()
 })
