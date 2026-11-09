@@ -130,6 +130,71 @@ test("empty results say Nobody here, or Nobody matches the query", async () => {
   expect(await screen.findAllByText("Nobody here")).not.toHaveLength(0)
   await userEvent.type(screen.getByRole("textbox", { name: "Search people" }), "zz")
   expect(await screen.findAllByText("Nobody matches “zz”")).not.toHaveLength(0)
+
+  expect(
+    screen.getAllByText("Check the spelling, or look in the other tabs.").length
+  ).toBeGreaterThan(0)
+
+  expect(screen.queryByRole("button", { name: "Clear filters" })).toBeNull()
+})
+
+describe("an empty list names the filters", () => {
+  const thirdClassGroup = `stage%3A${thirdClassStage.id}`
+  const named = "⁨Sunday School · 3rd Class⁩"
+
+  test("a search in a group says the group hides people; each button clears its part", async () => {
+    address.set(`q=kiro&group=stage:${thirdClassStage.id}`)
+    open(() => peopleList([]))
+    expect(await screen.findAllByText("Nobody matches “kiro”")).not.toHaveLength(0)
+
+    expect(
+      screen.getAllByText(`Check the spelling, or clear the filters (${named}) to search everyone.`)
+        .length
+    ).toBeGreaterThan(0)
+
+    await userEvent.click(screen.getAllByRole("button", { name: "Clear filters" })[0])
+    expect(router.push).toHaveBeenLastCalledWith("/members/?q=kiro", { scroll: false })
+    act(() => address.set(`q=kiro&group=stage:${thirdClassStage.id}`))
+    await userEvent.click((await screen.findAllByRole("button", { name: "Clear search" }))[1])
+
+    expect(router.replace).toHaveBeenLastCalledWith(`/members/?group=${thirdClassGroup}`, {
+      scroll: false,
+    })
+  })
+
+  test("the Inactive tab with a group and no search names both; Clear filters goes back to Active", async () => {
+    address.set(`group=stage:${thirdClassStage.id}&status=inactive`)
+    open(() => peopleList([]))
+
+    expect(
+      await screen.findAllByText(
+        `Filters are on: ${named}, ⁨Inactive⁩. Clear them to see everyone.`
+      )
+    ).not.toHaveLength(0)
+
+    expect(screen.queryByRole("button", { name: "Clear search" })).toBeNull()
+    await userEvent.click(screen.getAllByRole("button", { name: "Clear filters" })[0])
+    expect(router.push).toHaveBeenLastCalledWith("/members/", { scroll: false })
+
+    expect(await screen.findByRole("tab", { name: /^Active/ })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    )
+  })
+
+  test.each([
+    [
+      "de",
+      "Filter gesetzt: ⁨Inaktiv⁩. Setzen Sie die Filter zurück, um alle zu sehen.",
+      "Filter zurücksetzen",
+    ],
+    ["ar", "عوامل التصفية مفعّلة: ⁨غير نشط⁩. امسحها لرؤية الجميع.", "مسح عوامل التصفية"],
+  ] as const)("reads in %s", async (locale, hint, button) => {
+    address.set("status=inactive")
+    open(() => peopleList([]), locale)
+    expect(await screen.findAllByText(hint)).not.toHaveLength(0)
+    expect(screen.getAllByRole("button", { name: button }).length).toBeGreaterThan(0)
+  })
 })
 
 test("in Arabic the phone rows join groups with the Arabic comma", async () => {

@@ -40,6 +40,7 @@ import { useCan } from "@/features/identity/auth/session"
 import { servicesQuery } from "@/features/organization/services/api"
 import { useFormat } from "@/i18n/format"
 import { useRouter } from "@/i18n/navigation"
+import { isolate } from "@/lib/bidi"
 import { fullName, initials, preferredName } from "@/lib/domain/names"
 import { routes } from "@/lib/routes"
 
@@ -90,17 +91,72 @@ function BelongsTo({ person }: { person: PersonRow }) {
   )
 }
 
+function EmptyPeople({
+  query,
+  filters,
+  onClear,
+  onClearFilters,
+}: {
+  query: string
+  filters: string[]
+  onClear: () => void
+  onClearFilters: () => void
+}) {
+  const t = useTranslations()
+  const f = useFormat()
+  const named = filters.map(isolate).join(f.separator)
+
+  const hint = query
+    ? filters.length > 0
+      ? t("members.empty.noMatchFilteredHint", { filters: named })
+      : t("members.empty.noMatchHint")
+    : filters.length > 0
+      ? t("members.empty.filteredHint", { filters: named })
+      : t("members.empty.hint")
+
+  return (
+    <Empty className="py-6">
+      <EmptyHeader>
+        <EmptyTitle>
+          {query ? t("members.empty.noMatch", { query }) : t("members.empty.title")}
+        </EmptyTitle>
+        <EmptyDescription>{hint}</EmptyDescription>
+      </EmptyHeader>
+      {query || filters.length > 0 ? (
+        <EmptyContent>
+          <div className="flex flex-wrap justify-center gap-2">
+            {query ? (
+              <Button variant="outline" size="sm" onClick={onClear}>
+                {t("common.clearSearch")}
+              </Button>
+            ) : null}
+            {filters.length > 0 ? (
+              <Button variant="outline" size="sm" onClick={onClearFilters}>
+                {t("members.empty.clearFilters")}
+              </Button>
+            ) : null}
+          </div>
+        </EmptyContent>
+      ) : null}
+    </Empty>
+  )
+}
+
 function PeopleTable({
   list,
   query,
+  filters,
   onPage,
   onClear,
+  onClearFilters,
   onSelect,
 }: {
   list: PeopleList
   query: string
+  filters: string[]
   onPage: (page: number) => void
   onClear: () => void
+  onClearFilters: () => void
   onSelect?: (person: PersonRow) => void
 }) {
   const t = useTranslations()
@@ -135,23 +191,12 @@ function PeopleTable({
   })
 
   const empty = (
-    <Empty className="py-6">
-      <EmptyHeader>
-        <EmptyTitle>
-          {query ? t("members.empty.noMatch", { query }) : t("members.empty.title")}
-        </EmptyTitle>
-        <EmptyDescription>
-          {query ? t("members.empty.noMatchHint") : t("members.empty.hint")}
-        </EmptyDescription>
-      </EmptyHeader>
-      {query ? (
-        <EmptyContent>
-          <Button variant="outline" size="sm" onClick={onClear}>
-            {t("common.clearSearch")}
-          </Button>
-        </EmptyContent>
-      ) : null}
-    </Empty>
+    <EmptyPeople
+      query={query}
+      filters={filters}
+      onClear={onClear}
+      onClearFilters={onClearFilters}
+    />
   )
 
   return (
@@ -408,8 +453,13 @@ export function MembersScreen() {
           <PeopleTable
             list={list}
             query={q}
+            filters={[
+              ...(option ? [option.label] : []),
+              ...(status === "inactive" ? [t("common.inactive")] : []),
+            ]}
             onPage={setPage}
             onClear={search.clear}
+            onClearFilters={() => show({ group: "", status: "active" }, "push")}
             onSelect={(row) => setSelected({ row, key: filterKey, version: 0 })}
           />
         )}
