@@ -99,3 +99,10 @@ export const erasureReviewQuery = (id: Uuid) => ({
 
 export const eraseRequest = (id: Uuid, clearNotes: boolean) =>
   dataOf(api.POST("/data-requests/{id}/erase", { params: { path: { id } }, body: { clearNotes } }))
+
+export type CopyLink = Schemas["CopyLinkResponse"]
+
+export type CopyLinkStatus = Schemas["CopyLinkStatus"]
+
+export const createCopyLink = (id: Uuid) =>
+  dataOf(api.POST("/data-requests/{id}/copy-link", { params: { path: { id } }, body: {} }))

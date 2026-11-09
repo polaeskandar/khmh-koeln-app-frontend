@@ -328,7 +328,8 @@
       "subjectGone": "Die Daten, um die es in dieser Anfrage geht, gibt es nicht mehr.",
       "ownAccount": "Sie können Ihr eigenes Konto nicht löschen. Bitten Sie jemand anderen, der Datenschutzanfragen bearbeitet.",
       "declineReasonRequired": "Geben Sie den Grund an. Die Person muss ihn erfahren und darauf hingewiesen werden, dass sie sich bei der Datenschutzaufsicht beschweren kann.",
-      "nothingScheduled": "Für dieses Konto ist keine Löschung vorgemerkt."
+      "nothingScheduled": "Für dieses Konto ist keine Löschung vorgemerkt.",
+      "copyLinkInvalid": "Dieser Download-Link ist ungültig, wurde schon benutzt oder ist abgelaufen. Bitten Sie das Gemeindebüro um einen neuen."
     },
     "loadFailed": "Das konnte nicht geladen werden.",
     "notSaved": "Nicht gespeichert. Prüfen Sie Ihre Verbindung und versuchen Sie es noch einmal.",
@@ -2083,6 +2084,7 @@
       "erasedNote": "Der Name wurde auch aus diesem Protokoll entfernt.",
       "erasesOn": "Wird am {date} automatisch gelöscht, außer die Person widerruft vorher. Sie können die Daten auch jetzt schon löschen.",
       "erasedAutomatically": "Automatisch gelöscht {when}",
+      "downloadedOn": "Kopie von der Person heruntergeladen {when}",
       "withdrawnOn": "Zurückgezogen {when}: Die Person hat die Löschung widerrufen und ihr Konto behalten."
     },
     "erase": {
@@ -2124,6 +2126,34 @@
       "staysTotals": "Die Anwesenheitszahlen früherer Treffen bleiben, ohne Ihren Namen.",
       "password": "Ihr Passwort",
       "passwordHint": "Zur Bestätigung, dass Sie es sind."
+    },
+    "copyLink": {
+      "title": "Download-Link",
+      "description": "Ein Einmal-Link, mit dem die Person ihre Daten selbst herunterlädt. Er funktioniert einmal, 7 Tage lang; sobald er benutzt wird, ist die Anfrage abgeschlossen.",
+      "create": "Download-Link erstellen",
+      "createNew": "Neuen Link erstellen",
+      "newTitle": "Neuen Link erstellen?",
+      "newText": "Der bisherige Link funktioniert dann sofort nicht mehr.",
+      "newConfirm": "Neuen Link erstellen",
+      "link": "Link",
+      "copy": "Kopieren",
+      "copied": "Link kopiert.",
+      "copyFailed": "Kopieren hat nicht geklappt. Markieren Sie den Link und kopieren Sie ihn selbst.",
+      "shownOnce": "Kopieren Sie ihn jetzt: Der Link wird nur dieses eine Mal angezeigt.",
+      "emailedTo": "Per E-Mail an <email></email> geschickt.",
+      "handOver": "Nicht per E-Mail verschickt, weil es kein Konto dafür gibt. Geben Sie den Link selbst sicher weiter, zum Beispiel persönlich.",
+      "expires": "Gültig bis {date}, {time}.",
+      "expired": "Abgelaufen {when}.",
+      "used": "Benutzt {when}.",
+      "hidden": "Der Link selbst wurde nur einmal angezeigt, beim Erstellen."
+    },
+    "copy": {
+      "title": "Ihre Daten herunterladen",
+      "intro": "Eine Kopie von allem, was die App über Sie speichert, als JSON-Datei. Der Link funktioniert nur einmal; bewahren Sie die Datei gut auf.",
+      "download": "Daten herunterladen",
+      "savedTitle": "Ihre Daten sind heruntergeladen",
+      "savedText": "Die Datei liegt in Ihren Downloads. Dieser Link funktioniert jetzt nicht mehr; für eine weitere Kopie wenden Sie sich an das Gemeindebüro.",
+      "linkInvalid": "Dieser Link ist ungültig, wurde schon benutzt oder ist abgelaufen. Bitten Sie das Gemeindebüro um einen neuen."
     }
   },
   "member": {

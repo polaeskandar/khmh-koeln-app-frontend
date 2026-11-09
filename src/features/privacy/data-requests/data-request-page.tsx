@@ -1,9 +1,10 @@
 "use client"
 
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { CalendarClock, Eraser } from "lucide-react"
+import { CalendarClock, Copy, Eraser, Link2, RefreshCw } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useState } from "react"
+import { useId, useRef, useState } from "react"
+import { toast } from "sonner"
 
 import { Topbar } from "@/components/app-shell/topbar"
 import { ConfirmDialog } from "@/components/confirm-dialog"
@@ -14,6 +15,9 @@ import { NotFoundState, QueryErrorState, QueryState } from "@/components/page-st
 import { RecordPage } from "@/components/record-page"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { Spinner } from "@/components/ui/spinner"
 import { useCan, useSession } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -23,7 +27,10 @@ import { routes } from "@/lib/routes"
 
 import {
   accountRecordOf,
+  type CopyLink,
+  type CopyLinkStatus,
   type Counts,
+  createCopyLink,
   type DataRequestDetail,
   dataRequestQuery,
   eraseRequest,
@@ -207,7 +214,9 @@ function Outcome({ data }: { data: DataRequestDetail }) {
 
   const closed =
     request.kind === "copy"
-      ? t("detail.sentOn", { when })
+      ? request.closedBy
+        ? t("detail.sentOn", { when })
+        : t("detail.downloadedOn", { when })
       : !request.closedBy && request.erasesOn
         ? t("detail.erasedAutomatically", { when })
         : t("detail.erasedOn", { when })
@@ -228,6 +237,164 @@ function Outcome({ data }: { data: DataRequestDetail }) {
       {request.kind === "erasure" && !request.subjectName ? (
         <p className="text-sm text-muted-foreground">{t("detail.erasedNote")}</p>
       ) : null}
+    </Section>
+  )
+}
+
+function CreatedLink({ link }: { link: CopyLink }) {
+  const t = useTranslations("privacy.copyLink")
+  const id = useId()
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(link.url)
+      toast.success(t("copied"))
+    } catch {
+      toast.error(t("copyFailed"))
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <FieldLabel htmlFor={id}>{t("link")}</FieldLabel>
+      <div className="flex gap-2">
+        <Input
+          id={id}
+          readOnly
+          dir="ltr"
+          value={link.url}
+          className="min-w-0 flex-1 font-mono text-xs"
+          onFocus={(event) => event.currentTarget.select()}
+        />
+        <Button variant="outline" className="shrink-0" onClick={() => void copy()}>
+          <Copy data-icon="inline-start" />
+          {t("copy")}
+        </Button>
+      </div>
+      <p className="text-xs text-muted-foreground">{t("shownOnce")}</p>
+    </div>
+  )
+}
+
+function LinkStatus({
+  status,
+  today,
+  linkShown,
+}: {
+  status: CopyLinkStatus
+  today: string
+  linkShown: boolean
+}) {
+  const t = useTranslations("privacy.copyLink")
+  const f = useFormat()
+  const [now] = useState(Date.now)
+  const expired = !status.usedAt && Date.parse(status.expiresAt) <= now
+
+  return (
+    <ul className="flex flex-col gap-1 text-sm">
+      <li>
+        {status.usedAt
+          ? t("used", { when: f.atLabel(status.usedAt, today) })
+          : expired
+            ? t("expired", { when: f.atLabel(status.expiresAt, today) })
+            : t("expires", {
+                date: f.dayMonth(f.instantDate(status.expiresAt)),
+                time: f.instantTime(status.expiresAt),
+              })}
+      </li>
+      <li className="text-muted-foreground">
+        {status.emailedTo
+          ? t.rich("emailedTo", { email: () => <bdi dir="ltr">{status.emailedTo}</bdi> })
+          : t("handOver")}
+      </li>
+      {linkShown ? null : <li className="text-muted-foreground">{t("hidden")}</li>}
+    </ul>
+  )
+}
+
+function CopyLinkSection({ data }: { data: DataRequestDetail }) {
+  const t = useTranslations()
+  const queryClient = useQueryClient()
+  const [created, setCreated] = useState<CopyLink | null>(null)
+  const creating = useRef(false)
+  const { request } = data
+  const open = request.status === "open"
+  const gone = data.member === null && data.account === null
+
+  const create = useApiMutation(() => createCopyLink(request.id), {
+    onSuccess: setCreated,
+    invalidate: [["data-requests"]],
+  })
+
+  const shown = created
+    ? { expiresAt: created.expiresAt, emailedTo: created.emailedTo, usedAt: null }
+    : data.copyLink
+
+  async function createLink() {
+    if (creating.current) {
+      return false
+    }
+
+    creating.current = true
+
+    try {
+      const result = await create.execute()
+
+      if (result.ok) {
+        return true
+      }
+
+      if (result.problem.status !== 409) {
+        return false
+      }
+
+      void queryClient.invalidateQueries({ queryKey: ["data-requests"] })
+
+      return true
+    } finally {
+      creating.current = false
+    }
+  }
+
+  if (!open && !shown) {
+    return null
+  }
+
+  const actions =
+    !open || gone ? null : shown ? (
+      <ConfirmDialog
+        trigger={
+          <Button variant="outline">
+            <RefreshCw data-icon="inline-start" />
+            {t("privacy.copyLink.createNew")}
+          </Button>
+        }
+        title={t("privacy.copyLink.newTitle")}
+        description={t("privacy.copyLink.newText")}
+        confirmLabel={t("privacy.copyLink.newConfirm")}
+        onConfirm={createLink}
+      />
+    ) : (
+      <Button disabled={create.pending} onClick={() => void createLink()}>
+        {create.pending ? <Spinner data-icon="inline-start" /> : <Link2 data-icon="inline-start" />}
+        {t("privacy.copyLink.create")}
+      </Button>
+    )
+
+  return (
+    <Section
+      id="copy-link"
+      title={t("privacy.copyLink.title")}
+      description={open ? t("privacy.copyLink.description") : undefined}
+      actions={actions}
+    >
+      {open && gone ? (
+        <p className="border border-dashed p-4 text-sm text-muted-foreground">
+          {t("errors.privacy.subjectGone")}
+        </p>
+      ) : null}
+      {created ? <CreatedLink link={created} /> : null}
+      {shown ? <LinkStatus status={shown} today={data.today} linkShown={created !== null} /> : null}
     </Section>
   )
 }
@@ -352,6 +519,7 @@ function RequestView({ data }: { data: DataRequestDetail }) {
             {erasure && !blocked && review.isError ? (
               <QueryErrorState error={review.error} onRetry={() => review.refetch()} />
             ) : null}
+            {request.kind === "copy" ? <CopyLinkSection data={data} /> : null}
             <Outcome data={data} />
           </div>
           <aside className="flex min-w-0 flex-col gap-6 lg:self-start">

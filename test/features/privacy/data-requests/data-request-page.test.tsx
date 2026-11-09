@@ -2,10 +2,11 @@ import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
+import type { Schemas } from "@/lib/api/client"
 import { SessionProvider } from "@/features/identity/auth/session"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -350,4 +351,300 @@ test("a withdrawn erasure reads Withdrawn and says the person kept the account",
 
   expect(screen.queryByRole("button", { name: "Erase data…" })).not.toBeInTheDocument()
   expect(screen.queryByText(/Erased automatically/)).not.toBeInTheDocument()
+})
+
+describe("a copy request", () => {
+  const URL_SENT = "https://app.khmk-koeln.com/en/data-copy/#token=kXh2abc"
+  const NEW_URL = "https://app.khmk-koeln.com/en/data-copy/#token=nEw9xyz"
+
+  const hoda = {
+    id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea131",
+    name: "Hoda Farag",
+    email: "hoda@example.org",
+    roles: ["Parent"],
+  }
+
+  const copyRequest = (extra: Partial<DataRequestDetail> = {}): DataRequestDetail =>
+    review({
+      request: { ...review().request, kind: "copy", subjectName: "Hoda Farag" },
+      member: null,
+      account: hoda,
+      ...extra,
+    })
+
+  const created = (url: string, emailedTo: string | null) => () =>
+    HttpResponse.json({ url, expiresAt: "2099-11-15T10:00:00Z", emailedTo }, { status: 201 })
+
+  function openCopy(
+    first: DataRequestDetail,
+    answers: (() => Response)[] = [created(URL_SENT, "hoda@example.org")]
+  ) {
+    let current = first
+    let reads = 0
+    const posted: unknown[] = []
+
+    server.use(
+      http.get(apiUrl("/me"), () => HttpResponse.json(me.administrator)),
+      http.get(apiUrl(`/data-requests/${ID}`), () => {
+        reads++
+
+        return HttpResponse.json(current)
+      }),
+      http.post(apiUrl(`/data-requests/${ID}/copy-link`), async ({ request }) => {
+        posted.push(await request.json())
+        const answer = (answers[posted.length - 1] ?? answers.at(-1)!)()
+
+        if (answer.status === 201) {
+          const link = (await answer.clone().json()) as Schemas["CopyLinkResponse"]
+
+          current = {
+            ...current,
+            copyLink: { expiresAt: link.expiresAt, emailedTo: link.emailedTo, usedAt: null },
+          }
+        }
+
+        return answer
+      })
+    )
+
+    renderWithProviders(
+      <SessionProvider>
+        <SidebarProvider>
+          <DataRequestPage />
+        </SidebarProvider>
+      </SessionProvider>
+    )
+
+    return { posted, reads: () => reads }
+  }
+
+  beforeEach(() => {
+    vi.spyOn(toast, "success")
+  })
+
+  test("without a link it offers Create download link and no erasure", async () => {
+    openCopy(copyRequest())
+    const panel = await section("Download link")
+
+    expect(
+      panel.getByText(
+        "A one-time link for the person to download their data themselves. It works once, for 7 days, and the request closes when it is used."
+      )
+    ).toBeInTheDocument()
+
+    expect(panel.getByRole("button", { name: "Create download link" })).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Erase data…" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("heading", { name: "What erasing deletes" })).toBeNull()
+  })
+
+  test("creating a link shows it with Copy, its expiry and where it was emailed", async () => {
+    const page = openCopy(copyRequest())
+    const panel = await section("Download link")
+    await userEvent.click(panel.getByRole("button", { name: "Create download link" }))
+
+    const link = await panel.findByRole("textbox", { name: "Link" })
+    expect(link).toHaveValue(URL_SENT)
+    expect(link).toHaveAttribute("dir", "ltr")
+    expect(link).toHaveAttribute("readonly")
+    expect(panel.getByText("Copy it now: the link is shown only this once.")).toBeInTheDocument()
+    expect(panel.getByText("Works until Sun 15 Nov, 11:00.")).toBeInTheDocument()
+    expect(panel.getByText("hoda@example.org")).toHaveAttribute("dir", "ltr")
+
+    expect(panel.getByText("hoda@example.org").parentElement).toHaveTextContent(
+      "Emailed to hoda@example.org."
+    )
+
+    expect(page.posted).toEqual([{}])
+    await waitFor(() => expect(page.reads()).toBe(2))
+    expect(panel.getByRole("button", { name: "Create a new link" })).toBeInTheDocument()
+    expect(panel.queryByText(/shown only once, when it was created/)).not.toBeInTheDocument()
+
+    const user = userEvent.setup()
+    await user.click(panel.getByRole("button", { name: "Copy" }))
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Link copied."))
+    expect(await navigator.clipboard.readText()).toBe(URL_SENT)
+  })
+
+  test("a copy the browser refuses says to copy it by hand", async () => {
+    openCopy(copyRequest())
+    const panel = await section("Download link")
+    await userEvent.click(panel.getByRole("button", { name: "Create download link" }))
+    await panel.findByRole("textbox", { name: "Link" })
+    const user = userEvent.setup()
+    vi.spyOn(navigator.clipboard, "writeText").mockRejectedValue(new Error("denied"))
+    await user.click(panel.getByRole("button", { name: "Copy" }))
+
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith(
+        "Couldn’t copy. Select the link and copy it yourself."
+      )
+    )
+  })
+
+  test("a member without an account gets a link to hand over", async () => {
+    openCopy(copyRequest({ account: null, member: review().member }), [created(URL_SENT, null)])
+    const panel = await section("Download link")
+    await userEvent.click(panel.getByRole("button", { name: "Create download link" }))
+
+    expect(
+      await panel.findByText(
+        "Not emailed, because there is no account to send it to. Hand it over yourself in a safe way, for example in person."
+      )
+    ).toBeInTheDocument()
+  })
+
+  test("an existing link shows its state without the link, and a new one voids it", async () => {
+    const page = openCopy(
+      copyRequest({
+        copyLink: {
+          expiresAt: "2099-11-15T10:00:00Z",
+          emailedTo: "hoda@example.org",
+          usedAt: null,
+        },
+      }),
+      [created(NEW_URL, "hoda@example.org")]
+    )
+
+    const panel = await section("Download link")
+    expect(panel.getByText("Works until Sun 15 Nov, 11:00.")).toBeInTheDocument()
+
+    expect(
+      panel.getByText("The link itself was shown only once, when it was created.")
+    ).toBeInTheDocument()
+
+    expect(panel.queryByRole("textbox")).not.toBeInTheDocument()
+    expect(panel.queryByRole("button", { name: "Create download link" })).not.toBeInTheDocument()
+    await userEvent.click(panel.getByRole("button", { name: "Create a new link" }))
+    const dialog = within(await screen.findByRole("alertdialog"))
+    expect(dialog.getByText("The current link stops working at once.")).toBeInTheDocument()
+    await userEvent.click(dialog.getByRole("button", { name: "Create new link" }))
+
+    expect(await panel.findByRole("textbox", { name: "Link" })).toHaveValue(NEW_URL)
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument())
+    expect(page.posted).toEqual([{}])
+  })
+
+  test("Cancel keeps the old link", async () => {
+    const page = openCopy(
+      copyRequest({
+        copyLink: { expiresAt: "2099-11-15T10:00:00Z", emailedTo: null, usedAt: null },
+      })
+    )
+
+    await userEvent.click(
+      (await section("Download link")).getByRole("button", { name: "Create a new link" })
+    )
+
+    await userEvent.click(
+      within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Cancel" })
+    )
+
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument())
+    expect(page.posted).toEqual([])
+  })
+
+  test("an expired link says so", async () => {
+    openCopy(
+      copyRequest({
+        copyLink: { expiresAt: "2026-11-01T10:00:00Z", emailedTo: null, usedAt: null },
+      })
+    )
+
+    expect(
+      (await section("Download link")).getByText("Expired on Sun 1 Nov at 11:00.")
+    ).toBeInTheDocument()
+  })
+
+  test("a used link closed the request: it says when, and offers nothing", async () => {
+    openCopy(
+      copyRequest({
+        request: { ...copyRequest().request, status: "done", closedAt: "2026-11-08T11:08:00Z" },
+        copyLink: {
+          expiresAt: "2099-11-15T10:00:00Z",
+          emailedTo: "hoda@example.org",
+          usedAt: "2026-11-08T11:08:00Z",
+        },
+      })
+    )
+
+    const panel = await section("Download link")
+    expect(panel.getByText("Used today at 12:08.")).toBeInTheDocument()
+    expect(panel.queryByRole("button")).not.toBeInTheDocument()
+
+    expect(
+      (await section("Outcome")).getByText("Copy downloaded by the person today at 12:08")
+    ).toBeInTheDocument()
+
+    expect(screen.getByText("Done")).toBeInTheDocument()
+  })
+
+  test.each([
+    ["privacy.notOpen", "This request has already been closed."],
+    ["privacy.notCopy", "This is not a request for a copy."],
+    ["privacy.subjectGone", "The data this request is about no longer exists."],
+  ])("a refusal (%s) toasts its text and refetches", async (code, text) => {
+    const page = openCopy(copyRequest(), [() => problem(409, code)])
+    const panel = await section("Download link")
+    await userEvent.click(panel.getByRole("button", { name: "Create download link" }))
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(text))
+    await waitFor(() => expect(page.reads()).toBeGreaterThanOrEqual(2))
+    expect(panel.queryByRole("textbox")).not.toBeInTheDocument()
+  })
+
+  test("a double click creates one link", async () => {
+    let answer = () => {}
+    const page = openCopy(copyRequest())
+
+    server.use(
+      http.post(apiUrl(`/data-requests/${ID}/copy-link`), async ({ request }) => {
+        page.posted.push(await request.json())
+        await new Promise<void>((resolve) => (answer = resolve))
+
+        return created(URL_SENT, null)()
+      })
+    )
+
+    const panel = await section("Download link")
+    await userEvent.dblClick(panel.getByRole("button", { name: "Create download link" }))
+    answer()
+    expect(await panel.findByRole("textbox", { name: "Link" })).toHaveValue(URL_SENT)
+    expect(page.posted).toHaveLength(1)
+  })
+
+  test("a subject that is gone gets no link", async () => {
+    openCopy(copyRequest({ account: null, member: null }))
+    const panel = await section("Download link")
+    expect(panel.getByText("The data this request is about no longer exists.")).toBeInTheDocument()
+    expect(panel.queryByRole("button")).not.toBeInTheDocument()
+  })
+
+  test("reads in Arabic with the address left to right", async () => {
+    server.use(
+      http.get(apiUrl("/me"), () => HttpResponse.json(me.administrator)),
+      http.get(apiUrl(`/data-requests/${ID}`), () =>
+        HttpResponse.json(
+          copyRequest({
+            copyLink: {
+              expiresAt: "2099-11-15T10:00:00Z",
+              emailedTo: "hoda@example.org",
+              usedAt: null,
+            },
+          })
+        )
+      )
+    )
+
+    renderWithProviders(
+      <SessionProvider>
+        <SidebarProvider>
+          <DataRequestPage />
+        </SidebarProvider>
+      </SessionProvider>,
+      { locale: "ar" }
+    )
+
+    const panel = await section("رابط التنزيل")
+    expect(panel.getByText("hoda@example.org")).toHaveAttribute("dir", "ltr")
+    expect(panel.getByRole("button", { name: "إنشاء رابط جديد" })).toBeInTheDocument()
+  })
 })
