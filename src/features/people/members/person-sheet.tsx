@@ -51,7 +51,7 @@ import {
   renamePersonRequest,
   moveMembershipRequest,
 } from "./api"
-import { useGroupOptions } from "./groups"
+import { blocksPlacement, useGroupOptions } from "./groups"
 
 const PEOPLE_QUERIES = [["people"], ["services"]]
 
@@ -299,11 +299,15 @@ function AddTo({ person }: { person: PersonRow }) {
   const t = useTranslations()
   const options = useGroupOptions()
 
-  const current = new Set(
-    person.placements.map((p) => (p.stage ? `stage:${p.stage.id}` : `service:${p.service.id}`))
+  const held = person.placements.map((p) => ({
+    serviceId: p.service.id,
+    stageId: p.stage?.id ?? null,
+  }))
+
+  const missing = options.filter(
+    (option) => !held.some((placement) => blocksPlacement(placement, option.placement))
   )
 
-  const missing = options.filter((option) => !current.has(option.value))
   const [chosen, setChosen] = useState("")
 
   const join = useApiMutation(joinRequest, {

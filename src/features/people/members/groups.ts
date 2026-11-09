@@ -32,3 +32,13 @@ export function useGroupOptions(): GroupOption[] {
       })),
     ])
 }
+
+type GroupPlacement = GroupOption["placement"]
+
+export function blocksPlacement(held: GroupPlacement, wanted: GroupPlacement): boolean {
+  if (held.serviceId !== wanted.serviceId) {
+    return false
+  }
+
+  return held.stageId === wanted.stageId || (held.stageId === null) !== (wanted.stageId === null)
+}

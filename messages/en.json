@@ -194,6 +194,7 @@
       "duplicateTitle": "Possible duplicate",
       "duplicate": "{count, plural, one {Someone called {name} already exists.} other {# people called {name} already exist.}} Check that this is a different person.",
       "alreadyIn": "{name} is already in {where}.",
+      "alreadyInService": "{name} is already in {where}. Within one service, a person is on the service itself or on its stages, not both.",
       "membershipEnded": "This membership has already ended.",
       "addNotAllowed": "You can’t add people.",
       "changeNotAllowed": "You can’t change people or their stages.",

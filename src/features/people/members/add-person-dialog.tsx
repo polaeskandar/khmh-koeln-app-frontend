@@ -32,6 +32,7 @@ import {
   type NewPerson,
   type PlacementInput,
 } from "./api"
+import { blocksPlacement } from "./groups"
 import { PlacementFields, usePlacement } from "./placement-fields"
 
 type Candidate = PersonRef & { groups: { service: ServiceRef; stage: StageRef | null }[] }
@@ -39,9 +40,8 @@ type Candidate = PersonRef & { groups: { service: ServiceRef; stage: StageRef | 
 const PEOPLE_QUERIES = [["people"], ["services"], ["stages"]]
 
 const groupAt = (candidate: Candidate, placement: PlacementInput) =>
-  candidate.groups.find(
-    (group) =>
-      group.service.id === placement.serviceId && (group.stage?.id ?? null) === placement.stageId
+  candidate.groups.find((group) =>
+    blocksPlacement({ serviceId: group.service.id, stageId: group.stage?.id ?? null }, placement)
   )
 
 function AddPersonForm({ preset, onDone }: { preset?: PlacementInput; onDone: () => void }) {
