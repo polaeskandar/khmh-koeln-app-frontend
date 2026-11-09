@@ -1,10 +1,12 @@
 import { screen, within } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Locale } from "@/i18n/config"
+import { isolate } from "@/lib/bidi"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import {
@@ -162,6 +164,31 @@ test("empty groups and meetings say so", async () => {
   ).toBeInTheDocument()
 
   expect(await screen.findByText("No meetings in the next two weeks.")).toBeInTheDocument()
+})
+
+test("the square on a card ticks the member's own task off", async () => {
+  open()
+  const task = nevineHomework.todo[0]!
+  const reported: string[] = []
+
+  server.use(
+    http.put(apiUrl("/member/homework/:id/completion"), ({ params }) => {
+      reported.push(String(params.id))
+
+      return HttpResponse.json({
+        done: true,
+        completedAt: "2026-11-08T11:08:00Z",
+        completedBy: "Nevine Boulos",
+        completedByYou: true,
+      })
+    })
+  )
+
+  const toDo = within(await screen.findByRole("region", { name: "To do" }))
+  const name = `Mark “${isolate(task.title)}” done`
+  await userEvent.click(toDo.getByRole("button", { name }))
+  await vi.waitFor(() => expect(reported).toEqual([task.id]))
+  expect(toDo.getByRole("button", { name })).toHaveAttribute("aria-pressed", "true")
 })
 
 test("an account unlinked meanwhile reads not linked", async () => {

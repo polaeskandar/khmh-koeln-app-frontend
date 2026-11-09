@@ -1467,7 +1467,8 @@
       "doneBy": "Done · reported by {name} {when}",
       "doneByParent": "Done · reported by a parent {when}",
       "done": "Done",
-      "toDo": "To do"
+      "toDo": "To do",
+      "markDone": "Mark “{title}” done for {name}"
     },
     "completion": {
       "markDone": "Mark as done",
@@ -2138,7 +2139,8 @@
       "done": "Done",
       "emptyToDo": "Nothing to do right now.",
       "emptyDone": "Nothing ticked off yet.",
-      "forYou": "For you"
+      "forYou": "For you",
+      "markDone": "Mark “{title}” done"
     },
     "completion": {
       "hint": "Tap when you’ve done it. You can undo it.",

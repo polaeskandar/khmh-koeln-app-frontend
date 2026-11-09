@@ -1467,7 +1467,8 @@
       "doneBy": "Erledigt · {when} von {name} gemeldet",
       "doneByParent": "Erledigt · {when} von einem Elternteil gemeldet",
       "done": "Erledigt",
-      "toDo": "Zu erledigen"
+      "toDo": "Zu erledigen",
+      "markDone": "„{title}“ für {name} als erledigt melden"
     },
     "completion": {
       "markDone": "Als erledigt melden",
@@ -2138,7 +2139,8 @@
       "done": "Erledigt",
       "emptyToDo": "Gerade gibt es nichts zu erledigen.",
       "emptyDone": "Noch nichts abgehakt.",
-      "forYou": "Für Sie"
+      "forYou": "Für Sie",
+      "markDone": "„{title}“ als erledigt melden"
     },
     "completion": {
       "hint": "Tippen Sie, wenn Sie es erledigt haben. Sie können es rückgängig machen.",

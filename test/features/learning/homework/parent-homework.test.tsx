@@ -1,8 +1,11 @@
 import { screen, within } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
+import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import type { Locale } from "@/i18n/config"
+import { isolate } from "@/lib/bidi"
 import { apiUrl, problem } from "@test/support/api"
 import { homeworkOf, MIMI_ID, MINA_ID, mimi, mina } from "@test/support/fixtures/parent"
 import { server } from "@test/support/msw"
@@ -19,6 +22,8 @@ vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation
 beforeEach(() => {
   search.value = ""
   vi.spyOn(console, "error").mockImplementation(() => {})
+  vi.spyOn(toast, "success")
+  vi.spyOn(toast, "error")
 })
 
 afterEach(() => vi.restoreAllMocks())
@@ -155,4 +160,97 @@ test("in Arabic stage names sit in bdi", async () => {
     "The Good Shepherd",
     "3rd Class",
   ])
+})
+
+const drawing = homeworkOf[MINA_ID].todo[0]
+const reading = homeworkOf[MINA_ID].done[0]
+
+const completion = (task: ParentTask) =>
+  apiUrl(`/parent/children/${MINA_ID}/homework/${task.id}/completion`)
+
+const square = (title: string) =>
+  screen.findByRole("button", { name: `Mark “${isolate(title)}” done for ${isolate("Mina")}` })
+
+test("tapping a card's square reports the task done once, in place, and refreshes the lists", async () => {
+  search.value = `child=${MINA_ID}`
+  const requested = open()
+  const puts: unknown[] = []
+
+  server.use(
+    http.put(completion(drawing), async ({ request }) => {
+      puts.push(await request.json())
+
+      return HttpResponse.json(
+        {
+          done: true,
+          completedAt: "2026-11-08T11:08:00Z",
+          completedBy: "Hoda Farag",
+          completedByYou: true,
+        },
+        { status: 201 }
+      )
+    })
+  )
+
+  const tick = await square(drawing.title)
+  expect(tick).toHaveAttribute("aria-pressed", "false")
+  await region("Done")
+  const reads = requested.length
+  await userEvent.dblClick(tick)
+  expect(tick).toHaveAttribute("aria-pressed", "true")
+  const card = screen.getByRole("link", { name: /Draw the shepherd and his sheep/ })
+  await vi.waitFor(() => expect(card).toHaveTextContent("Done · reported by you today at 12:08"))
+  expect(puts).toEqual([{}])
+  await vi.waitFor(() => expect(requested.length).toBe(reads + 2))
+  expect(toast.error).not.toHaveBeenCalled()
+})
+
+test("tapping a done card's square takes the report back and says so", async () => {
+  search.value = `child=${MINA_ID}`
+  open()
+  const deletes: unknown[] = []
+
+  server.use(
+    http.delete(completion(reading), async ({ request }) => {
+      deletes.push(await request.json())
+
+      return new HttpResponse(null, { status: 204 })
+    })
+  )
+
+  const tick = await square(reading.title)
+  expect(tick).toHaveAttribute("aria-pressed", "true")
+  await userEvent.dblClick(tick)
+  await vi.waitFor(() => expect(toast.success).toHaveBeenCalledWith("Marked as not done for Mina."))
+  expect(tick).toHaveAttribute("aria-pressed", "false")
+  expect(deletes).toEqual([{}])
+})
+
+test("a refused report empties the square again and says why", async () => {
+  search.value = `child=${MINA_ID}`
+  open()
+  server.use(http.put(completion(drawing), () => problem(404, "homework.notAvailable")))
+  const tick = await square(drawing.title)
+  await userEvent.click(tick)
+
+  await vi.waitFor(() =>
+    expect(toast.error).toHaveBeenCalledWith("This homework is not available.")
+  )
+
+  await vi.waitFor(() => expect(tick).toHaveAttribute("aria-pressed", "false"))
+  expect(tick).not.toHaveAttribute("aria-disabled")
+})
+
+test("the square sits beside the link, which still opens the task", async () => {
+  search.value = `child=${MINA_ID}`
+  open()
+  const tick = await square(drawing.title)
+  const card = screen.getByRole("link", { name: /Draw the shepherd and his sheep/ })
+
+  expect(card).toHaveAttribute("href", `/parent/homework/view/?id=${drawing.id}&child=${MINA_ID}`)
+
+  expect(card).not.toContainElement(tick)
+  expect(tick.closest("a")).toBeNull()
+  expect(tick).toHaveAttribute("type", "button")
+  expect(tick).toHaveClass("min-h-11", "min-w-11", "focus-visible:ring-2")
 })

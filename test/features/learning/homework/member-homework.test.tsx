@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import type { Locale } from "@/i18n/config"
+import { isolate } from "@/lib/bidi"
 import { apiUrl, problem } from "@test/support/api"
 import { nevineHomework } from "@test/support/fixtures/member"
 import { server } from "@test/support/msw"
@@ -87,6 +88,45 @@ test("the list shows what is to do and what was done", async () => {
   expect(done.getByRole("link", { name: /Say the Easter greeting at home/ })).toHaveTextContent(
     "Done · reported by you on Thu 29 Oct at 20:15"
   )
+})
+
+test("a member ticks their own task off in the list and takes it back", async () => {
+  const puts: unknown[] = []
+  const deletes: unknown[] = []
+
+  server.use(
+    http.get(apiUrl("/member/homework"), ({ request }) => {
+      const state = new URL(request.url).searchParams.get("state") as "todo" | "done"
+
+      return HttpResponse.json({ today: "2026-11-08", items: nevineHomework[state] })
+    }),
+    http.put(apiUrl(`${path}/completion`), async ({ request }) => {
+      puts.push(await request.json())
+
+      return HttpResponse.json({
+        done: true,
+        completedAt: "2026-11-08T11:08:00Z",
+        completedBy: "Nevine Boulos",
+        completedByYou: true,
+      })
+    }),
+    http.delete(apiUrl(`${path}/completion`), async ({ request }) => {
+      deletes.push(await request.json())
+
+      return new HttpResponse(null, { status: 204 })
+    })
+  )
+
+  renderWithProviders(<MemberHomework />)
+  const tick = await screen.findByRole("button", { name: `Mark “${isolate(task.title)}” done` })
+  await userEvent.click(tick)
+  await vi.waitFor(() => expect(tick).not.toHaveAttribute("aria-disabled"))
+  expect(tick).toHaveAttribute("aria-pressed", "true")
+  expect(puts).toEqual([{}])
+  await userEvent.click(tick)
+  await vi.waitFor(() => expect(toast.success).toHaveBeenCalledWith("Marked as not done."))
+  expect(tick).toHaveAttribute("aria-pressed", "false")
+  expect(deletes).toEqual([{}])
 })
 
 test("an unlinked account reads the not-linked text", async () => {

@@ -27,30 +27,26 @@ export function reportOf(task: Report): Report {
   return { done, completedAt, completedBy, completedByYou }
 }
 
-export function CompletionControl({
-  today,
-  initial,
-  hint,
-  undone,
-  reportDone,
-  undoReport,
-  invalidate,
-}: {
-  today: LocalDate
+type CompletionOptions = {
   initial: Report
-  hint: string
   undone: string
   reportDone: () => Promise<Report>
   undoReport: () => Promise<void>
   invalidate: QueryKey[]
-}) {
-  const t = useTranslations("parent.completion")
-  const f = useFormat()
+}
+
+export function useCompletion({
+  initial,
+  undone,
+  reportDone,
+  undoReport,
+  invalidate,
+}: CompletionOptions) {
   const [local, setLocal] = useState<{ report: Report; from: Report } | null>(null)
   const busy = useRef(false)
-  const markDone = useApiMutation(reportDone, { invalidate })
+  const done = useApiMutation(reportDone, { invalidate })
   const undo = useApiMutation(undoReport, { invalidate, successMessage: undone })
-  const pending = markDone.pending || undo.pending
+  const pending = done.pending || undo.pending
   const report = local && (pending || local.from === initial) ? local.report : initial
 
   async function change(next: Report, run: () => Promise<Report | null>) {
@@ -69,6 +65,32 @@ export function CompletionControl({
     }
   }
 
+  return {
+    report,
+    pending,
+    saving: report.done && report.completedAt === null,
+    markDone: () =>
+      void change(SAVING, async () => {
+        const result = await done.execute()
+
+        return result.ok ? result.data : null
+      }),
+    undo: () => void change(NOT_DONE, async () => ((await undo.execute()).ok ? NOT_DONE : null)),
+  }
+}
+
+export function CompletionControl({
+  today,
+  hint,
+  ...options
+}: CompletionOptions & {
+  today: LocalDate
+  hint: string
+}) {
+  const t = useTranslations("parent.completion")
+  const f = useFormat()
+  const { report, pending, saving, markDone, undo } = useCompletion(options)
+
   if (!report.done) {
     return (
       <div className="flex flex-col gap-2">
@@ -76,13 +98,7 @@ export function CompletionControl({
           size="lg"
           className="h-12 w-full sm:w-auto sm:self-start"
           disabled={pending}
-          onClick={() =>
-            void change(SAVING, async () => {
-              const result = await markDone.execute()
-
-              return result.ok ? result.data : null
-            })
-          }
+          onClick={markDone}
         >
           <Check data-icon="inline-start" />
           {t("markDone")}
@@ -116,10 +132,8 @@ export function CompletionControl({
         variant="outline"
         size="sm"
         className="self-start sm:self-center"
-        disabled={pending || when === null}
-        onClick={() =>
-          void change(NOT_DONE, async () => ((await undo.execute()).ok ? NOT_DONE : null))
-        }
+        disabled={pending || saving}
+        onClick={undo}
       >
         <Undo2 data-icon="inline-start" />
         {t("undo")}

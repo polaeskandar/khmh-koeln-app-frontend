@@ -7,7 +7,7 @@ import { Section } from "@/components/page-header"
 import { QueryErrorState, QueryState } from "@/components/page-states"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSession } from "@/features/identity/auth/session"
-import { ListSkeleton, TaskList } from "@/features/learning/homework/task-list"
+import { ListSkeleton, TaskList, useOwnCompletion } from "@/features/learning/homework/task-list"
 import { useFormat } from "@/i18n/format"
 import { ApiError } from "@/lib/api/problem"
 import { localTimeOf } from "@/lib/domain/time"
@@ -34,6 +34,7 @@ function Homework({ which }: { which: "todo" | "done" }) {
   const t = useTranslations("member.home")
   const toDo = useMemberHomework("todo")
   const done = useMemberHomework("done")
+  const completion = useOwnCompletion()
   const own = which === "todo" ? toDo : done
 
   if (own.isError) {
@@ -47,6 +48,7 @@ function Homework({ which }: { which: "todo" | "done" }) {
         tasks={done.data.items.slice(0, DONE_RECENTLY)}
         today={done.data.today}
         href={taskHref}
+        completion={completion}
       />
     ) : null
   }
@@ -65,6 +67,7 @@ function Homework({ which }: { which: "todo" | "done" }) {
       tasks={toDo.data.items}
       today={toDo.data.today}
       href={taskHref}
+      completion={completion}
       empty={t("emptyToDo")}
     />
   )
