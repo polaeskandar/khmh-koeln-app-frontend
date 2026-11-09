@@ -389,20 +389,35 @@ export function InactiveBadge() {
   )
 }
 
-function StatusAction({ person }: { person: PersonRow }) {
+function StatusAction({
+  person,
+  onChange,
+}: {
+  person: PersonRow
+  onChange?: (person: PersonRow) => void
+}) {
   const t = useTranslations()
   const [confirming, setConfirming] = useState(false)
 
+  const changed = (next: PersonRow["person"]) =>
+    onChange?.({
+      ...person,
+      person: next,
+      placements: next.status === "inactive" ? [] : person.placements,
+    })
+
   const deactivate = useApiMutation(deactivatePersonRequest, {
-    successMessage: t("toast.personInactive"),
+    successMessage: (next) => t("toast.personInactive", { name: preferredName(next) }),
     invalidate: [["people"]],
     awaitRefetch: true,
+    onSuccess: changed,
   })
 
   const reactivate = useApiMutation(reactivatePersonRequest, {
-    successMessage: t("toast.personReactivated"),
+    successMessage: (next) => t("toast.personReactivated", { name: preferredName(next) }),
     invalidate: [["people"]],
     awaitRefetch: true,
+    onSuccess: changed,
   })
 
   if (person.person.status === "inactive") {
@@ -443,9 +458,11 @@ function StatusAction({ person }: { person: PersonRow }) {
 export function PersonSheet({
   person,
   onOpenChange,
+  onStatusChange,
 }: {
   person: PersonRow | null
   onOpenChange: (open: boolean) => void
+  onStatusChange?: (person: PersonRow) => void
 }) {
   const t = useTranslations("members.sheet")
   const can = useCan()
@@ -482,7 +499,7 @@ export function PersonSheet({
             </div>
             {edit ? (
               <SheetFooter className="border-t">
-                <StatusAction person={person} />
+                <StatusAction person={person} onChange={onStatusChange} />
               </SheetFooter>
             ) : null}
           </>

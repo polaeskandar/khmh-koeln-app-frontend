@@ -21,6 +21,22 @@ export const peopleQuery = (filter: PeopleFilter) => ({
     dataOf(api.GET("/people", { params: { query: filter }, signal })),
 })
 
+const SEARCH_LIMIT = 100
+
+const nameSearch = (person: PersonRow["person"]) =>
+  `${person.firstName} ${person.lastName}`.slice(0, SEARCH_LIMIT).trim()
+
+export const personRowQuery = (person: PersonRow["person"], version: number) => ({
+  queryKey: ["people", "detail", { id: person.id, version }] as const,
+  queryFn: async ({ signal }: { signal: AbortSignal }) => {
+    const list = await dataOf(
+      api.GET("/people", { params: { query: { status: "all", q: nameSearch(person) } }, signal })
+    )
+
+    return list.items.find((row) => row.person.id === person.id) ?? null
+  },
+})
+
 export type DirectoryPerson = Schemas["DirectoryEntry"]
 
 export const directoryQuery = (q: string) => ({
