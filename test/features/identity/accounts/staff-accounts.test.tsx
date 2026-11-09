@@ -147,7 +147,7 @@ test("giving a role offers the ones not held, and sends it once", async () => {
 })
 
 test("removing asks first; the last role manager keeps the role", async () => {
-  const { sent } = open({ remove: () => problem(409, "roles.lastRoleManager") })
+  const { sent } = open({ remove: () => problem(409, "roles.lastAdministrator") })
   const row = within(await rowOf("Mariam Fahmy"))
 
   await userEvent.click(

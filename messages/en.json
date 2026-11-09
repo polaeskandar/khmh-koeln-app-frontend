@@ -212,7 +212,6 @@
       "chooseRole": "Choose at least one role.",
       "nameRequired": "Enter a name for the role.",
       "nameTaken": "A role called “{name}” already exists.",
-      "lastRoleManager": "At least one active account must be able to change roles. Give that permission to someone else first.",
       "unknownPermission": "Some of these permissions don’t exist.",
       "createNotAllowed": "You can’t add roles.",
       "updateNotAllowed": "You can’t change roles.",
@@ -221,7 +220,7 @@
       "chooseService": "Choose the service this role applies to.",
       "ownAdminRole": "You can’t remove your own administrator role. Ask another administrator.",
       "stageOnlyForServants": "Only servant roles can be limited to a stage.",
-      "lastAdministrator": "The last active administrator keeps this role. Make someone else an administrator first.",
+      "lastAdministrator": "At least one active account must be able to change roles. Give that permission to someone else first.",
       "accountPending": "This account is waiting for approval. It gets its roles when it is approved.",
       "notHeld": "{name} doesn’t have this role."
     },

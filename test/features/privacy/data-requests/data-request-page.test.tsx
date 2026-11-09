@@ -270,7 +270,7 @@ test("a review the API refuses says why, and Erase stays disabled", async () => 
 
   expect(
     await screen.findByText(
-      "The last active administrator keeps this role. Make someone else an administrator first."
+      "At least one active account must be able to change roles. Give that permission to someone else first."
     )
   ).toBeInTheDocument()
 

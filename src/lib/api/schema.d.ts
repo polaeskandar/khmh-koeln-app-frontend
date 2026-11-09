@@ -1,43 +1,4 @@
 export type paths = {
-  "/roles": {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-
-    get: operations["pending_roles_list"]
-    put?: never
-
-    post: operations["pending_roles_create"]
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  "/roles/{id}": {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-
-    get: operations["pending_roles_show"]
-
-    put: operations["pending_roles_update"]
-    post?: never
-
-    delete: operations["pending_roles_delete"]
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
   "/services/insights": {
     parameters: {
       query?: never
@@ -305,6 +266,43 @@ export type paths = {
     put?: never
     post?: never
     delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/roles": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_roles_list"]
+    put?: never
+
+    post: operations["post_api_roles_create"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/roles/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_roles_show"]
+
+    put: operations["put_api_roles_edit"]
+    post?: never
+
+    delete: operations["delete_api_roles_delete"]
     options?: never
     head?: never
     patch?: never
@@ -1695,37 +1693,6 @@ export type paths = {
 export type webhooks = Record<string, never>
 export type components = {
   schemas: {
-    RoleRow: {
-      id: string
-      name: string
-      permissions: components["schemas"]["PermissionResponse"][]
-      holderCount: number
-    }
-    RoleList: {
-      items: components["schemas"]["RoleRow"][]
-    }
-    RoleInput: {
-      name: string
-      permissions: components["schemas"]["PermissionResponse"][]
-    }
-    RoleCreated: {
-      id: string
-    }
-    RoleHolder: {
-      id: string
-      displayName: string
-      email: string
-      disabled: boolean
-    }
-    RoleDetail: {
-      id: string
-      name: string
-      permissions: components["schemas"]["PermissionResponse"][]
-      createdAt: string
-      updatedAt: string
-      holders: components["schemas"]["RoleHolder"][]
-      onlyWayToChangeRoles: boolean
-    }
     Liveness: {
       status: "ok"
     }
@@ -1804,6 +1771,16 @@ export type components = {
       registration?: components["schemas"]["RegistrationRequest"]
 
       privacy?: components["schemas"]["PrivacyRequest"]
+    }
+    PermissionRequest: {
+      action?: string | null
+
+      resource?: string | null
+    }
+    RoleRequest: {
+      name?: string | null
+
+      permissions?: components["schemas"]["PermissionRequest"][]
     }
     GiveAccountRoleRequest: {
       roleId?: string | null
@@ -2210,6 +2187,31 @@ export type components = {
     }
     RegistrationServicesResponse: {
       items: components["schemas"]["ServiceOptionResponse"][]
+    }
+    RoleRowResponse: {
+      id: string
+      name: string
+      permissions: components["schemas"]["PermissionResponse"][]
+      holderCount: number
+    }
+    RoleListResponse: {
+      items: components["schemas"]["RoleRowResponse"][]
+    }
+    RoleHolderResponse: {
+      id: string
+      displayName: string
+      email: string
+      disabled: boolean
+    }
+    RoleDetailsResponse: {
+      createdAt: string
+      holders: components["schemas"]["RoleHolderResponse"][]
+      id: string
+      name: string
+      onlyWayToChangeRoles: boolean
+      permissions: components["schemas"]["PermissionResponse"][]
+
+      updatedAt: string
     }
     StaffAccount: {
       id: string
@@ -3204,122 +3206,6 @@ export type components = {
 }
 export type $defs = Record<string, never>
 export interface operations {
-  pending_roles_list: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["RoleList"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  pending_roles_create: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RoleInput"]
-      }
-    }
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["RoleCreated"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  pending_roles_show: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["RoleDetail"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  pending_roles_update: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RoleInput"]
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          "application/json": components["schemas"]["RoleDetail"]
-        }
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
-  pending_roles_delete: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        "application/json": Record<string, never>
-      }
-    }
-    responses: {
-      204: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      default: components["responses"]["Problem"]
-    }
-  }
   get_api_services_insights: {
     parameters: {
       query?: {
@@ -3678,6 +3564,124 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["RegistrationServicesResponse"]
         }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_roles_list: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RoleListResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_roles_create: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RoleRequest"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": {
+            id: string
+          }
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_roles_show: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RoleDetailsResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  put_api_roles_edit: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RoleRequest"]
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["RoleDetailsResponse"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  delete_api_roles_delete: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": Record<string, never>
+      }
+    }
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
       }
       default: components["responses"]["Problem"]
     }

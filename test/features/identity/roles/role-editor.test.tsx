@@ -202,7 +202,7 @@ test("a role without Services: See warns that it opens nothing", async () => {
 
 test("unticking Roles: Change on the only way warns, and a refusal keeps what was typed", async () => {
   search.value = `id=${ADMIN_ID}`
-  open(<RolePage />, { save: () => problem(409, "roles.lastRoleManager") })
+  open(<RolePage />, { save: () => problem(409, "roles.lastAdministrator") })
   const name = await screen.findByRole("textbox", { name: "Name" })
   await userEvent.click(box("Roles: Change"))
   expect(screen.getByText(/Nobody else can change roles/)).toBeInTheDocument()
