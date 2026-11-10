@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { FormPanel } from "@/components/form-panel"
 import { PasswordSection, PreferencesFields } from "@/features/identity/account/account-sections"
 import { useSession } from "@/features/identity/auth/session"
+import { OwnData } from "@/features/privacy/own-data/own-data"
 import { ListSkeleton } from "@/features/learning/homework/task-list"
 import { useFormat } from "@/i18n/format"
 import { ApiError } from "@/lib/api/problem"
@@ -80,6 +81,7 @@ export function MemberAccount() {
         </h2>
         <p className="text-muted-foreground">{t("member.account.churchSees.body")}</p>
       </section>
+      <OwnData today={session.me.today} />
     </div>
   )
 }

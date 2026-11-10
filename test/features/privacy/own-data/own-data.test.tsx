@@ -196,6 +196,10 @@ test("a parent with a member record reads that the record goes and the children 
   ).toBeInTheDocument()
 
   expect(dialog.getByText(/Your children’s records stay\./)).toBeInTheDocument()
+
+  expect(
+    dialog.getByText("For example, whether your children’s data should be deleted too.")
+  ).toBeInTheDocument()
 })
 
 test("a wrong password shows under the field and keeps the dialog and the session", async () => {
