@@ -11,26 +11,21 @@ import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { homeworkOf, MIMI_ID, MINA_ID, mimi, mina } from "@test/support/fixtures/parent"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { ChildSummary } from "@/features/people/children/api"
 import { ParentHome } from "@/features/portals/parent/parent-home"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 const hoda: Me = { ...me.parent, account: { ...me.parent.account, displayName: "Hoda Farag" } }
 
 beforeEach(() => {
-  search.value = ""
   vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-11-08T11:08:00Z") })
   vi.spyOn(console, "error").mockImplementation(() => {})
 })
 
 afterEach(() => {
   vi.useRealTimers()
-  vi.restoreAllMocks()
 })
 
 function open(items: ChildSummary[] = [mimi, mina], locale: Locale = "en") {
@@ -73,7 +68,7 @@ test("greets the parent and shows each child with what is to do", async () => {
 })
 
 test("lists the selected child's tasks, due first", async () => {
-  search.value = `child=${MINA_ID}`
+  address.set(`child=${MINA_ID}`)
   open()
   const list = within(await screen.findByRole("region", { name: "To do for Mina" }))
   const first = list.getAllByRole("link")[0]!
@@ -88,7 +83,7 @@ test.each([
   ["an unlinked child", "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ec999"],
   ["a malformed id", "not-a-uuid"],
 ])("%s in the address shows the first child without asking for it", async (_, child) => {
-  search.value = `child=${child}`
+  address.set(`child=${child}`)
   const requested = open()
   expect(await screen.findByRole("region", { name: "To do for Mimi" })).toBeInTheDocument()
   expect(requested.every((r) => r.startsWith(MIMI_ID))).toBe(true)
@@ -113,7 +108,7 @@ test.each([
 })
 
 test("done tasks say who reported them, five at most", async () => {
-  search.value = `child=${MINA_ID}`
+  address.set(`child=${MINA_ID}`)
   open()
   const done = within(await screen.findByRole("region", { name: "Done recently" }))
   const cards = done.getAllByRole("link")
@@ -154,14 +149,14 @@ test("a network error offers to try again", async () => {
     )
   )
 
-  const retry = await screen.findByRole("button", { name: "Try again" }, { timeout: 10_000 })
+  const retry = await screen.findByRole("button", { name: "Try again" })
   fail = false
   await userEvent.click(retry)
   expect(await screen.findByRole("region", { name: "To do for Mimi" })).toBeInTheDocument()
 })
 
 test("the square on a card ticks the task off for the selected child", async () => {
-  search.value = `child=${MINA_ID}`
+  address.set(`child=${MINA_ID}`)
   open()
   const task = homeworkOf[MINA_ID].todo[0]
   const reported: string[] = []

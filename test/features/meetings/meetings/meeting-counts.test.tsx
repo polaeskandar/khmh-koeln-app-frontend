@@ -16,12 +16,7 @@ import { renderWithProviders } from "@test/support/providers"
 import { AgendaPage } from "@/features/meetings/meetings/agenda-page"
 import { SchedulesPage } from "@/features/meetings/meetings/schedules-page"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
-  search.value = ""
   vi.spyOn(console, "error").mockImplementation(() => {})
 })
 

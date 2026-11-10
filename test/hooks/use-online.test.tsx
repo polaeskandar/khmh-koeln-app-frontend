@@ -1,11 +1,7 @@
 import { act, renderHook } from "@testing-library/react"
-import { afterEach, expect, test, vi } from "vitest"
+import { expect, test, vi } from "vitest"
 
 import { useOnline } from "@/hooks/use-online"
-
-afterEach(() => {
-  vi.restoreAllMocks()
-})
 
 test("it follows the browser's connection events", () => {
   const onLine = vi.spyOn(window.navigator, "onLine", "get").mockReturnValue(true)

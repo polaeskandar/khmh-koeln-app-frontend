@@ -10,6 +10,7 @@ import { schedule } from "@test/support/fixtures/schedules"
 import { insightsOf, services } from "@test/support/fixtures/services"
 import { stageRef } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { Me } from "@/features/identity/auth/api"
@@ -20,10 +21,6 @@ import type {
   ServiceStages,
 } from "@/features/organization/services/api"
 import { ServiceDetails } from "@/features/organization/services/service-details"
-
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
 
 beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => {}))
 
@@ -87,7 +84,7 @@ function open(
   scheduleCount: number,
   viewer: Me = me.administrator
 ) {
-  search.value = `id=${service.id}`
+  address.set(`id=${service.id}`)
   const scheduleRequests: string[] = []
 
   server.use(
@@ -276,7 +273,7 @@ test.each([
 
 test("an unknown id shows not found", async () => {
   const id = "0192f3a4-7b1c-7d2e-8f3a-00000000dead"
-  search.value = `id=${id}`
+  address.set(`id=${id}`)
   server.use(http.get(apiUrl(`/services/${id}`), () => problem(404, "notFound.service")))
 
   renderWithProviders(

@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { afterEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { roleSummary } from "@/features/identity/auth/role-summary"
@@ -15,12 +15,6 @@ import { renderWithProviders } from "@test/support/providers"
 
 import { NavUser } from "@/components/app-shell/account-menu"
 import { AppShell } from "@/components/app-shell/app-shell"
-
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
-afterEach(() => {
-  navigation.pathname = "/"
-})
 
 function shell(account: Me, locale: Locale = "en") {
   server.use(http.get(apiUrl("/me"), () => HttpResponse.json(account)))

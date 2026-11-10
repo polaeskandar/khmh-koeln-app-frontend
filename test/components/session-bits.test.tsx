@@ -14,8 +14,6 @@ import { renderWithProviders } from "@test/support/providers"
 import { HistoryTimeline } from "@/components/history-timeline"
 import { agendaHref, AgendaRow, SessionCardView } from "@/components/session-bits"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 afterEach(() => vi.unstubAllEnvs())
 
 const TODAY = "2026-11-08"

@@ -4,7 +4,14 @@ import { cleanup, configure } from "@testing-library/react"
 import { afterAll, afterEach, beforeAll, vi } from "vitest"
 
 import { server } from "@test/support/msw"
-import { address } from "@test/support/navigation"
+import { resetNavigation } from "@test/support/navigation"
+
+vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
+
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  ...(await import("@test/support/navigation")).nextNavigationMock,
+}))
 
 configure({ asyncUtilTimeout: 3000 })
 
@@ -36,7 +43,7 @@ beforeAll(() => server.listen({ onUnhandledFrame: "error" }))
 afterEach(() => {
   cleanup()
   server.resetHandlers()
-  address.set("")
+  resetNavigation()
 })
 
 afterAll(() => server.close())

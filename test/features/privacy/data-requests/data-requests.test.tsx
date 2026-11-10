@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
@@ -18,14 +18,9 @@ import type { DataRequestRow, DataRequests } from "@/features/privacy/data-reque
 import { DataRequestsPage } from "@/features/privacy/data-requests/data-requests-page"
 import { DueLabel } from "@/features/privacy/data-requests/request-bits"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
-  router.push.mockClear()
   vi.spyOn(console, "error").mockImplementation(() => {})
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 const row = (id: string, extra: Partial<DataRequestRow>): DataRequestRow => ({
   id,

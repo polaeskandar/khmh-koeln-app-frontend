@@ -10,8 +10,6 @@ import { renderWithProviders } from "@test/support/providers"
 
 import { ForgotPasswordPage, SetPasswordPage } from "@/features/identity/auth/password-pages"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 type Sent = { url: string; address: string; body: unknown }
 
 beforeEach(() => {
@@ -21,7 +19,6 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  vi.restoreAllMocks()
   window.history.replaceState(null, "", "/")
 })
 
@@ -76,7 +73,6 @@ test("the token leaves the address before any request and travels only in the bo
 })
 
 test("choosing another language keeps the link usable", async () => {
-  router.replace.mockReset()
   navigation.pathname = "/set-password/"
   open()
   await userEvent.click(await screen.findByRole("button", { name: "Language" }))

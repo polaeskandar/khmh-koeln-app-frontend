@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { ScheduleSummary } from "@/lib/api/types/meetings"
@@ -11,17 +11,10 @@ import { me } from "@test/support/fixtures/me"
 import { services } from "@test/support/fixtures/services"
 import { stageRef, sundaySchool } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
-import { router } from "@test/support/navigation"
+import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import { SchedulesPage } from "@/features/meetings/meetings/schedules-page"
-
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
-beforeEach(() => (search.value = ""))
-afterEach(() => router.push.mockReset())
 
 const youth = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f11",
@@ -74,7 +67,7 @@ const items: ScheduleSummary[] = [
 ]
 
 function open(query = "") {
-  search.value = query
+  address.set(query)
 
   server.use(
     http.get(apiUrl("/schedules"), () => HttpResponse.json({ today: "2026-11-08", items })),

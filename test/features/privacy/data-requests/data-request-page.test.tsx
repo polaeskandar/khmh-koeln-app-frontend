@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
@@ -11,24 +11,19 @@ import { SessionProvider } from "@/features/identity/auth/session"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { DataRequestDetail, ErasureReview } from "@/features/privacy/data-requests/api"
 import { DataRequestPage } from "@/features/privacy/data-requests/data-request-page"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 const ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea901"
 
 beforeEach(() => {
-  search.value = `id=${ID}`
+  address.set(`id=${ID}`)
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "error")
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 const review = (extra: Partial<DataRequestDetail> = {}): DataRequestDetail => ({
   today: "2026-11-08",

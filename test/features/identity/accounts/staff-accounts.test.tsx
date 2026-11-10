@@ -2,7 +2,7 @@ import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -16,15 +16,11 @@ import { testProviders } from "@test/support/providers"
 import type { StaffAccount } from "@/features/identity/accounts/api"
 import { StaffAccounts } from "@/features/identity/accounts/staff-accounts"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 const role = (n: number, name: string) => ({
   id: `0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ee${String(n).padStart(3, "0")}`,

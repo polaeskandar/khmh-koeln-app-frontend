@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -18,16 +18,13 @@ import {
 import { me } from "@test/support/fixtures/me"
 import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { LessonDetail, LessonRow } from "@/features/learning/lessons/api"
 import { EditLessonPage, NewLessonPage } from "@/features/learning/lessons/lesson-editor"
 import { LessonPage } from "@/features/learning/lessons/lesson-page"
 import { StageLessonsPage } from "@/features/learning/lessons/stage-lessons"
-
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
 
 const daniel = { id: me.administrator.account.id, name: "Daniel Michael" }
 const christine = { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f03", name: "Christine Adel" }
@@ -37,8 +34,6 @@ beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 function editor(page: React.ReactNode, servants = [daniel, christine], write?: () => Response) {
   const sent: Record<string, unknown>[] = []
@@ -72,13 +67,13 @@ function editor(page: React.ReactNode, servants = [daniel, christine], write?: (
 }
 
 const openNew = (servants?: (typeof daniel)[], write?: () => Response) => {
-  search.value = `stage=${lessonStage.id}`
+  address.set(`stage=${lessonStage.id}`)
 
   return editor(<NewLessonPage />, servants, write)
 }
 
 const openEdit = (detail: LessonDetail, servants?: (typeof daniel)[]) => {
-  search.value = `id=${detail.lesson.id}`
+  address.set(`id=${detail.lesson.id}`)
   server.use(http.get(apiUrl(`/lessons/${detail.lesson.id}`), () => HttpResponse.json(detail)))
 
   return editor(<EditLessonPage />, servants)
@@ -181,7 +176,7 @@ const row = (id: string, title: string, extra: Partial<LessonRow> = {}): LessonR
 })
 
 function list(locale: Locale = "en") {
-  search.value = `id=${THIRD_CLASS_ID}`
+  address.set(`id=${THIRD_CLASS_ID}`)
 
   server.use(
     http.get(apiUrl(`/stages/${THIRD_CLASS_ID}`), () => HttpResponse.json(thirdClass)),
@@ -228,7 +223,7 @@ test("in Arabic helper names use the Arabic list format", async () => {
 })
 
 test("the lesson page lists Christine as Helping", async () => {
-  search.value = `id=${goodSamaritan.id}`
+  address.set(`id=${goodSamaritan.id}`)
 
   server.use(
     http.get(apiUrl(`/lessons/${goodSamaritan.id}`), () =>

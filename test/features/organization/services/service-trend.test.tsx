@@ -10,6 +10,7 @@ import { me } from "@test/support/fixtures/me"
 import { insightsOf, type ServiceInsightList, services } from "@test/support/fixtures/services"
 import { stageRef } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import {
@@ -20,10 +21,6 @@ import {
 import { ServiceDetails } from "@/features/organization/services/service-details"
 import { ServicesTable } from "@/features/organization/services/services-overview"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-11-08T11:08:00Z") })
   vi.spyOn(console, "error").mockImplementation(() => {})
@@ -31,7 +28,6 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers()
-  vi.restoreAllMocks()
 })
 
 const [sundaySchool, youth, , deacons] = services.items as ServiceRow[]
@@ -112,7 +108,7 @@ test("phone cards add the next meeting", async () => {
 
 test("details show the attendance stat and no leaders", async () => {
   const service = rows[0]!
-  search.value = `id=${service.id}`
+  address.set(`id=${service.id}`)
 
   const stages: ServiceStages = {
     service: { id: service.id, name: service.name, tone: service.tone, archived: false },

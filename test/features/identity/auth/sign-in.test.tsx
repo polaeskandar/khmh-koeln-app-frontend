@@ -21,8 +21,6 @@ import {
 } from "@/features/identity/auth/auth-outcome"
 import { PendingPage, SignInPage, UnconfirmedPage } from "@/features/identity/auth/sign-in-page"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 const PASSWORD = "correct horse battery"
 
 beforeEach(() => {
@@ -35,9 +33,6 @@ beforeEach(() => {
 
 afterEach(() => {
   forgetOutcome()
-  vi.restoreAllMocks()
-  router.replace.mockReset()
-  router.push.mockReset()
   localStorage.clear()
   sessionStorage.clear()
   window.history.replaceState(null, "", "/")

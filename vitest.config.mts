@@ -16,6 +16,7 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["test/support/setup.ts"],
     testTimeout: 15_000,
+    restoreMocks: true,
     env: { TZ: "UTC" },
     server: { deps: { inline: ["next-intl"] } },
   },

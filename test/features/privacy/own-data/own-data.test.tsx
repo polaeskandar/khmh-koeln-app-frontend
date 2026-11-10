@@ -23,8 +23,6 @@ import { renderWithProviders } from "@test/support/providers"
 import { AccountPage } from "@/features/identity/account/account-page"
 import { OwnData } from "@/features/privacy/own-data/own-data"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 const PASSWORD = "correct horse battery"
 const requested = { receivedAt: "2026-11-08T11:08:00Z", dueOn: "2026-12-08" }
 const scheduled = { receivedAt: "2026-11-08T11:08:00Z", erasesOn: "2026-11-22" }
@@ -47,8 +45,6 @@ beforeEach(() => {
 
 afterEach(() => {
   forgetOutcome()
-  vi.restoreAllMocks()
-  router.replace.mockClear()
 })
 
 function open(

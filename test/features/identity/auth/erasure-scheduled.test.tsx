@@ -16,8 +16,6 @@ import {
 } from "@/features/identity/auth/auth-outcome"
 import { ErasureScheduledPage } from "@/features/identity/auth/erasure-scheduled-page"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 const PASSWORD = "correct horse battery"
 
 beforeEach(() => {
@@ -30,7 +28,6 @@ beforeEach(() => {
 
 afterEach(() => {
   forgetOutcome()
-  vi.restoreAllMocks()
 })
 
 function backend(...answers: (() => Response)[]) {

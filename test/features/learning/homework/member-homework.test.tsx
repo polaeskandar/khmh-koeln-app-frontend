@@ -2,34 +2,29 @@ import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import type { Locale } from "@/i18n/config"
 import { isolate } from "@/lib/bidi"
 import { apiUrl, problem } from "@test/support/api"
 import { nevineHomework } from "@test/support/fixtures/member"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { MemberTaskDetail } from "@/features/learning/homework/api"
 import { MemberHomework } from "@/features/learning/homework/member-homework"
 import { MemberTaskPage } from "@/features/learning/homework/member-task"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 const task = nevineHomework.todo[0]!
 const path = `/member/homework/${task.id}`
 
 beforeEach(() => {
-  search.value = `id=${task.id}`
+  address.set(`id=${task.id}`)
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 const detail = (extra: Partial<MemberTaskDetail["task"]> = {}): MemberTaskDetail => ({
   today: "2026-11-08",
@@ -239,7 +234,7 @@ test.each([
   ["a missing id", ""],
   ["a malformed id", "id=nope"],
 ])("%s shows the same not-available page", async (_, query) => {
-  search.value = query
+  address.set(query)
   openTask(() => problem(404, "homework.notAvailable"))
   expect(await screen.findByText("This page isn’t available")).toBeInTheDocument()
 

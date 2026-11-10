@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { describe, expect, test, vi } from "vitest"
+import { describe, expect, test } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Locale } from "@/i18n/config"
@@ -13,8 +13,6 @@ import { renderWithProviders } from "@test/support/providers"
 
 import type { ServiceRow } from "@/features/organization/services/api"
 import { ServicesOverview } from "@/features/organization/services/services-overview"
-
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
 
 const answerInsights = (rows: ServiceRow[] = services.items) =>
   server.use(http.get(apiUrl("/services/insights"), () => HttpResponse.json(insightsOf(rows))))
@@ -183,7 +181,7 @@ test("Retry refetches after a failed request", async () => {
   answerInsights()
   renderOverview()
 
-  const retry = await screen.findByRole("button", { name: "Try again" }, { timeout: 8000 })
+  const retry = await screen.findByRole("button", { name: "Try again" })
   fail = false
   await userEvent.click(retry)
   expect(await screen.findByRole("tab", { name: "Active (7)" })).toBeInTheDocument()

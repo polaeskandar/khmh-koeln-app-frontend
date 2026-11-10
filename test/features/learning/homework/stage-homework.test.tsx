@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
@@ -10,22 +10,16 @@ import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
-import { router } from "@test/support/navigation"
+import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { HomeworkRow, StageHomework } from "@/features/learning/homework/api"
 import { StageHomeworkPage } from "@/features/learning/homework/stage-homework"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
-  search.value = `id=${THIRD_CLASS_ID}`
+  address.set(`id=${THIRD_CLASS_ID}`)
   vi.spyOn(console, "error").mockImplementation(() => {})
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 const lesson = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e9001",
@@ -123,7 +117,7 @@ test("opens on drafts when nothing is published yet, and drafts open the editor"
 })
 
 test("keeps the tab in the address", async () => {
-  search.value = `id=${THIRD_CLASS_ID}&status=archived`
+  address.set(`id=${THIRD_CLASS_ID}&status=archived`)
   open(data([verse]))
 
   expect(
@@ -203,7 +197,7 @@ test("publishes a draft row once, even on a double click, and it moves to Publis
 })
 
 test("the actions menu offers what the viewer may do with each row", async () => {
-  search.value = `id=${THIRD_CLASS_ID}&status=published`
+  address.set(`id=${THIRD_CLASS_ID}&status=published`)
   open(data([verse, drawing]))
   const rows = (await table()).getAllByRole("row").slice(1)
 
@@ -226,7 +220,7 @@ test("the actions menu offers what the viewer may do with each row", async () =>
 })
 
 test("someone who may neither change homework nor read members gets no actions", async () => {
-  search.value = `id=${THIRD_CLASS_ID}&status=published`
+  address.set(`id=${THIRD_CLASS_ID}&status=published`)
   open(data([verse]), me.attendanceOnly)
   const rows = (await table()).getAllByRole("row").slice(1)
   expect(within(rows[0]!).queryByRole("button")).not.toBeInTheDocument()

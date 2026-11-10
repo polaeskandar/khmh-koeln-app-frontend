@@ -7,26 +7,20 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { LanguageMenu } from "@/components/language-switch"
 import type { Locale } from "@/i18n/config"
 import type { Schemas } from "@/lib/api/client"
-import { makeQueryClient } from "@/lib/api/query-provider"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { navigation, router } from "@test/support/navigation"
-import { renderWithProviders } from "@test/support/providers"
+import { makeTestQueryClient, renderWithProviders } from "@test/support/providers"
 
 import { LANGUAGE_APPLIED_KEY } from "@/features/identity/auth/account-language"
 import type { Me } from "@/features/identity/auth/api"
 import { RequireStaff } from "@/features/identity/auth/guards"
 import { SessionProvider } from "@/features/identity/auth/session"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => vi.spyOn(toast, "error"))
 
 afterEach(() => {
-  vi.restoreAllMocks()
-  router.replace.mockReset()
-  navigation.pathname = "/"
   localStorage.clear()
   window.history.replaceState(null, "", "/")
 })
@@ -55,7 +49,7 @@ function backend(
   return calls
 }
 
-function menu(client = makeQueryClient(), locale: Locale = "en") {
+function menu(client = makeTestQueryClient(), locale: Locale = "en") {
   return renderWithProviders(
     <SessionProvider>
       <LanguageMenu />
@@ -85,7 +79,7 @@ describe("choosing a language while signed in", () => {
         )
     )
 
-    const client = makeQueryClient()
+    const client = makeTestQueryClient()
     menu(client)
     await waitFor(() => expect(client.getQueryData(["me"])).toBeDefined())
     await chooseGerman()
@@ -104,7 +98,7 @@ describe("choosing a language while signed in", () => {
       () => new Promise((resolve) => (answer = () => resolve(HttpResponse.json(me.servant))))
     )
 
-    const client = makeQueryClient()
+    const client = makeTestQueryClient()
     menu(client)
     await waitFor(() => expect(client.getQueryData(["me"])).toBeDefined())
     await chooseGerman()
@@ -120,7 +114,7 @@ describe("choosing a language while signed in", () => {
       () => HttpResponse.json({})
     )
 
-    const client = makeQueryClient()
+    const client = makeTestQueryClient()
     menu(client)
     await waitFor(() => expect(client.getQueryState(["me"])?.status).toBe("error"))
     await chooseGerman()
@@ -141,7 +135,7 @@ describe("choosing a language while signed in", () => {
     ],
   ])("after %s, one toast in the new language; the language stays", async (_, failure, text) => {
     backend(() => me.servant, failure)
-    const client = makeQueryClient()
+    const client = makeTestQueryClient()
     const english = menu(client)
     await waitFor(() => expect(client.getQueryData(["me"])).toBeDefined())
     await chooseGerman()
@@ -152,7 +146,7 @@ describe("choosing a language while signed in", () => {
   })
 })
 
-function guardedPage(client = makeQueryClient(), locale: Locale = "en") {
+function guardedPage(client = makeTestQueryClient(), locale: Locale = "en") {
   return renderWithProviders(
     <SessionProvider>
       <RequireStaff>
@@ -205,7 +199,7 @@ describe("the account's language after sign-in or app start", () => {
       () => HttpResponse.json({})
     )
 
-    const client = makeQueryClient()
+    const client = makeTestQueryClient()
     const german = guardedPage(client, "de")
 
     await waitFor(() =>
@@ -235,7 +229,7 @@ describe("the account's language after sign-in or app start", () => {
       () => HttpResponse.json({})
     )
 
-    const client = makeQueryClient()
+    const client = makeTestQueryClient()
     guardedPage(client, "en")
     expect(await screen.findByText("Service page")).toBeInTheDocument()
 

@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Locale } from "@/i18n/config"
@@ -18,15 +18,10 @@ import { ParentAccount } from "@/features/portals/parent/parent-account"
 import { ParentChildren } from "@/features/people/children/parent-children"
 import { ParentShell } from "@/features/portals/parent/parent-shell"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
-  router.replace.mockClear()
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 const mariam = { ...mimi, fullName: "Mariam Hanna", name: "Mariam" }
 const minaHanna = { ...mina, fullName: "Mina Hanna", toDo: 1, done: 2 }

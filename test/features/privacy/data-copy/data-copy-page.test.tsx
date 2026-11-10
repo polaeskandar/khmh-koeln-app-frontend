@@ -11,8 +11,6 @@ import { renderWithProviders } from "@test/support/providers"
 
 import { DataCopyPage } from "@/features/privacy/data-copy/data-copy-page"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 let clicks: { href: string; download: string }[] = []
 
 beforeEach(() => {
@@ -33,7 +31,6 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  vi.restoreAllMocks()
   window.history.replaceState(null, "", "/")
 })
 

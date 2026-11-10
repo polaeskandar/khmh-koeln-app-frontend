@@ -1,25 +1,22 @@
 import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { afterEach, describe, expect, test, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, test } from "vitest"
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { navigation, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import { LanguageMenu, LanguageSubmenu } from "@/components/language-switch"
 
-const navigation = vi.hoisted(() => ({ replace: vi.fn(), pathname: "/services/view/" }))
-
-vi.mock("@/i18n/navigation", () => ({
-  useRouter: () => ({ replace: navigation.replace }),
-  usePathname: () => navigation.pathname,
-}))
+beforeEach(() => {
+  navigation.pathname = "/services/view/"
+})
 
 afterEach(() => {
-  navigation.replace.mockReset()
   localStorage.clear()
   window.history.replaceState(null, "", "/")
 })
@@ -40,7 +37,7 @@ describe("LanguageMenu", () => {
     await userEvent.click(screen.getByRole("button", { name: "Sprache" }))
     await userEvent.click(screen.getByRole("menuitemradio", { name: "العربية" }))
 
-    expect(navigation.replace).toHaveBeenCalledExactlyOnceWith("/services/view/?id=X", {
+    expect(router.replace).toHaveBeenCalledExactlyOnceWith("/services/view/?id=X", {
       locale: "ar",
     })
 
@@ -52,7 +49,7 @@ describe("LanguageMenu", () => {
     renderWithProviders(<LanguageMenu />, { locale: "en" })
     await userEvent.click(screen.getByRole("button", { name: "Language" }))
     await userEvent.click(screen.getByRole("menuitemradio", { name: "English" }))
-    expect(navigation.replace).not.toHaveBeenCalled()
+    expect(router.replace).not.toHaveBeenCalled()
   })
 })
 

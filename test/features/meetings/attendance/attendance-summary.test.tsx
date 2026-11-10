@@ -1,14 +1,14 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { apiUrl, problem } from "@test/support/api"
 import { closedFirstNovember, openRosterBoard, sheetHandlers } from "@test/support/fixtures/board"
 import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
-import { router } from "@test/support/navigation"
+import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { Me } from "@/features/identity/auth/api"
@@ -16,17 +16,7 @@ import type { AttendanceSheet } from "@/features/meetings/attendance/api"
 import { AttendanceSummaryPage } from "@/features/meetings/attendance/attendance-summary"
 import { useAgenda } from "@/features/meetings/meetings/api"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => {}))
-
-afterEach(() => {
-  vi.restoreAllMocks()
-  router.push.mockReset()
-  router.replace.mockReset()
-})
 
 const reads = { agenda: 0 }
 
@@ -37,7 +27,7 @@ function Agenda() {
 }
 
 function open(board: AttendanceSheet, reopen?: (body: unknown) => Response, who: Me = me.leader) {
-  search.value = `session=${board.session.id}`
+  address.set(`session=${board.session.id}`)
   const sent: unknown[] = []
   reads.agenda = 0
 

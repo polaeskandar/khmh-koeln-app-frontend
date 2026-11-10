@@ -3,11 +3,10 @@ import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
-import { makeQueryClient } from "@/lib/api/query-provider"
 import type { AgendaItem, PlannedItem, ScheduleSummary } from "@/lib/api/types/meetings"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -15,23 +14,16 @@ import { schedule } from "@test/support/fixtures/schedules"
 import { services } from "@test/support/fixtures/services"
 import { session, stageRef, sundaySchool } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
-import { router } from "@test/support/navigation"
-import { renderWithProviders } from "@test/support/providers"
+import { address, router } from "@test/support/navigation"
+import { makeTestQueryClient, renderWithProviders } from "@test/support/providers"
 
 import { SchedulePage } from "@/features/meetings/meetings/schedule-page"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
-  router.push.mockClear()
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 const stage = stageRef("3rd Class", 2)
 
@@ -59,7 +51,7 @@ function open(
 ) {
   const current = typeof data === "function" ? data : () => data
   const id = current().id
-  search.value = `id=${id}`
+  address.set(`id=${id}`)
 
   server.use(
     http.get(apiUrl(`/schedules/${id}`), () =>
@@ -126,7 +118,7 @@ test("failed agenda requests say so with a retry instead of loading forever", as
 })
 
 test("loaded dates stay on the page when a later refetch fails", async () => {
-  const client = makeQueryClient()
+  const client = makeTestQueryClient()
   open(schedule(), me.leader, client)
   const next = await section("Next dates")
   expect(await next.findAllByRole("listitem")).toHaveLength(3)

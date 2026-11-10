@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
@@ -11,24 +11,17 @@ import type { Action, Permission, Resource } from "@/lib/permissions"
 import { apiUrl, problem } from "@test/support/api"
 import { church, me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
-import { router } from "@test/support/navigation"
+import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { RoleDetail } from "@/features/identity/roles/api"
 import { NewRolePage, RolePage } from "@/features/identity/roles/role-editor"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
-  router.push.mockClear()
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 const all: Action[] = ["read", "create", "update", "delete"]
 
@@ -124,7 +117,7 @@ function open(
 const box = (name: string) => screen.getByRole("checkbox", { name })
 
 test("the Servant role shows its 17 boxes, each named and described by its row", async () => {
-  search.value = `id=${SERVANT_ID}`
+  address.set(`id=${SERVANT_ID}`)
   open(<RolePage />)
   expect(await screen.findByRole("heading", { name: "Servant", level: 1 })).toBeInTheDocument()
   const boxes = screen.getAllByRole("checkbox")
@@ -140,21 +133,21 @@ test("the Servant role shows its 17 boxes, each named and described by its row",
 })
 
 test("a role added on an earlier day shows that date", async () => {
-  search.value = `id=${SERVANT_ID}`
+  address.set(`id=${SERVANT_ID}`)
   open(<RolePage />)
 
   expect(await screen.findByText("Added on Tue 1 Sep at 12:00")).toBeInTheDocument()
 })
 
 test("a role added today says today", async () => {
-  search.value = `id=${SERVANT_ID}`
+  address.set(`id=${SERVANT_ID}`)
   open(<RolePage />, { who: { ...me.administrator, today: "2026-09-01" } })
 
   expect(await screen.findByText("Added today at 12:00")).toBeInTheDocument()
 })
 
 test("a new role ticks See with Add and is created once", async () => {
-  search.value = ""
+  address.set("")
   const sent = open(<NewRolePage />)
   await userEvent.type(await screen.findByRole("textbox", { name: "Name" }), "Attendance helper")
   await userEvent.click(box("Services: See"))
@@ -186,7 +179,7 @@ test("a new role ticks See with Add and is created once", async () => {
 })
 
 test("the Servant role applies only in assigned groups, and saving to everywhere sends the scope", async () => {
-  search.value = `id=${SERVANT_ID}`
+  address.set(`id=${SERVANT_ID}`)
   const sent = open(<RolePage />)
   const scope = await screen.findByRole("radiogroup", { name: "Where it applies" })
 
@@ -202,7 +195,7 @@ test("the Servant role applies only in assigned groups, and saving to everywhere
 })
 
 test("a new role applies everywhere unless assigned groups are chosen", async () => {
-  search.value = ""
+  address.set("")
   const sent = open(<NewRolePage />)
   await userEvent.type(await screen.findByRole("textbox", { name: "Name" }), "Helpers")
   expect(screen.getByRole("radio", { name: /Everywhere in the church/ })).toBeChecked()
@@ -254,7 +247,7 @@ test("a role without Services: See warns that it opens nothing", async () => {
 })
 
 test("unticking Roles: Change on the only way warns, and a refusal keeps what was typed", async () => {
-  search.value = `id=${ADMIN_ID}`
+  address.set(`id=${ADMIN_ID}`)
   open(<RolePage />, { save: () => problem(409, "roles.lastAdministrator") })
   const name = await screen.findByRole("textbox", { name: "Name" })
   await userEvent.click(box("Roles: Change"))
@@ -274,7 +267,7 @@ test("unticking Roles: Change on the only way warns, and a refusal keeps what wa
 })
 
 test("with roles: read only everything is read-only", async () => {
-  search.value = `id=${SERVANT_ID}`
+  address.set(`id=${SERVANT_ID}`)
 
   open(<RolePage />, {
     who: {
@@ -293,13 +286,13 @@ test("with roles: read only everything is read-only", async () => {
 })
 
 test("without roles: read the page says so", async () => {
-  search.value = `id=${SERVANT_ID}`
+  address.set(`id=${SERVANT_ID}`)
   open(<RolePage />, { who: me.churchOffice })
   expect(await screen.findByText("You can’t see roles")).toBeInTheDocument()
 })
 
 test("an unknown role shows not found", async () => {
-  search.value = "id=0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e0777"
+  address.set("id=0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e0777")
 
   server.use(
     http.get(apiUrl("/roles/0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e0777"), () =>

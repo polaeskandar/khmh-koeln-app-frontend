@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, test, vi } from "vitest"
 
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -16,14 +16,10 @@ import type { Schemas } from "@/lib/api/client"
 import { ApproveButton } from "@/features/identity/accounts/approve-dialog"
 import { MemberAccounts } from "@/features/identity/accounts/member-accounts"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 const youth = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ec601",

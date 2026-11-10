@@ -9,14 +9,11 @@ import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { session, sessionDetail } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { MeetingSession } from "@/features/meetings/meetings/api"
 import { SessionPage } from "@/features/meetings/meetings/session-page"
-
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
 
 beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => {}))
 
@@ -39,7 +36,7 @@ function open(
   who: Me = me.leader
 ) {
   const base = session(view)
-  search.value = `id=${base.id}`
+  address.set(`id=${base.id}`)
   let requests = 0
 
   server.use(
@@ -172,7 +169,7 @@ describe("origin and history", () => {
 
 describe("not found", () => {
   test("a malformed id shows not found without a request", async () => {
-    search.value = "id=not-a-uuid"
+    address.set("id=not-a-uuid")
 
     renderWithProviders(
       <SidebarProvider>
@@ -185,7 +182,7 @@ describe("not found", () => {
 
   test("a 404 shows not found", async () => {
     const base = session()
-    search.value = `id=${base.id}`
+    address.set(`id=${base.id}`)
     server.use(http.get(apiUrl(`/sessions/${base.id}`), () => problem(404, "notFound.session")))
 
     renderWithProviders(

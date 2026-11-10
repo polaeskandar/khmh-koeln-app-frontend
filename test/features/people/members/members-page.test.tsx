@@ -11,19 +11,15 @@ import { me } from "@test/support/fixtures/me"
 import { peopleList, person } from "@test/support/fixtures/people"
 import { services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
-import { address, router } from "@test/support/navigation"
+import { address, navigation, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { PeopleList } from "@/features/people/members/api"
 import { MembersPage } from "@/features/people/members/members-page"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-vi.mock("next/navigation", async () => (await import("@test/support/navigation")).searchParamsMock)
-
 beforeEach(() => {
+  navigation.pathname = "/members/"
   vi.spyOn(console, "error").mockImplementation(() => {})
-  router.replace.mockClear()
-  router.push.mockClear()
 })
 
 const sundaySchool = services.items[0]

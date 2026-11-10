@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { NavUser } from "@/components/app-shell/account-menu"
 import { SidebarProvider } from "@/components/ui/sidebar"
@@ -16,13 +16,10 @@ import { renderWithProviders } from "@test/support/providers"
 
 import { AccountPage } from "@/features/identity/account/account-page"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 let signOuts = 0
 
 beforeEach(() => {
   navigation.pathname = "/account/"
-  router.replace.mockClear()
   signOuts = 0
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
@@ -36,8 +33,6 @@ beforeEach(() => {
     })
   )
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 function open(locale: Locale = "en") {
   renderWithProviders(

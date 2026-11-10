@@ -15,12 +15,8 @@ import { renderWithProviders } from "@test/support/providers"
 import { readPrivacyNotice } from "@/features/privacy/notice/notice"
 import { PrivacyNoticePage } from "@/features/privacy/notice/privacy-notice-page"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 afterEach(() => {
   vi.unstubAllEnvs()
-  router.back.mockReset()
-  router.replace.mockReset()
 })
 
 const notice = (status: string, body = "## Who is responsible\n\nThe church office.") =>

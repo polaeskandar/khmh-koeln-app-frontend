@@ -2,31 +2,25 @@ import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import type { Locale } from "@/i18n/config"
 import { isolate } from "@/lib/bidi"
 import { apiUrl, problem } from "@test/support/api"
 import { homeworkOf, MIMI_ID, MINA_ID, mimi, mina } from "@test/support/fixtures/parent"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { ChildSummary } from "@/features/people/children/api"
 import type { ParentTask } from "@/features/learning/homework/api"
 import { ParentHomework } from "@/features/learning/homework/parent-homework"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
-  search.value = ""
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 type Lists = Record<string, { todo: readonly ParentTask[]; done: readonly ParentTask[] }>
 
@@ -62,7 +56,7 @@ function open({
 const region = async (name: string) => within(await screen.findByRole("region", { name }))
 
 test("lists what is to do in API order and everything done", async () => {
-  search.value = `child=${MINA_ID}`
+  address.set(`child=${MINA_ID}`)
   open()
 
   expect(
@@ -85,7 +79,7 @@ test("lists what is to do in API order and everything done", async () => {
 })
 
 test("the switcher links to each child's homework and loads the chosen child", async () => {
-  search.value = `child=${MIMI_ID}`
+  address.set(`child=${MIMI_ID}`)
   const requested = open()
   const nav = within(await screen.findByRole("navigation", { name: "Children" }))
 
@@ -99,14 +93,14 @@ test("the switcher links to each child's homework and loads the chosen child", a
 })
 
 test("an unlinked child in the address falls back to the first without asking for it", async () => {
-  search.value = "child=0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ec999"
+  address.set("child=0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ec999")
   const requested = open()
   expect((await region("To do")).getByText("Colour the ark")).toBeInTheDocument()
   expect(requested.every((r) => r.startsWith(MIMI_ID))).toBe(true)
 })
 
 test("empty lists say so", async () => {
-  search.value = `child=${MINA_ID}`
+  address.set(`child=${MINA_ID}`)
   open({ lists: { [MINA_ID]: { todo: [], done: [] } } })
   expect(await screen.findByText("Nothing to do for Mina right now.")).toBeInTheDocument()
   expect(await screen.findByText("Nothing ticked off yet.")).toBeInTheDocument()
@@ -120,7 +114,7 @@ test("without children there is no list and no homework request", async () => {
 })
 
 test("a child unlinked meanwhile refetches the children and shows the first left", async () => {
-  search.value = `child=${MINA_ID}`
+  address.set(`child=${MINA_ID}`)
   let reads = 0
 
   open({
@@ -134,7 +128,7 @@ test("a child unlinked meanwhile refetches the children and shows the first left
 })
 
 test("a failed children refresh after an unlink offers to try again", async () => {
-  search.value = `child=${MINA_ID}`
+  address.set(`child=${MINA_ID}`)
   let reads = 0
 
   open({ lists: { [MIMI_ID]: homeworkOf[MIMI_ID] } })
@@ -151,7 +145,7 @@ test("a failed children refresh after an unlink offers to try again", async () =
 })
 
 test("in Arabic stage names sit in bdi", async () => {
-  search.value = `child=${MINA_ID}`
+  address.set(`child=${MINA_ID}`)
   open({ locale: "ar" })
   await screen.findByText("Draw the shepherd and his sheep")
   const card = screen.getByText("Draw the shepherd and his sheep").closest("a")!
@@ -172,7 +166,7 @@ const square = (title: string) =>
   screen.findByRole("button", { name: `Mark “${isolate(title)}” done for ${isolate("Mina")}` })
 
 test("tapping a card's square reports the task done once, in place, and refreshes the lists", async () => {
-  search.value = `child=${MINA_ID}`
+  address.set(`child=${MINA_ID}`)
   const requested = open()
   const puts: unknown[] = []
 
@@ -206,7 +200,7 @@ test("tapping a card's square reports the task done once, in place, and refreshe
 })
 
 test("tapping a done card's square takes the report back and says so", async () => {
-  search.value = `child=${MINA_ID}`
+  address.set(`child=${MINA_ID}`)
   open()
   const deletes: unknown[] = []
 
@@ -227,7 +221,7 @@ test("tapping a done card's square takes the report back and says so", async () 
 })
 
 test("a refused report empties the square again and says why", async () => {
-  search.value = `child=${MINA_ID}`
+  address.set(`child=${MINA_ID}`)
   open()
   server.use(http.put(completion(drawing), () => problem(404, "homework.notAvailable")))
   const tick = await square(drawing.title)
@@ -242,7 +236,7 @@ test("a refused report empties the square again and says why", async () => {
 })
 
 test("the square sits beside the link, which still opens the task", async () => {
-  search.value = `child=${MINA_ID}`
+  address.set(`child=${MINA_ID}`)
   open()
   const tick = await square(drawing.title)
   const card = screen.getByRole("link", { name: /Draw the shepherd and his sheep/ })

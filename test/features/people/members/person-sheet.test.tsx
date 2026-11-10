@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
@@ -18,15 +18,10 @@ import { renderWithProviders } from "@test/support/providers"
 import type { PersonRow } from "@/features/people/members/api"
 import { MembersScreen } from "@/features/people/members/members-page"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-vi.mock("next/navigation", async () => (await import("@test/support/navigation")).searchParamsMock)
-
 beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 function open(initial: PersonRow, locale: Locale = "en", viewer: Me = me.administrator) {
   let current = initial

@@ -18,8 +18,6 @@ import { AppShell } from "@/components/app-shell/app-shell"
 import { isActive } from "@/components/app-shell/nav"
 import { TodayStamp, Topbar } from "@/components/app-shell/topbar"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 afterEach(() => {
   vi.unstubAllEnvs()
   vi.useRealTimers()

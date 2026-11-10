@@ -10,14 +10,11 @@ import { apiUrl, problem } from "@test/support/api"
 import { openRosterBoard, sheetHandlers, thirdClassBoard } from "@test/support/fixtures/board"
 import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { AttendanceSheet } from "@/features/meetings/attendance/api"
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
-
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
 
 beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => {}))
 
@@ -33,7 +30,7 @@ function open(
   { locale = "en", who = me.servant }: { locale?: Locale; who?: Me } = {}
 ) {
   const id = typeof board === "function" ? "0192f3a4-7b1c-7d2e-8f3a-000000000999" : board.session.id
-  search.value = `session=${id}`
+  address.set(`session=${id}`)
 
   server.use(
     ...(typeof board === "function"

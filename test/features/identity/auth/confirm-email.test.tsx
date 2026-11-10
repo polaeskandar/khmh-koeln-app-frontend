@@ -9,8 +9,6 @@ import { renderWithProviders } from "@test/support/providers"
 
 import { ConfirmEmailPage } from "@/features/identity/auth/confirm-email-page"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
   for (const method of ["error", "warn"] as const) {
     vi.spyOn(console, method).mockImplementation(() => {})
@@ -18,7 +16,6 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  vi.restoreAllMocks()
   window.history.replaceState(null, "", "/")
 })
 
