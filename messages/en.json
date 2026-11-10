@@ -850,7 +850,11 @@
       "deleteConfirm": "Delete role",
       "readOnly": "Your roles let you see roles, not change them.",
       "allows": "Allows",
-      "global": "Roles hold everywhere in the church, in every service. Which children a parent sees still comes from parent access; members see their own groups without a role."
+      "global": "Some roles hold everywhere in the church, others only in the services and stages an account is assigned to. Which children a parent sees still comes from parent access; members see their own groups without a role.",
+      "scope": {
+        "church": "Everywhere",
+        "assignedGroups": "In assigned groups"
+      }
     }
   },
   "session": {
@@ -2228,9 +2232,9 @@
     "details": "Role",
     "name": "Name",
     "nameHint": "For example: Church office, Attendance helper.",
-    "description": "What the role allows, everywhere in the church, and who has it.",
+    "description": "What the role allows, where it holds, and who has it.",
     "permissions": "What it allows",
-    "permissionsHint": "Roles hold everywhere: a role that may take attendance may take it in every service. Ticking Add, Change or Delete ticks See too.",
+    "permissionsHint": "Ticking Add, Change or Delete ticks See too.",
     "chosen": "{count, number} of {total, number} chosen",
     "readOnlyNote": "You can see this role, but your roles don’t let you change it.",
     "create": "Create role",
@@ -2252,7 +2256,12 @@
     "locksOut": "Nobody else can change roles. Without “Roles: Change” here, no one could repair roles any more, so this change would be refused.",
     "deleteLocksOut": "Nobody else can change roles, so this role can’t be deleted. Give another role “Roles: Change” first.",
     "added": "Added {when}",
-    "changed": "Last changed {when}"
+    "changed": "Last changed {when}",
+    "scope": "Where it applies",
+    "scopeChurch": "Everywhere in the church",
+    "scopeChurchHint": "In every service and stage. For the administrator, the church office and parents.",
+    "scopeAssigned": "Only in the account’s assigned groups",
+    "scopeAssignedHint": "In the services and stages the account is assigned to under Staff accounts and roles. For servants and service leaders."
   },
   "permissions": {
     "actions": {

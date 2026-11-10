@@ -160,6 +160,7 @@ test("a new role ticks See with Add and is created once", async () => {
       method: "POST",
       body: {
         name: "Attendance helper",
+        scope: "church",
         permissions: [
           { action: "read", resource: "services" },
           { action: "read", resource: "attendance" },
@@ -168,6 +169,42 @@ test("a new role ticks See with Add and is created once", async () => {
       },
     },
   ])
+})
+
+test("the Servant role applies only in assigned groups, and saving to everywhere sends the scope", async () => {
+  search.value = `id=${SERVANT_ID}`
+  const sent = open(<RolePage />)
+  const scope = await screen.findByRole("radiogroup", { name: "Where it applies" })
+
+  const assigned = within(scope).getByRole("radio", {
+    name: /Only in the account’s assigned groups/,
+  })
+
+  expect(assigned).toBeChecked()
+  await userEvent.click(within(scope).getByRole("radio", { name: /Everywhere in the church/ }))
+  await userEvent.click(screen.getByRole("button", { name: "Save changes" }))
+  await waitFor(() => expect(sent).toHaveLength(1))
+  expect(sent[0]).toMatchObject({ method: "PUT", body: { name: "Servant", scope: "church" } })
+})
+
+test("a new role applies everywhere unless assigned groups are chosen", async () => {
+  search.value = ""
+  const sent = open(<NewRolePage />)
+  await userEvent.type(await screen.findByRole("textbox", { name: "Name" }), "Helpers")
+  expect(screen.getByRole("radio", { name: /Everywhere in the church/ })).toBeChecked()
+
+  await userEvent.click(
+    screen.getByRole("radio", { name: /Only in the account’s assigned groups/ })
+  )
+
+  await userEvent.click(box("Services: See"))
+  await userEvent.click(screen.getByRole("button", { name: "Create role" }))
+  await waitFor(() => expect(sent).toHaveLength(1))
+
+  expect(sent[0]).toMatchObject({
+    method: "POST",
+    body: { name: "Helpers", scope: "assignedGroups" },
+  })
 })
 
 test("unticking See clears the row", async () => {
