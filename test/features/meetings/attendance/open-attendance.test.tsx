@@ -5,7 +5,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { upcomingQuery } from "@/features/meetings/dashboard/api"
 import { SessionPage } from "@/features/meetings/meetings/session-page"
@@ -101,11 +100,11 @@ function openBoard(
   )
 
   renderWithProviders(
-    <SidebarProvider>
+    <>
       <TakeAttendancePage />
       <Upcoming />
-    </SidebarProvider>,
-    { locale, me: who }
+    </>,
+    { locale, me: who, sidebar: true }
   )
 
   return calls
@@ -236,12 +235,7 @@ describe("the session page", () => {
       )
     )
 
-    renderWithProviders(
-      <SidebarProvider>
-        <SessionPage />
-      </SidebarProvider>,
-      { me: who }
-    )
+    renderWithProviders(<SessionPage />, { me: who, sidebar: true })
 
     return board.session.id
   }

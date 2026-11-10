@@ -3,7 +3,6 @@ import { http, HttpResponse } from "msw"
 import { renderToString } from "react-dom/server"
 import { afterEach, describe, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Locale } from "@/i18n/config"
 import { apiUrl } from "@test/support/api"
@@ -113,22 +112,13 @@ describe("the top bar", () => {
   const crumbs = [{ label: "Dienste", href: "/services/" }, { label: "Chor" }]
 
   test("marks the last crumb as the current page", () => {
-    renderWithProviders(
-      <SidebarProvider>
-        <Topbar crumbs={crumbs} />
-      </SidebarProvider>
-    )
+    renderWithProviders(<Topbar crumbs={crumbs} />, { sidebar: true })
 
     expect(screen.getByText("Chor", { selector: "[aria-current='page']" })).toBeInTheDocument()
   })
 
   test("the phone's back link reads 'Zurück zu Dienste' in German", () => {
-    renderWithProviders(
-      <SidebarProvider>
-        <Topbar crumbs={crumbs} />
-      </SidebarProvider>,
-      { locale: "de" }
-    )
+    renderWithProviders(<Topbar crumbs={crumbs} />, { locale: "de", sidebar: true })
 
     expect(screen.getByRole("link", { name: "Zurück zu Dienste" })).toHaveAttribute(
       "href",

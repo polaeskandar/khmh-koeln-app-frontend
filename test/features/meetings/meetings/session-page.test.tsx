@@ -2,7 +2,6 @@ import { screen, within } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import type { HistoryEntry } from "@/lib/api/types/meetings"
 import { apiUrl, problem } from "@test/support/api"
@@ -47,12 +46,7 @@ function open(
     })
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <SessionPage />
-    </SidebarProvider>,
-    { me: who }
-  )
+  renderWithProviders(<SessionPage />, { me: who, sidebar: true })
 
   return { id: base.id, requests: () => requests }
 }
@@ -171,11 +165,7 @@ describe("not found", () => {
   test("a malformed id shows not found without a request", async () => {
     address.set("id=not-a-uuid")
 
-    renderWithProviders(
-      <SidebarProvider>
-        <SessionPage />
-      </SidebarProvider>
-    )
+    renderWithProviders(<SessionPage />, { sidebar: true })
 
     expect(await screen.findByText("This page doesn’t exist")).toBeInTheDocument()
   })
@@ -185,11 +175,7 @@ describe("not found", () => {
     address.set(`id=${base.id}`)
     server.use(http.get(apiUrl(`/sessions/${base.id}`), () => problem(404, "notFound.session")))
 
-    renderWithProviders(
-      <SidebarProvider>
-        <SessionPage />
-      </SidebarProvider>
-    )
+    renderWithProviders(<SessionPage />, { sidebar: true })
 
     expect(await screen.findByText("This page doesn’t exist")).toBeInTheDocument()
   })

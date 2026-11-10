@@ -2,7 +2,6 @@ import { screen, within } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
 import { expect, test } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import type { SessionView } from "@/lib/api/types/meetings"
 import { apiUrl, problem } from "@test/support/api"
@@ -57,12 +56,7 @@ function answer(lists: Lists | (() => Response), who: Me = me.leader) {
     countsHandler([...sessions, ...earlier])
   )
 
-  return renderWithProviders(
-    <SidebarProvider>
-      <AttendanceOverview />
-    </SidebarProvider>,
-    { me: who }
-  )
+  return renderWithProviders(<AttendanceOverview />, { me: who, sidebar: true })
 }
 
 const cards = async () => {

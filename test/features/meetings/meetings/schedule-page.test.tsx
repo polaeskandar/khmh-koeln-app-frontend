@@ -5,7 +5,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import type { AgendaItem, PlannedItem, ScheduleSummary } from "@/lib/api/types/meetings"
 import { apiUrl, problem } from "@test/support/api"
@@ -86,12 +85,7 @@ function open(
     })
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <SchedulePage />
-    </SidebarProvider>,
-    { me: who, client }
-  )
+  renderWithProviders(<SchedulePage />, { me: who, client, sidebar: true })
 
   return id
 }

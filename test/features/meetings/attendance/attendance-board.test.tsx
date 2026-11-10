@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event"
 import { http } from "msw"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
@@ -42,12 +41,7 @@ function open(
       : sheetHandlers(board))
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <TakeAttendancePage />
-    </SidebarProvider>,
-    { locale, me: who }
-  )
+  renderWithProviders(<TakeAttendancePage />, { locale, me: who, sidebar: true })
 }
 
 const roster = async () => within(await screen.findByRole("region", { name: "Roster" }))

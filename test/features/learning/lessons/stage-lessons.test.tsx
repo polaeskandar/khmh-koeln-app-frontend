@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { apiUrl } from "@test/support/api"
 import { goodSamaritan, stageLessons } from "@test/support/fixtures/lessons"
@@ -88,12 +87,7 @@ function open(list: StageLessons, account: Me = me.servant) {
     })
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <StageLessonsPage />
-    </SidebarProvider>,
-    { me: account }
-  )
+  renderWithProviders(<StageLessonsPage />, { me: account, sidebar: true })
 
   return queries
 }

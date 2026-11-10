@@ -4,7 +4,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import type { Schemas } from "@/lib/api/client"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -144,10 +143,9 @@ function open(
 
   renderWithProviders(
     <SessionProvider>
-      <SidebarProvider>
-        <DataRequestPage />
-      </SidebarProvider>
-    </SessionProvider>
+      <DataRequestPage />
+    </SessionProvider>,
+    { sidebar: true }
   )
 
   return { bodies, reads: () => reads, reviews: () => reviews }
@@ -404,10 +402,9 @@ describe("a copy request", () => {
 
     renderWithProviders(
       <SessionProvider>
-        <SidebarProvider>
-          <DataRequestPage />
-        </SidebarProvider>
-      </SessionProvider>
+        <DataRequestPage />
+      </SessionProvider>,
+      { sidebar: true }
     )
 
     return { posted, reads: () => reads }
@@ -631,11 +628,9 @@ describe("a copy request", () => {
 
     renderWithProviders(
       <SessionProvider>
-        <SidebarProvider>
-          <DataRequestPage />
-        </SidebarProvider>
+        <DataRequestPage />
       </SessionProvider>,
-      { locale: "ar" }
+      { locale: "ar", sidebar: true }
     )
 
     const panel = await section("رابط التنزيل")

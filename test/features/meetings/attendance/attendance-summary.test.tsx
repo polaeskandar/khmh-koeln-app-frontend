@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import { apiUrl, problem } from "@test/support/api"
 import { closedFirstNovember, openRosterBoard, sheetHandlers } from "@test/support/fixtures/board"
 import { me } from "@test/support/fixtures/me"
@@ -52,11 +51,11 @@ function open(board: AttendanceSheet, reopen?: (body: unknown) => Response, who:
   )
 
   renderWithProviders(
-    <SidebarProvider>
+    <>
       <AttendanceSummaryPage />
       <Agenda />
-    </SidebarProvider>,
-    { me: who }
+    </>,
+    { me: who, sidebar: true }
   )
 
   return sent

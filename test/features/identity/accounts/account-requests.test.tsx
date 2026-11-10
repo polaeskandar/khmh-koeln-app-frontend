@@ -4,7 +4,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Schemas } from "@/lib/api/client"
@@ -85,10 +84,9 @@ function open(account: Me = me.administrator, decline?: () => Response) {
 
   renderWithProviders(
     <SessionProvider>
-      <SidebarProvider>
-        <SettingsPage />
-      </SidebarProvider>
-    </SessionProvider>
+      <SettingsPage />
+    </SessionProvider>,
+    { sidebar: true }
   )
 
   return calls

@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { expect, test } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { ScheduleSummary } from "@/lib/api/types/meetings"
 import { apiUrl } from "@test/support/api"
 import { schedule } from "@test/support/fixtures/schedules"
@@ -79,12 +78,7 @@ function open(query = "") {
     )
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <SchedulesPage />
-    </SidebarProvider>,
-    { me: me.leader }
-  )
+  renderWithProviders(<SchedulesPage />, { me: me.leader, sidebar: true })
 }
 
 const groups = async () => {

@@ -4,7 +4,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import type { ServiceStages } from "@/features/organization/services/api"
 import { apiUrl, problem } from "@test/support/api"
@@ -73,12 +72,7 @@ function open(
     })
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <StagesManager />
-    </SidebarProvider>,
-    { me: viewer }
-  )
+  renderWithProviders(<StagesManager />, { me: viewer, sidebar: true })
 
   return puts
 }

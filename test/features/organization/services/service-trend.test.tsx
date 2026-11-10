@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Locale } from "@/i18n/config"
 import { apiUrl } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -123,12 +122,7 @@ test("details show the attendance stat and no leaders", async () => {
     http.get(apiUrl("/schedules"), () => HttpResponse.json({ today: "2026-11-08", items: [] }))
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <ServiceDetails />
-    </SidebarProvider>,
-    { me: me.administrator }
-  )
+  renderWithProviders(<ServiceDetails />, { me: me.administrator, sidebar: true })
 
   const stat = (await screen.findByText("Attendance, last 4 weeks")).parentElement!
   await waitFor(() => expect(stat).toHaveTextContent("82%"))

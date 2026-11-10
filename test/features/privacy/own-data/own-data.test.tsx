@@ -4,7 +4,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import { type Me, meQuery } from "@/features/identity/auth/api"
 import {
   forgetOutcome,
@@ -327,11 +326,7 @@ test.each([
     )
   )
 
-  renderWithProviders(
-    <SessionProvider>
-      <SidebarProvider>{page()}</SidebarProvider>
-    </SessionProvider>
-  )
+  renderWithProviders(<SessionProvider>{page()}</SessionProvider>, { sidebar: true })
 
   const groups = await screen.findAllByRole("group")
   await screen.findByRole("button", { name: "Delete account…" })

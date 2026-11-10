@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { DirectoryPerson } from "@/features/people/members/api"
 import type { Locale } from "@/i18n/config"
 import { apiUrl } from "@test/support/api"
@@ -99,12 +98,7 @@ function open(
     })
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <TakeAttendancePage />
-    </SidebarProvider>,
-    { locale, me: me.servant }
-  )
+  renderWithProviders(<TakeAttendancePage />, { locale, me: me.servant, sidebar: true })
 
   return { queries, aborted }
 }

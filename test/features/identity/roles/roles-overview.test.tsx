@@ -4,7 +4,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Action, Permission, Resource } from "@/lib/permissions"
@@ -115,10 +114,9 @@ function open(who: Me, remove?: () => Response) {
 
   renderWithProviders(
     <SessionProvider>
-      <SidebarProvider>
-        <SettingsPage />
-      </SidebarProvider>
-    </SessionProvider>
+      <SettingsPage />
+    </SessionProvider>,
+    { sidebar: true }
   )
 
   return { deletes, reads: () => reads }

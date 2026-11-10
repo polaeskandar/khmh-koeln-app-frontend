@@ -4,7 +4,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -94,12 +93,7 @@ function openList(
     )
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <StageHomeworkPage />
-    </SidebarProvider>,
-    { me: account }
-  )
+  renderWithProviders(<StageHomeworkPage />, { me: account, sidebar: true })
 }
 
 async function menuItems() {
@@ -318,12 +312,7 @@ test("deleting from the progress page opens the stage's homework list", async ()
     })
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <HomeworkProgressPage />
-    </SidebarProvider>,
-    { me: me.servant }
-  )
+  renderWithProviders(<HomeworkProgressPage />, { me: me.servant, sidebar: true })
 
   expect(await menuItems()).toEqual(["Publish", "Archive", "Delete draft"])
   expect(screen.getAllByRole("button", { name: "Publish", hidden: true })).toHaveLength(1)

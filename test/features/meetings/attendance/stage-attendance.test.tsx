@@ -2,7 +2,6 @@ import { screen, within } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
 import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
@@ -53,12 +52,7 @@ function open(answer: () => Response, locale: Locale = "en") {
     http.get(apiUrl(`/stages/${THIRD_CLASS_ID}/attendance-history`), answer)
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <StageAttendance />
-    </SidebarProvider>,
-    { locale }
-  )
+  renderWithProviders(<StageAttendance />, { locale, sidebar: true })
 }
 
 test("is the current tab, ends the crumbs and links each session to its summary", async () => {

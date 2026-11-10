@@ -4,7 +4,6 @@ import { http, HttpResponse } from "msw"
 import { afterEach, describe, expect, test } from "vitest"
 
 import { NavUser } from "@/components/app-shell/account-menu"
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { RedirectIfSignedIn } from "@/features/identity/auth/guards"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -165,10 +164,9 @@ describe("My groups", () => {
 
     renderWithProviders(
       <SessionProvider>
-        <SidebarProvider>
-          <NavUser />
-        </SidebarProvider>
-      </SessionProvider>
+        <NavUser />
+      </SessionProvider>,
+      { sidebar: true }
     )
 
     await userEvent.click(await screen.findByRole("button", { name: "Account menu" }))

@@ -4,6 +4,7 @@ import { type Messages, NextIntlClientProvider } from "next-intl"
 import { Direction } from "radix-ui"
 import type { ReactElement, ReactNode } from "react"
 
+import { SidebarProvider } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { type Me, meQuery } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -16,7 +17,7 @@ import en from "../../messages/en.json"
 
 const catalogs = { en, de, ar } as unknown as Record<Locale, Messages>
 
-type ProviderOptions = { locale?: Locale; client?: QueryClient; me?: Me }
+type ProviderOptions = { locale?: Locale; client?: QueryClient; me?: Me; sidebar?: boolean }
 
 export function makeTestQueryClient() {
   const client = makeQueryClient()
@@ -30,18 +31,21 @@ export function testProviders({
   locale = "en",
   client = makeTestQueryClient(),
   me,
+  sidebar = false,
 }: ProviderOptions = {}) {
   if (me) {
     client.setQueryData(meQuery.queryKey, me)
   }
 
   function Providers({ children }: { children: ReactNode }) {
+    const page = sidebar ? <SidebarProvider>{children}</SidebarProvider> : children
+
     return (
       <NextIntlClientProvider locale={locale} messages={catalogs[locale]} timeZone="Europe/Berlin">
         <QueryClientProvider client={client}>
           <Direction.Provider dir={directionOf(locale)}>
             <TooltipProvider>
-              {me ? <SessionProvider>{children}</SessionProvider> : children}
+              {me ? <SessionProvider>{page}</SessionProvider> : page}
             </TooltipProvider>
           </Direction.Provider>
         </QueryClientProvider>

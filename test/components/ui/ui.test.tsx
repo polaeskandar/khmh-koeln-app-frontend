@@ -6,7 +6,7 @@ import { Providers } from "@/components/providers"
 import { renderWithProviders } from "@test/support/providers"
 
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog"
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Spinner } from "@/components/ui/spinner"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
@@ -36,12 +36,7 @@ describe("translated screen-reader labels", () => {
   })
 
   test("SidebarTrigger is labelled in German", () => {
-    renderWithProviders(
-      <SidebarProvider>
-        <SidebarTrigger />
-      </SidebarProvider>,
-      { locale: "de" }
-    )
+    renderWithProviders(<SidebarTrigger />, { locale: "de", sidebar: true })
 
     expect(
       screen.getByRole("button", { name: "Seitenleiste ein- oder ausblenden" })

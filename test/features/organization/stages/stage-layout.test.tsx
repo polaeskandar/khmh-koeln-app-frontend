@@ -8,7 +8,6 @@ import { me } from "@test/support/fixtures/me"
 import { peopleList } from "@test/support/fixtures/people"
 import { SUNDAY_SCHOOL_ID, THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Locale } from "@/i18n/config"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
@@ -24,12 +23,7 @@ beforeEach(() => {
 })
 
 const renderPage = (locale: Locale = "en") =>
-  renderWithProviders(
-    <SidebarProvider>
-      <StageOverview />
-    </SidebarProvider>,
-    { locale, me: me.administrator }
-  )
+  renderWithProviders(<StageOverview />, { locale, me: me.administrator, sidebar: true })
 
 function answer(stage: () => Response) {
   let requests = 0

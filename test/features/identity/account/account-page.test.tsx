@@ -5,7 +5,6 @@ import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
 import { NavUser } from "@/components/app-shell/account-menu"
-import { SidebarProvider } from "@/components/ui/sidebar"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
@@ -37,11 +36,9 @@ beforeEach(() => {
 function open(locale: Locale = "en") {
   renderWithProviders(
     <SessionProvider>
-      <SidebarProvider>
-        <AccountPage />
-      </SidebarProvider>
+      <AccountPage />
     </SessionProvider>,
-    { locale }
+    { locale, sidebar: true }
   )
 }
 
@@ -66,10 +63,9 @@ test("shows the account's name, email and roles", async () => {
 test("the account menu opens Your account", async () => {
   renderWithProviders(
     <SessionProvider>
-      <SidebarProvider>
-        <NavUser />
-      </SidebarProvider>
-    </SessionProvider>
+      <NavUser />
+    </SessionProvider>,
+    { sidebar: true }
   )
 
   await userEvent.click(await screen.findByRole("button", { name: "Account menu" }))

@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import { SessionProvider } from "@/features/identity/auth/session"
 import { apiUrl, problem } from "@test/support/api"
 import {
@@ -46,9 +45,8 @@ function open(page: "new" | "edit", write?: () => Response) {
   )
 
   renderWithProviders(
-    <SessionProvider>
-      <SidebarProvider>{page === "new" ? <NewLessonPage /> : <EditLessonPage />}</SidebarProvider>
-    </SessionProvider>
+    <SessionProvider>{page === "new" ? <NewLessonPage /> : <EditLessonPage />}</SessionProvider>,
+    { sidebar: true }
   )
 
   return sent

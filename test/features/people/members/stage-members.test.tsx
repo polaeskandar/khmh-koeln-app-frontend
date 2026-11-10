@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import type { Stage } from "@/features/organization/stages/api"
 import type { PersonRow } from "@/features/people/members/api"
@@ -50,12 +49,7 @@ function open(
     })
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <StageOverview />
-    </SidebarProvider>,
-    { locale, me: viewer }
-  )
+  renderWithProviders(<StageOverview />, { locale, me: viewer, sidebar: true })
 
   return pages
 }
@@ -130,21 +124,15 @@ test("another stage starts on its first page", async () => {
     })
   )
 
-  const page = () => (
-    <SidebarProvider>
-      <StageOverview />
-    </SidebarProvider>
-  )
-
-  const view = renderWithProviders(page())
+  const view = renderWithProviders(<StageOverview />, { sidebar: true })
   await screen.findByText("Showing 1–25 of 30")
   address.set(`id=${otherId}`)
-  view.rerender(page())
+  view.rerender(<StageOverview />)
   expect(await screen.findByRole("heading", { name: "4th Class" })).toBeInTheDocument()
   await userEvent.click(await (await members()).findByRole("button", { name: "Next page" }))
   await screen.findByText("Showing 26–30 of 30")
   address.set(`id=${THIRD_CLASS_ID}`)
-  view.rerender(page())
+  view.rerender(<StageOverview />)
   expect(await screen.findByRole("heading", { name: thirdClass.name })).toBeInTheDocument()
   expect(await screen.findByText("Showing 1–25 of 30")).toBeInTheDocument()
   expect(pages).not.toContain(`${THIRD_CLASS_ID}:2`)
