@@ -8,7 +8,8 @@ import { toast } from "sonner"
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/problem"
 import type { PersonRef, Uuid } from "@/lib/api/types/common"
-import { type ProblemTranslator, translateProblem } from "@/lib/api/translate-problem"
+import { translateProblem } from "@/lib/api/translate-problem"
+import { useProblemTranslator } from "@/lib/api/use-problem-translator"
 
 import type { AttendanceBoard, Mark, Placement } from "./api"
 
@@ -165,6 +166,7 @@ export async function withRetries<T>(write: (signal: AbortSignal) => Promise<T>)
 
 export function useMarkWrites(sessionId: Uuid) {
   const t = useTranslations()
+  const translate = useProblemTranslator()
   const queryClient = useQueryClient()
   const [writes, dispatch] = useReducer(writesReducer, {})
 
@@ -221,7 +223,7 @@ export function useMarkWrites(sessionId: Uuid) {
       }
 
       const problem = error as ApiError
-      toast.error(translateProblem(problem, t as unknown as ProblemTranslator))
+      toast.error(translateProblem(problem, translate))
 
       if (problem.code && REFETCH_CODES.has(problem.code)) {
         void refetchSession()

@@ -18,7 +18,6 @@ import { initialsOf, roleSummary } from "@/features/identity/auth/role-summary"
 import { useSession } from "@/features/identity/auth/session"
 import { useInlineEnd } from "@/i18n/direction"
 import { Link } from "@/i18n/navigation"
-import type { ProblemTranslator } from "@/lib/api/translate-problem"
 import { routes } from "@/lib/routes"
 
 export function AccountMenuItems() {
@@ -97,7 +96,7 @@ export function NavUser() {
               <div className="grid flex-1 text-start text-sm leading-tight">
                 <span className="truncate font-medium">{me.account.displayName}</span>
                 <span className="truncate text-xs text-muted-foreground">
-                  {roleSummary(me, t as unknown as ProblemTranslator)}
+                  {roleSummary(me, t("roles.summary.none"))}
                 </span>
               </div>
               <ChevronsUpDown className="ms-auto size-4" />

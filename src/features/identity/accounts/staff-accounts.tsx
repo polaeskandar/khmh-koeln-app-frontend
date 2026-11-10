@@ -32,9 +32,10 @@ import {
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import { ApiError } from "@/lib/api/problem"
-import { describeProblem, type ProblemTranslator } from "@/lib/api/translate-problem"
+import { describeProblem } from "@/lib/api/translate-problem"
 import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
+import { useProblemTranslator } from "@/lib/api/use-problem-translator"
 import { isolate } from "@/lib/bidi"
 import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
@@ -163,6 +164,7 @@ function PasswordLinkDialog({
   onOpenChange: (open: boolean) => void
 }) {
   const t = useTranslations()
+  const translate = useProblemTranslator()
   const f = useFormat()
   const [link, setLink] = useState<PasswordLink | null>(null)
   const [problem, setProblem] = useState<string | null>(null)
@@ -178,7 +180,7 @@ function PasswordLinkDialog({
         }
 
         if (error instanceof ApiError) {
-          setProblem(describeProblem(error, t as unknown as ProblemTranslator).message)
+          setProblem(describeProblem(error, translate).message)
         } else {
           throw error
         }
@@ -188,7 +190,7 @@ function PasswordLinkDialog({
     return () => {
       current = false
     }
-  }, [account.id, t])
+  }, [account.id, translate])
 
   return (
     <Dialog open onOpenChange={onOpenChange}>

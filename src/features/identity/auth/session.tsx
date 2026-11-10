@@ -16,7 +16,8 @@ import { toast } from "sonner"
 import { useRouter } from "@/i18n/navigation"
 import { onUnauthorized } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/problem"
-import { type ProblemTranslator, translateProblem } from "@/lib/api/translate-problem"
+import { translateProblem } from "@/lib/api/translate-problem"
+import { useProblemTranslator } from "@/lib/api/use-problem-translator"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { can, type Can, canAssign, type Group, isUnassigned, within } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
@@ -108,7 +109,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [refetch])
 
   const locale = useLocale()
-  const tAll = useTranslations() as unknown as ProblemTranslator
+  const tAll = useProblemTranslator()
 
   useEffect(
     () =>

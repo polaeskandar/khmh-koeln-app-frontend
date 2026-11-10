@@ -7,7 +7,6 @@ import type { Me } from "@/features/identity/auth/api"
 import { roleSummary } from "@/features/identity/auth/role-summary"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Locale } from "@/i18n/config"
-import type { ProblemTranslator } from "@/lib/api/translate-problem"
 import { apiUrl } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
@@ -162,7 +161,6 @@ describe("the phone's tab bar", () => {
 })
 
 test("roleSummary uses the API's role names and falls back to 'No role yet'", () => {
-  const t = ((key: string) => key) as unknown as ProblemTranslator
-  expect(roleSummary(me.parent, t)).toBe("Parent")
-  expect(roleSummary(me.noRoles, t)).toBe("roles.summary.none")
+  expect(roleSummary(me.parent, "No role yet")).toBe("Parent")
+  expect(roleSummary(me.noRoles, "No role yet")).toBe("No role yet")
 })
