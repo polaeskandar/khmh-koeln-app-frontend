@@ -27,9 +27,9 @@ import { type Group, groupAt } from "@/lib/permissions"
 
 import {
   ASSIGNMENT_QUERIES,
-  type Assignment,
   assignRequest,
   type GroupOption,
+  type Place,
   removeAssignmentRequest,
   whereOf,
 } from "./api"
@@ -197,7 +197,7 @@ export function AssignmentChip({
   removable,
 }: {
   account: { displayName: string }
-  assignment: Assignment
+  assignment: Place & { id: Uuid }
   label?: string
   removable: boolean
 }) {
