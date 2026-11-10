@@ -2,7 +2,7 @@
 
 import { type QueryKey, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
-import { useCallback, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 
 import { ApiError } from "./problem"
@@ -30,66 +30,56 @@ export function useApiMutation<A extends unknown[], T>(
 ) {
   const t = useTranslations() as unknown as ProblemTranslator
   const queryClient = useQueryClient()
-  const mutation = useMutation({ mutationFn: (args: A) => fn(...args), retry: false })
   const [problem, setProblem] = useState<Problem | null>(null)
-  const [refetching, setRefetching] = useState(false)
-  const { mutateAsync } = mutation
 
-  const execute = useCallback(
-    async (...args: A): Promise<MutationResult<T>> => {
-      setProblem(null)
-
-      try {
-        const data = await mutateAsync(args)
-
-        if (successMessage) {
-          toast.success(
-            typeof successMessage === "function" ? successMessage(data) : successMessage
-          )
-        }
-
-        const refetched = Promise.all(
-          invalidate.map((queryKey) => queryClient.invalidateQueries({ queryKey }))
-        )
-
-        if (awaitRefetch) {
-          setRefetching(true)
-
-          try {
-            await refetched
-          } finally {
-            setRefetching(false)
-          }
-        }
-
-        onSuccess?.(data)
-
-        return { ok: true, data }
-      } catch (error) {
-        if (!(error instanceof ApiError)) {
-          throw error
-        }
-
-        const found = describeProblem(error, t)
-        setProblem(found)
-        const shownInFields = error.status === 422 && Object.keys(found.fieldErrors).length > 0
-        const signedOut = error.status === 401 && error.code === "auth.unauthenticated"
-
-        if (toastOnError && !shownInFields && !signedOut) {
-          toast.error(found.message)
-        }
-
-        return { ok: false, problem: found }
+  const mutation = useMutation({
+    mutationFn: (args: A) => fn(...args),
+    retry: false,
+    onSuccess: async (data) => {
+      if (successMessage) {
+        toast.success(typeof successMessage === "function" ? successMessage(data) : successMessage)
       }
+
+      const refetched = Promise.all(
+        invalidate.map((queryKey) => queryClient.invalidateQueries({ queryKey }))
+      )
+
+      if (awaitRefetch) {
+        await refetched
+      }
+
+      onSuccess?.(data)
     },
-    [mutateAsync, successMessage, invalidate, awaitRefetch, queryClient, onSuccess, t, toastOnError]
-  )
+  })
+
+  async function execute(...args: A): Promise<MutationResult<T>> {
+    setProblem(null)
+
+    try {
+      return { ok: true, data: await mutation.mutateAsync(args) }
+    } catch (error) {
+      if (!(error instanceof ApiError)) {
+        throw error
+      }
+
+      const found = describeProblem(error, t)
+      setProblem(found)
+      const shownInFields = error.status === 422 && Object.keys(found.fieldErrors).length > 0
+      const signedOut = error.status === 401 && error.code === "auth.unauthenticated"
+
+      if (toastOnError && !shownInFields && !signedOut) {
+        toast.error(found.message)
+      }
+
+      return { ok: false, problem: found }
+    }
+  }
 
   return {
     execute,
-    pending: mutation.isPending || refetching,
+    pending: mutation.isPending,
     problem,
     fieldErrors: problem?.fieldErrors ?? {},
-    reset: useCallback(() => setProblem(null), []),
+    reset: () => setProblem(null),
   }
 }
