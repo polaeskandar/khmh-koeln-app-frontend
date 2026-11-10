@@ -114,3 +114,21 @@ test("in Arabic the email stays left to right and the tab bar marks Account", as
     expect(link).toHaveAttribute("href", "/member/account/")
   }
 })
+
+test("the member can download their data and ask to delete it, record included", async () => {
+  server.use(
+    http.get(apiUrl("/me/erasure-request"), () => HttpResponse.json({ erasureRequested: null }))
+  )
+
+  open()
+  expect(await screen.findByRole("button", { name: "Download (JSON)" })).toBeInTheDocument()
+  await userEvent.click(await screen.findByRole("button", { name: "Delete account…" }))
+
+  expect(
+    within(await screen.findByRole("alertdialog")).getByText(
+      "Your own member record, with your attendance marks and homework reports"
+    )
+  ).toBeInTheDocument()
+
+  expect(screen.queryByText(/children’s data/)).toBeNull()
+})

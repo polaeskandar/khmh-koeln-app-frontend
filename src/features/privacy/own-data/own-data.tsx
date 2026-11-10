@@ -40,9 +40,11 @@ const requestErasure = (body: Schemas["OwnErasureRequestRequest"]) =>
   dataOf(api.POST("/me/erasure-request", { body }))
 
 function DeleteAccountForm({
+  parent,
   onAlreadyRequested,
   onPendingChange,
 }: {
+  parent: boolean
   onAlreadyRequested: () => void
   onPendingChange: (pending: boolean) => void
 }) {
@@ -113,7 +115,7 @@ function DeleteAccountForm({
         />
         <TextAreaField
           label={t("privacy.own.noteLabel")}
-          description={t("privacy.own.noteHint")}
+          description={parent ? t("privacy.own.noteHint") : undefined}
           optional
           maxLength={2000}
           value={note}
@@ -164,6 +166,7 @@ function DeleteAccountDialog() {
           </p>
         </div>
         <DeleteAccountForm
+          parent={areas?.parent ?? false}
           onPendingChange={setPending}
           onAlreadyRequested={() => {
             setOpen(false)
