@@ -1,6 +1,6 @@
 "use client"
 
-import { useCan } from "@/features/identity/auth/session"
+import { useCan, useCanAssign } from "@/features/identity/auth/session"
 import { useQuery } from "@tanstack/react-query"
 import { Archive, ArrowRight, PencilLine } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -157,6 +157,7 @@ function Details({ service }: { service: ServiceRow }) {
   const stages = useQuery(serviceStagesQuery(service.id))
   const schedules = useQuery(serviceSchedulesQuery(service.id))
   const can = useCan()
+  const canAssign = useCanAssign()
   const insight = useServiceInsight(service.id)
   const activeSchedules = schedules.data?.items.filter((schedule) => schedule.active).length ?? 0
 
@@ -226,7 +227,7 @@ function Details({ service }: { service: ServiceRow }) {
             )}
           </QueryState>
         </Section>
-        {can("read", "users") ? (
+        {canAssign(groupAt(service)) ? (
           <ServiceServants
             service={{
               id: service.id,

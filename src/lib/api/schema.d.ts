@@ -1203,6 +1203,23 @@ export type paths = {
     patch?: never
     trace?: never
   }
+  "/services/{id}/servants": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+
+    get: operations["get_api_service_servants"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/services": {
     parameters: {
       query?: never
@@ -2294,6 +2311,7 @@ export type components = {
       id: string
       name: string
       role: string
+      groups: components["schemas"]["AssignedGroup"][]
     }
     RegistrationReceivedResponse: {
       status: string
@@ -2966,6 +2984,15 @@ export type components = {
       today: string
       sessions: components["schemas"]["HistorySession"][]
       rows: components["schemas"]["HistoryRow"][]
+    }
+    ServiceServant: {
+      assignmentId: string
+      account: components["schemas"]["AccountReference"]
+      stage: components["schemas"]["StageReference"] | null
+    }
+    ServiceServantsResponse: {
+      servants: components["schemas"]["ServiceServant"][]
+      assignable: components["schemas"]["AccountReference"][]
     }
     ServiceResponse: {
       archived: boolean
@@ -5372,6 +5399,28 @@ export interface operations {
           "application/json": {
             items: components["schemas"]["AccountReference"][]
           }
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  get_api_service_servants: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["ServiceServantsResponse"]
         }
       }
       default: components["responses"]["Problem"]

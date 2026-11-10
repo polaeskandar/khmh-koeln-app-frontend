@@ -12,9 +12,13 @@ import { stageRef } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { StaffAccount } from "@/features/identity/accounts/api"
 import type { Me } from "@/features/identity/auth/api"
-import type { ServiceRow, ServiceStages } from "@/features/organization/services/api"
+import type {
+  ServantAccount,
+  ServiceRow,
+  ServiceServant,
+  ServiceStages,
+} from "@/features/organization/services/api"
 import { ServiceDetails } from "@/features/organization/services/service-details"
 
 const search = vi.hoisted(() => ({ value: "" }))
@@ -39,37 +43,30 @@ const familyMeeting: ServiceRow = {
 
 const ref = ({ id, name, tone }: ServiceRow) => ({ id, name, tone, archived: false })
 
-const staffAccount = (
-  n: number,
-  displayName: string,
-  assignments: StaffAccount["assignments"]
-): StaffAccount => ({
+const account = (n: number, name: string): ServantAccount => ({
   id: `0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef${String(n).padStart(3, "0")}`,
-  displayName,
-  email: `${displayName.split(" ")[0]!.toLowerCase()}@example.org`,
-  disabled: false,
-  roles: [],
-  assignments,
+  name,
 })
 
-const staff: StaffAccount[] = [
-  staffAccount(1, "Christine Adel", [
-    { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea001", service: ref(sundaySchool), stage: null },
-  ]),
-  staffAccount(2, "Daniel Mikhail", [
-    {
-      id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea002",
-      service: ref(sundaySchool),
-      stage: stageRef("3rd Class", 3),
-    },
-  ]),
-  staffAccount(3, "Mina Girgis", [
-    { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea003", service: ref(familyMeeting), stage: null },
-  ]),
-  staffAccount(4, "Rebecca Girgis", []),
+const CHRISTINE = account(1, "Christine Adel")
+const DANIEL = account(2, "Daniel Mikhail")
+const REBECCA = account(4, "Rebecca Girgis")
+
+const assignment = (n: number) => `0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea${String(n).padStart(3, "0")}`
+
+const SERVANTS: ServiceServant[] = [
+  { assignmentId: assignment(1), account: CHRISTINE, stage: null },
+  { assignmentId: assignment(2), account: DANIEL, stage: stageRef("3rd Class", 3) },
+  { assignmentId: assignment(3), account: DANIEL, stage: stageRef("4th Class", 4) },
 ]
 
-const assigned: string[] = []
+let servants: ServiceServant[] = []
+const sent: string[] = []
+
+beforeEach(() => {
+  servants = [...SERVANTS]
+  sent.length = 0
+})
 
 const stagesOf = (service: ServiceRow, names: string[]): ServiceStages => ({
   service: { id: service.id, name: service.name, tone: service.tone, archived: false },
@@ -94,21 +91,28 @@ function open(
   const scheduleRequests: string[] = []
 
   server.use(
-    http.get(apiUrl("/staff-accounts"), () =>
-      HttpResponse.json({ today: "2026-11-08", items: staff })
-    ),
+    http.get(apiUrl(`/services/${service.id}/servants`), () => {
+      sent.push("list")
+
+      return HttpResponse.json({ servants, assignable: [CHRISTINE, DANIEL, REBECCA] })
+    }),
     http.post(apiUrl("/accounts/:id/assignments"), async ({ params, request }) => {
       const body = (await request.json()) as { serviceId: string; stageId: string | null }
-      assigned.push(`${params.id} ${body.serviceId} ${body.stageId}`)
+      sent.push(`assign ${params.id} ${body.serviceId} ${body.stageId}`)
+      const stage = stageRef("3rd Class", 3)
+      const assigned = [CHRISTINE, DANIEL, REBECCA].find((option) => option.id === params.id)!
+      servants = [...servants, { assignmentId: assignment(99), account: assigned, stage }]
 
       return HttpResponse.json(
-        {
-          id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea099",
-          service: ref(sundaySchool),
-          stage: stageRef("3rd Class", 3),
-        },
+        { id: assignment(99), service: ref(sundaySchool), stage },
         { status: 201 }
       )
+    }),
+    http.delete(apiUrl("/assignments/:id"), ({ params }) => {
+      sent.push(`unassign ${params.id}`)
+      servants = servants.filter((servant) => servant.assignmentId !== params.id)
+
+      return new HttpResponse(null, { status: 204 })
     }),
     http.get(apiUrl(`/services/${service.id}`), () => HttpResponse.json(service)),
     http.get(apiUrl(`/services/${service.id}/stages`), () =>
@@ -194,42 +198,80 @@ test("a servant sees no Edit", async () => {
   expect(screen.queryByRole("button", { name: "Edit" })).toBeNull()
 })
 
-test("Servants lists who serves in the service and its stages, and Assign adds one", async () => {
-  assigned.length = 0
+const servantsSection = async () =>
+  within((await screen.findByRole("heading", { name: "Servants" })).closest("section")!)
+
+test("Servants lists each servant with their groups, and Assign adds one", async () => {
   open(sundaySchool, STAGES, 0)
-  const section = (await screen.findByRole("heading", { name: "Servants" })).closest("section")!
-  const servants = within(section)
-  const christine = (await servants.findByText("Christine Adel")).closest("li")!
+  const section = await servantsSection()
+  const christine = (await section.findByText("Christine Adel")).closest("li")!
   expect(christine).toHaveTextContent("The whole service")
-  expect(servants.getByText("Daniel Mikhail").closest("li")).toHaveTextContent("3rd Class")
-  expect(servants.queryByText("Mina Girgis")).toBeNull()
-  expect(servants.queryByText("Rebecca Girgis")).toBeNull()
-  await userEvent.click(servants.getByRole("button", { name: "Assign" }))
+  expect(section.getByText("Daniel Mikhail").closest("li")).toHaveTextContent("3rd Class4th Class")
+  expect(section.queryByText("Rebecca Girgis")).toBeNull()
+  await userEvent.click(section.getByRole("button", { name: "Assign" }))
   const dialog = within(await screen.findByRole("dialog"))
   expect(dialog.getByText("Assign a servant to ⁨Sunday School⁩")).toBeInTheDocument()
   expect(dialog.queryByRole("combobox", { name: "Service" })).toBeNull()
-  await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Account" }), staff[3]!.id)
+
+  expect(dialog.getAllByRole("option").map((option) => option.textContent)).toEqual([
+    "Choose an account",
+    "Christine Adel",
+    "Daniel Mikhail",
+    "Rebecca Girgis",
+    "The whole service",
+    ...STAGES,
+  ])
+
+  await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Account" }), REBECCA.id)
   await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Stage" }), "3rd Class")
   await userEvent.click(dialog.getByRole("button", { name: "Assign" }))
+  expect((await section.findByText("Rebecca Girgis")).closest("li")).toHaveTextContent("3rd Class")
+
+  expect(sent).toEqual([
+    "list",
+    `assign ${REBECCA.id} ${sundaySchool.id} ${stageRef("3rd Class", 3).id}`,
+    "list",
+  ])
+})
+
+test("a service leader without users: read sees the servants and takes one out", async () => {
+  open(sundaySchool, STAGES, 0, me.leader)
+  const section = await servantsSection()
+  expect(await section.findByRole("button", { name: "Assign" })).toBeInTheDocument()
+
+  await userEvent.click(
+    await section.findByRole("button", {
+      name: "Take Daniel Mikhail out of Sunday School · 3rd Class",
+    })
+  )
+
+  await userEvent.click(
+    within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Take out" })
+  )
 
   await waitFor(() =>
-    expect(assigned).toEqual([`${staff[3]!.id} ${sundaySchool.id} ${stageRef("3rd Class", 3).id}`])
+    expect(section.getByText("Daniel Mikhail").closest("li")).not.toHaveTextContent("3rd Class")
   )
+
+  expect(sent).toEqual(["list", `unassign ${assignment(2)}`, "list"])
 })
 
-test("a leader without users: read sees no Servants", async () => {
-  open(sundaySchool, STAGES, 0, me.leader)
+test("an archived service lists its servants without Assign", async () => {
+  open({ ...sundaySchool, archived: true, archivedAt: "2026-10-01T10:00:00Z" }, STAGES, 0)
+  const section = await servantsSection()
+  expect(await section.findByText("Christine Adel")).toBeInTheDocument()
+  expect(section.queryByRole("button", { name: "Assign" })).toBeNull()
+})
+
+test.each([
+  ["a servant", me.servant],
+  ["the church office, who reads accounts", me.churchOffice],
+])("%s, who may not assign in the service, sees no Servants", async (_, viewer) => {
+  open(sundaySchool, STAGES, 0, viewer)
   await screen.findByRole("heading", { level: 1, name: "Sunday School" })
+  await screen.findByRole("heading", { name: "Meeting schedules" })
   expect(screen.queryByRole("heading", { name: "Servants" })).toBeNull()
-})
-
-test("who may read accounts but not assign sees the servants without Assign or Take out", async () => {
-  open(sundaySchool, STAGES, 0, me.churchOffice)
-
-  const section = (await screen.findByRole("heading", { name: "Servants" })).closest("section")!
-  expect(await within(section).findByText("Christine Adel")).toBeInTheDocument()
-  expect(within(section).queryByRole("button", { name: "Assign" })).toBeNull()
-  expect(within(section).queryByRole("button", { name: /^Take / })).toBeNull()
+  expect(sent).toEqual([])
 })
 
 test("an unknown id shows not found", async () => {

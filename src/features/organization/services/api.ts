@@ -57,6 +57,16 @@ export const serviceStagesQuery = (id: Uuid) => ({
     dataOf(api.GET("/services/{id}/stages", { params: { path: { id } }, signal })),
 })
 
+export type ServiceServant = Schemas["ServiceServant"]
+
+export type ServantAccount = Schemas["AccountReference"]
+
+export const serviceServantsQuery = (id: Uuid) => ({
+  queryKey: ["services", "servants", id] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) =>
+    dataOf(api.GET("/services/{id}/servants", { params: { path: { id } }, signal })),
+})
+
 type Structure = "services" | "stages"
 
 export const archiveRequest = (kind: Structure, id: Uuid) =>

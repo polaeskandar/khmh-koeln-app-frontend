@@ -20,9 +20,7 @@ import {
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
-import { type StaffAccount, staffAccountsQuery } from "@/features/identity/accounts/api"
 import { initialsOf } from "@/features/identity/auth/role-summary"
-import { useCanAssign } from "@/features/identity/auth/session"
 import {
   ASSIGNMENT_QUERIES,
   assignRequest,
@@ -30,9 +28,25 @@ import {
   whereOf,
 } from "@/features/organization/assignments/api"
 import { AssignmentChip, GroupFields } from "@/features/organization/assignments/group-choice"
+import type { Uuid } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
-import { type Group, groupAt } from "@/lib/permissions"
+import type { Group } from "@/lib/permissions"
+
+import { type ServantAccount, type ServiceServant, serviceServantsQuery } from "./api"
+
+type ServantRow = { account: ServantAccount; assignments: ServiceServant[] }
+
+function rowsByAccount(servants: ServiceServant[]): ServantRow[] {
+  const rows = new Map<Uuid, ServantRow>()
+
+  for (const servant of servants) {
+    const row = rows.get(servant.account.id) ?? { account: servant.account, assignments: [] }
+    rows.set(servant.account.id, { ...row, assignments: [...row.assignments, servant] })
+  }
+
+  return [...rows.values()]
+}
 
 function AssignServantDialog({
   service,
@@ -40,7 +54,7 @@ function AssignServantDialog({
   onOpenChange,
 }: {
   service: GroupOption
-  accounts: StaffAccount[]
+  accounts: ServantAccount[]
   onOpenChange: (open: boolean) => void
 }) {
   const t = useTranslations()
@@ -52,7 +66,7 @@ function AssignServantDialog({
   const assign = useApiMutation((chosen: string, group: Group) => assignRequest(chosen, group), {
     successMessage: (assignment) =>
       t("toast.groupAssigned", {
-        name: isolate(account?.displayName ?? ""),
+        name: isolate(account?.name ?? ""),
         where: isolate(whereOf(assignment)),
       }),
     invalidate: ASSIGNMENT_QUERIES,
@@ -94,7 +108,7 @@ function AssignServantDialog({
                 </NativeSelectOption>
                 {accounts.map((option) => (
                   <NativeSelectOption key={option.id} value={option.id}>
-                    {option.displayName}
+                    {option.name}
                   </NativeSelectOption>
                 ))}
               </NativeSelect>
@@ -127,15 +141,8 @@ function AssignServantDialog({
   )
 }
 
-function ServantRows({ service, accounts }: { service: GroupOption; accounts: StaffAccount[] }) {
+function ServantRows({ service, servants }: { service: GroupOption; servants: ServiceServant[] }) {
   const t = useTranslations()
-  const canAssign = useCanAssign()
-
-  const servants = accounts.flatMap((account) => {
-    const here = account.assignments.filter((assignment) => assignment.service.id === service.id)
-
-    return here.length > 0 ? [{ account, here }] : []
-  })
 
   if (servants.length === 0) {
     return <p className="text-sm text-muted-foreground">{t("services.detail.servants.empty")}</p>
@@ -143,23 +150,19 @@ function ServantRows({ service, accounts }: { service: GroupOption; accounts: St
 
   return (
     <ul className="divide-y border-y">
-      {servants.map(({ account, here }) => (
+      {rowsByAccount(servants).map(({ account, assignments }) => (
         <li key={account.id} className="flex items-start gap-3 py-3">
-          <MemberAvatar
-            name={account.displayName}
-            initials={initialsOf(account.displayName)}
-            seed={account.id}
-          />
+          <MemberAvatar name={account.name} initials={initialsOf(account.name)} seed={account.id} />
           <span className="flex min-w-0 flex-1 flex-col gap-1.5">
-            <bdi className="truncate text-sm font-medium">{account.displayName}</bdi>
+            <bdi className="truncate text-sm font-medium">{account.name}</bdi>
             <ul className="flex flex-wrap gap-1.5">
-              {here.map((assignment) => (
+              {assignments.map((assignment) => (
                 <AssignmentChip
-                  key={assignment.id}
-                  account={account}
-                  assignment={assignment}
+                  key={assignment.assignmentId}
+                  account={{ displayName: account.name }}
+                  assignment={{ id: assignment.assignmentId, service, stage: assignment.stage }}
                   label={assignment.stage?.name ?? t("assignments.wholeService")}
-                  removable={canAssign(groupAt(assignment.service, assignment.stage))}
+                  removable
                 />
               ))}
             </ul>
@@ -178,11 +181,9 @@ export function ServiceServants({
   archived: boolean
 }) {
   const t = useTranslations("services.detail.servants")
-  const canAssign = useCanAssign()
-  const accounts = useQuery(staffAccountsQuery)
+  const servants = useQuery(serviceServantsQuery(service.id))
   const [assigning, setAssigning] = useState(false)
-  const assigns = !archived && canAssign(groupAt(service))
-  const active = accounts.data?.items.filter((account) => !account.disabled) ?? []
+  const assignable = archived ? null : servants.data?.assignable
 
   return (
     <Section
@@ -190,7 +191,7 @@ export function ServiceServants({
       title={t("title")}
       description={t("description")}
       actions={
-        assigns && accounts.data ? (
+        assignable ? (
           <Button variant="outline" onClick={() => setAssigning(true)}>
             <Plus data-icon="inline-start" />
             {t("assign")}
@@ -198,11 +199,11 @@ export function ServiceServants({
         ) : null
       }
     >
-      <QueryState query={accounts}>
-        {(data) => <ServantRows service={service} accounts={data.items} />}
+      <QueryState query={servants}>
+        {(data) => <ServantRows service={service} servants={data.servants} />}
       </QueryState>
-      {assigning ? (
-        <AssignServantDialog service={service} accounts={active} onOpenChange={setAssigning} />
+      {assigning && assignable ? (
+        <AssignServantDialog service={service} accounts={assignable} onOpenChange={setAssigning} />
       ) : null}
     </Section>
   )
