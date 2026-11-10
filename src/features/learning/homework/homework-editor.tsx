@@ -3,11 +3,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link2, Plus, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useId, useRef, useState } from "react"
+import { useId, useState } from "react"
 import { toast } from "sonner"
 
 import { Topbar } from "@/components/app-shell/topbar"
-import { focusFirstInvalid } from "@/components/focus-first-invalid"
 import { FormPanel } from "@/components/form-panel"
 import { TextAreaField, TextField } from "@/components/form-fields"
 import { NoAccess } from "@/components/no-access"
@@ -30,6 +29,7 @@ import { useCan, useCanIn } from "@/features/identity/auth/session"
 import { HomeworkStatusBadge } from "@/features/learning/lessons/lesson-bits"
 import { stageQuery } from "@/features/organization/stages/api"
 import { useStageCrumbs } from "@/features/organization/stages/stage-layout"
+import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useSearchParamId } from "@/hooks/use-search-param-id"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { useFormat } from "@/i18n/format"
@@ -76,7 +76,6 @@ function HomeworkForm(props: FormProps) {
   const f = useFormat()
   const router = useRouter()
   const can = useCanIn(group)
-  const formRef = useRef<HTMLFormElement>(null)
   const dueId = useId()
   const lessonSelectId = useId()
   const [lessonId, setLessonId] = useState(homework ? homework.lesson.id : props.lessonId)
@@ -118,11 +117,7 @@ function HomeworkForm(props: FormProps) {
 
   const lessonLabel = (l: LessonRef) => `${f.dayMonth(l.teachingDate)} · ${l.title}`
 
-  useEffect(() => {
-    if (mutation.problem) {
-      focusFirstInvalid(formRef.current)
-    }
-  }, [mutation.problem])
+  const formRef = useFocusFirstInvalid(mutation.problem)
 
   const resourceError = (row: number, key: "label" | "url") => {
     const index = sent.indexOf(row)

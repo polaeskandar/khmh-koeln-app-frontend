@@ -3,9 +3,8 @@
 import { useCan } from "@/features/identity/auth/session"
 import { Archive, ArchiveRestore, Ellipsis, PencilLine, Plus, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 
-import { focusFirstInvalid } from "@/components/focus-first-invalid"
 import { TextAreaField, TextField } from "@/components/form-fields"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,6 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { FieldGroup } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
+import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useRouter } from "@/i18n/navigation"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
@@ -69,7 +69,6 @@ function ServiceForm({
 }) {
   const t = useTranslations()
   const router = useRouter()
-  const formRef = useRef<HTMLFormElement>(null)
   const [name, setName] = useState(service?.name ?? "")
   const [description, setDescription] = useState(service?.description ?? "")
 
@@ -87,11 +86,7 @@ function ServiceForm({
   const mutation = service ? update : create
   const errors = mutation.fieldErrors
 
-  useEffect(() => {
-    if (mutation.problem) {
-      focusFirstInvalid(formRef.current)
-    }
-  }, [mutation.problem])
+  const formRef = useFocusFirstInvalid(mutation.problem)
 
   useEffect(() => onPendingChange(mutation.pending), [mutation.pending, onPendingChange])
 

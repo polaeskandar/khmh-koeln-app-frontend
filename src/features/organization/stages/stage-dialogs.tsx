@@ -11,9 +11,8 @@ import {
   Trash2,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 
-import { focusFirstInvalid } from "@/components/focus-first-invalid"
 import { TextAreaField, TextField } from "@/components/form-fields"
 import { Button } from "@/components/ui/button"
 import {
@@ -33,6 +32,7 @@ import {
 import { FieldGroup } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { useCan } from "@/features/identity/auth/session"
+import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useRouter } from "@/i18n/navigation"
 import type { ServiceRef } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -62,7 +62,6 @@ function StageForm({
 }) {
   const t = useTranslations()
   const router = useRouter()
-  const formRef = useRef<HTMLFormElement>(null)
   const [name, setName] = useState(stage?.name ?? "")
   const [description, setDescription] = useState(stage?.description ?? "")
 
@@ -84,11 +83,7 @@ function StageForm({
   const errors = mutation.fieldErrors
   const shownInFields = Object.keys(errors).length > 0
 
-  useEffect(() => {
-    if (mutation.problem) {
-      focusFirstInvalid(formRef.current)
-    }
-  }, [mutation.problem])
+  const formRef = useFocusFirstInvalid(mutation.problem)
 
   useEffect(() => onPendingChange(mutation.pending), [mutation.pending, onPendingChange])
 

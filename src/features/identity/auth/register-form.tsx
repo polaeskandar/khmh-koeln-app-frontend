@@ -4,9 +4,8 @@ import { useQuery } from "@tanstack/react-query"
 import { cn } from "cn"
 import { CircleAlert } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
-import { useEffect, useId, useRef, useState } from "react"
+import { useId, useState } from "react"
 
-import { focusFirstInvalid } from "@/components/focus-first-invalid"
 import { TextAreaField, TextField } from "@/components/form-fields"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -25,6 +24,7 @@ import {
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Spinner } from "@/components/ui/spinner"
+import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
 import type { Locale } from "@/i18n/config"
 import { Link, useRouter } from "@/i18n/navigation"
@@ -115,7 +115,6 @@ export function RegisterForm() {
   const locale = useLocale() as Locale
   const router = useRouter()
   const privacyId = useId()
-  const formRef = useRef<HTMLFormElement>(null)
   const [alert, setAlert] = useState<string | null>(null)
 
   const [form, setForm] = useState({
@@ -136,11 +135,7 @@ export function RegisterForm() {
   const errors = register.fieldErrors
   const servant = form.registeredAs === "servant"
 
-  useEffect(() => {
-    if (register.problem) {
-      focusFirstInvalid(formRef.current)
-    }
-  }, [register.problem])
+  const formRef = useFocusFirstInvalid(register.problem)
 
   const submit = useSubmitOnce(async () => {
     setAlert(null)

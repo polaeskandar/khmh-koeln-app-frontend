@@ -2,10 +2,9 @@
 
 import { CircleAlert, UserPlus } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
-import { focusFirstInvalid } from "@/components/focus-first-invalid"
 import { TextField } from "@/components/form-fields"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -20,6 +19,7 @@ import {
 import { FieldGroup } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { useCan } from "@/features/identity/auth/session"
+import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useFormat } from "@/i18n/format"
 import type { PersonRef, ServiceRef, StageRef } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -55,7 +55,6 @@ function AddPersonForm({
   const t = useTranslations()
   const f = useFormat()
   const can = useCan()
-  const formRef = useRef<HTMLFormElement>(null)
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [displayName, setDisplayName] = useState("")
@@ -87,11 +86,7 @@ function AddPersonForm({
   const errors = create.fieldErrors
   const shownInFields = Object.keys(errors).length > 0
 
-  useEffect(() => {
-    if (create.problem && Object.keys(create.fieldErrors).length > 0) {
-      focusFirstInvalid(formRef.current)
-    }
-  }, [create.problem, create.fieldErrors])
+  const formRef = useFocusFirstInvalid(create.problem)
 
   useEffect(() => onPendingChange(busy), [busy, onPendingChange])
 

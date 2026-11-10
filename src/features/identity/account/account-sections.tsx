@@ -2,7 +2,7 @@
 
 import { KeyRound } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
-import { useEffect, useId, useRef, useState } from "react"
+import { useEffect, useId, useState } from "react"
 
 import { FormPanel } from "@/components/form-panel"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -19,10 +19,10 @@ import {
 import { FieldGroup, FieldLabel } from "@/components/ui/field"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Spinner } from "@/components/ui/spinner"
-import { focusFirstInvalid } from "@/components/focus-first-invalid"
 import { AppearanceFields } from "@/components/theme-switch"
 import type { Me } from "@/features/identity/auth/api"
 import { PasswordField } from "@/features/identity/auth/password-field"
+import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { isLocale, LOCALE_NAMES, LOCALES } from "@/i18n/config"
 import { useSwitchLocale } from "@/i18n/use-switch-locale"
@@ -111,7 +111,6 @@ function PasswordForm({
 }) {
   const t = useTranslations("account.password")
   const tCommon = useTranslations("common")
-  const formRef = useRef<HTMLFormElement>(null)
   const [currentPassword, setCurrent] = useState("")
   const [newPassword, setNew] = useState("")
 
@@ -126,11 +125,7 @@ function PasswordForm({
   const problem =
     mutation.problem && Object.keys(errors).length === 0 ? mutation.problem.message : null
 
-  useEffect(() => {
-    if (mutation.problem) {
-      focusFirstInvalid(formRef.current)
-    }
-  }, [mutation.problem])
+  const formRef = useFocusFirstInvalid(mutation.problem)
 
   useEffect(() => onPendingChange(mutation.pending), [mutation.pending, onPendingChange])
 

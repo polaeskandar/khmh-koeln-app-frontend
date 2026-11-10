@@ -4,10 +4,9 @@ import { useQuery } from "@tanstack/react-query"
 import { cn } from "cn"
 import { Link2, Plus, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useRef, useState } from "react"
+import { useState } from "react"
 
 import { type Crumb, Topbar } from "@/components/app-shell/topbar"
-import { focusFirstInvalid } from "@/components/focus-first-invalid"
 import { FormPanel } from "@/components/form-panel"
 import { TextAreaField, TextField } from "@/components/form-fields"
 import { NoAccess } from "@/components/no-access"
@@ -28,6 +27,7 @@ import { Input } from "@/components/ui/input"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
 import { useCan, useSession } from "@/features/identity/auth/session"
+import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { Link, useRouter } from "@/i18n/navigation"
 import type { ServiceRef } from "@/lib/api/types/common"
 import { ApiError } from "@/lib/api/problem"
@@ -152,7 +152,6 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
     setHelperIds((ids) => ids.filter((helper) => helper !== id))
   }
 
-  const formRef = useRef<HTMLFormElement>(null)
   const [version] = useState(lesson?.version ?? 0)
 
   const [fields, setFields] = useState({
@@ -196,11 +195,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
   const errors = mutation.fieldErrors
   const completed = lesson?.status === "completed"
 
-  useEffect(() => {
-    if (mutation.problem) {
-      focusFirstInvalid(formRef.current)
-    }
-  }, [mutation.problem])
+  const formRef = useFocusFirstInvalid(mutation.problem)
 
   const keepsMeeting = (saved: Lesson) =>
     meeting === savedMeeting && (meeting !== OTHER_DATE || otherDate === saved.teachingDate)
