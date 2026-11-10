@@ -45,6 +45,8 @@ export const directoryQuery = (q: string) => ({
     dataOf(api.GET("/people/directory", { params: { query: { q } }, signal })),
 })
 
+export const MEMBERSHIP_QUERIES = [["people"], ["services"], ["stages"]]
+
 export type PlacementInput = { serviceId: Uuid; stageId: Uuid | null }
 
 export type NewPerson = {

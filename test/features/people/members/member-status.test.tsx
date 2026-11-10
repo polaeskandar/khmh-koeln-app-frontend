@@ -41,10 +41,15 @@ function open(
   let lydia = initial
   const requests: URLSearchParams[] = []
   const posts: string[] = []
+  const reads = { services: 0 }
 
   server.use(
     http.get(apiUrl("/me"), () => HttpResponse.json(viewer)),
-    http.get(apiUrl("/services"), () => HttpResponse.json(services)),
+    http.get(apiUrl("/services"), () => {
+      reads.services++
+
+      return HttpResponse.json(services)
+    }),
     http.get(apiUrl("/people"), ({ request }) => {
       const params = new URL(request.url).searchParams
       requests.push(params)
@@ -110,7 +115,7 @@ function open(
     { locale }
   )
 
-  return { requests, posts }
+  return { requests, posts, reads }
 }
 
 const lydia = () => person("Lydia", "Aziz")
@@ -167,6 +172,16 @@ test("marking as inactive on Active keeps the sheet on the person while the row 
   expect(screen.getByRole("tab", { name: "Inactive (2)", hidden: true })).toBeInTheDocument()
   expect(screen.queryByRole("button", { name: /Lydia Aziz/, hidden: true })).toBeNull()
   expect(posts).toEqual(["deactivate"])
+})
+
+test("marking as inactive refetches the services, whose member counts change", async () => {
+  const { reads } = open(lydia())
+  const sheet = await openSheet()
+  await waitFor(() => expect(reads.services).toBe(1))
+  await userEvent.click(sheet.getByRole("button", { name: "Mark as inactive" }))
+  const dialog = within(await screen.findByRole("alertdialog"))
+  await userEvent.click(dialog.getByRole("button", { name: "Mark as inactive" }))
+  await waitFor(() => expect(reads.services).toBe(2))
 })
 
 test("on All the sheet stays open with the badge and Reactivate, and no Add to", async () => {

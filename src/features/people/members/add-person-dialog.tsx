@@ -29,6 +29,7 @@ import { preferredName } from "@/lib/domain/names"
 import {
   addMembershipRequest,
   createPersonRequest,
+  MEMBERSHIP_QUERIES,
   type NewPerson,
   type PlacementInput,
 } from "./api"
@@ -36,8 +37,6 @@ import { blocksPlacement } from "./groups"
 import { PlacementFields, usePlacement } from "./placement-fields"
 
 type Candidate = PersonRef & { groups: { service: ServiceRef; stage: StageRef | null }[] }
-
-const PEOPLE_QUERIES = [["people"], ["services"], ["stages"]]
 
 const groupAt = (candidate: Candidate, placement: PlacementInput) =>
   candidate.groups.find((group) =>
@@ -58,13 +57,13 @@ function AddPersonForm({ preset, onDone }: { preset?: PlacementInput; onDone: ()
   const create = useApiMutation(createPersonRequest, {
     toastOnError: false,
     successMessage: (saved) => t("toast.added", { name: preferredName(saved.person) }),
-    invalidate: PEOPLE_QUERIES,
+    invalidate: MEMBERSHIP_QUERIES,
     onSuccess: onDone,
   })
 
   const join = useApiMutation(addMembershipRequest, {
     toastOnError: false,
-    invalidate: PEOPLE_QUERIES,
+    invalidate: MEMBERSHIP_QUERIES,
     onSuccess: onDone,
   })
 

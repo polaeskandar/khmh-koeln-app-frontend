@@ -45,6 +45,7 @@ import {
   deactivatePersonRequest,
   endMembershipRequest,
   joinRequest,
+  MEMBERSHIP_QUERIES,
   type PersonNames,
   type PersonRow,
   type Placement,
@@ -53,8 +54,6 @@ import {
   moveMembershipRequest,
 } from "./api"
 import { blocksPlacement, useGroupOptions } from "./groups"
-
-const PEOPLE_QUERIES = [["people"], ["services"]]
 
 function useWhere() {
   const t = useTranslations("members.sheet")
@@ -78,7 +77,7 @@ function NameForm({ person }: { person: PersonRow["person"] }) {
 
   const rename = useApiMutation((next: PersonNames) => renamePersonRequest(person.id, next), {
     successMessage: t("toast.saved"),
-    invalidate: PEOPLE_QUERIES,
+    invalidate: [["people"], ["services"]],
     awaitRefetch: true,
     onSuccess: () => setEdits({}),
   })
@@ -176,7 +175,11 @@ function MembershipMenu({
 
   const move = useApiMutation(
     (stageId: string) => moveMembershipRequest(placement.membershipId, stageId),
-    { successMessage: t("toast.membershipMoved"), invalidate: PEOPLE_QUERIES, awaitRefetch: true }
+    {
+      successMessage: t("toast.membershipMoved"),
+      invalidate: MEMBERSHIP_QUERIES,
+      awaitRefetch: true,
+    }
   )
 
   if (targets.length === 0 && !remove) {
@@ -238,7 +241,7 @@ function Placements({ person }: { person: PersonRow }) {
 
   const end = useApiMutation(endMembershipRequest, {
     successMessage: t("toast.membershipEnded"),
-    invalidate: PEOPLE_QUERIES,
+    invalidate: MEMBERSHIP_QUERIES,
     awaitRefetch: true,
   })
 
@@ -319,7 +322,7 @@ function AddTo({ person }: { person: PersonRow }) {
 
   const join = useApiMutation(joinRequest, {
     successMessage: t("toast.membershipAdded"),
-    invalidate: PEOPLE_QUERIES,
+    invalidate: MEMBERSHIP_QUERIES,
     awaitRefetch: true,
     onSuccess: () => setChosen(""),
   })
@@ -419,14 +422,14 @@ function StatusAction({
 
   const deactivate = useApiMutation(deactivatePersonRequest, {
     successMessage: (next) => t("toast.personInactive", { name: preferredName(next) }),
-    invalidate: [["people"]],
+    invalidate: MEMBERSHIP_QUERIES,
     awaitRefetch: true,
     onSuccess: changed,
   })
 
   const reactivate = useApiMutation(reactivatePersonRequest, {
     successMessage: (next) => t("toast.personReactivated", { name: preferredName(next) }),
-    invalidate: [["people"]],
+    invalidate: MEMBERSHIP_QUERIES,
     awaitRefetch: true,
     onSuccess: changed,
   })

@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query"
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
@@ -7,12 +8,14 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { ServiceList, ServiceRow } from "@/features/organization/services/api"
 import type { Me } from "@/features/identity/auth/api"
+import { stageQuery } from "@/features/organization/stages/api"
 import type { Locale } from "@/i18n/config"
 import type { Schemas } from "@/lib/api/client"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { peopleList } from "@test/support/fixtures/people"
 import { services } from "@test/support/fixtures/services"
+import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
@@ -94,6 +97,14 @@ const moved: Schemas["AddedMembershipResponse"] = {
   endsOn: null,
 }
 
+const stageReads = { count: 0 }
+
+function StageMemberCount() {
+  const stage = useQuery(stageQuery(THIRD_CLASS_ID))
+
+  return <output>{stage.data?.memberCount}</output>
+}
+
 function open(
   initial: PersonRow,
   move: () => Response = () => HttpResponse.json(moved),
@@ -102,8 +113,14 @@ function open(
 ) {
   let current = initial
   const moves: unknown[] = []
+  stageReads.count = 0
 
   server.use(
+    http.get(apiUrl(`/stages/${THIRD_CLASS_ID}`), () => {
+      stageReads.count++
+
+      return HttpResponse.json(thirdClass)
+    }),
     http.get(apiUrl("/services"), () => HttpResponse.json(list)),
     http.get(apiUrl("/people"), () => HttpResponse.json(peopleList([current]))),
     http.post(apiUrl("/memberships/:id/move"), async ({ request }) => {
@@ -124,6 +141,7 @@ function open(
   renderWithProviders(
     <SidebarProvider>
       <MembersScreen />
+      <StageMemberCount />
     </SidebarProvider>,
     { locale, me: viewer }
   )
@@ -162,6 +180,15 @@ test("moving from 2nd to 3rd Class sends one move and shows the new stage since 
   expect(moves).toEqual([{ stageId: third.id }])
   expect(await sheet.findByText(/3rd Class/)).toBeInTheDocument()
   expect(await sheet.findByText(/Sun 8 Nov 2026/)).toBeInTheDocument()
+})
+
+test("a move refetches the stages, so their member counts are current", async () => {
+  open(lydia([inSecond]))
+  await openMenu()
+  const targets = await moveTargets()
+  await waitFor(() => expect(stageReads.count).toBe(1))
+  await userEvent.click(targets.getByRole("menuitem", { name: "3rd Class" }))
+  await waitFor(() => expect(stageReads.count).toBe(2))
 })
 
 test("the targets leave out the current stage and the others the person is in", async () => {
