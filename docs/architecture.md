@@ -78,9 +78,7 @@ production; off unless set, the page says to ask the church office.
 - **TanStack Query** caches reads in memory only, for 30 seconds before refetching. Reads are retried at
   most twice, and only after status 0 or a 5xx; 4xx answers and mutations are never retried.
 - **MSW** answers the API in tests (`test/support/msw.ts`, with `problem()` and `renderWithQuery()` in
-  `test/support/api.tsx`); a request without a handler fails the test. `pnpm dev:mock` starts the dev server
-  with the same handlers in the browser (`src/mocks/handlers.ts`), for screens whose endpoints don't exist
-  yet; its worker file is generated into `public/` on demand, git-ignored and deleted before every build.
+  `test/support/api.tsx`); a request without a handler fails the test.
 - **Tests** share one setup (`test/support/setup.ts`): both navigation modules are mocked once, queries retry
   without a delay, and a test fails on any `console.error`, so a React or Radix warning, or a request MSW
   doesn't answer, is fixed rather than silenced. A test that expects an error stubs `console.error` itself.

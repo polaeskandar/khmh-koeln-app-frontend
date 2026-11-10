@@ -16,8 +16,7 @@
   "packageManager": "pnpm@12.15.0",
   "scripts": {
     "dev": "next dev",
-    "dev:mock": "msw init public --no-save && NEXT_PUBLIC_API_MOCKING=enabled next dev",
-    "build": "rm -f public/mockServiceWorker.js && next build",
+    "build": "next build",
     "lint": "eslint",
     "format": "eslint --fix && prettier --write .",
     "format:check": "prettier --check .",
