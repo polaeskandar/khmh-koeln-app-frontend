@@ -1,7 +1,7 @@
 import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, test } from "vitest"
 
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Locale } from "@/i18n/config"
@@ -18,7 +18,6 @@ import { MembersPage } from "@/features/people/members/members-page"
 
 beforeEach(() => {
   navigation.pathname = "/members/"
-  vi.spyOn(console, "error").mockImplementation(() => {})
 })
 
 const sundaySchool = services.items[0]

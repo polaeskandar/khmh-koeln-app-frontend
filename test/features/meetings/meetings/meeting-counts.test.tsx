@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 
 import type { Locale } from "@/i18n/config"
 import type { AgendaItem, ScheduleSummary, SessionView } from "@/lib/api/types/meetings"
@@ -14,10 +14,6 @@ import { renderWithProviders } from "@test/support/providers"
 
 import { AgendaPage } from "@/features/meetings/meetings/agenda-page"
 import { SchedulesPage } from "@/features/meetings/meetings/schedules-page"
-
-beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
-})
 
 type Extra = Omit<NonNullable<Parameters<typeof session>[0]>, "counts"> & {
   counts?: SessionView["counts"]

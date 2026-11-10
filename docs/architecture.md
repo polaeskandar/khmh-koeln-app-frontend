@@ -81,6 +81,12 @@ production; off unless set, the page says to ask the church office.
   `test/support/api.tsx`); a request without a handler fails the test. `pnpm dev:mock` starts the dev server
   with the same handlers in the browser (`src/mocks/handlers.ts`), for screens whose endpoints don't exist
   yet; its worker file is generated into `public/` on demand, git-ignored and deleted before every build.
+- **Tests** share one setup (`test/support/setup.ts`): both navigation modules are mocked once, queries retry
+  without a delay, and a test fails on any `console.error`, so a React or Radix warning, or a request MSW
+  doesn't answer, is fixed rather than silenced. A test that expects an error stubs `console.error` itself.
+  React warns when a client render creates a `<script>`, and next-themes' `ThemeProvider` renders its
+  pre-paint script, which only the static HTML runs; the tests that render the provider give it
+  `scriptProps={{ type: "text/plain" }}`.
 - **The apps** will use bearer tokens after the MVP (backend #83); the cookie session is for the browser.
   Inside the apps the origin is `capacitor://localhost` on iOS and `https://localhost` on Android, so the
   API will need them in its CORS allowlist then.

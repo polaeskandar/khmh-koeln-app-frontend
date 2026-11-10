@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { apiUrl, problem } from "@test/support/api"
@@ -22,7 +22,6 @@ const HOMEWORK_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea001"
 
 beforeEach(() => {
   address.set(`id=${HOMEWORK_ID}`)
-  vi.spyOn(console, "error").mockImplementation(() => {})
 })
 
 let seq = 0

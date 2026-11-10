@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import type { ServiceStages } from "@/features/organization/services/api"
@@ -15,8 +15,6 @@ import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import { StagesManager } from "@/features/organization/stages/stages-manager"
-
-beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => {}))
 
 const service = { id: SUNDAY_SCHOOL_ID, name: "Sunday School", tone: 1, archived: false }
 

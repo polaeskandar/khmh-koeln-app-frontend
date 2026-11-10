@@ -1,6 +1,6 @@
 import { screen, within } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
-import { beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test } from "vitest"
 
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
@@ -14,7 +14,6 @@ import { StageAttendance } from "@/features/meetings/attendance/stage-attendance
 
 beforeEach(() => {
   address.set(`id=${THIRD_CLASS_ID}`)
-  vi.spyOn(console, "error").mockImplementation(() => {})
 })
 
 const SUNDAYS = ["09-20", "09-27", "10-04", "10-11", "10-18", "10-25", "11-01", "11-08"]

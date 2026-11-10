@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -16,10 +16,6 @@ import { renderWithProviders } from "@test/support/providers"
 import type { DataRequestRow, DataRequests } from "@/features/privacy/data-requests/api"
 import { DataRequestsPage } from "@/features/privacy/data-requests/data-requests-page"
 import { DueLabel } from "@/features/privacy/data-requests/request-bits"
-
-beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
-})
 
 const row = (id: string, extra: Partial<DataRequestRow>): DataRequestRow => ({
   id,

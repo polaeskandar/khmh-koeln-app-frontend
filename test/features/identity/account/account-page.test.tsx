@@ -20,11 +20,11 @@ let signOuts = 0
 beforeEach(() => {
   navigation.pathname = "/account/"
   signOuts = 0
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
 
   server.use(
     http.get(apiUrl("/me"), () => HttpResponse.json(me.servant)),
+    http.get(apiUrl("/me/erasure-request"), () => HttpResponse.json({ erasureRequested: null })),
     http.post(apiUrl("/auth/sign-out"), () => {
       signOuts++
 
@@ -77,6 +77,12 @@ test("the account menu opens Your account", async () => {
 })
 
 test("the language choice switches in place", async () => {
+  server.use(
+    http.put(apiUrl("/me/language"), () =>
+      HttpResponse.json({ ...me.servant, account: { ...me.servant.account, language: "de" } })
+    )
+  )
+
   open()
   const english = await screen.findByRole("radio", { name: "English" })
   expect(english).toBeChecked()

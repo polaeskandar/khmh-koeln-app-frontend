@@ -19,7 +19,6 @@ import { ParentChildren } from "@/features/people/children/parent-children"
 import { ParentShell } from "@/features/portals/parent/parent-shell"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
 })
 
@@ -88,6 +87,10 @@ describe("Account", () => {
     navigation.pathname = "/parent/account/"
     serve(items)
 
+    server.use(
+      http.get(apiUrl("/me/erasure-request"), () => HttpResponse.json({ erasureRequested: null }))
+    )
+
     renderWithProviders(
       <SessionProvider>
         <ParentAccount />
@@ -121,6 +124,12 @@ describe("Account", () => {
   })
 
   test("Deutsch switches the language in place", async () => {
+    server.use(
+      http.put(apiUrl("/me/language"), () =>
+        HttpResponse.json({ ...me.parent, account: { ...me.parent.account, language: "de" } })
+      )
+    )
+
     open([mina])
     expect(await screen.findByRole("radio", { name: "English" })).toBeChecked()
     await userEvent.click(screen.getByRole("radio", { name: "Deutsch" }))

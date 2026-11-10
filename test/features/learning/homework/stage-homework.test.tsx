@@ -17,7 +17,6 @@ import { StageHomeworkPage } from "@/features/learning/homework/stage-homework"
 
 beforeEach(() => {
   address.set(`id=${THIRD_CLASS_ID}`)
-  vi.spyOn(console, "error").mockImplementation(() => {})
 })
 
 const lesson = {

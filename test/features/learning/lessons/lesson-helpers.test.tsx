@@ -30,7 +30,6 @@ const christine = { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f03", name: "Christine
 const bishoy = { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f02", name: "Bishoy Tadros" }
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
 })
 

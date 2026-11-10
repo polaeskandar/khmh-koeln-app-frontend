@@ -19,10 +19,6 @@ beforeEach(() => {
   URL.createObjectURL = vi.fn(() => "blob:khmk-my-data")
   URL.revokeObjectURL = vi.fn()
 
-  for (const method of ["error", "warn"] as const) {
-    vi.spyOn(console, method).mockImplementation(() => {})
-  }
-
   vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (
     this: HTMLAnchorElement
   ) {

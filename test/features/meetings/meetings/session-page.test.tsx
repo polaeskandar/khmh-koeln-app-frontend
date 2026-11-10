@@ -1,6 +1,6 @@
 import { screen, within } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import type { HistoryEntry } from "@/lib/api/types/meetings"
@@ -13,8 +13,6 @@ import { renderWithProviders } from "@test/support/providers"
 
 import type { MeetingSession } from "@/features/meetings/meetings/api"
 import { SessionPage } from "@/features/meetings/meetings/session-page"
-
-beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => {}))
 
 const schedule: MeetingSession["schedule"] = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f90",

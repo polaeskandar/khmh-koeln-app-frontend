@@ -21,7 +21,6 @@ import type { AttendanceSheet } from "@/features/meetings/attendance/api"
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "error")
 })
 

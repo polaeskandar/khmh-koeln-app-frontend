@@ -23,7 +23,6 @@ import { HomeworkProgressPage } from "@/features/learning/homework/homework-prog
 import { StageHomeworkPage } from "@/features/learning/homework/stage-homework"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })

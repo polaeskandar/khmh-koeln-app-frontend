@@ -10,6 +10,7 @@ import type { Schemas } from "@/lib/api/client"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { services } from "@test/support/fixtures/services"
+import { answerSettingsLists } from "@test/support/fixtures/settings"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
@@ -17,7 +18,6 @@ import type { AccountRequest } from "@/features/identity/accounts/api"
 import { SettingsPage } from "@/features/identity/accounts/settings-page"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })
@@ -58,6 +58,8 @@ const requests = [
 function open(account: Me = me.administrator, decline?: () => Response) {
   let items = [...requests]
   const calls = { list: 0, decline: [] as unknown[] }
+
+  answerSettingsLists()
 
   server.use(
     http.get(apiUrl("/me"), () => HttpResponse.json(account)),

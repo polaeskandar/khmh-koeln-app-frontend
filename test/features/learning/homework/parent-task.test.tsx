@@ -20,7 +20,6 @@ const path = `/parent/children/${MINA_ID}/homework/${TASK_ID}`
 
 beforeEach(() => {
   address.set(`id=${TASK_ID}&child=${MINA_ID}`)
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })

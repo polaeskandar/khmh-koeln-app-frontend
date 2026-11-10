@@ -1,7 +1,7 @@
 import { cleanup, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { apiUrl } from "@test/support/api"
@@ -17,7 +17,6 @@ import { StageLessonsPage } from "@/features/learning/lessons/stage-lessons"
 
 beforeEach(() => {
   address.set(`id=${THIRD_CLASS_ID}`)
-  vi.spyOn(console, "error").mockImplementation(() => {})
 })
 
 const row = (overrides: Partial<LessonRow>): LessonRow => ({

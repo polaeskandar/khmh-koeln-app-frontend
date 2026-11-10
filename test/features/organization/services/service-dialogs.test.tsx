@@ -17,7 +17,6 @@ import type { ServiceFields } from "@/features/organization/services/api"
 import { ServicesOverview } from "@/features/organization/services/services-overview"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "error")
   vi.spyOn(toast, "success")
 })

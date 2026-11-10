@@ -17,7 +17,6 @@ import type { StaffAccount } from "@/features/identity/accounts/api"
 import { StaffAccounts } from "@/features/identity/accounts/staff-accounts"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })

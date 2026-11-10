@@ -11,7 +11,12 @@ import { renderWithProviders, testProviders } from "@test/support/providers"
 import { AppearanceFields, AppearanceMenu } from "@/components/theme-switch"
 
 const themed = (ui: React.ReactNode, defaultTheme = "system") => (
-  <ThemeProvider attribute="class" defaultTheme={defaultTheme} enableSystem>
+  <ThemeProvider
+    attribute="class"
+    defaultTheme={defaultTheme}
+    enableSystem
+    scriptProps={{ type: "text/plain" }}
+  >
     {ui}
   </ThemeProvider>
 )

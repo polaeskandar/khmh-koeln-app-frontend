@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test, vi } from "vitest"
 
 import type { DirectoryPerson } from "@/features/people/members/api"
 import type { Locale } from "@/i18n/config"
@@ -20,8 +20,6 @@ import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
-
-beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => {}))
 
 const youth = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f11",

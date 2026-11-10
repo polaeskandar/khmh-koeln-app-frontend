@@ -1,8 +1,9 @@
 import "@testing-library/jest-dom/vitest"
 
 import { cleanup, configure } from "@testing-library/react"
-import { afterAll, afterEach, beforeAll, vi } from "vitest"
+import { afterAll, afterEach, beforeAll, beforeEach, vi } from "vitest"
 
+import { checkConsoleErrors, watchConsoleErrors } from "@test/support/console"
 import { server } from "@test/support/msw"
 import { resetNavigation } from "@test/support/navigation"
 
@@ -40,10 +41,13 @@ vi.stubGlobal(
 
 beforeAll(() => server.listen({ onUnhandledFrame: "error" }))
 
+beforeEach(() => watchConsoleErrors())
+
 afterEach(() => {
   cleanup()
   server.resetHandlers()
   resetNavigation()
+  checkConsoleErrors()
 })
 
 afterAll(() => server.close())

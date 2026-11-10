@@ -20,7 +20,6 @@ const ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea901"
 
 beforeEach(() => {
   address.set(`id=${ID}`)
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "error")
 })
 

@@ -17,7 +17,6 @@ import { AttendanceOverview } from "@/features/meetings/attendance/attendance-ov
 
 beforeEach(() => {
   navigation.pathname = "/services/"
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "error")
 })
 

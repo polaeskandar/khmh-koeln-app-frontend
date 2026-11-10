@@ -25,7 +25,6 @@ import { EditLessonPage, NewLessonPage } from "@/features/learning/lessons/lesso
 const SCHEDULE_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f90"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })

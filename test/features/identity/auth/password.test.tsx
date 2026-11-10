@@ -12,12 +12,6 @@ import { ForgotPasswordPage, SetPasswordPage } from "@/features/identity/auth/pa
 
 type Sent = { url: string; address: string; body: unknown }
 
-beforeEach(() => {
-  for (const method of ["error", "warn"] as const) {
-    vi.spyOn(console, method).mockImplementation(() => {})
-  }
-})
-
 afterEach(() => {
   window.history.replaceState(null, "", "/")
 })

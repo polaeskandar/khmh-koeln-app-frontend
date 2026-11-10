@@ -17,7 +17,6 @@ import { applyWrites, type Writes, writesReducer } from "@/features/meetings/att
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "error")
 })
 

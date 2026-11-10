@@ -1,7 +1,7 @@
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { afterEach, describe, expect, test } from "vitest"
 
 import { apiUrl, problem } from "@test/support/api"
 import { server } from "@test/support/msw"
@@ -16,12 +16,6 @@ const SERVICES = [
   { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f10", name: "Sunday School" },
   { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f11", name: "Youth Meeting" },
 ]
-
-beforeEach(() => {
-  for (const method of ["error", "warn"] as const) {
-    vi.spyOn(console, method).mockImplementation(() => {})
-  }
-})
 
 afterEach(() => {
   forgetOutcome()

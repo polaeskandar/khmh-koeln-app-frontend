@@ -18,7 +18,6 @@ import type { Role } from "@/features/identity/roles/api"
 import { SettingsPage } from "@/features/identity/accounts/settings-page"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })

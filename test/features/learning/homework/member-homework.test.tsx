@@ -21,7 +21,6 @@ const path = `/member/homework/${task.id}`
 
 beforeEach(() => {
   address.set(`id=${task.id}`)
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })

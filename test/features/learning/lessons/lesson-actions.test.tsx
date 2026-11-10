@@ -22,7 +22,6 @@ const path = `/lessons/${ID}`
 
 beforeEach(() => {
   address.set(`id=${ID}`)
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })

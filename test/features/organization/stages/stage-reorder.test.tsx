@@ -20,7 +20,6 @@ const ROW = 48
 
 beforeEach(() => {
   address.set(`id=${SUNDAY_SCHOOL_ID}`)
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "error")
 
   vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
