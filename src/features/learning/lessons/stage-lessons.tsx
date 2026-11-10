@@ -3,7 +3,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { Plus, Search } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import { Section } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"
@@ -21,6 +21,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useCanIn } from "@/features/identity/auth/session"
 import type { Stage } from "@/features/organization/stages/api"
 import { StageLayout } from "@/features/organization/stages/stage-layout"
+import { useDebounced } from "@/hooks/use-debounced"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import type { LessonStatus } from "@/lib/api/types/learning"
@@ -32,18 +33,6 @@ import { LessonStatusBadge, MeetingLine } from "./lesson-bits"
 
 const SEARCH_DELAY_MS = 300
 const STATUSES: LessonStatus[] = ["draft", "ready", "completed"]
-
-function useDebounced(value: string, ms: number) {
-  const [debounced, setDebounced] = useState(value)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), ms)
-
-    return () => clearTimeout(timer)
-  }, [value, ms])
-
-  return debounced
-}
 
 function Row({ lesson, today }: { lesson: LessonRow; today: string }) {
   const t = useTranslations()

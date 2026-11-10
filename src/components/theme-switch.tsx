@@ -2,7 +2,7 @@
 
 import { Monitor, Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
-import { useId, useSyncExternalStore } from "react"
+import { useId } from "react"
 import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { FieldLabel } from "@/components/ui/field"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { useInBrowser } from "@/hooks/use-in-browser"
 
 const THEMES = [
   { value: "light", icon: Sun },
@@ -27,16 +28,10 @@ const THEMES = [
 
 type Theme = (typeof THEMES)[number]["value"]
 
-const noSubscription = () => () => {}
-
 function useChosenTheme(): { theme: Theme; setTheme: (theme: string) => void } {
   const { theme, setTheme } = useTheme()
 
-  const mounted = useSyncExternalStore(
-    noSubscription,
-    () => true,
-    () => false
-  )
+  const mounted = useInBrowser()
 
   const known = THEMES.some((t) => t.value === theme)
 

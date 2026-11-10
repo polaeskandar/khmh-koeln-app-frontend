@@ -26,7 +26,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { cn } from "cn"
 import { GripVertical } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useMemo, useState, useSyncExternalStore } from "react"
+import { useMemo, useState } from "react"
 
 import { Topbar } from "@/components/app-shell/topbar"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
@@ -34,6 +34,7 @@ import { NotFoundState, QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty"
 import { type ServiceStages, serviceStagesQuery } from "@/features/organization/services/api"
+import { useInBrowser } from "@/hooks/use-in-browser"
 import { Link } from "@/i18n/navigation"
 import { useFormat } from "@/i18n/format"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -44,8 +45,6 @@ import { reorderStagesRequest } from "./api"
 import { AddStageButton, RestoreStageButton, StageActionsMenu } from "./stage-dialogs"
 
 type StageItem = ServiceStages["stages"][number]
-
-const noSubscription = () => () => {}
 
 function SortableRow({
   stage,
@@ -150,11 +149,7 @@ function Manager({ data }: { data: ServiceStages }) {
     setOrder(stages.map((stage) => stage.id))
   }
 
-  const mounted = useSyncExternalStore(
-    noSubscription,
-    () => true,
-    () => false
-  )
+  const mounted = useInBrowser()
 
   const reorder = useApiMutation((ids: string[]) => reorderStagesRequest(service.id, ids))
 

@@ -4,7 +4,7 @@ import { useIsMutating, useQuery, useQueryClient } from "@tanstack/react-query"
 import { cn } from "cn"
 import { CircleAlert, Layers, Plus, Search, X } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useId, useState } from "react"
+import { useId, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -30,6 +30,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/in
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Spinner } from "@/components/ui/spinner"
 import { QueryErrorState } from "@/components/page-states"
+import { useDebounced } from "@/hooks/use-debounced"
 import { useFormat } from "@/i18n/format"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
@@ -558,18 +559,6 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
       </DialogFooter>
     </>
   )
-}
-
-function useDebounced(value: string, ms: number) {
-  const [debounced, setDebounced] = useState(value)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), ms)
-
-    return () => clearTimeout(timer)
-  }, [value, ms])
-
-  return debounced
 }
 
 export function ApproveButton({ request }: { request: AccountRequest }) {
