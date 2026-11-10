@@ -1,12 +1,10 @@
 import type { Me } from "./api"
 
-type Translate = (key: string, values?: Record<string, string | number>) => string
-
-export function roleSummary(me: Me, t: Translate): string {
+export function roleSummary(me: Me, none: string): string {
   const [first, ...more] = me.roles
 
   if (!first) {
-    return t("roles.summary.none")
+    return none
   }
 
   return more.length > 0 ? `${first.name} +${more.length}` : first.name

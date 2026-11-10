@@ -18,7 +18,8 @@ import {
 } from "@/components/ui/empty"
 import { Link } from "@/i18n/navigation"
 import { ApiError } from "@/lib/api/problem"
-import { type ProblemTranslator, translateProblem } from "@/lib/api/translate-problem"
+import { translateProblem } from "@/lib/api/translate-problem"
+import { useProblemTranslator } from "@/lib/api/use-problem-translator"
 import { routes } from "@/lib/routes"
 
 export function NotFoundState({ home = routes.home() }: { home?: string }) {
@@ -46,11 +47,10 @@ export function NotFoundState({ home = routes.home() }: { home?: string }) {
 
 export function QueryErrorState({ error, onRetry }: { error: unknown; onRetry: () => unknown }) {
   const t = useTranslations()
+  const translate = useProblemTranslator()
 
   const message =
-    error instanceof ApiError
-      ? translateProblem(error, t as unknown as ProblemTranslator)
-      : t("errors.internal")
+    error instanceof ApiError ? translateProblem(error, translate) : t("errors.internal")
 
   return (
     <Empty className="border border-dashed">

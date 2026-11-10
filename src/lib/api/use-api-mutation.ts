@@ -1,12 +1,12 @@
 "use client"
 
 import { type QueryKey, useMutation, useQueryClient } from "@tanstack/react-query"
-import { useTranslations } from "next-intl"
 import { useState } from "react"
 import { toast } from "sonner"
 
 import { ApiError } from "./problem"
-import { describeProblem, type Problem, type ProblemTranslator } from "./translate-problem"
+import { describeProblem, type Problem } from "./translate-problem"
+import { useProblemTranslator } from "./use-problem-translator"
 
 export type MutationResult<T> = { ok: true; data: T } | { ok: false; problem: Problem }
 
@@ -28,7 +28,7 @@ export function useApiMutation<A extends unknown[], T>(
     toastOnError = true,
   }: Options<T> = {}
 ) {
-  const t = useTranslations() as unknown as ProblemTranslator
+  const t = useProblemTranslator()
   const queryClient = useQueryClient()
   const [problem, setProblem] = useState<Problem | null>(null)
 
