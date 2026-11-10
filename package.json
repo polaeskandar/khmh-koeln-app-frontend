@@ -27,8 +27,7 @@
     "test:watch": "vitest",
     "cap:sync": "pnpm build && cap sync",
     "cap:ios": "cap open ios",
-    "cap:android": "cap open android",
-    "package": "sh scripts/package.sh"
+    "cap:android": "cap open android"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.3",
