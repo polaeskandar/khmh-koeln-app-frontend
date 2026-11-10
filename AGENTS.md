@@ -35,3 +35,25 @@ OpenAPI document. `pnpm api:types` copies that document from the backend's dev s
 `openapi/openapi.json`, the contract snapshot, and generates `src/lib/api/schema.d.ts` from the copy. When a
 backend change reaches the frontend, update both in the same PR; never edit either by hand, which
 `pnpm api:types:check` rejects. Types of API data are `Schemas["…"]` from the same module; don't write them by hand.
+
+## Names and structure
+
+- **Components and hooks** are named function declarations, `export function ServiceDetails()`, never arrow
+  constants. A hook starts with `use`; one that two features need lives in `src/hooks/use-<name>.ts`
+  (`src/hooks/use-today.ts`), not pasted into both.
+- **API calls** are `<verb><Noun>Request` and queries `<noun>Query`, in the feature's `api.ts`
+  (`addStageRequest` and `stageQuery` in `src/features/organization/stages/api.ts`). The lists of query keys a
+  change invalidates are exported from an `api.ts` too (`ASSIGNMENT_QUERIES` in
+  `src/features/organization/assignments/api.ts`); a component never retypes a key.
+- **Callbacks.** A callback prop is `on<Event>` (`onOpenChange`, `onDone`). A local function is named for what it
+  does (`submit`, `saveDraft`, `removeResource`), not for the event that calls it; there is no `handle<Event>`.
+- **One term per thing**, taken from the vocabulary table of the backend's `docs/code-style.md` (section 7):
+  service, stage, group, schedule, session, attendance, lesson, homework, person, guardian, account. A value
+  keeps its name from the API to the screen; an id is `<thing>Id`, never the bare noun.
+- **States, not flags.** A value with a fixed set of states is a union of literals
+  (`useState<"edit" | "archive" | "restore" | "delete" | null>` in
+  `src/features/organization/services/service-dialogs.tsx`). A component that creates or edits takes a
+  discriminated union, not optional props that allow both at once. No positional booleans: `submitAnyway()`, not
+  `submit(true)`.
+- **Types** come from `react` by name: `import type { ReactNode } from "react"`
+  (`src/components/page-states.tsx`), not `React.ReactNode`.
