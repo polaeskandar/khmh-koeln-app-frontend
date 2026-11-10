@@ -2,7 +2,7 @@
 
 import { useQueryClient } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
-import { useCallback, useReducer, useSyncExternalStore } from "react"
+import { useCallback, useReducer } from "react"
 import { toast } from "sonner"
 
 import { api, dataOf, type Schemas } from "@/lib/api/client"
@@ -257,20 +257,3 @@ export function useMarkWrites(sessionId: Uuid) {
     },
   }
 }
-
-const subscribeOnline = (onChange: () => void) => {
-  window.addEventListener("online", onChange)
-  window.addEventListener("offline", onChange)
-
-  return () => {
-    window.removeEventListener("online", onChange)
-    window.removeEventListener("offline", onChange)
-  }
-}
-
-export const useOnline = () =>
-  useSyncExternalStore(
-    subscribeOnline,
-    () => navigator.onLine,
-    () => true
-  )

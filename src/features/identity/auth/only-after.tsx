@@ -1,20 +1,14 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { useSyncExternalStore } from "react"
 
 import { NotFoundPage } from "@/components/not-found-page"
+import { useInBrowser } from "@/hooks/use-in-browser"
 
 import { type AuthOutcome, lastOutcome } from "./auth-outcome"
 
-const subscribeNothing = () => () => {}
-
 export function OnlyAfter({ outcome, children }: { outcome: AuthOutcome; children: ReactNode }) {
-  const inBrowser = useSyncExternalStore(
-    subscribeNothing,
-    () => true,
-    () => false
-  )
+  const inBrowser = useInBrowser()
 
   if (!inBrowser) {
     return null

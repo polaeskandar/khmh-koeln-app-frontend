@@ -2,7 +2,7 @@
 
 import { CalendarX2, CircleAlert, CircleCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useState, useSyncExternalStore } from "react"
+import { useState } from "react"
 
 import { TextField } from "@/components/form-fields"
 import { NotFoundPage } from "@/components/not-found-page"
@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { FieldGroup } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
+import { useInBrowser } from "@/hooks/use-in-browser"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
@@ -22,8 +23,6 @@ import { AuthFrame, AuthHeading } from "./auth-frame"
 import { scheduledErasureOn } from "./auth-outcome"
 import { PasswordField } from "./password-field"
 
-const subscribeNothing = () => () => {}
-
 function StateIcon({ icon: Icon, tone }: { icon: typeof CalendarX2; tone: string }) {
   return (
     <span className={`inline-flex size-11 items-center justify-center ${tone}`}>
@@ -33,11 +32,7 @@ function StateIcon({ icon: Icon, tone }: { icon: typeof CalendarX2; tone: string
 }
 
 export function ErasureScheduledPage() {
-  const inBrowser = useSyncExternalStore(
-    subscribeNothing,
-    () => true,
-    () => false
-  )
+  const inBrowser = useInBrowser()
 
   if (!inBrowser) {
     return null

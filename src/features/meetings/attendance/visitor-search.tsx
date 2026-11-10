@@ -3,30 +3,19 @@
 import { useQuery } from "@tanstack/react-query"
 import { UserPlus } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useState } from "react"
 
 import { directoryQuery } from "@/features/people/members/api"
+import { useDebounced } from "@/hooks/use-debounced"
+import { useOnline } from "@/hooks/use-online"
 import { isolate } from "@/lib/bidi"
 
 import type { AttendanceSheet } from "./api"
 import { PersonRow } from "./attendance-board"
-import { useOnline, type Visitor } from "./mark-writes"
+import type { Visitor } from "./mark-writes"
 
 const MIN_LETTERS = 2
 const MAX_RESULTS = 8
 const DEBOUNCE_MS = 250
-
-function useDebounced(value: string, ms: number) {
-  const [debounced, setDebounced] = useState(value)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), ms)
-
-    return () => clearTimeout(timer)
-  }, [value, ms])
-
-  return debounced
-}
 
 export function VisitorSearch({
   board,

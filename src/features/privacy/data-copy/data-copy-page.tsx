@@ -2,7 +2,7 @@
 
 import { CircleAlert, CircleCheck, FileDown, Link2Off } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useState, useSyncExternalStore } from "react"
+import { useEffect, useState } from "react"
 
 import { NotFoundPage } from "@/components/not-found-page"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -10,13 +10,12 @@ import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { forgetAddressFragment, tokenInAddress } from "@/features/identity/auth/address-token"
 import { AuthFrame, AuthHeading } from "@/features/identity/auth/auth-frame"
+import { useInBrowser } from "@/hooks/use-in-browser"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { carryFragment } from "@/i18n/use-switch-locale"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
 import { downloadDataCopy } from "./api"
-
-const subscribeNothing = () => () => {}
 
 function StateIcon({ icon: Icon, tone }: { icon: typeof FileDown; tone: string }) {
   return (
@@ -27,11 +26,7 @@ function StateIcon({ icon: Icon, tone }: { icon: typeof FileDown; tone: string }
 }
 
 export function DataCopyPage() {
-  const inBrowser = useSyncExternalStore(
-    subscribeNothing,
-    () => true,
-    () => false
-  )
+  const inBrowser = useInBrowser()
 
   return inBrowser ? <DataCopyFlow /> : <AuthFrame>{null}</AuthFrame>
 }

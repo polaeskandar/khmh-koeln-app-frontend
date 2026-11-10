@@ -2,11 +2,12 @@
 
 import { CircleAlert, CircleCheck, Link2Off, MailCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useRef, useState, useSyncExternalStore } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { NotFoundPage } from "@/components/not-found-page"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
+import { useInBrowser } from "@/hooks/use-in-browser"
 import { Link } from "@/i18n/navigation"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { routes } from "@/lib/routes"
@@ -21,8 +22,6 @@ type Outcome =
   | { kind: "invalid" }
   | { kind: "failed"; message: string }
 
-const subscribeNothing = () => () => {}
-
 function StateIcon({ icon: Icon, tone }: { icon: typeof MailCheck; tone: string }) {
   return (
     <span className={`inline-flex size-11 items-center justify-center ${tone}`}>
@@ -32,11 +31,7 @@ function StateIcon({ icon: Icon, tone }: { icon: typeof MailCheck; tone: string 
 }
 
 export function ConfirmEmailPage() {
-  const inBrowser = useSyncExternalStore(
-    subscribeNothing,
-    () => true,
-    () => false
-  )
+  const inBrowser = useInBrowser()
 
   return inBrowser ? <ConfirmEmailFlow /> : <AuthFrame>{null}</AuthFrame>
 }

@@ -3,7 +3,7 @@
 import { useIsMutating, useQuery } from "@tanstack/react-query"
 import { Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useId, useState } from "react"
+import { useId, useState } from "react"
 
 import { TextAreaField, TextField } from "@/components/form-fields"
 import { Button } from "@/components/ui/button"
@@ -29,6 +29,7 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Spinner } from "@/components/ui/spinner"
 import { peopleQuery } from "@/features/people/members/api"
+import { useDebounced } from "@/hooks/use-debounced"
 import { useRouter } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -43,18 +44,6 @@ import {
 } from "./api"
 
 const CHANNELS = ["email", "letter", "in_person"] as const
-
-function useDebounced(value: string, ms: number) {
-  const [debounced, setDebounced] = useState(value)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), ms)
-
-    return () => clearTimeout(timer)
-  }, [value, ms])
-
-  return debounced
-}
 
 function Choice({
   id,

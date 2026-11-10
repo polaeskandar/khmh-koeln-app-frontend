@@ -3,10 +3,11 @@
 import { useQuery } from "@tanstack/react-query"
 import { Search, X } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
+import { useDebounced } from "@/hooks/use-debounced"
 import { useFormat } from "@/i18n/format"
 import { preferredName } from "@/lib/domain/names"
 
@@ -14,18 +15,6 @@ import { type DirectoryPerson, directoryQuery } from "./api"
 
 const MIN_LETTERS = 2
 const DEBOUNCE_MS = 250
-
-function useDebounced(value: string, ms: number) {
-  const [debounced, setDebounced] = useState(value)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), ms)
-
-    return () => clearTimeout(timer)
-  }, [value, ms])
-
-  return debounced
-}
 
 export function groupsText(person: DirectoryPerson, separator: string, none: string) {
   if (person.groups.length === 0) {
