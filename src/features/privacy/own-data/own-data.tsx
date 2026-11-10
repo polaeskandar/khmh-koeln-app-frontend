@@ -3,9 +3,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Download, Hourglass, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 
-import { focusFirstInvalid } from "@/components/focus-first-invalid"
 import { TextAreaField } from "@/components/form-fields"
 import { FormPanel } from "@/components/form-panel"
 import {
@@ -24,6 +23,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { rememberErasureScheduled } from "@/features/identity/auth/auth-outcome"
 import { PasswordField } from "@/features/identity/auth/password-field"
 import { useSession } from "@/features/identity/auth/session"
+import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { useFormat } from "@/i18n/format"
 import { api, apiDownload, dataOf, type Schemas } from "@/lib/api/client"
@@ -51,7 +51,6 @@ function DeleteAccountForm({
 }) {
   const t = useTranslations()
   const { endSession } = useSession()
-  const formRef = useRef<HTMLFormElement>(null)
   const [password, setPassword] = useState("")
   const [note, setNote] = useState("")
 
@@ -64,11 +63,7 @@ function DeleteAccountForm({
 
   const errors = erase.fieldErrors
 
-  useEffect(() => {
-    if (erase.problem) {
-      focusFirstInvalid(formRef.current)
-    }
-  }, [erase.problem])
+  const formRef = useFocusFirstInvalid(erase.problem)
 
   useEffect(() => onPendingChange(erase.pending), [erase.pending, onPendingChange])
 

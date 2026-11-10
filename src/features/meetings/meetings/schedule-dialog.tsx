@@ -4,9 +4,8 @@ import { useQuery } from "@tanstack/react-query"
 import { cn } from "cn"
 import { CalendarClock, Info, Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
-import { focusFirstInvalid } from "@/components/focus-first-invalid"
 import { TextAreaField, TextField } from "@/components/form-fields"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -32,6 +31,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Spinner } from "@/components/ui/spinner"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { type ServiceRow, servicesQuery } from "@/features/organization/services/api"
+import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useFormat } from "@/i18n/format"
 import { useRouter } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
@@ -216,7 +216,6 @@ function ScheduleForm({
   const t = useTranslations()
   const f = useFormat()
   const router = useRouter()
-  const formRef = useRef<HTMLFormElement>(null)
   const [d, setD] = useState<Draft>(() => initialDraft(today, services, fixedServiceId, schedule))
 
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) =>
@@ -255,11 +254,7 @@ function ScheduleForm({
   const group = stage?.name ?? service?.name ?? (schedule ? groupOf(schedule) : undefined)
   const recurrenceError = RECURRENCE_FIELDS.map((field) => errors[field]).find(Boolean)
 
-  useEffect(() => {
-    if (mutation.problem) {
-      focusFirstInvalid(formRef.current)
-    }
-  }, [mutation.problem])
+  const formRef = useFocusFirstInvalid(mutation.problem)
 
   useEffect(() => onPendingChange(mutation.pending), [mutation.pending, onPendingChange])
 
