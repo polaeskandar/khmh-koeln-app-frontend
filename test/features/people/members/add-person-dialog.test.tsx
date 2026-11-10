@@ -33,9 +33,9 @@ const sundaySchool = services.items[0]
 const addOnly: Me = {
   ...me.churchOffice,
   permissions: [
-    { action: "read", resource: "services" },
-    { action: "read", resource: "members" },
-    { action: "create", resource: "members" },
+    { action: "read", resource: "services", scope: "church" },
+    { action: "read", resource: "members", scope: "church" },
+    { action: "create", resource: "members", scope: "church" },
   ],
 }
 

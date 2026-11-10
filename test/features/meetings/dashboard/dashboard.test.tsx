@@ -203,6 +203,16 @@ test("German day headings", async () => {
   expect(screen.getByRole("heading", { name: "So., 15. Nov." })).toBeInTheDocument()
 })
 
+test("a servant without a group is told to ask the church office instead of empty lists", async () => {
+  open(data({ sessions: [], upcoming: [] }), { who: { ...christine, assignments: [] } })
+
+  expect(await screen.findByText("You are not assigned to a group yet")).toBeInTheDocument()
+
+  expect(screen.getByText(/^Ask the church office\./)).toBeInTheDocument()
+  expect(screen.queryByRole("heading", { name: "Today" })).toBeNull()
+  expect(screen.queryByText("Check Meetings for the coming days.")).toBeNull()
+})
+
 test("without attendance: read the dashboard has no Today section", async () => {
   open(data({ upcoming: [planned("2026-11-09", "3rd Class", 3)] }), { who: me.churchOffice })
 

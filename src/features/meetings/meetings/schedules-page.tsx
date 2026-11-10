@@ -9,14 +9,16 @@ import { Suspense } from "react"
 
 import { Topbar } from "@/components/app-shell/topbar"
 import { PageBody, PageHeader } from "@/components/page-header"
+import { NotAssigned } from "@/components/not-assigned"
 import { QueryState } from "@/components/page-states"
 import { ServiceTag } from "@/components/service-tag"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
-import { useCan } from "@/features/identity/auth/session"
+import { useCan, useUnassigned } from "@/features/identity/auth/session"
 import { servicesQuery } from "@/features/organization/services/api"
 import { Link } from "@/i18n/navigation"
 import type { ServiceRef } from "@/lib/api/types/common"
 import { orderOf, type ScheduleSummary } from "@/lib/api/types/meetings"
+import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import { type ScheduleList as Schedules, useSchedules } from "./api"
@@ -136,7 +138,7 @@ function Schedules({
                 showService={false}
                 emptyText={t("emptyService")}
                 trailing={(schedule) =>
-                  can("update", "sessions") ? (
+                  can("update", "sessions", meetingGroup(schedule)) ? (
                     <EditScheduleButton schedule={schedule} today={list.today} />
                   ) : null
                 }
@@ -152,6 +154,7 @@ function Schedules({
 function SchedulesScreen() {
   const t = useTranslations()
   const can = useCan()
+  const unassigned = useUnassigned()
   const search = useSearchParams()
   const status = statusOf(search.get("status"))
   const serviceId = search.get("service")
@@ -177,18 +180,24 @@ function SchedulesScreen() {
             ) : null
           }
         />
-        <MeetingsTabs active="schedules" />
-        <div className="flex justify-end">
-          <ServiceFilter
-            services={active}
-            value={serviceId}
-            path={routes.schedules()}
-            query={{ status: status === "active" ? null : status }}
-          />
-        </div>
-        <QueryState query={schedules}>
-          {(list) => <Schedules list={list} status={status} serviceId={serviceId} />}
-        </QueryState>
+        {unassigned ? (
+          <NotAssigned />
+        ) : (
+          <>
+            <MeetingsTabs active="schedules" />
+            <div className="flex justify-end">
+              <ServiceFilter
+                services={active}
+                value={serviceId}
+                path={routes.schedules()}
+                query={{ status: status === "active" ? null : status }}
+              />
+            </div>
+            <QueryState query={schedules}>
+              {(list) => <Schedules list={list} status={status} serviceId={serviceId} />}
+            </QueryState>
+          </>
+        )}
       </PageBody>
     </>
   )

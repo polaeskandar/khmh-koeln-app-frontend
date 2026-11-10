@@ -10,10 +10,11 @@ import { RecordPage } from "@/components/record-page"
 import { ServiceTag } from "@/components/service-tag"
 import { SessionBadges, SessionWhen } from "@/components/session-bits"
 import { Button } from "@/components/ui/button"
-import { useCan } from "@/features/identity/auth/session"
+import { useCanIn } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
 import { groupOf } from "@/lib/api/types/meetings"
+import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import type { AttendanceSheet as Board } from "./api"
@@ -79,7 +80,7 @@ function NotFoundPage() {
 
 function ActiveBoard({ board, boardAt }: { board: Board; boardAt: number }) {
   const t = useTranslations("attendance.board")
-  const can = useCan()
+  const can = useCanIn(meetingGroup(board.session))
   const online = useOnline()
   const writes = useMarkWrites(board.session.id)
   const shown = applyWrites(board, writes.writes, boardAt)
@@ -130,7 +131,7 @@ function ActiveBoard({ board, boardAt }: { board: Board; boardAt: number }) {
 function NotOpen({ board }: { board: Board }) {
   const t = useTranslations("attendance.session")
   const f = useFormat()
-  const can = useCan()
+  const can = useCanIn(meetingGroup(board.session))
   const records = can("create", "attendance")
   const { session, today } = board
   const due = session.date <= today

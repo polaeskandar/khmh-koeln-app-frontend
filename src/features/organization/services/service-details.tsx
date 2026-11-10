@@ -25,6 +25,7 @@ import { NewScheduleButton } from "@/features/meetings/meetings/schedule-dialog"
 import { ScheduleList } from "@/features/meetings/meetings/schedule-list"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
+import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import {
@@ -69,7 +70,7 @@ function Stages({ service, stages }: { service: ServiceRow; stages: ServiceStage
   const t = useTranslations()
   const f = useFormat()
   const can = useCan()
-  const addStages = can("create", "stages") && !service.archived
+  const addStages = can("create", "stages", groupAt(service)) && !service.archived
 
   return (
     <Section
@@ -178,7 +179,7 @@ function Details({ service }: { service: ServiceRow }) {
               {can("create", "sessions") && !service.archived && schedules.data ? (
                 <NewScheduleButton today={schedules.data.today} fixedServiceId={service.id} />
               ) : null}
-              {can("update", "services") && !service.archived ? (
+              {can("update", "services", groupAt(service)) && !service.archived ? (
                 <EditButton service={service} />
               ) : null}
               <ServiceActionsMenu service={service} />

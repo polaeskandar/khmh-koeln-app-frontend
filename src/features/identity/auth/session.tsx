@@ -18,7 +18,7 @@ import { onUnauthorized } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/problem"
 import { type ProblemTranslator, translateProblem } from "@/lib/api/translate-problem"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
-import { can, type Can } from "@/lib/permissions"
+import { can, type Can, canAssign, type Group, isUnassigned, within } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import { onLanguageSaveFailed } from "./account-language"
@@ -156,9 +156,28 @@ export function useSession(): SessionContext {
   return context
 }
 
-export function useCan(): Can {
+function useMe() {
   const { session } = useSession()
-  const me = session.status === "authenticated" ? session.me : null
 
-  return (action, resource) => can(me, action, resource)
+  return session.status === "authenticated" ? session.me : null
+}
+
+export function useCan(): Can {
+  const me = useMe()
+
+  return (action, resource, group) => can(me, action, resource, group)
+}
+
+export function useCanIn(group: Group | undefined): Can {
+  return within(useCan(), group)
+}
+
+export function useCanAssign(): (group?: Group) => boolean {
+  const me = useMe()
+
+  return (group) => canAssign(me, group)
+}
+
+export function useUnassigned(): boolean {
+  return isUnassigned(useMe())
 }

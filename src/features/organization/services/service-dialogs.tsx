@@ -27,6 +27,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { useRouter } from "@/i18n/navigation"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
+import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import {
@@ -212,8 +213,8 @@ export function ServiceActionsMenu({ service }: { service: ServiceRow }) {
   const router = useRouter()
   const [open, setOpen] = useState<"edit" | "archive" | "restore" | "delete" | null>(null)
   const can = useCan()
-  const edit = can("update", "services") && !service.archived
-  const archive = can("delete", "services")
+  const edit = can("update", "services", groupAt(service)) && !service.archived
+  const archive = can("delete", "services", groupAt(service))
 
   const impact = useServiceInsight(service.id)?.impact ?? {
     activeSchedules: 0,

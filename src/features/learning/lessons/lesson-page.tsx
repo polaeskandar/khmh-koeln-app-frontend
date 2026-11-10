@@ -27,8 +27,9 @@ import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 
 import { initialsOf } from "@/features/identity/auth/role-summary"
-import { useCan } from "@/features/identity/auth/session"
+import { useCanIn } from "@/features/identity/auth/session"
 import { stageHomeworkQuery } from "@/features/learning/homework/api"
+import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import {
@@ -81,8 +82,14 @@ function useLessonChange<A extends unknown[], T>(
   }
 }
 
-function useEverPublished({ archived, lesson, stage, homework }: LessonDetail): boolean | null {
-  const can = useCan()
+function useEverPublished({
+  archived,
+  lesson,
+  service,
+  stage,
+  homework,
+}: LessonDetail): boolean | null {
+  const can = useCanIn(groupAt(service, stage))
   const readable = can("read", "homework")
 
   const deletable =
@@ -264,7 +271,7 @@ function LessonView({ data }: { data: LessonDetail }) {
   const t = useTranslations()
   const f = useFormat()
   const { lesson, stage, service, today, homework } = data
-  const can = useCan()
+  const can = useCanIn(groupAt(service, stage))
   const everPublished = useEverPublished(data)
   const flags = lessonFlagsFor(can, data, everPublished)
 

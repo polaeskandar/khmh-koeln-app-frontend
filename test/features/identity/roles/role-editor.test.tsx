@@ -9,7 +9,7 @@ import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Action, Permission, Resource } from "@/lib/permissions"
 import { apiUrl, problem } from "@test/support/api"
-import { me } from "@test/support/fixtures/me"
+import { church, me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
@@ -41,6 +41,7 @@ const ADMIN_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e0001"
 const servant: RoleDetail = {
   id: SERVANT_ID,
   name: "Servant",
+  scope: "assignedGroups",
   permissions: [
     ...perms("services", ["read"]),
     ...perms("attendance"),
@@ -61,6 +62,7 @@ const administrator: RoleDetail = {
   ...servant,
   id: ADMIN_ID,
   name: "Administrator",
+  scope: "church",
   permissions: (
     [
       "services",
@@ -226,7 +228,7 @@ test("with roles: read only everything is read-only", async () => {
   open(<RolePage />, {
     who: {
       ...me.churchOffice,
-      permissions: [...me.churchOffice.permissions, ...perms("roles", ["read"])],
+      permissions: [...me.churchOffice.permissions, ...church(...perms("roles", ["read"]))],
     },
   })
 

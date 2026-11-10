@@ -9,7 +9,7 @@ import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Action, Permission, Resource } from "@/lib/permissions"
 import { apiUrl, problem } from "@test/support/api"
-import { me } from "@test/support/fixtures/me"
+import { church, me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
@@ -39,6 +39,7 @@ const role = (
 ): RoleRow => ({
   id: `0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e0${String(n).padStart(3, "0")}`,
   name,
+  scope: "church",
   permissions,
   holderCount,
 })
@@ -82,7 +83,7 @@ const roles = [
 
 const withRoles = (actions: Action[]): Me => ({
   ...me.churchOffice,
-  permissions: [...me.churchOffice.permissions, ...perms("roles", actions)],
+  permissions: [...me.churchOffice.permissions, ...church(...perms("roles", actions))],
 })
 
 function open(who: Me, remove?: () => Response) {

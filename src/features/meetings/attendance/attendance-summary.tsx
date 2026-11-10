@@ -16,7 +16,7 @@ import { useSessionLines } from "@/components/session-bits"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Topbar } from "@/components/app-shell/topbar"
-import { useCan } from "@/features/identity/auth/session"
+import { useCanIn } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
 import { isolate } from "@/lib/bidi"
@@ -24,6 +24,7 @@ import type { Instant, PersonRef } from "@/lib/api/types/common"
 import { groupOf } from "@/lib/api/types/meetings"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { initials, preferredName } from "@/lib/domain/names"
+import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import { type AttendanceSheet as Board, reopenAttendanceRequest } from "./api"
@@ -248,7 +249,7 @@ function Summary({ board }: { board: Board }) {
 
 function SummaryActions({ board }: { board: Board }) {
   const t = useTranslations("attendance.summary")
-  const can = useCan()
+  const can = useCanIn(meetingGroup(board.session))
   const { session } = board
 
   return (

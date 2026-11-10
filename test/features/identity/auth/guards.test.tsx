@@ -128,6 +128,14 @@ describe("RequirePermission", () => {
     expect(requests()).toBe(0)
     expect(router.replace).not.toHaveBeenCalled()
   })
+
+  test("a servant without a group is told to ask the church office and never asks", async () => {
+    answerMe({ ...me.servant, assignments: [] })
+    const requests = membersPage()
+    expect(await screen.findByText("You are not assigned to a group yet")).toBeInTheDocument()
+    expect(screen.queryByText("Not allowed")).toBeNull()
+    expect(requests()).toBe(0)
+  })
 })
 
 test("useCan is false once a 401 has ended the session", async () => {

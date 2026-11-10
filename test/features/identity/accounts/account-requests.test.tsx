@@ -136,7 +136,11 @@ test("a 409 alreadyApproved toasts and refetches", async () => {
 })
 
 test("staff who may only read requests are not offered Decline", async () => {
-  open({ ...me.churchOffice, permissions: [{ action: "read", resource: "users" }] })
+  open({
+    ...me.churchOffice,
+    permissions: [{ action: "read", resource: "users", scope: "church" }],
+  })
+
   expect(await screen.findByText(requests[0].account.email)).toBeInTheDocument()
   expect(screen.queryByRole("button", { name: /Decline/ })).toBeNull()
 })

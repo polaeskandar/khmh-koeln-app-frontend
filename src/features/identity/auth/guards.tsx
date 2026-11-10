@@ -7,6 +7,7 @@ import { type ReactNode, useEffect, useState } from "react"
 
 import { KhmkMark } from "@/components/brand/logo"
 import { NoAccess } from "@/components/no-access"
+import { NotAssigned } from "@/components/not-assigned"
 import { QueryErrorState } from "@/components/page-states"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,13 +21,13 @@ import {
 import { isLocale, type Locale } from "@/i18n/config"
 import { storeLocale } from "@/i18n/locale-choice"
 import { usePathname, useRouter } from "@/i18n/navigation"
-import type { Action, Resource } from "@/lib/permissions"
+import { type Action, GROUP_RESOURCES, type Resource } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import { LANGUAGE_APPLIED_KEY, markLanguageApplied } from "./account-language"
 import type { areasOf, Me } from "./api"
 import { safeNext } from "./safe-next"
-import { useCan, useSession } from "./session"
+import { useCan, useSession, useUnassigned } from "./session"
 
 type Areas = ReturnType<typeof areasOf>
 
@@ -166,9 +167,14 @@ export function RequirePermission({
 }) {
   const t = useTranslations("errors")
   const can = useCan()
+  const unassigned = useUnassigned()
 
   if (can(action, resource)) {
     return children
+  }
+
+  if (unassigned && GROUP_RESOURCES.includes(resource)) {
+    return <NotAssigned />
   }
 
   if (fallback !== undefined) {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useCan } from "@/features/identity/auth/session"
+import { useCan, useUnassigned } from "@/features/identity/auth/session"
 import { useQuery } from "@tanstack/react-query"
 import type { ColumnDef } from "@tanstack/react-table"
 import { Archive, Search, X } from "lucide-react"
@@ -17,6 +17,7 @@ import {
   DataTableView,
   useDataTable,
 } from "@/components/data-table/data-table"
+import { NotAssigned } from "@/components/not-assigned"
 import { PageBody, PageHeader } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"
 import { ServiceSwatch } from "@/components/service-tag"
@@ -57,6 +58,7 @@ export function ServicesOverview() {
   const t = useTranslations()
   const query = useQuery(servicesQuery)
   const can = useCan()
+  const unassigned = useUnassigned()
 
   return (
     <>
@@ -67,7 +69,11 @@ export function ServicesOverview() {
           description={t("services.description")}
           actions={can("create", "services") ? <NewServiceButton /> : null}
         />
-        <QueryState query={query}>{(list) => <ServicesTable rows={list.items} />}</QueryState>
+        {unassigned ? (
+          <NotAssigned />
+        ) : (
+          <QueryState query={query}>{(list) => <ServicesTable rows={list.items} />}</QueryState>
+        )}
       </PageBody>
     </>
   )

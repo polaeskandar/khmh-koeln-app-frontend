@@ -1152,6 +1152,40 @@ export type paths = {
     patch?: never
     trace?: never
   }
+  "/accounts/{id}/assignments": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+
+    post: operations["post_api_account_assignments_add"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/assignments/{id}": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+
+    delete: operations["delete_api_assignments_remove"]
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   "/service-leaders": {
     parameters: {
       query?: never
@@ -1765,6 +1799,11 @@ export type components = {
 
       guardianConsentNote?: string | null
     }
+    ApprovalAssignmentRequest: {
+      serviceId?: string | null
+
+      stageId?: string | null
+    }
     ApprovalRequest: {
       as?: "parent" | "servant" | "member" | null
 
@@ -1773,6 +1812,8 @@ export type components = {
       roleIds?: string[]
 
       member?: components["schemas"]["MemberApprovalRequest"]
+
+      assignments?: components["schemas"]["ApprovalAssignmentRequest"][]
     }
     ConfirmEmailRequest: {
       token?: string | null
@@ -1830,6 +1871,8 @@ export type components = {
     }
     RoleRequest: {
       name?: string | null
+
+      scope?: string | null
 
       permissions?: components["schemas"]["PermissionRequest"][]
     }
@@ -1991,6 +2034,11 @@ export type components = {
       title?: string | null
 
       location?: string | null
+    }
+    AssignmentRequest: {
+      serviceId?: string | null
+
+      stageId?: string | null
     }
     ServiceRequest: {
       name?: string | null
@@ -2173,9 +2221,13 @@ export type components = {
       displayName: string
       language: components["schemas"]["Language"]
     }
-    RoleResponse: {
-      id: string
-      name: string
+    AssignedGroup: {
+      service: components["schemas"]["ServiceReference"]
+      stage: components["schemas"]["StageReference"] | null
+    }
+    MemberSummaryResponse: {
+      personId: string
+      groupCount: number
     }
 
     Action: "create" | "read" | "update" | "delete"
@@ -2191,20 +2243,24 @@ export type components = {
       | "lessons"
       | "homework"
       | "parentPortal"
-    PermissionResponse: {
+
+    RoleScope: "church" | "assignedGroups"
+    AccountPermissionResponse: {
       action: components["schemas"]["Action"]
       resource: components["schemas"]["Resource"]
+      scope: components["schemas"]["RoleScope"]
     }
-    MemberSummaryResponse: {
-      personId: string
-      groupCount: number
+    RoleResponse: {
+      id: string
+      name: string
     }
     MeResponse: {
       account: components["schemas"]["AccountResponse"]
-      roles: components["schemas"]["RoleResponse"][]
-      permissions: components["schemas"]["PermissionResponse"][]
-      today: string
+      assignments: components["schemas"]["AssignedGroup"][]
       member: components["schemas"]["MemberSummaryResponse"] | null
+      permissions: components["schemas"]["AccountPermissionResponse"][]
+      roles: components["schemas"]["RoleResponse"][]
+      today: string
     }
 
     AgeCheck: "sixteenOrOlder" | "guardianConsent"
@@ -2249,9 +2305,14 @@ export type components = {
     RegistrationServicesResponse: {
       items: components["schemas"]["ServiceOptionResponse"][]
     }
+    PermissionResponse: {
+      action: components["schemas"]["Action"]
+      resource: components["schemas"]["Resource"]
+    }
     RoleRowResponse: {
       id: string
       name: string
+      scope: components["schemas"]["RoleScope"]
       permissions: components["schemas"]["PermissionResponse"][]
       holderCount: number
     }
@@ -2271,18 +2332,25 @@ export type components = {
       name: string
       onlyWayToChangeRoles: boolean
       permissions: components["schemas"]["PermissionResponse"][]
+      scope: components["schemas"]["RoleScope"]
 
       updatedAt: string
     }
-    StaffAccount: {
+    AssignmentView: {
       id: string
+      service: components["schemas"]["ServiceReference"]
+      stage: components["schemas"]["StageReference"] | null
+    }
+    StaffAccountResponse: {
+      assignments: components["schemas"]["AssignmentView"][]
+      disabled: boolean
       displayName: string
       email: string
-      disabled: boolean
+      id: string
       roles: components["schemas"]["RoleSummary"][]
     }
-    StaffAccountList: {
-      items: components["schemas"]["StaffAccount"][]
+    StaffAccountListResponse: {
+      items: components["schemas"]["StaffAccountResponse"][]
       today: string
     }
     IssuedPasswordLink: {
@@ -3826,7 +3894,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          "application/json": components["schemas"]["StaffAccountList"]
+          "application/json": components["schemas"]["StaffAccountListResponse"]
         }
       }
       default: components["responses"]["Problem"]
@@ -5237,6 +5305,52 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["AttendanceHistory"]
         }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  post_api_account_assignments_add: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AssignmentRequest"]
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["AssignmentView"]
+        }
+      }
+      default: components["responses"]["Problem"]
+    }
+  }
+  delete_api_assignments_remove: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
       }
       default: components["responses"]["Problem"]
     }

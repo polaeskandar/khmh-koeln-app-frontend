@@ -104,7 +104,12 @@ use the same folders.
 - **Permissions** come from `GET /me` only: read models carry no permission flags (the backend's
   `docs/api.md`, "What the viewer may do"). Screens offer an action when `useCan()` from
   `src/features/identity/auth/session.tsx` grants it, together with the item's own state (archived, status) as
-  `docs/api.md` describes for that action.
+  `docs/api.md` describes for that action. A role holds church-wide or only in the account's assigned groups
+  (the backend's "Assigned groups"): `can(action, resource)` asks whether it holds anywhere, and a screen about
+  one service, stage, session, lesson, homework or person passes its group, `can(action, resource, group)` or
+  `useCanIn(group)`, so a servant sees an action only where it holds. `useCanAssign()` says who may assign
+  accounts to groups, and `useUnassigned()` marks a servant without a group, whose dashboard and lists say to
+  ask the church office.
 - **Query keys** are `["<resource>", "list" | "detail", params]`, e.g. `["services", "list", {status: "all"}]`
   or `["sessions", "detail", id]`. A change invalidates by prefix (`["services"]`), so every list and detail
   of that resource refetches.

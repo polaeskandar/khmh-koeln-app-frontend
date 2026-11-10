@@ -15,11 +15,12 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useCan } from "@/features/identity/auth/session"
+import { useCanIn } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { isolate } from "@/lib/bidi"
 import type { PersonRef } from "@/lib/api/types/common"
 import { fullName, initials, matchesQuery, preferredName } from "@/lib/domain/names"
+import { meetingGroup } from "@/lib/permissions"
 
 import type { AttendanceSheet as Board, Mark, Placement } from "./api"
 
@@ -201,7 +202,7 @@ export function AttendanceBoard({
 }) {
   const t = useTranslations("attendance.board")
   const tc = useTranslations("common")
-  const can = useCan()
+  const can = useCanIn(meetingGroup(board.session))
   const [query, setQuery] = useState("")
   const [filter, setFilter] = useState<Filter>("all")
   const { session, counts } = board

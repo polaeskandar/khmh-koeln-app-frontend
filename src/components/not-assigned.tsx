@@ -1,0 +1,20 @@
+import { Layers } from "lucide-react"
+import { useTranslations } from "next-intl"
+
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+
+export function NotAssigned() {
+  const t = useTranslations("assignments.notAssigned")
+
+  return (
+    <Empty className="border border-dashed">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <Layers />
+        </EmptyMedia>
+        <EmptyTitle>{t("title")}</EmptyTitle>
+        <EmptyDescription>{t("description")}</EmptyDescription>
+      </EmptyHeader>
+    </Empty>
+  )
+}
