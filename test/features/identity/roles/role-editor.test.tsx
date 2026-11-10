@@ -17,7 +17,6 @@ import type { RoleDetail } from "@/features/identity/roles/api"
 import { NewRolePage, RolePage } from "@/features/identity/roles/role-editor"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })

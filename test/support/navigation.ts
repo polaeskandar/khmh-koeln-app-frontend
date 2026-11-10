@@ -45,11 +45,16 @@ export const router = {
   prefetch: vi.fn(),
 }
 
+const linkOnlyProps = new Set(["locale", "prefetch", "replace", "scroll", "shallow"])
+
 export const navigationMock = {
   useRouter: () => router,
   usePathname: () => navigation.pathname,
   Link: ({ href, ...props }: { href: string } & Record<string, unknown>) =>
-    createElement("a", { href, ...props }),
+    createElement("a", {
+      href,
+      ...Object.fromEntries(Object.entries(props).filter(([name]) => !linkOnlyProps.has(name))),
+    }),
 }
 
 export const nextNavigationMock = {

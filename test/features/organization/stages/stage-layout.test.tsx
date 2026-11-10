@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, test } from "vitest"
 
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -19,7 +19,6 @@ const SERVICE_ID = SUNDAY_SCHOOL_ID
 
 beforeEach(() => {
   address.set(`id=${ID}`)
-  vi.spyOn(console, "error").mockImplementation(() => {})
 })
 
 const renderPage = (locale: Locale = "en") =>

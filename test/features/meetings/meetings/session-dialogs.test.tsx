@@ -16,7 +16,6 @@ import { renderWithProviders } from "@test/support/providers"
 import { SessionPage } from "@/features/meetings/meetings/session-page"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
 })
 

@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test } from "vitest"
 
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -20,8 +20,6 @@ import type {
   ServiceStages,
 } from "@/features/organization/services/api"
 import { ServiceDetails } from "@/features/organization/services/service-details"
-
-beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => {}))
 
 const STAGES = ["Kindergarten", "1st Class", "2nd Class", "3rd Class", "4th Class", "5th Class"]
 
@@ -110,6 +108,8 @@ function open(
 
       return new HttpResponse(null, { status: 204 })
     }),
+    http.get(apiUrl("/me"), () => HttpResponse.json(viewer)),
+    http.get(apiUrl("/services"), () => HttpResponse.json(services)),
     http.get(apiUrl(`/services/${service.id}`), () => HttpResponse.json(service)),
     http.get(apiUrl(`/services/${service.id}/stages`), () =>
       HttpResponse.json(stagesOf(service, names))

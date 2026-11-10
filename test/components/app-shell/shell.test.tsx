@@ -42,7 +42,18 @@ describe("isActive", () => {
 })
 
 function shell(account: Me, locale: Locale = "en") {
-  server.use(http.get(apiUrl("/me"), () => HttpResponse.json(account)))
+  server.use(
+    http.get(apiUrl("/me"), () => HttpResponse.json(account)),
+    http.get(apiUrl("/attendance/overview"), () =>
+      HttpResponse.json({
+        today: "2026-11-08",
+        sessions: [],
+        earlier: [],
+        closed: [],
+        openCount: 0,
+      })
+    )
+  )
 
   return renderWithProviders(
     <SessionProvider>

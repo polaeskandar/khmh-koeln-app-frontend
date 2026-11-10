@@ -18,7 +18,6 @@ import type { HomeworkDetail, StageHomework } from "@/features/learning/homework
 import { EditHomeworkPage, NewHomeworkPage } from "@/features/learning/homework/homework-editor"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })

@@ -26,7 +26,6 @@ import { ServiceActionsMenu } from "@/features/organization/services/service-dia
 import type { Stage } from "@/features/organization/stages/api"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
 })
 
@@ -180,6 +179,9 @@ test("an archived service's details show when and why", async () => {
   server.use(
     http.get(apiUrl(`/services/${archived.id}`), () => HttpResponse.json(archived)),
     http.get(apiUrl(`/services/${archived.id}/stages`), () => HttpResponse.json(archivedStages)),
+    http.get(apiUrl(`/services/${archived.id}/servants`), () =>
+      HttpResponse.json({ servants: [], assignable: [] })
+    ),
     http.get(apiUrl("/services/insights"), () => HttpResponse.json(insightsOf(services.items))),
     http.get(apiUrl("/schedules"), () => HttpResponse.json({ today: "2026-11-08", items: [] }))
   )

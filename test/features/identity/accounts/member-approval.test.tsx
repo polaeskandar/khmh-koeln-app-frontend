@@ -17,7 +17,6 @@ import { ApproveButton } from "@/features/identity/accounts/approve-dialog"
 import { MemberAccounts } from "@/features/identity/accounts/member-accounts"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
 })
 
@@ -86,6 +85,7 @@ function open(
   const bodies: unknown[] = []
 
   server.use(
+    http.get(apiUrl("/services"), () => HttpResponse.json(services)),
     http.get(apiUrl("/account-requests/member-candidates"), () => HttpResponse.json({ items })),
     http.post(apiUrl("/account-requests/:id/approve"), async ({ request: req }) => {
       bodies.push(await req.json())
@@ -187,6 +187,7 @@ test("approving a member refetches the member accounts", async () => {
   let reads = 0
 
   server.use(
+    http.get(apiUrl("/services"), () => HttpResponse.json(services)),
     http.get(apiUrl("/member-accounts"), () => {
       reads++
 

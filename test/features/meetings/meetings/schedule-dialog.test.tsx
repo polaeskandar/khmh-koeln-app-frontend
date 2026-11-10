@@ -19,7 +19,6 @@ import { renderWithProviders } from "@test/support/providers"
 import { SchedulesPage } from "@/features/meetings/meetings/schedules-page"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
 })
 

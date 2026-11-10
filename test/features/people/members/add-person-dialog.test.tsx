@@ -17,7 +17,6 @@ import { renderWithProviders } from "@test/support/providers"
 import { MembersScreen } from "@/features/people/members/members-page"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })

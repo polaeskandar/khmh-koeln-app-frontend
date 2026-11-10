@@ -26,7 +26,7 @@ const PASSWORD = "correct horse battery"
 beforeEach(() => {
   vi.spyOn(toast, "error")
 
-  for (const method of ["log", "info", "warn", "error", "debug"] as const) {
+  for (const method of ["log", "info", "warn", "debug"] as const) {
     vi.spyOn(console, method).mockImplementation(() => {})
   }
 })

@@ -9,6 +9,7 @@ import { SessionProvider } from "@/features/identity/auth/session"
 import type { Action, Permission, Resource } from "@/lib/permissions"
 import { apiUrl, problem } from "@test/support/api"
 import { church, me } from "@test/support/fixtures/me"
+import { answerSettingsLists } from "@test/support/fixtures/settings"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
@@ -16,7 +17,6 @@ import type { RoleRow } from "@/features/identity/roles/api"
 import { SettingsPage } from "@/features/identity/accounts/settings-page"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })
@@ -87,6 +87,8 @@ function open(who: Me, remove?: () => Response) {
   let items = roles
   let reads = 0
   const deletes: string[] = []
+
+  answerSettingsLists()
 
   server.use(
     http.get(apiUrl("/me"), () => HttpResponse.json(who)),

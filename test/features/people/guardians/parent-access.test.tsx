@@ -17,7 +17,6 @@ import type { GuardianLink, GuardianLinks } from "@/features/people/guardians/ap
 import { ParentAccess } from "@/features/people/guardians/parent-access"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })

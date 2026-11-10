@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test } from "vitest"
 
 import { apiUrl, problem } from "@test/support/api"
 import { closedFirstNovember, openRosterBoard, sheetHandlers } from "@test/support/fixtures/board"
@@ -14,8 +14,6 @@ import type { Me } from "@/features/identity/auth/api"
 import type { AttendanceSheet } from "@/features/meetings/attendance/api"
 import { AttendanceSummaryPage } from "@/features/meetings/attendance/attendance-summary"
 import { useAgenda } from "@/features/meetings/meetings/api"
-
-beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => {}))
 
 const reads = { agenda: 0 }
 

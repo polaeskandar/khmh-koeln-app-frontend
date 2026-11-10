@@ -18,7 +18,6 @@ import { LessonPage } from "@/features/learning/lessons/lesson-page"
 
 beforeEach(() => {
   address.set(`id=${goodSamaritan.id}`)
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })

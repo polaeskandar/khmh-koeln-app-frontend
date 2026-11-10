@@ -17,7 +17,6 @@ import { CorrectionDialog } from "@/features/meetings/attendance/board-dialogs"
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "error")
 })
 

@@ -22,7 +22,6 @@ import { ServicesTable } from "@/features/organization/services/services-overvie
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-11-08T11:08:00Z") })
-  vi.spyOn(console, "error").mockImplementation(() => {})
 })
 
 afterEach(() => {
@@ -118,6 +117,10 @@ test("details show the attendance stat and no leaders", async () => {
   server.use(
     http.get(apiUrl(`/services/${service.id}`), () => HttpResponse.json(service)),
     http.get(apiUrl(`/services/${service.id}/stages`), () => HttpResponse.json(stages)),
+    http.get(apiUrl(`/services/${service.id}/servants`), () =>
+      HttpResponse.json({ servants: [], assignable: [] })
+    ),
+    http.get(apiUrl("/services"), () => HttpResponse.json(services)),
     http.get(apiUrl("/services/insights"), () => HttpResponse.json(insights)),
     http.get(apiUrl("/schedules"), () => HttpResponse.json({ today: "2026-11-08", items: [] }))
   )

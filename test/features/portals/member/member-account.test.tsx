@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -24,7 +24,6 @@ const nevine: Me = {
 
 beforeEach(() => {
   navigation.pathname = "/member/account/"
-  vi.spyOn(console, "error").mockImplementation(() => {})
 })
 
 function open(
@@ -35,6 +34,7 @@ function open(
     http.get(apiUrl("/me"), () =>
       HttpResponse.json({ ...nevine, account: { ...nevine.account, language: locale } })
     ),
+    http.get(apiUrl("/me/erasure-request"), () => HttpResponse.json({ erasureRequested: null })),
     http.get(apiUrl("/member/groups"), () =>
       typeof groups === "function"
         ? groups()
@@ -74,6 +74,12 @@ test("an unlinked account reads so", async () => {
 })
 
 test("Deutsch switches the language in place", async () => {
+  server.use(
+    http.put(apiUrl("/me/language"), () =>
+      HttpResponse.json({ ...nevine, account: { ...nevine.account, language: "de" } })
+    )
+  )
+
   open()
   expect(await screen.findByRole("radio", { name: "English" })).toBeChecked()
   await userEvent.click(screen.getByRole("radio", { name: "Deutsch" }))
@@ -111,10 +117,6 @@ test("in Arabic the email stays left to right and the tab bar marks Account", as
 })
 
 test("the member can download their data and ask to delete it, record included", async () => {
-  server.use(
-    http.get(apiUrl("/me/erasure-request"), () => HttpResponse.json({ erasureRequested: null }))
-  )
-
   open()
   expect(await screen.findByRole("button", { name: "Download (JSON)" })).toBeInTheDocument()
   await userEvent.click(await screen.findByRole("button", { name: "Delete account…" }))

@@ -29,7 +29,6 @@ let clicks: { href: string; download: string }[] = []
 
 beforeEach(() => {
   clicks = []
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
   URL.createObjectURL = vi.fn(() => "blob:khmk-my-data")

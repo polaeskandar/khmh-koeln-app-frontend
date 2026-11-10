@@ -18,7 +18,6 @@ import type { Agenda } from "@/features/meetings/meetings/api"
 import { AgendaPage } from "@/features/meetings/meetings/agenda-page"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
 })
 

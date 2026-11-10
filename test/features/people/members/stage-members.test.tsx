@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import type { Stage } from "@/features/organization/stages/api"
@@ -20,7 +20,6 @@ import { StageOverview } from "@/features/organization/stages/stage-layout"
 
 beforeEach(() => {
   address.set(`id=${THIRD_CLASS_ID}`)
-  vi.spyOn(console, "error").mockImplementation(() => {})
 })
 
 const fourteen = [

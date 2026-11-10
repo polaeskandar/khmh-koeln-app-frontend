@@ -29,7 +29,6 @@ const member = (displayName: string): Me => ({
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-11-08T11:08:00Z") })
-  vi.spyOn(console, "error").mockImplementation(() => {})
 })
 
 afterEach(() => {

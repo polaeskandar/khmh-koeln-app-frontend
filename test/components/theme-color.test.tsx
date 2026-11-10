@@ -18,7 +18,12 @@ test("the browser chrome takes the chosen appearance, whatever the device prefer
   }
 
   render(
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="dark"
+      enableSystem={false}
+      scriptProps={{ type: "text/plain" }}
+    >
       <ThemeColor />
     </ThemeProvider>
   )

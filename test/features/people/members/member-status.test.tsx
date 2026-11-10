@@ -21,7 +21,6 @@ import { MembersPage } from "@/features/people/members/members-page"
 
 beforeEach(() => {
   navigation.pathname = "/members/"
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })

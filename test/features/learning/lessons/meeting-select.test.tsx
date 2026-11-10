@@ -1,7 +1,7 @@
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test } from "vitest"
 
 import { SessionProvider } from "@/features/identity/auth/session"
 import { apiUrl, problem } from "@test/support/api"
@@ -19,8 +19,6 @@ import { renderWithProviders } from "@test/support/providers"
 
 import { toMeeting } from "@/features/learning/lessons/api"
 import { EditLessonPage, NewLessonPage } from "@/features/learning/lessons/lesson-editor"
-
-beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => {}))
 
 const SCHEDULE_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f90"
 

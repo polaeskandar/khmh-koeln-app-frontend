@@ -17,7 +17,6 @@ import type { ParentTask } from "@/features/learning/homework/api"
 import { ParentHomework } from "@/features/learning/homework/parent-homework"
 
 beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })

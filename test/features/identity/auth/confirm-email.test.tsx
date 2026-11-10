@@ -1,19 +1,13 @@
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { afterEach, expect, test } from "vitest"
 
 import { apiUrl, problem } from "@test/support/api"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
 import { ConfirmEmailPage } from "@/features/identity/auth/confirm-email-page"
-
-beforeEach(() => {
-  for (const method of ["error", "warn"] as const) {
-    vi.spyOn(console, method).mockImplementation(() => {})
-  }
-})
 
 afterEach(() => {
   window.history.replaceState(null, "", "/")
