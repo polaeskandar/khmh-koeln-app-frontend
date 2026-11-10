@@ -4,30 +4,13 @@ import * as React from "react"
 import {
   type Column,
   type ColumnDef,
-  columnFacetingFeature,
-  columnFilteringFeature,
-  type ColumnFiltersState,
   columnSizingFeature,
-  columnVisibilityFeature,
-  type ColumnVisibilityState,
-  createFacetedRowModel,
-  createFacetedUniqueValues,
-  createFilteredRowModel,
   createPaginatedRowModel,
   createSortedRowModel,
-  filterFn_arrIncludes,
-  filterFn_equals,
-  filterFn_inDateRange,
-  filterFn_includesString,
-  filterFn_inNumberRange,
-  filterFn_weakEquals,
   flexRender,
-  globalFilteringFeature,
   type ReactTable,
   type RowData,
   rowPaginationFeature,
-  rowSelectionFeature,
-  type RowSelectionState,
   rowSortingFeature,
   sortFn_alphanumeric,
   sortFn_datetime,
@@ -53,27 +36,11 @@ import {
 } from "@/components/ui/table"
 
 const dataTableFeatures = tableFeatures({
-  columnFacetingFeature,
-  columnFilteringFeature,
   columnSizingFeature,
-  columnVisibilityFeature,
-  globalFilteringFeature,
   rowPaginationFeature,
-  rowSelectionFeature,
   rowSortingFeature,
-  facetedRowModel: createFacetedRowModel(),
-  facetedUniqueValues: createFacetedUniqueValues(),
-  filteredRowModel: createFilteredRowModel(),
   paginatedRowModel: createPaginatedRowModel(),
   sortedRowModel: createSortedRowModel(),
-  filterFns: {
-    arrIncludes: filterFn_arrIncludes,
-    equals: filterFn_equals,
-    inDateRange: filterFn_inDateRange,
-    includesString: filterFn_includesString,
-    inNumberRange: filterFn_inNumberRange,
-    weakEquals: filterFn_weakEquals,
-  },
   sortFns: {
     alphanumeric: sortFn_alphanumeric,
     datetime: sortFn_datetime,
@@ -83,53 +50,30 @@ const dataTableFeatures = tableFeatures({
 
 export type DataTableFeatures = typeof dataTableFeatures
 
+const WIDTH_FROM_CONTENT = { size: undefined }
+
 type UseDataTableOptions<TData extends RowData> = {
   data: TData[]
   columns: ColumnDef<DataTableFeatures, TData, unknown>[]
   getRowId?: (row: TData) => string
   initialSorting?: SortingState
-  initialGlobalFilter?: string
-  initialFilters?: ColumnFiltersState
-  initialVisibility?: ColumnVisibilityState
-  initialSelection?: RowSelectionState
   pageSize?: number
   manual?: { rowCount: number; page: number; onPageChange: (page: number) => void }
 }
 
 export function useDataTable<TData extends RowData>(options: UseDataTableOptions<TData>) {
-  const {
-    data,
-    columns,
-    getRowId,
-    initialSorting = [],
-    initialFilters = [],
-    initialGlobalFilter = "",
-    initialVisibility = {},
-    initialSelection = {},
-    pageSize = 10,
-    manual,
-  } = options
+  const { data, columns, getRowId, initialSorting = [], pageSize = 10, manual } = options
 
   const [sorting, setSorting] = React.useState<SortingState>(initialSorting)
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(initialFilters)
-  const [globalFilter, setGlobalFilter] = React.useState<string>(initialGlobalFilter)
-
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<ColumnVisibilityState>(initialVisibility)
-
-  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>(initialSelection)
 
   const table = useTable({
     features: dataTableFeatures,
     data,
     columns,
     getRowId,
+    defaultColumn: WIDTH_FROM_CONTENT,
     state: {
       sorting,
-      columnFilters,
-      globalFilter,
-      columnVisibility,
-      rowSelection,
       ...(manual ? { pagination: { pageIndex: manual.page - 1, pageSize } } : {}),
     },
     initialState: { pagination: { pageIndex: 0, pageSize } },
@@ -137,7 +81,6 @@ export function useDataTable<TData extends RowData>(options: UseDataTableOptions
       ? {
           manualPagination: true,
           manualSorting: true,
-          manualFiltering: true,
           rowCount: manual.rowCount,
           onPaginationChange: (updater) => {
             const current = { pageIndex: manual.page - 1, pageSize }
@@ -147,13 +90,9 @@ export function useDataTable<TData extends RowData>(options: UseDataTableOptions
         }
       : {}),
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onRowSelectionChange: setRowSelection,
-    onGlobalFilterChange: setGlobalFilter,
-    onColumnVisibilityChange: setColumnVisibility,
   })
 
-  return { table, setColumnFilters, setGlobalFilter, globalFilter }
+  return { table }
 }
 
 export function DataTableColumnHeader<TData extends RowData, TValue>({
@@ -249,16 +188,14 @@ export function DataTablePagination<TData extends RowData>({
 export function DataTableView<TData extends RowData>({
   table,
   className,
-  rowClassName,
   emptyMessage,
 }: {
   table: ReactTable<DataTableFeatures, TData>
   className?: string
-  rowClassName?: (row: TData) => string | undefined
   emptyMessage?: React.ReactNode
 }) {
   const t = useTranslations("table")
-  const columnCount = table.getVisibleLeafColumns().length
+  const columnCount = table.getAllLeafColumns().length
 
   return (
     <div className={cn("overflow-hidden border", className)}>
@@ -267,15 +204,7 @@ export function DataTableView<TData extends RowData>({
           {table.getHeaderGroups().map((hg) => (
             <TableRow key={hg.id} className="hover:bg-transparent">
               {hg.headers.map((header) => (
-                <TableHead
-                  key={header.id}
-                  style={{
-                    width:
-                      header.column.columnDef.size !== 150
-                        ? header.column.columnDef.size
-                        : undefined,
-                  }}
-                >
+                <TableHead key={header.id} style={{ width: header.column.columnDef.size }}>
                   {header.isPlaceholder
                     ? null
                     : flexRender(header.column.columnDef.header, header.getContext())}
@@ -287,12 +216,8 @@ export function DataTableView<TData extends RowData>({
         <TableBody>
           {table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                className={rowClassName?.(row.original)}
-              >
-                {row.getVisibleCells().map((cell) => (
+              <TableRow key={row.id}>
+                {row.getAllCells().map((cell) => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
