@@ -2224,6 +2224,7 @@
     "groups": {
       "noSchedule": "No regular meetings at the moment.",
       "lastLesson": "Last lesson: “{title}”, {date}",
+      "servants": "Servants: {names}",
       "serviceLeader": "{name} (Service leader)"
     },
     "homework": {

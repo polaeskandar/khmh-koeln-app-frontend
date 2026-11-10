@@ -110,6 +110,10 @@ use the same folders.
   `useCanIn(group)`, so a servant sees an action only where it holds. `useCanAssign()` says who may assign
   accounts to groups, and `useUnassigned()` marks a servant without a group, whose dashboard and lists say to
   ask the church office.
+- **Servants per group** on the member portal come from `GET /member/servants`: a servant's `groups` are the
+  member's groups they serve, but `role` is `service_leader` when they lead any one of them. A group card calls
+  a servant its service leader only where that is certain: all their groups are in the card's service, or they
+  serve the service's own roster, which only a whole-service assignment covers.
 - **Query keys** are `["<resource>", "list" | "detail", params]`, e.g. `["services", "list", {status: "all"}]`
   or `["sessions", "detail", id]`. A change invalidates by prefix (`["services"]`), so every list and detail
   of that resource refetches.
