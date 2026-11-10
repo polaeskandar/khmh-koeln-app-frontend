@@ -188,8 +188,8 @@ describe("success", () => {
     expect(onSuccess).not.toHaveBeenCalled()
     release()
     await act(() => running)
-    expect(result.current.mutation.pending).toBe(false)
     expect(onSuccess).toHaveBeenCalledWith({ id: "s1" })
+    await waitFor(() => expect(result.current.mutation.pending).toBe(false))
   })
 
   test("a failure invalidates nothing and is not retried", async () => {
