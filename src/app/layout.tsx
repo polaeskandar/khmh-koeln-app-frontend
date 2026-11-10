@@ -10,7 +10,6 @@ import { THEME_COLORS } from "@/lib/theme-colors"
 
 import { fontStack } from "@/lib/font-stack"
 import { cn } from "@/lib/utils"
-import { ApiMocking } from "@/mocks/api-mocking"
 
 import "./globals.css"
 
@@ -71,9 +70,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           disableTransitionOnChange
         >
           <ThemeColor />
-          <QueryProvider>
-            <ApiMocking>{children}</ApiMocking>
-          </QueryProvider>
+          <QueryProvider>{children}</QueryProvider>
         </ThemeProvider>
       </body>
     </html>
