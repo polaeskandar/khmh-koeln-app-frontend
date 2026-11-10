@@ -12,13 +12,14 @@ import { RecordPage } from "@/components/record-page"
 import { ServiceTag } from "@/components/service-tag"
 import { SessionBadges, SessionWhen } from "@/components/session-bits"
 import { Button } from "@/components/ui/button"
-import { useCan } from "@/features/identity/auth/session"
+import { useCanIn } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
 import { isolate } from "@/lib/bidi"
 import { recurrenceOf } from "@/lib/domain/recurrence"
 import type { LocalDate } from "@/lib/api/types/common"
 import { groupOf, type SessionView } from "@/lib/api/types/meetings"
+import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import { OpenAttendanceButton } from "@/features/meetings/attendance/open-attendance-button"
@@ -29,7 +30,7 @@ import { SessionManageMenu } from "./session-dialogs"
 function AttendanceAction({ session, today }: { session: SessionView; today: LocalDate }) {
   const t = useTranslations()
   const router = useRouter()
-  const can = useCan()
+  const can = useCanIn(meetingGroup(session))
   const records = can("create", "attendance")
 
   if (session.status === "active" && records) {
@@ -68,8 +69,8 @@ function AttendanceAction({ session, today }: { session: SessionView; today: Loc
 function SessionDetail({ data, actions }: { data: MeetingSession; actions?: ReactNode }) {
   const t = useTranslations()
   const f = useFormat()
-  const can = useCan()
   const { session, schedule, today } = data
+  const can = useCanIn(meetingGroup(session))
   const canceled = session.status === "canceled"
 
   const attendanceNote = canceled

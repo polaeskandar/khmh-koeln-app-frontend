@@ -26,7 +26,7 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/c
 import { Input } from "@/components/ui/input"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
-import { useCan } from "@/features/identity/auth/session"
+import { useCan, useCanIn } from "@/features/identity/auth/session"
 import { HomeworkStatusBadge } from "@/features/learning/lessons/lesson-bits"
 import { stageQuery } from "@/features/organization/stages/api"
 import { useStageCrumbs } from "@/features/organization/stages/stage-layout"
@@ -36,6 +36,7 @@ import { Link, useRouter } from "@/i18n/navigation"
 import type { LessonRef, LocalDate, ServiceRef, Uuid } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { addDays } from "@/lib/domain/time"
+import { type Group, groupAt, within } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import {
@@ -62,17 +63,18 @@ type HomeworkStage = StageHomework["stage"]
 
 type FormProps = {
   stage: HomeworkStage
+  group: Group
   audienceSize: number
   fromLesson: Uuid | null
 } & ({ lessons: LessonRef[]; lessonId: Uuid; homework?: never } | { homework: HomeworkDetail })
 
 function HomeworkForm(props: FormProps) {
-  const { stage, audienceSize, fromLesson, homework } = props
+  const { stage, group, audienceSize, fromLesson, homework } = props
   const lessons = homework ? [homework.lesson] : props.lessons
   const t = useTranslations()
   const f = useFormat()
   const router = useRouter()
-  const can = useCan()
+  const can = useCanIn(group)
   const formRef = useRef<HTMLFormElement>(null)
   const dueId = useId()
   const lessonSelectId = useId()
@@ -524,7 +526,7 @@ function NewHomework({ stageId }: { stageId: Uuid }) {
         >
           <QueryState query={list}>
             {(data) =>
-              data.archived || !can("create", "homework") ? (
+              data.archived || !can("create", "homework", groupAt(s.service, s)) ? (
                 <NoAccess title={t("new.noAccessTitle")}>
                   {t("new.noAccess", { stage: s.name })}
                 </NoAccess>
@@ -533,6 +535,7 @@ function NewHomework({ stageId }: { stageId: Uuid }) {
               ) : (
                 <HomeworkForm
                   stage={data.stage}
+                  group={groupAt(s.service, s)}
                   audienceSize={data.audienceSize}
                   lessons={data.lessons}
                   lessonId={firstLesson(data, wanted)}
@@ -569,13 +572,15 @@ function EditHomework({ id }: { id: Uuid }) {
             >
               {t("edit.archived")}
             </NoAccess>
-          ) : !homeworkFlagsFor(can, data, data.archived).edit ? (
+          ) : !homeworkFlagsFor(within(can, groupAt(data.service, data.stage)), data, data.archived)
+              .edit ? (
             <NoAccess title={t("edit.noAccessTitle")}>
               {t("edit.noAccess", { stage: data.stage.name })}
             </NoAccess>
           ) : (
             <HomeworkForm
               stage={data.stage}
+              group={groupAt(data.service, data.stage)}
               audienceSize={data.audienceSize}
               fromLesson={fromLesson}
               homework={data}

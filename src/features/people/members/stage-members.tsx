@@ -16,17 +16,18 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useCan } from "@/features/identity/auth/session"
+import { useCanIn } from "@/features/identity/auth/session"
 import { peopleQuery, type PeopleList } from "./api"
 import { AddPersonButton } from "./add-person-dialog"
 import { useFormat } from "@/i18n/format"
 import { fullName, initials, preferredName } from "@/lib/domain/names"
+import { groupAt } from "@/lib/permissions"
 
 import type { Stage } from "@/features/organization/stages/api"
 
 function EmptyRoster({ stage }: { stage: Stage }) {
   const t = useTranslations("stages.overview")
-  const can = useCan()
+  const can = useCanIn(groupAt(stage.service, stage))
   const addable = !stage.archived && !stage.service.archived && can("create", "members")
 
   return (

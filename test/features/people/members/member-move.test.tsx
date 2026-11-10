@@ -51,9 +51,9 @@ const ref = ({ id, name, position }: typeof second) => ({ id, name, position, ar
 const removeOnly: Me = {
   ...me.churchOffice,
   permissions: [
-    { action: "read", resource: "services" },
-    { action: "read", resource: "members" },
-    { action: "delete", resource: "members" },
+    { action: "read", resource: "services", scope: "church" },
+    { action: "read", resource: "members", scope: "church" },
+    { action: "delete", resource: "members", scope: "church" },
   ],
 }
 

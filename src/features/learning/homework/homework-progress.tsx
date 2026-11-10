@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useCan } from "@/features/identity/auth/session"
+import { useCanIn } from "@/features/identity/auth/session"
 import { CompletionMeter, HomeworkStatusBadge } from "@/features/learning/lessons/lesson-bits"
 import { useStageCrumbs } from "@/features/organization/stages/stage-layout"
 import { useFormat } from "@/i18n/format"
@@ -24,6 +24,7 @@ import { ApiError } from "@/lib/api/problem"
 import type { Uuid } from "@/lib/api/types/common"
 import { isolate } from "@/lib/bidi"
 import { initials, matchesQuery, preferredName } from "@/lib/domain/names"
+import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import {
@@ -274,7 +275,8 @@ function ProgressView({ data }: { data: HomeworkProgress }) {
   const t = useTranslations()
   const f = useFormat()
   const router = useRouter()
-  const can = useCan()
+  const group = groupAt(data.service, data.stage)
+  const can = useCanIn(group)
   const { homework, lesson } = data
   const detail = useQuery(homeworkQuery(homework.id))
   const stageArchived = detail.data?.archived ?? true
@@ -319,6 +321,7 @@ function ProgressView({ data }: { data: HomeworkProgress }) {
               ) : null}
               <HomeworkActions
                 homework={homework}
+                group={group}
                 stageArchived={stageArchived}
                 place="page"
                 onDeleted={() => router.push(routes.stageHomework(data.stage.id))}

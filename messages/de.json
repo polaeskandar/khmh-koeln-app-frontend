@@ -2303,5 +2303,11 @@
         "description": "Sehen: die Rollen und was sie erlauben. Anlegen, Ändern, Löschen: Rollen anlegen, ändern und löschen."
       }
     }
+  },
+  "assignments": {
+    "notAssigned": {
+      "title": "Sie sind noch keiner Gruppe zugeordnet",
+      "description": "Wenden Sie sich an das Gemeindebüro. Sobald Sie einem Dienst oder einer Stufe zugeordnet sind, erscheinen hier deren Treffen, Mitglieder, Lektionen und Hausaufgaben."
+    }
   }
 }

@@ -140,7 +140,7 @@ describe("the phone's tab bar", () => {
   test("keeps a plain Attendance tab for accounts that only read attendance", async () => {
     shell({
       ...me.attendanceOnly,
-      permissions: [{ action: "read", resource: "attendance" }],
+      permissions: [{ action: "read", resource: "attendance", scope: "church" }],
     })
 
     const bar = await screen.findByRole("navigation", { name: "Main" })

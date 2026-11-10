@@ -14,7 +14,7 @@ export const declineRequest = (account: Uuid) =>
     api.POST("/account-requests/{id}/decline", { params: { path: { id: account } }, body: {} })
   )
 
-export type StaffAccount = Schemas["StaffAccount"]
+export type StaffAccount = Schemas["StaffAccountResponse"]
 
 export const staffAccountsQuery = {
   queryKey: ["staff-accounts"] as const,

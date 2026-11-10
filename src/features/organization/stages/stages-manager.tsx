@@ -37,6 +37,7 @@ import { type ServiceStages, serviceStagesQuery } from "@/features/organization/
 import { Link } from "@/i18n/navigation"
 import { useFormat } from "@/i18n/format"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
+import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import { reorderStagesRequest } from "./api"
@@ -138,7 +139,7 @@ function Manager({ data }: { data: ServiceStages }) {
   )
 
   const can = useCan()
-  const manage = can("update", "stages") && !service.archived
+  const manage = can("update", "stages", groupAt(service)) && !service.archived
   const byId = useMemo(() => new Map(stages.map((stage) => [stage.id, stage])), [stages])
   const key = stages.map((stage) => stage.id).join()
   const [order, setOrder] = useState(() => stages.map((stage) => stage.id))
@@ -246,7 +247,7 @@ function Manager({ data }: { data: ServiceStages }) {
           title={t("stages.page.title", { name: service.name })}
           description={manage && rows.length > 1 ? t("stages.page.hint") : undefined}
           actions={
-            can("create", "stages") && !service.archived ? (
+            can("create", "stages", groupAt(service)) && !service.archived ? (
               <AddStageButton service={service} />
             ) : null
           }

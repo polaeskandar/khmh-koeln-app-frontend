@@ -15,10 +15,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Spinner } from "@/components/ui/spinner"
-import { useCan } from "@/features/identity/auth/session"
+import { useCanIn } from "@/features/identity/auth/session"
 import { Link } from "@/i18n/navigation"
 import { isolate } from "@/lib/bidi"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
+import type { Group } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import {
@@ -133,11 +134,13 @@ function ChangeDialog({
 
 export function HomeworkActions({
   homework,
+  group,
   stageArchived,
   place,
   onDeleted,
 }: {
   homework: Homework
+  group: Group
   stageArchived: boolean
   place: "list" | "page"
   onDeleted?: () => void
@@ -145,7 +148,7 @@ export function HomeworkActions({
   const t = useTranslations()
   const publish = usePublishHomework()
   const [change, setChange] = useState<Change | null>(null)
-  const can = useCan()
+  const can = useCanIn(group)
   const flags = homeworkFlagsFor(can, homework, stageArchived)
   const target = { id: homework.id, title: homework.title, publishedAt: homework.publishedAt }
   const progress = place === "list" && flags.viewProgress && homework.status !== "draft"

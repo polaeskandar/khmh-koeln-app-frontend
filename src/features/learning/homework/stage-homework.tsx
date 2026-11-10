@@ -9,12 +9,13 @@ import { QueryState } from "@/components/page-states"
 import { Button } from "@/components/ui/button"
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useCan } from "@/features/identity/auth/session"
+import { useCanIn } from "@/features/identity/auth/session"
 import { CompletionMeter, HomeworkStatusBadge } from "@/features/learning/lessons/lesson-bits"
 import type { Stage } from "@/features/organization/stages/api"
 import { StageLayout } from "@/features/organization/stages/stage-layout"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
+import { type Group, groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import { type StageHomework, useStageHomework } from "./api"
@@ -29,7 +30,7 @@ function defaultTab(data: StageHomework): Tab {
   return data.tabs.published === 0 && data.tabs.draft > 0 ? "draft" : "published"
 }
 
-function Rows({ data, tab }: { data: StageHomework; tab: Tab }) {
+function Rows({ data, tab, group }: { data: StageHomework; tab: Tab; group: Group }) {
   const t = useTranslations("homework")
   const f = useFormat()
   const rows = data.items.filter((row) => row.status === tab)
@@ -111,7 +112,12 @@ function Rows({ data, tab }: { data: StageHomework; tab: Tab }) {
                 )}
               </td>
               <td className="px-3 py-3 text-end">
-                <HomeworkActions homework={row} stageArchived={data.archived} place="list" />
+                <HomeworkActions
+                  homework={row}
+                  group={group}
+                  stageArchived={data.archived}
+                  place="list"
+                />
               </td>
             </tr>
           ))}
@@ -123,7 +129,8 @@ function Rows({ data, tab }: { data: StageHomework; tab: Tab }) {
 
 function Homework({ stage }: { stage: Stage }) {
   const t = useTranslations("homework")
-  const can = useCan()
+  const group = groupAt(stage.service, stage)
+  const can = useCanIn(group)
   const search = useSearchParams()
   const router = useRouter()
   const query = useStageHomework(stage.id)
@@ -179,7 +186,7 @@ function Homework({ stage }: { stage: Stage }) {
                 ))}
               </TabsList>
             </Tabs>
-            <Rows data={data} tab={tab} />
+            <Rows data={data} tab={tab} group={group} />
           </Section>
         )
       }}

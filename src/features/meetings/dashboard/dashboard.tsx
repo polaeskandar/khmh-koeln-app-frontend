@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
 
 import { Topbar } from "@/components/app-shell/topbar"
+import { NotAssigned } from "@/components/not-assigned"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
 import { QueryErrorState, QueryState } from "@/components/page-states"
 import { ServiceTag } from "@/components/service-tag"
@@ -15,7 +16,7 @@ import {
 } from "@/components/session-bits"
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useCan, useSession } from "@/features/identity/auth/session"
+import { useCan, useSession, useUnassigned } from "@/features/identity/auth/session"
 import {
   attendanceOverviewQuery,
   useAttendanceCounts,
@@ -221,6 +222,7 @@ function DashboardView({ upcoming }: { upcoming: Upcoming }) {
   const f = useFormat()
   const { session } = useSession()
   const today = useTodaySessions()
+  const unassigned = useUnassigned()
 
   const firstName =
     session.status === "authenticated" ? session.me.account.displayName.split(" ")[0] : ""
@@ -242,6 +244,7 @@ function DashboardView({ upcoming }: { upcoming: Upcoming }) {
           </span>
         }
       />
+      {unassigned ? <NotAssigned /> : null}
       {today.shown ? (
         <Section
           id="today"
@@ -265,7 +268,7 @@ function DashboardView({ upcoming }: { upcoming: Upcoming }) {
           )}
         </Section>
       ) : null}
-      <ComingUp upcoming={upcoming} />
+      {unassigned ? null : <ComingUp upcoming={upcoming} />}
     </PageBody>
   )
 }

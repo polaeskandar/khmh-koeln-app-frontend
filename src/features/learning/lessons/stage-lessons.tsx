@@ -18,12 +18,13 @@ import {
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useCan } from "@/features/identity/auth/session"
+import { useCanIn } from "@/features/identity/auth/session"
 import type { Stage } from "@/features/organization/stages/api"
 import { StageLayout } from "@/features/organization/stages/stage-layout"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import type { LessonStatus } from "@/lib/api/types/learning"
+import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import { type LessonRow, type LessonTab, type StageLessons, stageLessonsQuery } from "./api"
@@ -177,7 +178,7 @@ function LessonList({
 
 function Lessons({ stage }: { stage: Stage }) {
   const t = useTranslations()
-  const can = useCan()
+  const can = useCanIn(groupAt(stage.service, stage))
   const [tab, setTab] = useState<LessonTab>("upcoming")
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState("")

@@ -160,7 +160,7 @@ function AddPersonForm({ preset, onDone }: { preset?: PlacementInput; onDone: ()
                             where: isolate(there.stage?.name ?? there.service.name),
                           })}
                         </span>
-                      ) : placement && can("update", "members") ? (
+                      ) : placement && can("update", "members", placement) ? (
                         <Button
                           type="button"
                           size="sm"

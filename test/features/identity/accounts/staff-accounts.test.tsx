@@ -47,6 +47,7 @@ const account = (
   email: `${displayName.split(" ")[0]!.toLowerCase()}@example.org`,
   disabled,
   roles: had,
+  assignments: [],
 })
 
 const mariam = account(1, "Mariam Fahmy", [administrator])

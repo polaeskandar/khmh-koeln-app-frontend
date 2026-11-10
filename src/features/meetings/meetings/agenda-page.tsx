@@ -8,17 +8,19 @@ import { useQuery } from "@tanstack/react-query"
 
 import { Topbar } from "@/components/app-shell/topbar"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
+import { NotAssigned } from "@/components/not-assigned"
 import { QueryState } from "@/components/page-states"
 import { AgendaRow } from "@/components/session-bits"
 import { Button } from "@/components/ui/button"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
-import { useCan } from "@/features/identity/auth/session"
+import { useCan, useUnassigned } from "@/features/identity/auth/session"
 import { servicesQuery } from "@/features/organization/services/api"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
 import { type AgendaItem, compareAgenda } from "@/lib/api/types/meetings"
 import { addDays, datesBetween, isValidLocalDate } from "@/lib/domain/time"
+import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import { type Agenda, useAgenda } from "./api"
@@ -160,7 +162,7 @@ function AgendaView({
             {day.items.map((item) => (
               <li key={itemKey(item)} className="flex items-center gap-2">
                 <AgendaRow item={item} today={agenda.today} className="min-w-0 flex-1" />
-                {item.kind === "planned" && can("update", "sessions") ? (
+                {item.kind === "planned" && can("update", "sessions", meetingGroup(item)) ? (
                   <OccurrenceMenu item={item} />
                 ) : null}
               </li>
@@ -174,6 +176,7 @@ function AgendaView({
 
 function AgendaScreen({ actions }: { actions?: ReactNode }) {
   const t = useTranslations()
+  const unassigned = useUnassigned()
   const search = useSearchParams()
   const windowStart = validDate(search.get("from"))
   const requestedDate = validDate(search.get("date"))
@@ -196,25 +199,31 @@ function AgendaScreen({ actions }: { actions?: ReactNode }) {
           description={t("meetings.agenda.description")}
           actions={actions}
         />
-        <MeetingsTabs active="sessions" />
-        <div className="flex justify-end">
-          <ServiceFilter
-            services={active}
-            value={serviceId}
-            path={routes.meetings()}
-            query={{ from: windowStart, date: requestedDate }}
-          />
-        </div>
-        <QueryState query={agenda}>
-          {(data) => (
-            <AgendaView
-              agenda={data}
-              requestedDate={requestedDate}
-              serviceId={serviceId}
-              windowStart={windowStart}
-            />
-          )}
-        </QueryState>
+        {unassigned ? (
+          <NotAssigned />
+        ) : (
+          <>
+            <MeetingsTabs active="sessions" />
+            <div className="flex justify-end">
+              <ServiceFilter
+                services={active}
+                value={serviceId}
+                path={routes.meetings()}
+                query={{ from: windowStart, date: requestedDate }}
+              />
+            </div>
+            <QueryState query={agenda}>
+              {(data) => (
+                <AgendaView
+                  agenda={data}
+                  requestedDate={requestedDate}
+                  serviceId={serviceId}
+                  windowStart={windowStart}
+                />
+              )}
+            </QueryState>
+          </>
+        )}
       </PageBody>
     </>
   )

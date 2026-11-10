@@ -106,7 +106,14 @@ test("a leader's six cards keep the API's order and offer the next step", async 
 })
 
 test("a servant without attendance: create sees the cards but no Take or Open", async () => {
-  answer({}, { ...me.servant, permissions: [{ action: "read", resource: "attendance" }] })
+  answer(
+    {},
+    {
+      ...me.servant,
+      permissions: [{ action: "read", resource: "attendance", scope: "assignedGroups" }],
+    }
+  )
+
   const all = await cards()
 
   const labels = all.flatMap((card) =>

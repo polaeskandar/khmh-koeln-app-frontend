@@ -5,15 +5,17 @@ import { useTranslations } from "next-intl"
 
 import { Topbar } from "@/components/app-shell/topbar"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
+import { NotAssigned } from "@/components/not-assigned"
 import { QueryState } from "@/components/page-states"
 import { AgendaRow, SessionCardView } from "@/components/session-bits"
 import { Button } from "@/components/ui/button"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
-import { useCan } from "@/features/identity/auth/session"
+import { useCanIn, useUnassigned } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
 import type { CountedSession, SessionView } from "@/lib/api/types/meetings"
+import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import {
@@ -28,7 +30,7 @@ type Counted = (session: SessionView) => CountedSession
 
 export function CardAction({ session, today }: { session: SessionView; today: LocalDate }) {
   const t = useTranslations("attendance")
-  const can = useCan()
+  const can = useCanIn(meetingGroup(session))
   const records = can("create", "attendance")
 
   if (session.status === "active" && records) {
@@ -179,13 +181,20 @@ function OverviewView({ overview }: { overview: Overview }) {
 
 export function AttendanceOverview() {
   const t = useTranslations()
+  const unassigned = useUnassigned()
   const query = useAttendanceOverview()
 
   return (
     <>
       <Topbar crumbs={[{ label: t("nav.attendance") }]} />
       <PageBody>
-        <QueryState query={query}>{(overview) => <OverviewView overview={overview} />}</QueryState>
+        {unassigned ? (
+          <NotAssigned />
+        ) : (
+          <QueryState query={query}>
+            {(overview) => <OverviewView overview={overview} />}
+          </QueryState>
+        )}
       </PageBody>
     </>
   )

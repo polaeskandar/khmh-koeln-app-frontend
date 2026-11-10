@@ -32,6 +32,7 @@ import { Link, useRouter } from "@/i18n/navigation"
 import type { ServiceRef } from "@/lib/api/types/common"
 import { ApiError } from "@/lib/api/problem"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
+import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import {
@@ -594,7 +595,7 @@ function NewLesson({ stageId }: { stageId: string }) {
     <QueryState query={query} notFound={<NotFoundPage />}>
       {(data) => (
         <EditorPage service={data.service} stage={data.stage} title={t("newLesson")}>
-          {!data.archived && can("create", "lessons") ? (
+          {!data.archived && can("create", "lessons", groupAt(data.service, data.stage)) ? (
             <WithOptions stage={data.stage}>
               {(choices) => <LessonForm stage={data.stage} viewNotes choices={choices} />}
             </WithOptions>
@@ -620,7 +621,7 @@ function EditLesson({ id }: { id: string }) {
         <EditorPage service={data.service} stage={data.stage} title={t("editLesson")}>
           {data.lesson.archivedAt ? (
             <NoAccess title={t("noAccess.archivedTitle")}>{t("noAccess.archivedBody")}</NoAccess>
-          ) : data.archived || !can("update", "lessons") ? (
+          ) : data.archived || !can("update", "lessons", groupAt(data.service, data.stage)) ? (
             <NoAccess title={t("noAccess.changeTitle")}>
               {t("noAccess.changeBody", { stage: data.stage.name })}
             </NoAccess>
@@ -630,7 +631,7 @@ function EditLesson({ id }: { id: string }) {
                 <LessonForm
                   stage={data.stage}
                   lesson={data.lesson}
-                  viewNotes={can("read", "members")}
+                  viewNotes={can("read", "members", groupAt(data.service, data.stage))}
                   choices={choices}
                 />
               )}

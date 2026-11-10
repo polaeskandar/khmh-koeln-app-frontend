@@ -53,6 +53,7 @@ const fady: AccountRequest = {
 const parentRole: Role = {
   id: "role-parent",
   name: "Parent",
+  scope: "church",
   permissions: [{ action: "read", resource: "parentPortal" }],
   holderCount: 0,
 }
@@ -60,6 +61,7 @@ const parentRole: Role = {
 const servantRole: Role = {
   id: "role-servant",
   name: "Servant",
+  scope: "assignedGroups",
   permissions: [{ action: "create", resource: "attendance" }],
   holderCount: 0,
 }
@@ -254,7 +256,11 @@ test("a 422 roles.unknown shows under the roles with the dialog open", async () 
 })
 
 test("with users:read only the requests show without Approve… or Decline", async () => {
-  open(undefined, { ...me.churchOffice, permissions: [{ action: "read", resource: "users" }] })
+  open(undefined, {
+    ...me.churchOffice,
+    permissions: [{ action: "read", resource: "users", scope: "church" }],
+  })
+
   await screen.findByRole("heading", { name: "Account requests (2)" })
   expect(screen.queryByRole("button", { name: "Approve…" })).toBeNull()
   expect(screen.queryByRole("button", { name: "Decline" })).toBeNull()

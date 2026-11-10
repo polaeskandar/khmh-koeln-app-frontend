@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useCan } from "@/features/identity/auth/session"
+import { useCanIn } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { useRouter } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
@@ -29,6 +29,7 @@ import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { recurrenceOf } from "@/lib/domain/recurrence"
 import { addDays } from "@/lib/domain/time"
+import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import {
@@ -64,7 +65,7 @@ function archivedPart(schedule: ScheduleSummary) {
 function Actions({ schedule, today }: { schedule: ScheduleSummary; today: LocalDate }) {
   const t = useTranslations()
   const router = useRouter()
-  const can = useCan()
+  const can = useCanIn(meetingGroup(schedule))
   const [dialog, setDialog] = useState<"deactivate" | "delete" | null>(null)
   const name = isolate(schedule.name)
   const archived = archivedPart(schedule)
@@ -162,7 +163,7 @@ function Actions({ schedule, today }: { schedule: ScheduleSummary; today: LocalD
 
 function Dates({ schedule, today }: { schedule: ScheduleSummary; today: LocalDate }) {
   const t = useTranslations("meetings.schedule")
-  const can = useCan()
+  const can = useCanIn(meetingGroup(schedule))
   const next = useAgenda({ scheduleId: schedule.id, from: today, to: addDays(today, DAYS) })
 
   const past = useAgenda({

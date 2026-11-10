@@ -39,6 +39,7 @@ import { useFormat } from "@/i18n/format"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { fullName, initials, preferredName } from "@/lib/domain/names"
+import { canInAny, groupAt } from "@/lib/permissions"
 
 import {
   deactivatePersonRequest,
@@ -143,13 +144,19 @@ function useMoveTargets(person: PersonRow, placement: Placement) {
   const services = useQuery(servicesQuery)
   const service = services.data?.items.find((item) => item.id === placement.service.id)
 
-  if (!service || service.archived || !can("update", "members")) {
+  if (
+    !service ||
+    service.archived ||
+    !can("update", "members", groupAt(placement.service, placement.stage))
+  ) {
     return []
   }
 
   const taken = new Set(person.placements.flatMap((other) => (other.stage ? [other.stage.id] : [])))
 
-  return service.stages.filter((stage) => !taken.has(stage.id))
+  return service.stages.filter(
+    (stage) => !taken.has(stage.id) && can("update", "members", groupAt(service, stage))
+  )
 }
 
 function MembershipMenu({
@@ -165,7 +172,7 @@ function MembershipMenu({
   const can = useCan()
   const where = useWhere()
   const targets = useMoveTargets(person, placement)
-  const remove = can("delete", "members")
+  const remove = can("delete", "members", groupAt(placement.service, placement.stage))
 
   const move = useApiMutation(
     (stageId: string) => moveMembershipRequest(placement.membershipId, stageId),
@@ -470,8 +477,16 @@ export function PersonSheet({
 }) {
   const t = useTranslations("members.sheet")
   const can = useCan()
-  const edit = can("update", "members")
   const side = useInlineEnd()
+
+  const edit =
+    person !== null &&
+    canInAny(
+      can,
+      "update",
+      "members",
+      person.placements.map((placement) => groupAt(placement.service, placement.stage))
+    )
 
   return (
     <Sheet open={person !== null} onOpenChange={onOpenChange}>

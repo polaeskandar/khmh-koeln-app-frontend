@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react"
+import { cleanup, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { beforeEach, expect, test, vi } from "vitest"
@@ -166,6 +166,25 @@ test("New lesson opens the editor for this stage", async () => {
     "href",
     `/lessons/new/?stage=${THIRD_CLASS_ID}`
   )
+})
+
+test("New lesson follows the servant's own stage, not the role alone", async () => {
+  const servingIn = (stageId: string): Me => ({
+    ...me.servant,
+    assignments: [
+      {
+        service: thirdClass.service,
+        stage: { id: stageId, name: "A class", position: 0, archived: false },
+      },
+    ],
+  })
+
+  open(upcoming(), servingIn(THIRD_CLASS_ID))
+  expect(await screen.findByRole("link", { name: "New lesson" })).toBeInTheDocument()
+  cleanup()
+  open(upcoming(), servingIn("0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f99"))
+  await rows()
+  expect(screen.queryByRole("link", { name: "New lesson" })).toBeNull()
 })
 
 test("an archived stage offers no New lesson", async () => {

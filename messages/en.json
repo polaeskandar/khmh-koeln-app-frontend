@@ -2303,5 +2303,11 @@
         "description": "See: the roles and what they allow. Add, Change, Delete: create, change and delete roles."
       }
     }
+  },
+  "assignments": {
+    "notAssigned": {
+      "title": "You are not assigned to a group yet",
+      "description": "Ask the church office. Once you are assigned to a service or a stage, its meetings, members, lessons and homework appear here."
+    }
   }
 }
