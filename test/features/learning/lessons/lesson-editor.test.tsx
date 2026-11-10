@@ -140,6 +140,20 @@ test("Mark ready posts ready, two materials, null for empty texts and no empty r
   expect(toast.success).toHaveBeenCalledWith("Saved. The lesson is ready to teach.")
 })
 
+test("Enter in a field saves a new lesson as a draft", async () => {
+  const sent = openNew()
+  await userEvent.type(await screen.findByLabelText("Title"), "The Good Samaritan{Enter}")
+  await waitFor(() => expect(sent).toHaveLength(1))
+  expect(sent[0]).toMatchObject({ details: { title: "The Good Samaritan" }, status: "draft" })
+})
+
+test("Enter in a ready lesson saves it and keeps it ready", async () => {
+  const sent = openEdit(lessonDetail({ status: "ready" }))
+  await userEvent.type(await screen.findByLabelText("Title"), "{Enter}")
+  await waitFor(() => expect(sent).toHaveLength(1))
+  expect(sent[0]).toMatchObject({ status: "ready" })
+})
+
 test("422s show in place, focus the first and keep the input", async () => {
   openNew(() =>
     problem(422, "checkFields", {

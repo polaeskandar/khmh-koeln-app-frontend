@@ -232,10 +232,21 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
     }
   }
 
+  const keptStatus = lesson?.status === "ready" ? "ready" : "draft"
+
   function submit(status: "draft" | "ready") {
+    if (mutation.pending) {
+      return
+    }
+
     setIntent(status)
     void mutation.execute(input(status))
   }
+
+  const actionFor = (status: "draft" | "ready") =>
+    status === keptStatus
+      ? ({ type: "submit" } as const)
+      : ({ type: "button", onClick: () => submit(status) } as const)
 
   const materialError = (index: number, field: "label" | "url") =>
     filled(materials[index])
@@ -252,7 +263,7 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
       className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,340px)]"
       onSubmit={(event) => {
         event.preventDefault()
-        submit(lesson?.status === "ready" ? "ready" : "draft")
+        submit(keptStatus)
       }}
     >
       <div className="flex min-w-0 flex-col gap-6">
@@ -488,24 +499,19 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
           <p className="text-xs text-muted-foreground">{t("lessons.editor.statusHint")}</p>
           <div className="flex flex-col gap-2">
             {completed ? (
-              <Button type="button" onClick={() => submit("ready")} disabled={mutation.pending}>
+              <Button type="submit" disabled={mutation.pending}>
                 {mutation.pending ? <Spinner data-icon="inline-start" /> : null}
                 {t("common.saveChanges")}
               </Button>
             ) : (
               <>
-                <Button type="button" onClick={() => submit("ready")} disabled={mutation.pending}>
+                <Button {...actionFor("ready")} disabled={mutation.pending}>
                   {mutation.pending && intent === "ready" ? (
                     <Spinner data-icon="inline-start" />
                   ) : null}
                   {lesson?.status === "ready" ? t("common.save") : t("lessons.actions.markReady")}
                 </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => submit("draft")}
-                  disabled={mutation.pending}
-                >
+                <Button {...actionFor("draft")} variant="outline" disabled={mutation.pending}>
                   {mutation.pending && intent === "draft" ? (
                     <Spinner data-icon="inline-start" />
                   ) : null}
