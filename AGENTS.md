@@ -22,6 +22,15 @@ after it; except where the statement opens or closes its block. No `else` after 
 this (`curly`, `no-else-return`, `@stylistic/padding-line-between-statements`), and `pnpm format` adds the
 blank lines (`eslint --fix`, then Prettier).
 
+## Feature docs
+
+Every feature and the architecture is documented in `docs/features/`: one `<context>.md` per backend context,
+`portals.md` and `architecture.md`, mirrored with the backend's `docs/features/`. A pull request updates the doc
+of what it changes in the same PR: Features (the behaviour), Where (the code paths) and a History row (date ·
+change · issue · PR), so each doc records what was done and where. A change without new behaviour (a refactor,
+tests, tooling) adds only the History row; an architectural change updates `architecture.md`. Until a doc
+exists, its issue (#294–#301) lists what it covers.
+
 ## Tests
 
 Tests live in `test/`, mirroring `src/`: `test/lib/api/client.test.ts` tests `src/lib/api/client.ts`. Shared
