@@ -358,6 +358,29 @@ describe("duplicates", () => {
   })
 })
 
+test("Escape doesn't close the dialog while the person is saved", async () => {
+  let release = () => {}
+  open()
+
+  server.use(
+    http.post(apiUrl("/people"), async () => {
+      await new Promise<void>((resolve) => (release = resolve))
+
+      return HttpResponse.json(created("p1", "A", "B"), { status: 201 })
+    })
+  )
+
+  const dialog = await openDialog()
+  await userEvent.type(dialog.getByLabelText("First name"), "A")
+  await userEvent.type(dialog.getByLabelText("Last name"), "B")
+  await userEvent.click(dialog.getByRole("button", { name: "Add person" }))
+  await waitFor(() => expect(dialog.getByRole("button", { name: /Add person/ })).toBeDisabled())
+  await userEvent.keyboard("{Escape}")
+  expect(screen.getByRole("dialog")).toBeInTheDocument()
+  release()
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
+})
+
 test("a double click on Add person sends one request", async () => {
   let release = () => {}
 

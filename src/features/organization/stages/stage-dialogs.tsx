@@ -51,10 +51,12 @@ function StageForm({
   service,
   stage,
   onDone,
+  onPendingChange,
 }: {
   service: ServiceRef
   stage?: EditableStage
   onDone: () => void
+  onPendingChange: (pending: boolean) => void
 }) {
   const t = useTranslations()
   const router = useRouter()
@@ -85,6 +87,8 @@ function StageForm({
       focusFirstInvalid(formRef.current)
     }
   }, [mutation.problem])
+
+  useEffect(() => onPendingChange(mutation.pending), [mutation.pending, onPendingChange])
 
   async function submit() {
     const fields = { name, description: description.trim() === "" ? null : description }
@@ -174,9 +178,10 @@ export function StageFormDialog({
   onOpenChange: (open: boolean) => void
 }) {
   const t = useTranslations("stages.form")
+  const [pending, setPending] = useState(false)
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(next) => (next || !pending) && onOpenChange(next)}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
@@ -189,7 +194,12 @@ export function StageFormDialog({
           </DialogDescription>
         </DialogHeader>
         {open ? (
-          <StageForm service={service} stage={stage} onDone={() => onOpenChange(false)} />
+          <StageForm
+            service={service}
+            stage={stage}
+            onDone={() => onOpenChange(false)}
+            onPendingChange={setPending}
+          />
         ) : null}
       </DialogContent>
     </Dialog>

@@ -42,7 +42,11 @@ const stagesData = (): ServiceStages => ({
   archivedStages: [],
 })
 
-function open(data: ServiceStages, write?: () => Response, viewer: Me = me.leader) {
+function open(
+  data: ServiceStages,
+  write?: () => Response | Promise<Response>,
+  viewer: Me = me.leader
+) {
   search.value = `id=${SUNDAY_SCHOOL_ID}`
   const sent: { method: string; body: unknown }[] = []
 
@@ -114,6 +118,22 @@ test("Rename pre-fills the dialog and sends the whole stage with a PUT", async (
       { method: "PUT", body: { name: "Third Class", description: "Ages 8 to 9" } },
     ])
   )
+})
+
+test("Escape doesn't close the stage dialog while it saves", async () => {
+  let answer: (response: Response) => void = () => {}
+  open(stagesData(), () => new Promise<Response>((resolve) => (answer = resolve)))
+  await userEvent.click(await screen.findByRole("button", { name: "Actions for 3rd Class" }))
+  await userEvent.click(screen.getByRole("menuitem", { name: "Rename" }))
+  await userEvent.type(dialog().getByLabelText("Name"), " A")
+  await userEvent.click(dialog().getByRole("button", { name: "Save changes" }))
+
+  await waitFor(() => expect(dialog().getByRole("button", { name: /Save changes/ })).toBeDisabled())
+
+  await userEvent.keyboard("{Escape}")
+  expect(screen.getByRole("dialog")).toBeInTheDocument()
+  answer(HttpResponse.json({ ...thirdClass, name: "3rd Class A" }))
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
 })
 
 test("adding sends a POST and opens the new stage; nameTaken shows under Name", async () => {
