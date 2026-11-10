@@ -27,9 +27,14 @@ tasks:
       - pnpm format:check
 
   api:types:
-    desc: Generate src/lib/api/schema.d.ts from the backend's /api/openapi.json
+    desc: Copy the backend's /api/openapi.json to openapi/openapi.json and generate src/lib/api/schema.d.ts from it
     cmds:
       - pnpm api:types
+
+  api:types:check:
+    desc: Check that src/lib/api/schema.d.ts is generated from openapi/openapi.json
+    cmds:
+      - pnpm api:types:check
 
   typecheck:
     desc: Type-check with TypeScript
@@ -52,10 +57,11 @@ tasks:
       - pnpm cap:sync
 
   check:
-    desc: Run CI's checks (lint, formatting, types, tests, build)
+    desc: Run CI's checks (lint, formatting, API types, types, tests, build)
     cmds:
       - task: lint
       - task: format:check
+      - task: api:types:check
       - task: typecheck
       - task: test
       - task: build

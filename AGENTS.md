@@ -31,5 +31,7 @@ helpers (the setup file, MSW, render helpers, fixtures) live in `test/support/` 
 ## API
 
 Call the API only through `api` and `dataOf()` from `@/lib/api/client`, the client generated from the backend's
-OpenAPI document (`pnpm api:types` reads it from the backend's dev server at `/api/openapi.json`). Types of API data are `Schemas["…"]` from the
-same module; don't write them by hand.
+OpenAPI document. `pnpm api:types` copies that document from the backend's dev server (`/api/openapi.json`) to
+`openapi/openapi.json`, the contract snapshot, and generates `src/lib/api/schema.d.ts` from the copy. When a
+backend change reaches the frontend, update both in the same PR; never edit either by hand, which
+`pnpm api:types:check` rejects. Types of API data are `Schemas["…"]` from the same module; don't write them by hand.

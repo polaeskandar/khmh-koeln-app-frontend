@@ -1,11 +1,13 @@
-import { readFile, writeFile } from "node:fs/promises"
+import { mkdtemp, readFile, writeFile } from "node:fs/promises"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+import { fileURLToPath } from "node:url"
 
-import openapiTS, { astToString } from "openapi-typescript"
-import { format, resolveConfig } from "prettier"
+import { documentText, typesFrom } from "./openapi-types.mjs"
 
 const SPEC = "http://localhost:8000/api/openapi.json"
-const PENDING = new URL("../openapi/pending.json", import.meta.url)
-const TYPES = new URL("../src/lib/api/schema.d.ts", import.meta.url)
+const COPY = fileURLToPath(new URL("../openapi/openapi.json", import.meta.url))
+const TYPES = fileURLToPath(new URL("../src/lib/api/schema.d.ts", import.meta.url))
 
 async function fetchDocument() {
   const response = await fetch(SPEC).catch((error) => {
@@ -19,19 +21,30 @@ async function fetchDocument() {
   return response.json()
 }
 
-const document = await fetchDocument()
-const pending = JSON.parse(await readFile(PENDING, "utf8"))
+async function typesFromCopy() {
+  return typesFrom(JSON.parse(await readFile(COPY, "utf8")), TYPES)
+}
 
-document.paths = { ...pending.paths, ...document.paths }
-document.components.schemas = { ...pending.components.schemas, ...document.components.schemas }
+async function update() {
+  await writeFile(COPY, await documentText(await fetchDocument(), COPY))
+  await writeFile(TYPES, await typesFromCopy())
+}
 
-document.paths = Object.fromEntries(
-  Object.entries(document.paths).map(([path, item]) => [path.replace(/^\/api(?=\/)/, ""), item])
-)
+async function check() {
+  const types = await typesFromCopy()
 
-const source = astToString(
-  await openapiTS(document, { exportType: true, defaultNonNullable: false })
-).replace(/\/\*\*[\s\S]*?\*\//g, "")
+  if (types === (await readFile(TYPES, "utf8"))) {
+    return
+  }
 
-const options = await resolveConfig(TYPES.pathname)
-await writeFile(TYPES, await format(source, { ...options, filepath: TYPES.pathname }))
+  const generated = join(await mkdtemp(join(tmpdir(), "api-types-")), "schema.d.ts")
+  await writeFile(generated, types)
+
+  console.error(
+    `src/lib/api/schema.d.ts doesn't match openapi/openapi.json; the types generated from the copy are in ${generated}. Run pnpm api:types with the backend's dev server running.`
+  )
+
+  process.exitCode = 1
+}
+
+await (process.argv.includes("--check") ? check() : update())

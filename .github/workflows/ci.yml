@@ -38,6 +38,7 @@ jobs:
 
       - run: task lint
       - run: task format:check
+      - run: task api:types:check
       - run: task typecheck
       - run: task test
 

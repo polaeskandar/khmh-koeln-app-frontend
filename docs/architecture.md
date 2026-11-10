@@ -50,15 +50,22 @@ lets people request a password link by email on the forgot-password page once th
 production; off unless set, the page says to ask the church office.
 
 - **Generated client.** The types come from the backend's OpenAPI document. `pnpm api:types` reads it from
-  the backend's dev server (`http://localhost:8000/api/openapi.json`, served in dev only) and turns it into
-  `src/lib/api/schema.d.ts` with [openapi-typescript](https://openapi-ts.dev), dropping the `/api` prefix that
-  `NEXT_PUBLIC_API_BASE_URL` already holds. The generated file is committed, so CI and builds need no backend. Calls go through `api` from
+  the backend's dev server (`http://localhost:8000/api/openapi.json`, served in dev only), writes it
+  pretty-printed to `openapi/openapi.json` and turns that copy into `src/lib/api/schema.d.ts` with
+  [openapi-typescript](https://openapi-ts.dev), dropping the `/api` prefix that `NEXT_PUBLIC_API_BASE_URL`
+  already holds. Both files are committed, so CI and builds need no backend. Calls go through `api` from
   `src/lib/api/client.ts`, an [openapi-fetch](https://openapi-ts.dev/openapi-fetch/) client, wrapped in
   `dataOf()`: `dataOf(api.GET("/stages/{id}", { params: { path: { id } }, signal }))`. Paths, parameters,
   bodies and the data are checked against the document; types of API data are `Schemas["…"]`, never written
-  by hand. To follow a backend change, run `pnpm api:types` with the backend running.
-  `openapi/pending.json` holds the endpoints the frontend uses before the backend has them; it is empty now.
-  `pnpm api:types` merges them in, and each goes once the backend's document has it.
+  by hand.
+- **The contract snapshot.** `openapi/openapi.json` is the backend's document as the frontend is built
+  against it; it sits outside `src/`, so it is never bundled. The frontend PR that follows a backend change
+  runs `pnpm api:types` against the backend with that change and commits the copy and the types together,
+  so the review shows the API change next to the code that follows it. `pnpm api:types:check` (in
+  `task check` and CI) generates the types from the copy again, without the network, and fails when they
+  differ from `schema.d.ts`: a hand edit to either file, or a copy committed without its types, doesn't
+  pass. The types describe only what the backend serves; a screen for an endpoint the backend doesn't have
+  yet waits for that endpoint.
 - **Cookie session (D1).** Signing in sets an HttpOnly session cookie. The client sends every call with
   `credentials: "include"` and `cache: "no-store"`; the app never sends an `Authorization` header, never sees
   a token and keeps nothing about the session in web storage. Writes always send a JSON body (`{}` when the
