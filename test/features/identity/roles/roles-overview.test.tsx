@@ -35,11 +35,12 @@ const role = (
   n: number,
   name: string,
   permissions: Permission[],
-  holderCount: number
+  holderCount: number,
+  scope: RoleRow["scope"] = "church"
 ): RoleRow => ({
   id: `0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e0${String(n).padStart(3, "0")}`,
   name,
-  scope: "church",
+  scope,
   permissions,
   holderCount,
 })
@@ -77,7 +78,8 @@ const roles = [
       ...perms("lessons"),
       ...perms("homework"),
     ],
-    7
+    7,
+    "assignedGroups"
   ),
 ]
 
@@ -151,6 +153,8 @@ test("lists the roles by name with what they allow and who has them", async () =
   expect(servant).toHaveTextContent("17 of 40 permissions")
   expect(servant).toHaveTextContent("Services, Attendance, Members, Lessons and Homework")
   expect(servant).toHaveTextContent("7 accounts")
+  expect(servant).toHaveTextContent("In assigned groups")
+  expect(await rowOf("Parent")).toHaveTextContent("Everywhere")
   expect(await rowOf("Lesson preparation")).toHaveTextContent("No one")
 
   expect(within(servant).getByRole("link", { name: "Servant" })).toHaveAttribute(

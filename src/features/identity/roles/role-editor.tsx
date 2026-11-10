@@ -1,6 +1,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
+import { cn } from "cn"
 import { TriangleAlert } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useId, useRef, useState } from "react"
@@ -17,6 +18,8 @@ import { StatusBadge } from "@/components/status"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { FieldError } from "@/components/ui/field"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Spinner } from "@/components/ui/spinner"
 import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
@@ -31,6 +34,7 @@ import {
   PERMISSION_COUNT,
   type Resource,
   RESOURCES,
+  type RoleScope,
   SENSITIVE,
 } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
@@ -46,6 +50,59 @@ import {
 } from "./api"
 
 const NAME_MAX = 80
+
+const SCOPES: { value: RoleScope; label: "scopeChurch" | "scopeAssigned" }[] = [
+  { value: "church", label: "scopeChurch" },
+  { value: "assignedGroups", label: "scopeAssigned" },
+]
+
+function ScopeChoice({
+  value,
+  onChange,
+  disabled,
+  error,
+}: {
+  value: RoleScope
+  onChange: (scope: RoleScope) => void
+  disabled: boolean
+  error: string | undefined
+}) {
+  const t = useTranslations("roleEditor")
+  const id = useId()
+
+  return (
+    <FormPanel title={t("scope")}>
+      <RadioGroup
+        value={value}
+        onValueChange={(next) => onChange(next as RoleScope)}
+        disabled={disabled}
+        aria-label={t("scope")}
+        className="flex flex-col gap-2"
+      >
+        {SCOPES.map((option) => (
+          <label
+            key={option.value}
+            htmlFor={`${id}-${option.value}`}
+            className={cn(
+              "flex w-full items-start gap-3 border p-3 text-sm",
+              value === option.value && "border-primary bg-primary/5",
+              disabled ? "cursor-default" : "cursor-pointer"
+            )}
+          >
+            <RadioGroupItem id={`${id}-${option.value}`} value={option.value} className="mt-0.5" />
+            <span className="flex flex-col gap-0.5">
+              <span className="font-medium">{t(option.label)}</span>
+              <span className="text-xs text-pretty text-muted-foreground">
+                {t(`${option.label}Hint`)}
+              </span>
+            </span>
+          </label>
+        ))}
+      </RadioGroup>
+      {error ? <FieldError>{error}</FieldError> : null}
+    </FormPanel>
+  )
+}
 const key = (p: Permission) => `${p.resource}:${p.action}`
 
 function toggle(chosen: Set<string>, resource: Resource, action: Action, on: boolean) {
@@ -191,6 +248,7 @@ function RoleForm({ role }: { role: RoleDetail | null }) {
   const others = useQuery(roleListQuery)
   const [name, setName] = useState(role?.name ?? "")
   const [chosen, setChosen] = useState(() => new Set((role?.permissions ?? []).map(key)))
+  const [scope, setScope] = useState<RoleScope>(role?.scope ?? "church")
   const [deleting, setDeleting] = useState(false)
   const busy = useRef(false)
   const editable = role ? can("update", "roles") : can("create", "roles")
@@ -242,7 +300,7 @@ function RoleForm({ role }: { role: RoleDetail | null }) {
 
           busy.current = true
 
-          void save.execute({ name, permissions }).then((result) => {
+          void save.execute({ name, scope, permissions }).then((result) => {
             if (!result.ok || role) {
               busy.current = false
             }
@@ -270,6 +328,12 @@ function RoleForm({ role }: { role: RoleDetail | null }) {
             onChange={(event) => setName(event.target.value)}
           />
         </FormPanel>
+        <ScopeChoice
+          value={scope}
+          onChange={setScope}
+          disabled={!editable}
+          error={save.fieldErrors.scope}
+        />
         <FormPanel
           title={t("roleEditor.permissions")}
           note={

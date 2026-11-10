@@ -105,12 +105,17 @@ function RolesTable({ roles }: { roles: RoleRow[] }) {
             return (
               <tr key={role.id} className="border-b last:border-b-0">
                 <td className="px-3 py-3">
-                  <Link
-                    href={routes.role(role.id)}
-                    className="font-medium hover:underline hover:underline-offset-4"
-                  >
-                    <bdi>{role.name}</bdi>
-                  </Link>
+                  <span className="flex flex-col gap-0.5">
+                    <Link
+                      href={routes.role(role.id)}
+                      className="font-medium hover:underline hover:underline-offset-4"
+                    >
+                      <bdi>{role.name}</bdi>
+                    </Link>
+                    <span className="text-xs text-muted-foreground">
+                      {t(`settings.roles.scope.${role.scope}`)}
+                    </span>
+                  </span>
                 </td>
                 <td className="px-3 py-3">
                   <span className="flex flex-col gap-0.5">

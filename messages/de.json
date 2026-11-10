@@ -850,7 +850,11 @@
       "deleteConfirm": "Rolle löschen",
       "readOnly": "Ihre Rollen erlauben Ihnen, Rollen zu sehen, aber nicht zu ändern.",
       "allows": "Erlaubt",
-      "global": "Rollen gelten überall in der Gemeinde, in jedem Dienst. Welche Kinder Eltern sehen, ergibt sich weiter aus dem Elternzugang; Mitglieder sehen ihre eigenen Gruppen ohne Rolle."
+      "global": "Manche Rollen gelten überall in der Gemeinde, andere nur in den Diensten und Stufen, denen ein Konto zugeordnet ist. Welche Kinder Eltern sehen, ergibt sich weiter aus dem Elternzugang; Mitglieder sehen ihre eigenen Gruppen ohne Rolle.",
+      "scope": {
+        "church": "Überall",
+        "assignedGroups": "In zugeordneten Gruppen"
+      }
     }
   },
   "session": {
@@ -2228,9 +2232,9 @@
     "details": "Rolle",
     "name": "Name",
     "nameHint": "Zum Beispiel: Gemeindebüro, Anwesenheitshilfe.",
-    "description": "Was die Rolle erlaubt, überall in der Gemeinde, und wer sie hat.",
+    "description": "Was die Rolle erlaubt, wo sie gilt und wer sie hat.",
     "permissions": "Was sie erlaubt",
-    "permissionsHint": "Rollen gelten überall: Eine Rolle, die Anwesenheit erfassen darf, darf es in jedem Dienst. Wer Anlegen, Ändern oder Löschen ankreuzt, kreuzt auch Sehen an.",
+    "permissionsHint": "Wer Anlegen, Ändern oder Löschen ankreuzt, kreuzt auch Sehen an.",
     "chosen": "{count, number} von {total, number} gewählt",
     "readOnlyNote": "Sie können diese Rolle sehen, aber Ihre Rollen erlauben nicht, sie zu ändern.",
     "create": "Rolle anlegen",
@@ -2252,7 +2256,12 @@
     "locksOut": "Sonst kann niemand Rollen ändern. Ohne „Rollen: Ändern“ hier könnte niemand mehr Rollen reparieren, deshalb würde diese Änderung abgelehnt.",
     "deleteLocksOut": "Sonst kann niemand Rollen ändern, deshalb kann diese Rolle nicht gelöscht werden. Geben Sie zuerst einer anderen Rolle „Rollen: Ändern“.",
     "added": "Angelegt {when}",
-    "changed": "Zuletzt geändert {when}"
+    "changed": "Zuletzt geändert {when}",
+    "scope": "Wo sie gilt",
+    "scopeChurch": "Überall in der Gemeinde",
+    "scopeChurchHint": "In jedem Dienst und jeder Stufe. Für die Verwaltung, das Gemeindebüro und Eltern.",
+    "scopeAssigned": "Nur in den zugeordneten Gruppen des Kontos",
+    "scopeAssignedHint": "In den Diensten und Stufen, denen das Konto unter Mitarbeiterkonten und Rollen zugeordnet ist. Für Diener und Dienstleitungen."
   },
   "permissions": {
     "actions": {
