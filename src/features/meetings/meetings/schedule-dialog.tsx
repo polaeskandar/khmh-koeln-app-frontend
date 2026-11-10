@@ -204,12 +204,14 @@ function ScheduleForm({
   schedule,
   fixedServiceId,
   onDone,
+  onPendingChange,
 }: {
   services: ServiceRow[]
   today: LocalDate
   schedule?: ScheduleSummary
   fixedServiceId?: Uuid
   onDone: () => void
+  onPendingChange: (pending: boolean) => void
 }) {
   const t = useTranslations()
   const f = useFormat()
@@ -258,6 +260,8 @@ function ScheduleForm({
       focusFirstInvalid(formRef.current)
     }
   }, [mutation.problem])
+
+  useEffect(() => onPendingChange(mutation.pending), [mutation.pending, onPendingChange])
 
   function firstCreated(first: LocalDate) {
     if (first <= addDays(today, 1)) {
@@ -646,11 +650,12 @@ export function ScheduleDialog({
 }) {
   const t = useTranslations()
   const f = useFormat()
+  const [pending, setPending] = useState(false)
   const services = useQuery(servicesQuery)
   const manageable = services.data?.items.filter((s) => !s.archived) ?? []
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(next) => (next || !pending) && onOpenChange(next)}>
       <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 p-0 sm:max-w-4xl">
         <DialogHeader className="border-b p-6 pe-16">
           <DialogTitle className="flex items-center gap-2">
@@ -670,6 +675,7 @@ export function ScheduleDialog({
             schedule={schedule}
             fixedServiceId={fixedServiceId}
             onDone={() => onOpenChange(false)}
+            onPendingChange={setPending}
           />
         ) : null}
       </DialogContent>

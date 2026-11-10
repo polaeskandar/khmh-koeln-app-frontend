@@ -44,7 +44,15 @@ const groupAt = (candidate: Candidate, placement: PlacementInput) =>
     blocksPlacement({ serviceId: group.service.id, stageId: group.stage?.id ?? null }, placement)
   )
 
-function AddPersonForm({ preset, onDone }: { preset?: PlacementInput; onDone: () => void }) {
+function AddPersonForm({
+  preset,
+  onDone,
+  onPendingChange,
+}: {
+  preset?: PlacementInput
+  onDone: () => void
+  onPendingChange: (pending: boolean) => void
+}) {
   const t = useTranslations()
   const f = useFormat()
   const can = useCan()
@@ -85,6 +93,8 @@ function AddPersonForm({ preset, onDone }: { preset?: PlacementInput; onDone: ()
       focusFirstInvalid(formRef.current)
     }
   }, [create.problem, create.fieldErrors])
+
+  useEffect(() => onPendingChange(busy), [busy, onPendingChange])
 
   const person = (confirmDuplicate?: boolean): NewPerson => ({
     firstName,
@@ -243,6 +253,7 @@ function AddPersonForm({ preset, onDone }: { preset?: PlacementInput; onDone: ()
 export function AddPersonButton({ placement }: { placement?: PlacementInput }) {
   const t = useTranslations("members")
   const [open, setOpen] = useState(false)
+  const [pending, setPending] = useState(false)
 
   return (
     <>
@@ -250,13 +261,19 @@ export function AddPersonButton({ placement }: { placement?: PlacementInput }) {
         <UserPlus data-icon="inline-start" />
         {t("addPerson")}
       </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(next) => (next || !pending) && setOpen(next)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("newPerson.title")}</DialogTitle>
             <DialogDescription>{t("newPerson.description")}</DialogDescription>
           </DialogHeader>
-          {open ? <AddPersonForm preset={placement} onDone={() => setOpen(false)} /> : null}
+          {open ? (
+            <AddPersonForm
+              preset={placement}
+              onDone={() => setOpen(false)}
+              onPendingChange={setPending}
+            />
+          ) : null}
         </DialogContent>
       </Dialog>
     </>

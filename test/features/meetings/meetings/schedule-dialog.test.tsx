@@ -41,7 +41,7 @@ function open({
   who = me.leader,
 }: {
   list?: ServiceList
-  write?: () => Response
+  write?: () => Response | Promise<Response>
   schedules?: ReturnType<typeof schedule>[]
   who?: Me
 } = {}) {
@@ -243,6 +243,23 @@ describe("saving", () => {
       rosterMode: existing.rosterMode,
     })
   })
+})
+
+test("Escape doesn't close the schedule dialog while it saves", async () => {
+  let answer: (response: Response) => void = () => {}
+  open({ write: () => new Promise<Response>((resolve) => (answer = resolve)) })
+  const dialog = await newDialog()
+  await userEvent.type(dialog.getByLabelText("Name"), "Sunday class")
+  await userEvent.click(dialog.getByRole("button", { name: "Create schedule" }))
+
+  await waitFor(() =>
+    expect(dialog.getByRole("button", { name: /Create schedule/ })).toBeDisabled()
+  )
+
+  await userEvent.keyboard("{Escape}")
+  expect(screen.getByRole("dialog")).toBeInTheDocument()
+  answer(HttpResponse.json({ id: "s-new", createdSessions: 1 }, { status: 201 }))
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
 })
 
 test("a servant sees neither New schedule nor Edit", async () => {
