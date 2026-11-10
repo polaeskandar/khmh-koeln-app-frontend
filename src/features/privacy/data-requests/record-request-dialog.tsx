@@ -41,6 +41,7 @@ import {
   type NewDataRequest,
   recordDataRequest,
   type RequestKind,
+  DATA_REQUEST_QUERIES,
 } from "./api"
 
 const CHANNELS = ["email", "letter", "in_person"] as const
@@ -158,7 +159,7 @@ function RecordForm({ today, onDone }: { today: LocalDate; onDone: () => void })
 
   const record = useApiMutation(recordDataRequest, {
     successMessage: t("toast.dataRequestRecorded"),
-    invalidate: [["data-requests"]],
+    invalidate: DATA_REQUEST_QUERIES,
     onSuccess: (saved) => {
       onDone()
       router.push(routes.dataRequest(saved.id))

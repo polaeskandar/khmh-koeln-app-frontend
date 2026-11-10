@@ -36,8 +36,19 @@ import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { fold, fullName, preferredName } from "@/lib/domain/names"
 
-import { type AccountRequest, type AgeCheck, approveRequest, memberCandidatesQuery } from "./api"
-import { createPersonRequest, type DirectoryPerson } from "@/features/people/members/api"
+import {
+  type AccountRequest,
+  type AgeCheck,
+  approveRequest,
+  memberCandidatesQuery,
+  MEMBER_ACCOUNT_QUERIES,
+  STAFF_APPROVAL_QUERIES,
+} from "./api"
+import {
+  createPersonRequest,
+  type DirectoryPerson,
+  MEMBERSHIP_QUERIES,
+} from "@/features/people/members/api"
 import { PlacementFields, usePlacement } from "@/features/people/members/placement-fields"
 import { parentPortalOnly, rolesQuery } from "@/features/identity/roles/api"
 import { groupsText, PersonSearch } from "@/features/people/members/person-search"
@@ -49,6 +60,7 @@ import {
   useAssignableGroups,
 } from "@/features/organization/assignments/group-choice"
 import type { Group } from "@/lib/permissions"
+import { ACCOUNT_REQUESTS_KEY } from "@/lib/api/query-keys"
 
 const CLOSE_AND_REFETCH = new Set(["accounts.alreadyApproved", "notFound.user"])
 
@@ -153,7 +165,7 @@ function Approval({ request, onDone }: { request: AccountRequest; onDone: () => 
 
   const approve = useApiMutation(approveRequest, {
     successMessage: t("toast.accountApproved", { name: request.account.displayName }),
-    invalidate: [["accountRequests"], ["staff-accounts"], ["roles"], ["guardian-links"]],
+    invalidate: STAFF_APPROVAL_QUERIES,
     toastOnError: false,
     onSuccess: onDone,
   })
@@ -172,7 +184,7 @@ function Approval({ request, onDone }: { request: AccountRequest; onDone: () => 
 
     if (!result.ok && result.problem.code && CLOSE_AND_REFETCH.has(result.problem.code)) {
       toast.error(result.problem.message)
-      void queryClient.invalidateQueries({ queryKey: ["accountRequests"] })
+      void queryClient.invalidateQueries({ queryKey: ACCOUNT_REQUESTS_KEY })
       onDone()
     }
   }
@@ -279,12 +291,12 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
 
   const create = useApiMutation(createPersonRequest, {
     toastOnError: false,
-    invalidate: [["people"], ["services"], ["stages"]],
+    invalidate: MEMBERSHIP_QUERIES,
   })
 
   const approve = useApiMutation(approveRequest, {
     successMessage: t("toast.accountApproved", { name }),
-    invalidate: [["accountRequests"], ["member-accounts"]],
+    invalidate: MEMBER_ACCOUNT_QUERIES,
     toastOnError: false,
     onSuccess: onDone,
   })
@@ -362,7 +374,7 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
 
     if (!result.ok && result.problem.code && CLOSE_AND_REFETCH.has(result.problem.code)) {
       toast.error(result.problem.message)
-      void queryClient.invalidateQueries({ queryKey: ["accountRequests"] })
+      void queryClient.invalidateQueries({ queryKey: ACCOUNT_REQUESTS_KEY })
       onDone()
     }
   }

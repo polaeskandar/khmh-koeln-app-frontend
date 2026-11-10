@@ -1,0 +1,15 @@
+export const ME_KEY = ["me"] as const
+export const REGISTRATION_SERVICES_KEY = ["registration-services"] as const
+export const ACCOUNT_REQUESTS_KEY = ["account-requests"] as const
+export const STAFF_ACCOUNTS_KEY = ["staff-accounts"] as const
+export const MEMBER_ACCOUNTS_KEY = ["member-accounts"] as const
+export const ROLES_KEY = ["roles"] as const
+export const SERVICES_KEY = ["services"] as const
+export const STAGES_KEY = ["stages"] as const
+export const PEOPLE_KEY = ["people"] as const
+export const GUARDIAN_LINKS_KEY = ["guardian-links"] as const
+export const PARENT_KEY = ["parent"] as const
+export const MEMBER_KEY = ["member"] as const
+export const SCHEDULES_KEY = ["schedules"] as const
+export const AGENDA_KEY = ["agenda"] as const
+export const DATA_REQUESTS_KEY = ["data-requests"] as const

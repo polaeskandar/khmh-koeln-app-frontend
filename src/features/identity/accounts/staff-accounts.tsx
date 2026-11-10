@@ -48,9 +48,8 @@ import {
   type StaffAccount,
   staffAccountsQuery,
 } from "./api"
-import { type Role, rolesQuery } from "@/features/identity/roles/api"
-
-const STAFF_QUERIES = [["staff-accounts"], ["roles"], ["me"]]
+import { type Role, rolesQuery, ROLE_QUERIES } from "@/features/identity/roles/api"
+import { STAFF_ACCOUNTS_KEY } from "@/lib/api/query-keys"
 
 function GiveRoleDialog({
   account,
@@ -67,7 +66,7 @@ function GiveRoleDialog({
 
   const give = useApiMutation((id: string) => giveRoleRequest(account.id, id), {
     successMessage: t("toast.roleAssigned"),
-    invalidate: STAFF_QUERIES,
+    invalidate: ROLE_QUERIES,
     onSuccess: () => onOpenChange(false),
   })
 
@@ -75,7 +74,7 @@ function GiveRoleDialog({
     const result = await give.execute(roleId)
 
     if (!result.ok && result.problem.status === 409) {
-      void queryClient.invalidateQueries({ queryKey: ["staff-accounts"] })
+      void queryClient.invalidateQueries({ queryKey: STAFF_ACCOUNTS_KEY })
       onOpenChange(false)
     }
   }
@@ -241,7 +240,7 @@ function RoleChip({
 
   const remove = useApiMutation(() => removeRoleRequest(account.id, role.id), {
     successMessage: t("toast.roleRemoved"),
-    invalidate: STAFF_QUERIES,
+    invalidate: ROLE_QUERIES,
   })
 
   return (

@@ -18,9 +18,12 @@ import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 
-import { type MemberAccount, memberAccountsQuery, unlinkMemberRequest } from "./api"
-
-const REFETCH = [["member-accounts"], ["accountRequests"]]
+import {
+  type MemberAccount,
+  memberAccountsQuery,
+  unlinkMemberRequest,
+  MEMBER_ACCOUNT_QUERIES,
+} from "./api"
 
 function AgeLine({ account }: { account: MemberAccount }) {
   const t = useTranslations("settings.members")
@@ -56,7 +59,7 @@ function AccountRow({
 
   const unlink = useApiMutation(unlinkMemberRequest, {
     successMessage: t("toast.memberUnlinked", { name: account.name }),
-    invalidate: REFETCH,
+    invalidate: MEMBER_ACCOUNT_QUERIES,
   })
 
   const { member } = account
@@ -131,7 +134,7 @@ function AccountRow({
           const result = await unlink.execute(account.id)
 
           if (!result.ok && result.problem.status === 409) {
-            for (const queryKey of REFETCH) {
+            for (const queryKey of MEMBER_ACCOUNT_QUERIES) {
               void queryClient.invalidateQueries({ queryKey })
             }
 

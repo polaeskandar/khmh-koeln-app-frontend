@@ -43,9 +43,7 @@ import { routes } from "@/lib/routes"
 import { archiveRequest, deleteRequest, restoreRequest } from "@/features/organization/services/api"
 import { StructureChangeDialog } from "@/features/organization/services/structure-change"
 
-import { addStageRequest, type StageFields, updateStageRequest } from "./api"
-
-const STAGE_QUERIES = [["stages"], ["services"]]
+import { addStageRequest, type StageFields, updateStageRequest, STAGE_QUERIES } from "./api"
 
 export type EditableStage = { id: string; name: string; description: string | null }
 

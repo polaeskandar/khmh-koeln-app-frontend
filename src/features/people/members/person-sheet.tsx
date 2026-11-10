@@ -52,6 +52,7 @@ import {
   reactivatePersonRequest,
   renamePersonRequest,
   moveMembershipRequest,
+  PERSON_NAME_QUERIES,
 } from "./api"
 import { blocksPlacement, useGroupOptions } from "./groups"
 
@@ -77,7 +78,7 @@ function NameForm({ person }: { person: PersonRow["person"] }) {
 
   const rename = useApiMutation((next: PersonNames) => renamePersonRequest(person.id, next), {
     successMessage: t("toast.saved"),
-    invalidate: [["people"], ["services"]],
+    invalidate: PERSON_NAME_QUERIES,
     awaitRefetch: true,
     onSuccess: () => setEdits({}),
   })

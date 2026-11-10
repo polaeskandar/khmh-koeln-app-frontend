@@ -1,5 +1,6 @@
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import { can } from "@/lib/permissions"
+import { ME_KEY, REGISTRATION_SERVICES_KEY } from "@/lib/api/query-keys"
 
 export type Me = Schemas["MeResponse"]
 
@@ -12,7 +13,7 @@ export function areasOf(me: Me) {
 }
 
 export const meQuery = {
-  queryKey: ["me"] as const,
+  queryKey: ME_KEY,
   queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/me", { signal })),
 }
 
@@ -28,7 +29,7 @@ export type RegisteredAs = Schemas["RegisteredAs"]
 export type Registration = Schemas["RegisterAccountRequest"]
 
 export const registrationServicesQuery = {
-  queryKey: ["registrationServices", "list"] as const,
+  queryKey: [...REGISTRATION_SERVICES_KEY, "list"] as const,
   queryFn: ({ signal }: { signal: AbortSignal }) =>
     dataOf(api.GET("/auth/register/services", { signal })),
 }

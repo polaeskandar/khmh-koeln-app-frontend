@@ -1,5 +1,6 @@
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { LocalDate, Uuid } from "@/lib/api/types/common"
+import { DATA_REQUESTS_KEY, GUARDIAN_LINKS_KEY } from "@/lib/api/query-keys"
 
 export type RequestKind = Schemas["RequestKind"]
 export type RequestChannel = Schemas["RequestChannel"]
@@ -10,7 +11,7 @@ export type DataRequestRow = Schemas["DataRequestRowResponse"]
 export type DataRequests = Schemas["DataRequestListResponse"]
 
 export const dataRequestsQuery = {
-  queryKey: ["data-requests", "list"] as const,
+  queryKey: [...DATA_REQUESTS_KEY, "list"] as const,
   queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/data-requests", { signal })),
 }
 
@@ -22,7 +23,7 @@ export const recordDataRequest = (input: NewDataRequest) =>
 export type AccountChoice = Schemas["ParentAccessListResponse"]["accounts"][number]
 
 export const accountChoicesQuery = {
-  queryKey: ["guardian-links"] as const,
+  queryKey: GUARDIAN_LINKS_KEY,
   queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/guardian-links", { signal })),
 }
 
@@ -86,13 +87,13 @@ export function accountRecordOf(account: NonNullable<DataRequestDetail["account"
 }
 
 export const dataRequestQuery = (id: Uuid) => ({
-  queryKey: ["data-requests", "detail", id] as const,
+  queryKey: [...DATA_REQUESTS_KEY, "detail", id] as const,
   queryFn: ({ signal }: { signal: AbortSignal }) =>
     dataOf(api.GET("/data-requests/{id}", { params: { path: { id } }, signal })),
 })
 
 export const erasureReviewQuery = (id: Uuid) => ({
-  queryKey: ["data-requests", "erasure", id] as const,
+  queryKey: [...DATA_REQUESTS_KEY, "erasure", id] as const,
   queryFn: ({ signal }: { signal: AbortSignal }) =>
     dataOf(api.GET("/data-requests/{id}/erasure", { params: { path: { id } }, signal })),
 })
@@ -106,3 +107,5 @@ export type CopyLinkStatus = Schemas["CopyLinkStatus"]
 
 export const createCopyLink = (id: Uuid) =>
   dataOf(api.POST("/data-requests/{id}/copy-link", { params: { path: { id } }, body: {} }))
+
+export const DATA_REQUEST_QUERIES = [DATA_REQUESTS_KEY]
