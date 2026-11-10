@@ -170,6 +170,32 @@ test("a 422 shows every error under its field and focuses the email", async () =
   expect(document.querySelector('[data-slot="alert"]')).toBeNull()
 })
 
+test("an email that already has an account says so under the email and stays", async () => {
+  const bodies = backend(() =>
+    problem(422, "checkFields", {
+      fieldErrors: { "account.email": { code: "accounts.emailTaken", params: {} } },
+    })
+  )
+
+  renderWithProviders(<RegisterPage />)
+  const user = await fillIn()
+  await user.click(screen.getByRole("button", { name: "Create account" }))
+  await waitFor(() => expect(bodies).toHaveLength(1))
+  const email = screen.getByLabelText("Email address")
+  await waitFor(() => expect(email).toHaveFocus())
+  expect(email).toHaveAttribute("aria-invalid", "true")
+  expect(email).toHaveValue("mariam.hanna@example.org")
+
+  expect(
+    screen.getByText(
+      "There is already an account with this email address. Sign in, or reset the password if you forgot it."
+    )
+  ).toBeInTheDocument()
+
+  expect(router.push).not.toHaveBeenCalled()
+  expect(screen.getByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/sign-in/")
+})
+
 describe.each([
   ["409", () => problem(409, "accounts.privacyNoticeOutdated"), /privacy notice has changed/],
   ["429", () => problem(429, "auth.tooManyAttempts"), /Too many attempts/],
