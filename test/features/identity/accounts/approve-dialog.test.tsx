@@ -86,9 +86,25 @@ const mina = child(2, "Mina", "Hanna")
 function open(approve?: () => Response, account = me.administrator) {
   const queries: string[] = []
   const sent: unknown[] = []
+  const reads = { roles: 0, staffAccounts: 0, memberAccounts: 0, guardianLinks: 0 }
 
   server.use(
     http.get(apiUrl("/me"), () => HttpResponse.json(account)),
+    http.get(apiUrl("/staff-accounts"), () => {
+      reads.staffAccounts++
+
+      return HttpResponse.json({ today: "2026-11-08", items: [] })
+    }),
+    http.get(apiUrl("/member-accounts"), () => {
+      reads.memberAccounts++
+
+      return HttpResponse.json({ today: "2026-11-08", items: [] })
+    }),
+    http.get(apiUrl("/guardian-links"), () => {
+      reads.guardianLinks++
+
+      return HttpResponse.json({ today: "2026-11-08", items: [], accounts: [] })
+    }),
     http.get(apiUrl("/account-requests"), () =>
       HttpResponse.json({
         items: [sandra, fady],
@@ -96,7 +112,11 @@ function open(approve?: () => Response, account = me.administrator) {
         today: "2026-11-08",
       } satisfies Schemas["AccountRequestListResponse"])
     ),
-    http.get(apiUrl("/roles"), () => HttpResponse.json({ items: [servantRole, parentRole] })),
+    http.get(apiUrl("/roles"), () => {
+      reads.roles++
+
+      return HttpResponse.json({ items: [servantRole, parentRole] })
+    }),
     http.get(apiUrl("/services"), () => HttpResponse.json(services)),
     http.get(apiUrl("/people/directory"), ({ request }) => {
       const q = new URL(request.url).searchParams.get("q") ?? ""
@@ -121,7 +141,7 @@ function open(approve?: () => Response, account = me.administrator) {
     </SessionProvider>
   )
 
-  return { queries, sent }
+  return { queries, sent, reads }
 }
 
 const openApprove = async (row = 0) => {
@@ -209,6 +229,17 @@ test("a 409 closes the dialog and refetches", async () => {
   await userEvent.click(dialog.getByRole("button", { name: "Approve account" }))
   await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull())
   expect(toast.error).toHaveBeenCalled()
+})
+
+test("approving a parent refetches the staff accounts, the roles and the parent links", async () => {
+  const { reads } = open()
+  const dialog = await openApprove()
+  await userEvent.type(dialog.getByRole("textbox"), "demi")
+  await userEvent.click(await dialog.findByRole("button", { name: /Demiana Fanous/ }))
+  await waitFor(() => expect(reads).toMatchObject({ roles: 1, staffAccounts: 1, guardianLinks: 1 }))
+  await userEvent.click(dialog.getByRole("button", { name: "Approve account" }))
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull())
+  await waitFor(() => expect(reads).toMatchObject({ roles: 2, staffAccounts: 2, guardianLinks: 2 }))
 })
 
 test("a parent starts with the Parent role ticked", async () => {

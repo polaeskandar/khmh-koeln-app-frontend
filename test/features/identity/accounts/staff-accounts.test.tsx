@@ -104,11 +104,16 @@ function open({
 } = {}) {
   let items = accounts
   const sent: string[] = []
+  const reads = { roles: 0 }
 
   server.use(
     http.get(apiUrl("/me"), () => HttpResponse.json(who)),
     http.get(apiUrl("/staff-accounts"), () => HttpResponse.json({ today: "2026-11-08", items })),
-    http.get(apiUrl("/roles"), () => HttpResponse.json({ items: roleRows })),
+    http.get(apiUrl("/roles"), () => {
+      reads.roles++
+
+      return HttpResponse.json({ items: roleRows })
+    }),
     http.get(apiUrl("/services"), () => HttpResponse.json(services)),
     http.post(apiUrl("/accounts/:id/assignments"), async ({ params, request }) => {
       const body = (await request.json()) as Schemas["AssignmentRequest"]
@@ -176,7 +181,7 @@ function open({
     { wrapper }
   )
 
-  return { sent, client }
+  return { sent, client, reads }
 }
 
 const rowOf = async (name: string) =>
@@ -201,7 +206,7 @@ test("rows keep the API order, the disabled account last with its badge", async 
 })
 
 test("giving a role offers the ones not held, and sends it once", async () => {
-  const { sent } = open()
+  const { sent, reads } = open()
   const rebeccaRow = within(await rowOf("Rebecca Girgis"))
   await userEvent.click(await rebeccaRow.findByRole("button", { name: "Role" }))
   const dialog = within(await screen.findByRole("dialog"))
@@ -222,6 +227,8 @@ test("giving a role offers the ones not held, and sends it once", async () => {
   expect(
     await within(await rowOf("Rebecca Girgis")).findByText("Attendance helper")
   ).toBeInTheDocument()
+
+  await waitFor(() => expect(reads.roles).toBe(2))
 })
 
 test("Cancel closes the role dialog without giving a role", async () => {
