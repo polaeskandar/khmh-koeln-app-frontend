@@ -139,6 +139,20 @@ test("the Servant role shows its 17 boxes, each named and described by its row",
   expect(screen.getByText(/· disabled/)).toBeInTheDocument()
 })
 
+test("a role added on an earlier day shows that date", async () => {
+  search.value = `id=${SERVANT_ID}`
+  open(<RolePage />)
+
+  expect(await screen.findByText("Added on Tue 1 Sep at 12:00")).toBeInTheDocument()
+})
+
+test("a role added today says today", async () => {
+  search.value = `id=${SERVANT_ID}`
+  open(<RolePage />, { who: { ...me.administrator, today: "2026-09-01" } })
+
+  expect(await screen.findByText("Added today at 12:00")).toBeInTheDocument()
+})
+
 test("a new role ticks See with Add and is created once", async () => {
   search.value = ""
   const sent = open(<NewRolePage />)
