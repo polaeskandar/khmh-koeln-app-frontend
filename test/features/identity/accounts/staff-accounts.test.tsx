@@ -264,7 +264,11 @@ test("a password link is emailed to the account and never shown", async () => {
   const row = within(await rowOf("Sara Wissa"))
   await userEvent.click(await row.findByRole("button", { name: "Password link…" }))
   const dialog = within(await screen.findByRole("dialog"))
-  expect(await dialog.findByText(/^Sent to sara@example\.org\. Works until /)).toBeInTheDocument()
+
+  expect(
+    await dialog.findByText("Sent to sara@example.org. Works until on Mon 9 Nov at 12:00.")
+  ).toBeInTheDocument()
+
   expect(dialog.queryByRole("textbox")).not.toBeInTheDocument()
   expect(sent).toEqual([`link ${sara.id} {}`])
   await userEvent.click(dialog.getByRole("button", { name: "Close" }))

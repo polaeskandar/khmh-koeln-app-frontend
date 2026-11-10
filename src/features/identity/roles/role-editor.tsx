@@ -21,7 +21,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { FieldError } from "@/components/ui/field"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Spinner } from "@/components/ui/spinner"
-import { useCan } from "@/features/identity/auth/session"
+import { useCan, useSession } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -195,6 +195,8 @@ function PermissionGrid({
 function Holders({ role }: { role: RoleDetail | null }) {
   const t = useTranslations("roleEditor")
   const f = useFormat()
+  const { session } = useSession()
+  const today = session.status === "authenticated" ? session.me.today : null
 
   const staff = (chunks: React.ReactNode) => (
     <Link href={`${routes.settings()}#users`} className="underline underline-offset-4">
@@ -230,11 +232,13 @@ function Holders({ role }: { role: RoleDetail | null }) {
               ))}
             </ul>
           )}
-          <p className="text-xs text-muted-foreground">
-            {role.updatedAt !== role.createdAt
-              ? t("changed", { when: f.atLabel(role.updatedAt, f.instantDate(role.updatedAt)) })
-              : t("added", { when: f.atLabel(role.createdAt, f.instantDate(role.createdAt)) })}
-          </p>
+          {today ? (
+            <p className="text-xs text-muted-foreground">
+              {role.updatedAt !== role.createdAt
+                ? t("changed", { when: f.atLabel(role.updatedAt, today) })
+                : t("added", { when: f.atLabel(role.createdAt, today) })}
+            </p>
+          ) : null}
         </>
       )}
     </FormPanel>

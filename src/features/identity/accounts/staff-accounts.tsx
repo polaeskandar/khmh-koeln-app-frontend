@@ -33,6 +33,7 @@ import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import { ApiError } from "@/lib/api/problem"
 import { describeProblem, type ProblemTranslator } from "@/lib/api/translate-problem"
+import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { groupAt } from "@/lib/permissions"
@@ -154,9 +155,11 @@ function GiveRoleDialog({
 
 function PasswordLinkDialog({
   account,
+  today,
   onOpenChange,
 }: {
   account: StaffAccount
+  today: LocalDate
   onOpenChange: (open: boolean) => void
 }) {
   const t = useTranslations()
@@ -208,7 +211,7 @@ function PasswordLinkDialog({
           <p className="text-sm text-muted-foreground" role="status">
             {t("settings.users.passwordLink.sent", { email: account.email })}{" "}
             {t("settings.users.passwordLink.expires", {
-              when: f.atLabel(link.expiresAt, f.instantDate(new Date().toISOString())),
+              when: f.atLabel(link.expiresAt, today),
             })}
           </p>
         ) : (
@@ -279,12 +282,14 @@ function AccountRow({
   groups,
   changeRoles,
   sendLinks,
+  today,
 }: {
   account: StaffAccount
   roles: Role[]
   groups: GroupOption[]
   changeRoles: boolean
   sendLinks: boolean
+  today: LocalDate
 }) {
   const t = useTranslations()
   const canAssign = useCanAssign()
@@ -374,7 +379,9 @@ function AccountRow({
       {dialog === "group" ? (
         <AssignGroupDialog account={account} services={groups} onOpenChange={close} />
       ) : null}
-      {dialog === "link" ? <PasswordLinkDialog account={account} onOpenChange={close} /> : null}
+      {dialog === "link" ? (
+        <PasswordLinkDialog account={account} today={today} onOpenChange={close} />
+      ) : null}
     </li>
   )
 }
@@ -410,6 +417,7 @@ export function StaffAccounts() {
                 groups={groups}
                 changeRoles={changeRoles}
                 sendLinks={sendLinks}
+                today={data.today}
               />
             ))}
           </ul>
