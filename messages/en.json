@@ -96,7 +96,8 @@
       "guardian": "This parent link does not exist or was removed.",
       "request": "This request does not exist or was deleted.",
       "role": "This role does not exist or was deleted.",
-      "route": "Not found. Reload the page and try again."
+      "route": "Not found. Reload the page and try again.",
+      "assignment": "This assignment does not exist or was removed."
     },
     "validation": {
       "tooLong": "Use at most {max} characters.",
@@ -349,6 +350,10 @@
       "confirmationLinkInvalid": "This confirmation link is invalid or has expired. Register again to get a new one.",
       "unconfirmed": "Confirm your email address first: open the link we sent you when you registered.",
       "erasureScheduled": "This account will be deleted on {erasesOn}. Cancel the erasure to sign in again."
+    },
+    "assignments": {
+      "alreadyAssigned": "{name} is already assigned to {where}.",
+      "notAllowed": "You can’t assign people to this group or take them out of it."
     }
   },
   "toast": {
@@ -412,7 +417,9 @@
     "memberUnlinked": "Link removed for {name}.",
     "roleCreated": "Role “{name}” created.",
     "roleSaved": "Role saved.",
-    "roleDeleted": "Role “{name}” deleted."
+    "roleDeleted": "Role “{name}” deleted.",
+    "groupAssigned": "{name} now serves in {where}.",
+    "groupRemoved": "{name} no longer serves in {where}."
   },
   "roles": {
     "summary": {
@@ -749,13 +756,13 @@
       "remove": "Remove role",
       "assign": {
         "title": "Give {name} a role",
-        "description": "Roles decide what someone can see and change, in every service. An account can have several.",
+        "description": "Roles decide what someone can see and change: everywhere, or in the groups the account serves in. An account can have several.",
         "role": "Role",
         "submit": "Give role",
         "roleHint": "See what each role allows under <link>Roles</link>.",
         "choose": "Choose a role"
       },
-      "description": "Give each account the roles it needs. Roles hold everywhere in the church.",
+      "description": "Give each account the roles it needs and the groups it serves in. Some roles hold everywhere in the church, others only in the account’s groups.",
       "passwordLink": {
         "action": "Password link…",
         "title": "Password link for {name}",
@@ -763,7 +770,10 @@
         "sent": "Sent to {email}.",
         "expires": "Works until {when}.",
         "creating": "Sending the link…"
-      }
+      },
+      "addGroup": "Group",
+      "addGroupLabel": "Assign {name} to a group…",
+      "noGroups": "No group yet: sees no service until assigned."
     },
     "parents": {
       "title": "Parent access",
@@ -1394,6 +1404,17 @@
       "upcoming": {
         "title": "Coming up",
         "empty": "Nothing planned in the next two weeks."
+      },
+      "servants": {
+        "title": "Servants",
+        "description": "Who serves in this service. Leaders are assigned to the whole service.",
+        "empty": "Nobody is assigned yet.",
+        "assign": "Assign",
+        "dialog": {
+          "title": "Assign a servant to {service}",
+          "account": "Account",
+          "chooseAccount": "Choose an account"
+        }
       }
     }
   },
@@ -1912,7 +1933,7 @@
     "approve": {
       "title": "Approve {name}’s account",
       "parentDescription": "Check the family first, for example in person after the liturgy. The parent then sees these children’s published homework.",
-      "servantDescription": "Check with the service leader first. The roles decide what the servant can see and do, in every service.",
+      "servantDescription": "Check with the service leader first. The roles decide what the servant can see and do; the groups, where.",
       "children": "Children",
       "childrenHint": "Children whose names {name} wrote are already chosen. Search to add others.",
       "findChild": "Find a child by name or class",
@@ -1942,8 +1963,13 @@
       "consentNote": "How did they agree? (optional)",
       "consentNotePlaceholder": "For example: his mother agreed in person on 8 November.",
       "roles": "Roles",
-      "rolesHint": "What the account may do, everywhere in the church. You can change it later under Staff accounts and roles.",
-      "servesIn": "Says they serve in {service}."
+      "rolesHint": "What the account may do. You can change it later under Staff accounts and roles.",
+      "servesIn": "Says they serve in {service}.",
+      "groups": "Groups",
+      "groupsHint": "Where they serve. Roles that hold only in assigned groups hold here. The service they named is already chosen.",
+      "noGroups": "No group yet. A servant without a group sees no service.",
+      "addGroup": "Add group",
+      "removeGroup": "Remove {group}"
     },
     "decline": {
       "title": "Decline {name}’s registration?",
@@ -2317,6 +2343,20 @@
     "notAssigned": {
       "title": "You are not assigned to a group yet",
       "description": "Ask the church office. Once you are assigned to a service or a stage, its meetings, members, lessons and homework appear here."
+    },
+    "wholeService": "The whole service",
+    "service": "Service",
+    "stage": "Stage",
+    "chooseService": "Choose a service",
+    "stageHint": "The whole service covers its own roster and all its stages, as for a service leader; a stage covers that stage only.",
+    "assign": "Assign",
+    "remove": "Take out",
+    "removeLabel": "Take {name} out of {where}",
+    "removeTitle": "Take {name} out of {where}?",
+    "removeDescription": "Roles that hold in assigned groups no longer hold there for them. Their past attendance records, lessons and homework stay.",
+    "dialog": {
+      "title": "Assign {name} to a group",
+      "description": "Roles that hold only in assigned groups, such as Servant and Service leader, hold in the groups an account is assigned to."
     }
   }
 }

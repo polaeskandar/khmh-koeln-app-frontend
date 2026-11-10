@@ -2,7 +2,7 @@
 
 import { useIsMutating, useQuery, useQueryClient } from "@tanstack/react-query"
 import { cn } from "cn"
-import { CircleAlert, Search } from "lucide-react"
+import { CircleAlert, Layers, Plus, Search, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useEffect, useId, useState } from "react"
 import { toast } from "sonner"
@@ -41,8 +41,94 @@ import { PlacementFields, usePlacement } from "@/features/people/members/placeme
 import { parentPortalOnly, rolesQuery } from "@/features/identity/roles/api"
 import { groupsText, PersonSearch } from "@/features/people/members/person-search"
 import { RolesChoice } from "@/features/identity/roles/roles-choice"
+import type { GroupOption } from "@/features/organization/assignments/api"
+import {
+  GroupFields,
+  NO_GROUP,
+  useAssignableGroups,
+} from "@/features/organization/assignments/group-choice"
+import type { Group } from "@/lib/permissions"
 
 const CLOSE_AND_REFETCH = new Set(["accounts.alreadyApproved", "notFound.user"])
+
+const sameGroup = (a: Group, b: Group) => a.serviceId === b.serviceId && a.stageId === b.stageId
+
+function GroupsChoice({
+  services,
+  selected,
+  onChange,
+  errors,
+}: {
+  services: GroupOption[]
+  selected: Group[]
+  onChange: (groups: Group[]) => void
+  errors: string[]
+}) {
+  const t = useTranslations("accountRequests.approve")
+  const [draft, setDraft] = useState<Group>(NO_GROUP)
+
+  const nameOf = (group: Group) => {
+    const service = services.find((option) => option.id === group.serviceId)
+    const stage = service?.stages.find((option) => option.id === group.stageId)
+
+    return stage ? `${service?.name} · ${stage.name}` : (service?.name ?? "")
+  }
+
+  function add() {
+    if (!selected.some((group) => sameGroup(group, draft))) {
+      onChange([...selected, draft])
+    }
+
+    setDraft(NO_GROUP)
+  }
+
+  return (
+    <FieldSet data-invalid={errors.length > 0 ? true : undefined}>
+      <FieldLegend variant="label">{t("groups")}</FieldLegend>
+      <FieldDescription>{t("groupsHint")}</FieldDescription>
+      {selected.length > 0 ? (
+        <ul className="flex flex-wrap gap-1.5">
+          {selected.map((group) => (
+            <li
+              key={`${group.serviceId}-${group.stageId}`}
+              className="inline-flex items-center gap-1 border border-dashed px-2 py-0.5 text-xs"
+            >
+              <Layers className="size-3 shrink-0 text-muted-foreground" aria-hidden="true" />
+              <bdi>{nameOf(group)}</bdi>
+              <button
+                type="button"
+                className="text-muted-foreground hover:text-foreground"
+                aria-label={t("removeGroup", { group: nameOf(group) })}
+                onClick={() => onChange(selected.filter((other) => !sameGroup(other, group)))}
+              >
+                <X className="size-3" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-muted-foreground">{t("noGroups")}</p>
+      )}
+      <div className="flex flex-col gap-3 border p-3">
+        <GroupFields services={services} value={draft} onChange={setDraft} />
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="self-start"
+          disabled={!draft.serviceId}
+          onClick={add}
+        >
+          <Plus data-icon="inline-start" />
+          {t("addGroup")}
+        </Button>
+      </div>
+      {[...new Set(errors)].map((error) => (
+        <FieldError key={error}>{error}</FieldError>
+      ))}
+    </FieldSet>
+  )
+}
 
 function Approval({ request, onDone }: { request: AccountRequest; onDone: () => void }) {
   const t = useTranslations()
@@ -52,10 +138,21 @@ function Approval({ request, onDone }: { request: AccountRequest; onDone: () => 
   const parent = request.registeredAs === "parent"
   const [children, setChildren] = useState<DirectoryPerson[]>([])
   const [ticked, setTicked] = useState<string[] | null>(null)
+  const services = useAssignableGroups()
+
+  const [groups, setGroups] = useState<Group[]>(() =>
+    request.services
+      .filter((service) => !service.archived)
+      .map((service) => ({ serviceId: service.id, stageId: null }))
+  )
+
+  const offered = groups.filter((group) =>
+    services.some((service) => service.id === group.serviceId)
+  )
 
   const approve = useApiMutation(approveRequest, {
     successMessage: t("toast.accountApproved", { name: request.account.displayName }),
-    invalidate: [["accountRequests"]],
+    invalidate: [["accountRequests"], ["staff-accounts"]],
     toastOnError: false,
     onSuccess: onDone,
   })
@@ -69,7 +166,7 @@ function Approval({ request, onDone }: { request: AccountRequest; onDone: () => 
       request.account.id,
       parent
         ? { as: "parent", childIds: children.map((child) => child.id), roleIds }
-        : { as: "servant", roleIds }
+        : { as: "servant", roleIds, assignments: offered }
     )
 
     if (!result.ok && result.problem.code && CLOSE_AND_REFETCH.has(result.problem.code)) {
@@ -80,6 +177,10 @@ function Approval({ request, onDone }: { request: AccountRequest; onDone: () => 
   }
 
   const errors = approve.fieldErrors
+
+  const groupErrors = Object.entries(errors).flatMap(([field, error]) =>
+    field.startsWith("assignments") && error ? [error] : []
+  )
 
   const generalError =
     approve.problem &&
@@ -118,6 +219,14 @@ function Approval({ request, onDone }: { request: AccountRequest; onDone: () => 
           selected={roleIds}
           onChange={setTicked}
           error={errors.roleIds}
+        />
+      ) : null}
+      {!parent && services.length > 0 ? (
+        <GroupsChoice
+          services={services}
+          selected={offered}
+          onChange={setGroups}
+          errors={groupErrors}
         />
       ) : null}
       {generalError ? <FieldError>{generalError}</FieldError> : null}

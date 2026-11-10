@@ -9,6 +9,7 @@ import { SessionProvider } from "@/features/identity/auth/session"
 import type { Schemas } from "@/lib/api/client"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
+import { services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
 import { testProviders } from "@test/support/providers"
 
@@ -36,37 +37,113 @@ const office = role(3, "Church office")
 const helper = role(4, "Attendance helper")
 const roles = [administrator, servant, office, helper]
 
+const roleRows = roles.map((r) => ({
+  ...r,
+  scope: r === servant ? ("assignedGroups" as const) : ("church" as const),
+  permissions: [],
+  holderCount: 1,
+}))
+
+const sundaySchool = services.items[0]!
+const thirdClass = sundaySchool.stages[2]!
+const youth = services.items[1]!
+
+const serviceRef = ({ id, name, tone, archived }: typeof sundaySchool) => ({
+  id,
+  name,
+  tone,
+  archived,
+})
+
+const stageRef = ({ id, name, position }: typeof thirdClass) => ({
+  id,
+  name,
+  position,
+  archived: false,
+})
+
+const inThirdClass: StaffAccount["assignments"][number] = {
+  id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea001",
+  service: serviceRef(sundaySchool),
+  stage: stageRef(thirdClass),
+}
+
 const account = (
   n: number,
   displayName: string,
   had: typeof roles,
-  disabled = false
+  disabled = false,
+  assignments: StaffAccount["assignments"] = []
 ): StaffAccount => ({
   id: `0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef${String(n).padStart(3, "0")}`,
   displayName,
   email: `${displayName.split(" ")[0]!.toLowerCase()}@example.org`,
   disabled,
   roles: had,
-  assignments: [],
+  assignments,
 })
 
 const mariam = account(1, "Mariam Fahmy", [administrator])
 const rebecca = account(2, "Rebecca Girgis", [servant])
 const sara = account(3, "Sara Wissa", [office])
 const samuel = account(4, "Samuel Rizk", [servant], true)
+const daniel = account(5, "Daniel Mikhail", [servant], false, [inThirdClass])
 
 function open({
   remove,
   link,
+  assign,
   who = me.administrator,
-}: { remove?: () => Response; link?: () => Response; who?: Me } = {}) {
-  let items = [mariam, rebecca, sara, samuel]
+  accounts = [mariam, rebecca, sara, samuel],
+}: {
+  remove?: () => Response
+  link?: () => Response
+  assign?: () => Response
+  who?: Me
+  accounts?: StaffAccount[]
+} = {}) {
+  let items = accounts
   const sent: string[] = []
 
   server.use(
     http.get(apiUrl("/me"), () => HttpResponse.json(who)),
     http.get(apiUrl("/staff-accounts"), () => HttpResponse.json({ today: "2026-11-08", items })),
-    http.get(apiUrl("/roles"), () => HttpResponse.json({ items: roles })),
+    http.get(apiUrl("/roles"), () => HttpResponse.json({ items: roleRows })),
+    http.get(apiUrl("/services"), () => HttpResponse.json(services)),
+    http.post(apiUrl("/accounts/:id/assignments"), async ({ params, request }) => {
+      const body = (await request.json()) as Schemas["AssignmentRequest"]
+      sent.push(`assign ${params.id} ${body.serviceId} ${body.stageId}`)
+      const refused = assign?.()
+
+      if (refused) {
+        return refused
+      }
+
+      const service = services.items.find((option) => option.id === body.serviceId)!
+      const stage = service.stages.find((option) => option.id === body.stageId)
+
+      const created = {
+        id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea099",
+        service: serviceRef(service),
+        stage: stage ? stageRef(stage) : null,
+      }
+
+      items = items.map((item) =>
+        item.id === params.id ? { ...item, assignments: [...item.assignments, created] } : item
+      )
+
+      return HttpResponse.json(created, { status: 201 })
+    }),
+    http.delete(apiUrl("/assignments/:id"), ({ params }) => {
+      sent.push(`unassign ${params.id}`)
+
+      items = items.map((item) => ({
+        ...item,
+        assignments: item.assignments.filter((assignment) => assignment.id !== params.id),
+      }))
+
+      return new HttpResponse(null, { status: 204 })
+    }),
     http.post(apiUrl("/accounts/:id/roles"), async ({ params, request }) => {
       const body = (await request.json()) as Schemas["GiveAccountRoleRequest"]
       sent.push(`give ${params.id} ${body.roleId}`)
@@ -289,4 +366,130 @@ test("Escape doesn't close the role dialog while the role is being given", async
   await waitFor(() => expect(dialog.getByRole("button", { name: "Cancel" })).toBeDisabled())
   await userEvent.keyboard("{Escape}")
   expect(screen.getByRole("dialog")).toBeInTheDocument()
+})
+
+const openAssign = async (name: string) => {
+  await userEvent.click(
+    await within(await rowOf(name)).findByRole("button", { name: `Assign ${name} to a group…` })
+  )
+
+  return within(await screen.findByRole("dialog"))
+}
+
+test("each account shows its groups; a servant without one says so", async () => {
+  open({ accounts: [mariam, rebecca, daniel] })
+  const danielRow = within(await rowOf("Daniel Mikhail"))
+  expect(await danielRow.findByText("Sunday School · 3rd Class")).toBeInTheDocument()
+
+  expect(
+    await within(await rowOf("Rebecca Girgis")).findByText(
+      "No group yet: sees no service until assigned."
+    )
+  ).toBeInTheDocument()
+
+  expect(within(await rowOf("Mariam Fahmy")).queryByText(/No group yet/)).toBeNull()
+})
+
+test("assigning a group sends the service and stage once and shows the chip", async () => {
+  const { sent } = open()
+  const dialog = await openAssign("Rebecca Girgis")
+  expect(dialog.getByText("Assign ⁨Rebecca Girgis⁩ to a group")).toBeInTheDocument()
+  expect(dialog.getByRole("button", { name: "Assign" })).toBeDisabled()
+  const service = dialog.getByRole("combobox", { name: "Service" })
+  expect(within(service).queryByRole("option", { name: "Choir" })).toBeNull()
+  await userEvent.selectOptions(service, sundaySchool.id)
+  const stage = dialog.getByRole("combobox", { name: "Stage" })
+  expect(stage).toHaveValue("")
+  expect(within(stage).getAllByRole("option")[0]).toHaveTextContent("The whole service")
+  await userEvent.selectOptions(stage, thirdClass.id)
+  await userEvent.dblClick(dialog.getByRole("button", { name: "Assign" }))
+
+  await waitFor(() =>
+    expect(toast.success).toHaveBeenCalledWith(
+      "⁨Rebecca Girgis⁩ now serves in ⁨Sunday School · 3rd Class⁩."
+    )
+  )
+
+  expect(sent).toEqual([`assign ${rebecca.id} ${sundaySchool.id} ${thirdClass.id}`])
+
+  expect(
+    await within(await rowOf("Rebecca Girgis")).findByText("Sunday School · 3rd Class")
+  ).toBeInTheDocument()
+})
+
+test("a service without stages is assigned as a whole", async () => {
+  const { sent } = open()
+  const dialog = await openAssign("Sara Wissa")
+  await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Service" }), youth.id)
+  expect(dialog.queryByRole("combobox", { name: "Stage" })).toBeNull()
+  await userEvent.click(dialog.getByRole("button", { name: "Assign" }))
+  await waitFor(() => expect(sent).toEqual([`assign ${sara.id} ${youth.id} null`]))
+})
+
+test("an account already in the group keeps the dialog open with the reason", async () => {
+  open({
+    assign: () =>
+      problem(409, "assignments.alreadyAssigned", {
+        params: { name: "Rebecca Girgis", where: "Youth" },
+      }),
+  })
+
+  const dialog = await openAssign("Rebecca Girgis")
+  await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Service" }), youth.id)
+  await userEvent.click(dialog.getByRole("button", { name: "Assign" }))
+
+  await waitFor(() =>
+    expect(toast.error).toHaveBeenCalledWith("Rebecca Girgis is already assigned to Youth.")
+  )
+
+  expect(screen.getByRole("dialog")).toBeInTheDocument()
+})
+
+test("a refused assignment says who may assign", async () => {
+  open({ assign: () => problem(403, "assignments.notAllowed") })
+  const dialog = await openAssign("Rebecca Girgis")
+  await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Service" }), youth.id)
+  await userEvent.click(dialog.getByRole("button", { name: "Assign" }))
+
+  await waitFor(() =>
+    expect(toast.error).toHaveBeenCalledWith(
+      "You can’t assign people to this group or take them out of it."
+    )
+  )
+})
+
+test("taking someone out of a group asks first and removes the chip", async () => {
+  const { sent } = open({ accounts: [daniel] })
+  const row = within(await rowOf("Daniel Mikhail"))
+
+  await userEvent.click(
+    await row.findByRole("button", { name: "Take Daniel Mikhail out of Sunday School · 3rd Class" })
+  )
+
+  const dialog = within(await screen.findByRole("alertdialog"))
+  await userEvent.click(dialog.getByRole("button", { name: "Take out" }))
+  await waitFor(() => expect(sent).toEqual([`unassign ${inThirdClass.id}`]))
+
+  await waitFor(() =>
+    expect(toast.success).toHaveBeenCalledWith(
+      "⁨Daniel Mikhail⁩ no longer serves in ⁨Sunday School · 3rd Class⁩."
+    )
+  )
+
+  await waitFor(() => expect(screen.queryByText("Sunday School · 3rd Class")).toBeNull())
+})
+
+test("without the right to assign, groups show without Take out or Group", async () => {
+  open({
+    accounts: [daniel],
+    who: {
+      ...me.churchOffice,
+      permissions: [{ action: "read", resource: "users", scope: "church" }],
+    },
+  })
+
+  const row = within(await rowOf("Daniel Mikhail"))
+  expect(await row.findByText("Sunday School · 3rd Class")).toBeInTheDocument()
+  expect(row.queryByRole("button", { name: /^Take / })).toBeNull()
+  expect(row.queryByRole("button", { name: /to a group…$/ })).toBeNull()
 })
