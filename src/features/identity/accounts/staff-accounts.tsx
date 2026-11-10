@@ -22,13 +22,20 @@ import {
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
-import { useCan } from "@/features/identity/auth/session"
+import { useCan, useCanAssign } from "@/features/identity/auth/session"
+import type { GroupOption } from "@/features/organization/assignments/api"
+import {
+  AssignGroupDialog,
+  AssignmentChip,
+  useAssignableGroups,
+} from "@/features/organization/assignments/group-choice"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import { ApiError } from "@/lib/api/problem"
 import { describeProblem, type ProblemTranslator } from "@/lib/api/translate-problem"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
+import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import {
@@ -269,18 +276,27 @@ function RoleChip({
 function AccountRow({
   account,
   roles,
+  groups,
   changeRoles,
   sendLinks,
 }: {
   account: StaffAccount
   roles: Role[]
+  groups: GroupOption[]
   changeRoles: boolean
   sendLinks: boolean
 }) {
   const t = useTranslations()
-  const [dialog, setDialog] = useState<"role" | "link" | null>(null)
+  const canAssign = useCanAssign()
+  const [dialog, setDialog] = useState<"role" | "group" | "link" | null>(null)
   const left = roles.filter((role) => !account.roles.some((had) => had.id === role.id))
   const close = (open: boolean) => !open && setDialog(null)
+
+  const needsGroups = account.roles.some(
+    (held) => roles.find((role) => role.id === held.id)?.scope === "assignedGroups"
+  )
+
+  const offersGroups = !account.disabled && (needsGroups || groups.length > 0)
 
   return (
     <li className="flex flex-col gap-3 py-4 md:flex-row md:items-start md:justify-between">
@@ -311,6 +327,34 @@ function AccountRow({
             </li>
           ) : null}
         </ul>
+        {account.assignments.length > 0 || offersGroups ? (
+          <ul className="flex flex-wrap items-center gap-1.5">
+            {account.assignments.map((assignment) => (
+              <AssignmentChip
+                key={assignment.id}
+                account={account}
+                assignment={assignment}
+                removable={canAssign(groupAt(assignment.service, assignment.stage))}
+              />
+            ))}
+            {account.assignments.length === 0 && needsGroups && !account.disabled ? (
+              <li className="text-xs text-muted-foreground">{t("settings.users.noGroups")}</li>
+            ) : null}
+            {groups.length > 0 && !account.disabled ? (
+              <li>
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  aria-label={t("settings.users.addGroupLabel", { name: account.displayName })}
+                  onClick={() => setDialog("group")}
+                >
+                  <Plus data-icon="inline-start" />
+                  {t("settings.users.addGroup")}
+                </Button>
+              </li>
+            ) : null}
+          </ul>
+        ) : null}
       </span>
       {sendLinks ? (
         <Button
@@ -327,6 +371,9 @@ function AccountRow({
       {dialog === "role" ? (
         <GiveRoleDialog account={account} roles={left} onOpenChange={close} />
       ) : null}
+      {dialog === "group" ? (
+        <AssignGroupDialog account={account} services={groups} onOpenChange={close} />
+      ) : null}
       {dialog === "link" ? <PasswordLinkDialog account={account} onOpenChange={close} /> : null}
     </li>
   )
@@ -339,12 +386,15 @@ export function StaffAccounts() {
   const sendLinks = can("update", "users")
   const accounts = useQuery(staffAccountsQuery)
   const roles = useQuery({ ...rolesQuery, enabled: changeRoles })
+  const groups = useAssignableGroups()
 
   return (
     <Section
       id="users"
       title={t("title")}
-      description={changeRoles || sendLinks ? t("description") : t("descriptionReadOnly")}
+      description={
+        changeRoles || sendLinks || groups.length > 0 ? t("description") : t("descriptionReadOnly")
+      }
     >
       {roles.isError ? (
         <QueryErrorState error={roles.error} onRetry={() => roles.refetch()} />
@@ -357,6 +407,7 @@ export function StaffAccounts() {
                 key={account.id}
                 account={account}
                 roles={roles.data?.items ?? []}
+                groups={groups}
                 changeRoles={changeRoles}
                 sendLinks={sendLinks}
               />

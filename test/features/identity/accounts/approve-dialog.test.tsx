@@ -9,6 +9,7 @@ import { SessionProvider } from "@/features/identity/auth/session"
 import type { Schemas } from "@/lib/api/client"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
+import { services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
@@ -96,6 +97,7 @@ function open(approve?: () => Response, account = me.administrator) {
       } satisfies Schemas["AccountRequestListResponse"])
     ),
     http.get(apiUrl("/roles"), () => HttpResponse.json({ items: [servantRole, parentRole] })),
+    http.get(apiUrl("/services"), () => HttpResponse.json(services)),
     http.get(apiUrl("/people/directory"), ({ request }) => {
       const q = new URL(request.url).searchParams.get("q") ?? ""
       queries.push(q)
@@ -216,27 +218,112 @@ test("a parent starts with the Parent role ticked", async () => {
   expect(dialog.getByRole("checkbox", { name: /Servant/ })).not.toBeChecked()
 })
 
-test("a servant says where they serve, starts with nothing ticked and sends the ticked role once", async () => {
-  const { sent } = open()
+const sundaySchool = services.items[0]!
+const thirdClass = sundaySchool.stages[2]!
+const youth = services.items[1]!
 
+const servantNamed = (named: (typeof services.items)[number][]) =>
   server.use(
     http.get(apiUrl("/account-requests"), () =>
       HttpResponse.json({
         items: [
-          { ...fady, services: [{ id: "y", name: "Youth Meeting", tone: 2, archived: false }] },
+          {
+            ...fady,
+            services: named.map(({ id, name, tone, archived }) => ({ id, name, tone, archived })),
+          },
         ],
         today: "2026-11-08",
       })
     )
   )
 
+test("a servant says where they serve, starts with nothing ticked and sends the ticked role once", async () => {
+  const { sent } = open()
+  servantNamed([youth])
   const dialog = await openApprove()
   expect(dialog.getByText("Says they serve in Youth Meeting.")).toBeInTheDocument()
   const submit = dialog.getByRole("button", { name: "Approve account" })
   expect(submit).toBeDisabled()
   await userEvent.click(await dialog.findByRole("checkbox", { name: /Servant/ }))
+  await dialog.findByRole("button", { name: "Remove Youth Meeting" })
   await userEvent.dblClick(submit)
-  await waitFor(() => expect(sent).toEqual([{ as: "servant", roleIds: [servantRole.id] }]))
+
+  await waitFor(() =>
+    expect(sent).toEqual([
+      {
+        as: "servant",
+        roleIds: [servantRole.id],
+        assignments: [{ serviceId: youth.id, stageId: null }],
+      },
+    ])
+  )
+})
+
+test("the groups start with the named service and send a chosen stage too", async () => {
+  const { sent } = open()
+  servantNamed([youth])
+  const dialog = await openApprove()
+  const groups = within(await dialog.findByRole("group", { name: "Groups" }))
+  expect(await groups.findByText("Youth Meeting", { selector: "bdi" })).toBeInTheDocument()
+  await userEvent.selectOptions(groups.getByRole("combobox", { name: "Service" }), sundaySchool.id)
+  await userEvent.selectOptions(groups.getByRole("combobox", { name: "Stage" }), thirdClass.id)
+  await userEvent.click(groups.getByRole("button", { name: "Add group" }))
+  expect(groups.getByText("Sunday School · 3rd Class")).toBeInTheDocument()
+  await userEvent.click(groups.getByRole("button", { name: "Remove Youth Meeting" }))
+  await userEvent.click(dialog.getByRole("checkbox", { name: /Servant/ }))
+  await userEvent.click(dialog.getByRole("button", { name: "Approve account" }))
+
+  await waitFor(() =>
+    expect(sent).toEqual([
+      {
+        as: "servant",
+        roleIds: [servantRole.id],
+        assignments: [{ serviceId: sundaySchool.id, stageId: thirdClass.id }],
+      },
+    ])
+  )
+})
+
+test("without a named service the servant starts without a group", async () => {
+  open()
+  servantNamed([])
+  const dialog = await openApprove()
+  const groups = within(await dialog.findByRole("group", { name: "Groups" }))
+
+  expect(
+    groups.getByText("No group yet. A servant without a group sees no service.")
+  ).toBeInTheDocument()
+})
+
+test("a group the API refuses shows under the groups with the dialog open", async () => {
+  open(() =>
+    problem(422, "checkFields", {
+      fieldErrors: {
+        "assignments.0.serviceId": { code: "meetings.serviceArchived", params: { name: "Youth" } },
+      },
+    })
+  )
+
+  servantNamed([youth])
+  const dialog = await openApprove()
+  await userEvent.click(await dialog.findByRole("checkbox", { name: /Servant/ }))
+  await dialog.findByRole("button", { name: "Remove Youth Meeting" })
+  await userEvent.click(dialog.getByRole("button", { name: "Approve account" }))
+  const groups = within(dialog.getByRole("group", { name: "Groups" }))
+  expect(await groups.findByText(/Youth/, { selector: "[data-slot='field-error']" })).toBeVisible()
+  expect(screen.getByRole("dialog")).toBeInTheDocument()
+})
+
+test("a group the approver may not assign is refused in words", async () => {
+  open(() => problem(403, "assignments.notAllowed"))
+  servantNamed([youth])
+  const dialog = await openApprove()
+  await userEvent.click(await dialog.findByRole("checkbox", { name: /Servant/ }))
+  await userEvent.click(dialog.getByRole("button", { name: "Approve account" }))
+
+  expect(
+    await dialog.findByText("You can’t assign people to this group or take them out of it.")
+  ).toBeInTheDocument()
 })
 
 test("a 422 roles.unknown shows under the roles with the dialog open", async () => {

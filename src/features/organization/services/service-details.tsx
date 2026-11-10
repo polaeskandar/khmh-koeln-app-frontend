@@ -39,6 +39,7 @@ import { AddStageButton } from "@/features/organization/stages/stage-dialogs"
 
 import { trendText } from "./service-bits"
 import { ServiceActionsMenu, ServiceFormDialog } from "./service-dialogs"
+import { ServiceServants } from "./service-servants"
 
 function EditButton({ service }: { service: ServiceRow }) {
   const t = useTranslations("common")
@@ -225,6 +226,18 @@ function Details({ service }: { service: ServiceRow }) {
             )}
           </QueryState>
         </Section>
+        {can("read", "users") ? (
+          <ServiceServants
+            service={{
+              id: service.id,
+              name: service.name,
+              stages: [...(stages.data?.stages ?? [])]
+                .sort((a, b) => a.position - b.position)
+                .map((stage) => ({ id: stage.id, name: stage.name })),
+            }}
+            archived={service.archived}
+          />
+        ) : null}
       </PageBody>
     </>
   )

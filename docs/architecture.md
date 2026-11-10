@@ -84,7 +84,7 @@ per resource:
 | Context        | Folders                                      |
 | -------------- | -------------------------------------------- |
 | `identity`     | `auth`, `account`, `accounts`, `roles`       |
-| `organization` | `services`, `stages`                         |
+| `organization` | `services`, `stages`, `assignments`          |
 | `people`       | `members`, `guardians`, `children`, `groups` |
 | `meetings`     | `meetings`, `attendance`, `dashboard`        |
 | `learning`     | `lessons`, `homework`                        |
