@@ -48,7 +48,7 @@ import {
 } from "./api"
 import { type Role, rolesQuery } from "@/features/identity/roles/api"
 
-const STAFF_QUERIES = [["staff-accounts"], ["me"]]
+const STAFF_QUERIES = [["staff-accounts"], ["roles"], ["me"]]
 
 function GiveRoleDialog({
   account,

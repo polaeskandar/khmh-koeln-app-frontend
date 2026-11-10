@@ -152,7 +152,7 @@ function Approval({ request, onDone }: { request: AccountRequest; onDone: () => 
 
   const approve = useApiMutation(approveRequest, {
     successMessage: t("toast.accountApproved", { name: request.account.displayName }),
-    invalidate: [["accountRequests"], ["staff-accounts"]],
+    invalidate: [["accountRequests"], ["staff-accounts"], ["roles"], ["guardian-links"]],
     toastOnError: false,
     onSuccess: onDone,
   })
@@ -283,7 +283,7 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
 
   const approve = useApiMutation(approveRequest, {
     successMessage: t("toast.accountApproved", { name }),
-    invalidate: [["accountRequests"]],
+    invalidate: [["accountRequests"], ["member-accounts"]],
     toastOnError: false,
     onSuccess: onDone,
   })

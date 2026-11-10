@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { apiUrl, problem } from "@test/support/api"
+import { me } from "@test/support/fixtures/me"
 import { services } from "@test/support/fixtures/services"
 import { stageRef } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
@@ -13,6 +14,9 @@ import { renderWithProviders } from "@test/support/providers"
 import type { AccountRequest, MemberCandidate } from "@/features/identity/accounts/api"
 import type { Schemas } from "@/lib/api/client"
 import { ApproveButton } from "@/features/identity/accounts/approve-dialog"
+import { MemberAccounts } from "@/features/identity/accounts/member-accounts"
+
+vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
 
 beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {})
@@ -181,6 +185,43 @@ test("a record with an account is disabled, and a 422 stays under the list", asy
   ).toBeInTheDocument()
 
   expect(screen.getByRole("dialog")).toBeInTheDocument()
+})
+
+test("approving a member refetches the member accounts", async () => {
+  let reads = 0
+
+  server.use(
+    http.get(apiUrl("/member-accounts"), () => {
+      reads++
+
+      return HttpResponse.json({ today: "2026-11-08", items: [] })
+    }),
+    http.get(apiUrl("/account-requests/member-candidates"), () =>
+      HttpResponse.json({ items: [youngMina] })
+    ),
+    http.post(apiUrl("/account-requests/:id/approve"), () =>
+      HttpResponse.json(request("Mina Hanna").account)
+    )
+  )
+
+  renderWithProviders(
+    <>
+      <MemberAccounts />
+      <ApproveButton request={request("Mina Hanna")} />
+    </>,
+    { me: me.administrator }
+  )
+
+  await waitFor(() => expect(reads).toBe(1))
+  const dialog = await openDialog()
+
+  await waitFor(() =>
+    expect(dialog.getAllByRole("radio")[0]).toHaveAttribute("aria-checked", "true")
+  )
+
+  await userEvent.click(dialog.getByRole("radio", { name: "16 or older" }))
+  await userEvent.click(dialog.getByRole("button", { name: "Approve account" }))
+  await waitFor(() => expect(reads).toBe(2))
 })
 
 test("a long note is refused before sending, and 16 or older sends no note", async () => {
