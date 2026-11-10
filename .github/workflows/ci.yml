@@ -41,6 +41,7 @@ jobs:
       - run: task api:types:check
       - run: task typecheck
       - run: task test
+      - run: task unused
 
       - run: task build
         env:
