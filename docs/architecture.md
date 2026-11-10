@@ -12,7 +12,10 @@ permissions) is described in the `backend` repository's `docs/`.
 Capacitor copies these files into the iOS and Android projects, so the apps start from files on the device,
 open without a connection and don't depend on a web server being reachable. This is the way Capacitor
 supports; loading a hosted site with `server.url` is meant for live reload during development only. Browsers
-get the same files from any static web server.
+get the same files from any static web server. Hosting them is set up outside this repository: the host
+serves each page as a directory (`/de/` is `de/index.html`), answers unknown paths with `404.html` and status
+404 rather than falling back to `index.html`, and sets the caching and security headers that the hosting
+hand-off issue ([#285](https://github.com/polaeskandar/khmh-koeln-app-frontend/issues/285)) specifies.
 
 What this rules out, because no Next.js server runs in production:
 

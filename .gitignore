@@ -36,6 +36,3 @@ next-env.d.ts
 messages/*.d.json.ts
 
 /public/mockServiceWorker.js
-
-/web-*.tar.gz
-/web-*.tar.gz.sha256
