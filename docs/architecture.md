@@ -113,6 +113,10 @@ its main one (the Settings page in `identity/accounts`). `portals/parent` and `p
 has no backend counterpart: each portal's shell, navigation, home and account page. Tests in `test/features/`
 use the same folders.
 
+Shared code in `src/components`, `src/hooks`, `src/i18n` and `src/lib` doesn't import from `src/features`: a
+feature builds on it, never the other way round. ESLint warns about the imports that still cross (the staff shell,
+the portal account menu and the language switch); the warning becomes an error once they have moved.
+
 ### Data access
 
 - **One `api.ts` per feature** (`src/features/<context>/<resource>/api.ts`) holds its response types, query options and
@@ -184,8 +188,10 @@ The project uses pnpm 12, pinned in `package.json` (`packageManager` and `devEng
 The UI is in English, German and Arabic; Arabic is read right to left. The texts live in
 `messages/{en,de,ar}.json`, copied once from the UI prototype without its prototype-only texts; feature PRs
 only add keys. `test/i18n/messages.test.ts` keeps the three catalogs in step (same keys, same ICU arguments,
-no empty texts), and every `t()` call is type-checked against `messages/en.json` through the declaration
-next-intl generates (`messages/en.d.json.ts`, git-ignored).
+no empty texts), `pnpm messages:unused` lists the keys no code reads (a key read through a template literal,
+``t(`status.${status}`)``, matches a pattern in `DYNAMIC_KEYS` of `scripts/message-usage.mjs`), and every
+`t()` call is type-checked against `messages/en.json` through the declaration next-intl generates
+(`messages/en.d.json.ts`, git-ignored).
 
 **Two layouts.** `app/layout.tsx` is the only root layout: it renders `<html>` and `<body>` for every page,
 including the language-free ones (`/` and `out/404.html`). `app/[locale]/layout.tsx` prerenders each page

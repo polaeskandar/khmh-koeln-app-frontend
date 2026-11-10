@@ -92,6 +92,23 @@ const eslintConfig = defineConfig([
     },
   },
   {
+    files: ["src/components/**", "src/hooks/**", "src/i18n/**", "src/lib/**"],
+    rules: {
+      "@typescript-eslint/no-restricted-imports": [
+        "warn",
+        {
+          patterns: [
+            {
+              group: ["@/features", "@/features/**"],
+              message:
+                "Shared code in components, hooks, i18n and lib doesn't import a feature (docs/architecture.md, Code layout).",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ["src/lib/domain/time.ts", "test/**/*.test.{ts,tsx}"],
     rules: { "no-restricted-syntax": "off" },
   },
