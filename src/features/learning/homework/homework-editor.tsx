@@ -31,6 +31,7 @@ import { HomeworkStatusBadge } from "@/features/learning/lessons/lesson-bits"
 import { stageQuery } from "@/features/organization/stages/api"
 import { useStageCrumbs } from "@/features/organization/stages/stage-layout"
 import { useSearchParamId } from "@/hooks/use-search-param-id"
+import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
 import type { LessonRef, LocalDate, ServiceRef, Uuid } from "@/lib/api/types/common"
@@ -92,7 +93,6 @@ function HomeworkForm(props: FormProps) {
   const [savedId, setSavedId] = useState<Uuid | null>(homework?.id ?? null)
   const [version, setVersion] = useState(homework?.version ?? 0)
   const [intent, setIntent] = useState<"save" | "publish">("save")
-  const busy = useRef(false)
 
   const mutation = useApiMutation(
     (input: HomeworkInput) =>
@@ -153,65 +153,56 @@ function HomeworkForm(props: FormProps) {
     setSent((list) => list.map((i) => (i === row ? -1 : i > row ? i - 1 : i)))
   }
 
-  async function submit(next: "save" | "publish") {
-    if (busy.current) {
+  const submit = useSubmitOnce(async (next: "save" | "publish") => {
+    setIntent(next)
+
+    const kept = resources.flatMap((r, i) => (isBlank(r) ? [] : [i]))
+    setSent(kept)
+
+    const saved = await mutation.execute({
+      title,
+      instructions,
+      dueDate: dueDate || null,
+      resources: kept.map((i) => {
+        const { label, url } = resources[i]!
+
+        return { label, url: url?.trim() ? url : null }
+      }),
+    })
+
+    if (!saved.ok) {
       return
     }
 
-    busy.current = true
-    setIntent(next)
+    setSavedId(saved.data.id)
+    setVersion(saved.data.version)
 
-    try {
-      const kept = resources.flatMap((r, i) => (isBlank(r) ? [] : [i]))
-      setSent(kept)
+    if (next === "save") {
+      toast.success(
+        saved.data.status === "published"
+          ? t("toast.homeworkSavedPublished")
+          : homework
+            ? t("toast.homeworkSavedDraft")
+            : t("toast.homeworkDraftSaved")
+      )
 
-      const saved = await mutation.execute({
-        title,
-        instructions,
-        dueDate: dueDate || null,
-        resources: kept.map((i) => {
-          const { label, url } = resources[i]!
+      router.push(afterSave(saved.data.status))
 
-          return { label, url: url?.trim() ? url : null }
-        }),
-      })
-
-      if (!saved.ok) {
-        return
-      }
-
-      setSavedId(saved.data.id)
-      setVersion(saved.data.version)
-
-      if (next === "save") {
-        toast.success(
-          saved.data.status === "published"
-            ? t("toast.homeworkSavedPublished")
-            : homework
-              ? t("toast.homeworkSavedDraft")
-              : t("toast.homeworkDraftSaved")
-        )
-
-        router.push(afterSave(saved.data.status))
-
-        return
-      }
-
-      const result = await publisher.publish({
-        id: saved.data.id,
-        title,
-        publishedAt: homework?.publishedAt ?? null,
-      })
-
-      if (result?.ok) {
-        router.push(afterSave("published"))
-      } else if (!homework) {
-        router.replace(routes.editHomework(saved.data.id, fromLesson))
-      }
-    } finally {
-      busy.current = false
+      return
     }
-  }
+
+    const result = await publisher.publish({
+      id: saved.data.id,
+      title,
+      publishedAt: homework?.publishedAt ?? null,
+    })
+
+    if (result?.ok) {
+      router.push(afterSave("published"))
+    } else if (!homework) {
+      router.replace(routes.editHomework(saved.data.id, fromLesson))
+    }
+  })
 
   return (
     <form

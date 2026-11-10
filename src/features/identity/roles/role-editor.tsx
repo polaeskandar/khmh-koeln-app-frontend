@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 import { cn } from "cn"
 import { TriangleAlert } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useId, useRef, useState } from "react"
+import { useId, useState } from "react"
 
 import { Topbar } from "@/components/app-shell/topbar"
 import { ConfirmDialog } from "@/components/confirm-dialog"
@@ -22,6 +22,7 @@ import { FieldError } from "@/components/ui/field"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Spinner } from "@/components/ui/spinner"
 import { useCan, useSession } from "@/features/identity/auth/session"
+import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -254,7 +255,6 @@ function RoleForm({ role }: { role: RoleDetail | null }) {
   const [chosen, setChosen] = useState(() => new Set((role?.permissions ?? []).map(key)))
   const [scope, setScope] = useState<RoleScope>(role?.scope ?? "church")
   const [deleting, setDeleting] = useState(false)
-  const busy = useRef(false)
   const editable = role ? can("update", "roles") : can("create", "roles")
 
   const create = useApiMutation(createRoleRequest, {
@@ -290,6 +290,10 @@ function RoleForm({ role }: { role: RoleDetail | null }) {
 
   const blocked = !name.trim() || taken !== undefined || save.pending
 
+  const submit = useSubmitOnce(() => save.execute({ name, scope, permissions }), {
+    keepLocked: (result) => result.ok && !role,
+  })
+
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
       <form
@@ -298,17 +302,9 @@ function RoleForm({ role }: { role: RoleDetail | null }) {
         onSubmit={(event) => {
           event.preventDefault()
 
-          if (blocked || busy.current) {
-            return
+          if (!blocked) {
+            void submit()
           }
-
-          busy.current = true
-
-          void save.execute({ name, scope, permissions }).then((result) => {
-            if (!result.ok || role) {
-              busy.current = false
-            }
-          })
         }}
       >
         {!editable ? (

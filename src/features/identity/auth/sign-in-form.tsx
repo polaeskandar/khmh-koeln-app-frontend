@@ -2,13 +2,14 @@
 
 import { CircleAlert } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useRef, useState } from "react"
+import { useState } from "react"
 
 import { TextField } from "@/components/form-fields"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { FieldGroup } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
+import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { Link, useRouter } from "@/i18n/navigation"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { routes } from "@/lib/routes"
@@ -25,15 +26,9 @@ export function SignInForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
-  const submitting = useRef(false)
   const signIn = useApiMutation(signInRequest, { toastOnError: false })
 
-  async function submit() {
-    if (submitting.current) {
-      return
-    }
-
-    submitting.current = true
+  const submit = useSubmitOnce(async () => {
     setError(null)
     const result = await signIn.execute({ email, password })
 
@@ -61,9 +56,7 @@ export function SignInForm() {
             : result.problem.message
       )
     }
-
-    submitting.current = false
-  }
+  })
 
   return (
     <form

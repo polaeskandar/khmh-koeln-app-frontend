@@ -3,7 +3,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { CalendarClock, Copy, Eraser, Link2, RefreshCw } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useId, useRef, useState } from "react"
+import { useId, useState } from "react"
 import { toast } from "sonner"
 
 import { Topbar } from "@/components/app-shell/topbar"
@@ -19,6 +19,7 @@ import { FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { useCan, useSession } from "@/features/identity/auth/session"
+import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { useFormat } from "@/i18n/format"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
@@ -316,7 +317,6 @@ function CopyLinkSection({ data }: { data: DataRequestDetail }) {
   const t = useTranslations()
   const queryClient = useQueryClient()
   const [created, setCreated] = useState<CopyLink | null>(null)
-  const creating = useRef(false)
   const { request } = data
   const open = request.status === "open"
   const gone = data.member === null && data.account === null
@@ -330,31 +330,21 @@ function CopyLinkSection({ data }: { data: DataRequestDetail }) {
     ? { expiresAt: created.expiresAt, emailedTo: created.emailedTo, usedAt: null }
     : data.copyLink
 
-  async function createLink() {
-    if (creating.current) {
+  const createLink = useSubmitOnce(async () => {
+    const result = await create.execute()
+
+    if (result.ok) {
+      return true
+    }
+
+    if (result.problem.status !== 409) {
       return false
     }
 
-    creating.current = true
+    void queryClient.invalidateQueries({ queryKey: ["data-requests"] })
 
-    try {
-      const result = await create.execute()
-
-      if (result.ok) {
-        return true
-      }
-
-      if (result.problem.status !== 409) {
-        return false
-      }
-
-      void queryClient.invalidateQueries({ queryKey: ["data-requests"] })
-
-      return true
-    } finally {
-      creating.current = false
-    }
-  }
+    return true
+  })
 
   if (!open && !shown) {
     return null
@@ -372,7 +362,7 @@ function CopyLinkSection({ data }: { data: DataRequestDetail }) {
         title={t("privacy.copyLink.newTitle")}
         description={t("privacy.copyLink.newText")}
         confirmLabel={t("privacy.copyLink.newConfirm")}
-        onConfirm={createLink}
+        onConfirm={async () => (await createLink()) ?? false}
       />
     ) : (
       <Button disabled={create.pending} onClick={() => void createLink()}>

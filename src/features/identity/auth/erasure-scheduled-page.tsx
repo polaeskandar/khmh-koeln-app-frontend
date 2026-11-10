@@ -2,7 +2,7 @@
 
 import { CalendarX2, CircleAlert, CircleCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useRef, useState, useSyncExternalStore } from "react"
+import { useState, useSyncExternalStore } from "react"
 
 import { TextField } from "@/components/form-fields"
 import { NotFoundPage } from "@/components/not-found-page"
@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { FieldGroup } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
+import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
@@ -54,18 +55,11 @@ function ErasureScheduled({ erasesOn }: { erasesOn: LocalDate }) {
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [canceled, setCanceled] = useState(false)
-  const submitting = useRef(false)
   const cancel = useApiMutation(cancelErasureRequest, { toastOnError: false })
 
-  async function submit() {
-    if (submitting.current) {
-      return
-    }
-
-    submitting.current = true
+  const submit = useSubmitOnce(async () => {
     setError(null)
     const result = await cancel.execute({ email: email.trim(), password })
-    submitting.current = false
 
     if (result.ok) {
       setCanceled(true)
@@ -76,7 +70,7 @@ function ErasureScheduled({ erasesOn }: { erasesOn: LocalDate }) {
     setError(
       result.problem.code === "auth.invalidCredentials" ? t("signIn.wrong") : result.problem.message
     )
-  }
+  })
 
   if (canceled) {
     return (

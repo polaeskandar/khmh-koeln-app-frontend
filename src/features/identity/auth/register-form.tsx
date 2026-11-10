@@ -25,6 +25,7 @@ import {
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Spinner } from "@/components/ui/spinner"
+import { useSubmitOnce } from "@/hooks/use-submit-once"
 import type { Locale } from "@/i18n/config"
 import { Link, useRouter } from "@/i18n/navigation"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -115,7 +116,6 @@ export function RegisterForm() {
   const router = useRouter()
   const privacyId = useId()
   const formRef = useRef<HTMLFormElement>(null)
-  const submitting = useRef(false)
   const [alert, setAlert] = useState<string | null>(null)
 
   const [form, setForm] = useState({
@@ -142,12 +142,7 @@ export function RegisterForm() {
     }
   }, [register.problem])
 
-  async function submit() {
-    if (submitting.current) {
-      return
-    }
-
-    submitting.current = true
+  const submit = useSubmitOnce(async () => {
     setAlert(null)
 
     const result = await register.execute({
@@ -166,15 +161,13 @@ export function RegisterForm() {
       privacy: { accepted: form.acceptPrivacy, version: PRIVACY_NOTICE_VERSION },
     })
 
-    submitting.current = false
-
     if (result.ok) {
       rememberOutcome("registered")
       router.push(routes.registered())
     } else if (!SHOWN_FIELDS.some((field) => result.problem.fieldErrors[field])) {
       setAlert(result.problem.message)
     }
-  }
+  })
 
   const kinds = [
     { value: "parent", title: t("asParent"), description: t("asParentHint") },

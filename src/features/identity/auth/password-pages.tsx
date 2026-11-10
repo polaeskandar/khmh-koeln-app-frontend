@@ -3,13 +3,14 @@
 import { cn } from "cn"
 import { CircleAlert, CircleCheck, KeyRound, Link2Off, MailCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useRef, useState, useSyncExternalStore } from "react"
+import { useEffect, useState, useSyncExternalStore } from "react"
 
 import { TextField } from "@/components/form-fields"
 import { NotFoundPage } from "@/components/not-found-page"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
+import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { Link } from "@/i18n/navigation"
 import { carryFragment } from "@/i18n/use-switch-locale"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -56,7 +57,6 @@ function SetPasswordFlow() {
   const [password, setPassword] = useState("")
   const [outcome, setOutcome] = useState<"saved" | "invalid" | null>(null)
   const [alert, setAlert] = useState<string | null>(null)
-  const submitting = useRef(false)
   const save = useApiMutation(setPasswordRequest, { toastOnError: false })
 
   useEffect(forgetAddressFragment, [])
@@ -67,15 +67,13 @@ function SetPasswordFlow() {
     return () => carryFragment(null)
   }, [token, outcome])
 
-  async function submit() {
-    if (submitting.current || !token) {
+  const submit = useSubmitOnce(async () => {
+    if (!token) {
       return
     }
 
-    submitting.current = true
     setAlert(null)
     const result = await save.execute({ token, password })
-    submitting.current = false
 
     if (result.ok) {
       setOutcome("saved")
@@ -84,7 +82,7 @@ function SetPasswordFlow() {
     } else if (!result.problem.fieldErrors.password) {
       setAlert(result.problem.message)
     }
-  }
+  })
 
   if (token === null) {
     return <NotFoundPage />
@@ -157,26 +155,19 @@ function ForgotPasswordByEmail() {
   const [email, setEmail] = useState("")
   const [sentTo, setSentTo] = useState<string | null>(null)
   const [alert, setAlert] = useState<string | null>(null)
-  const submitting = useRef(false)
   const send = useApiMutation(forgotPasswordRequest, { toastOnError: false })
 
-  async function submit() {
-    if (submitting.current) {
-      return
-    }
-
-    submitting.current = true
+  const submit = useSubmitOnce(async () => {
     setAlert(null)
     const address = email.trim()
     const result = await send.execute(address)
-    submitting.current = false
 
     if (result.ok) {
       setSentTo(address)
     } else if (!result.problem.fieldErrors.email) {
       setAlert(result.problem.message)
     }
-  }
+  })
 
   if (sentTo) {
     return (

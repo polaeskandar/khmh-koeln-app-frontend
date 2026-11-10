@@ -23,6 +23,7 @@ import { focusFirstInvalid } from "@/components/focus-first-invalid"
 import { AppearanceFields } from "@/components/theme-switch"
 import type { Me } from "@/features/identity/auth/api"
 import { PasswordField } from "@/features/identity/auth/password-field"
+import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { isLocale, LOCALE_NAMES, LOCALES } from "@/i18n/config"
 import { useSwitchLocale } from "@/i18n/use-switch-locale"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -111,7 +112,6 @@ function PasswordForm({
   const t = useTranslations("account.password")
   const tCommon = useTranslations("common")
   const formRef = useRef<HTMLFormElement>(null)
-  const busy = useRef(false)
   const [currentPassword, setCurrent] = useState("")
   const [newPassword, setNew] = useState("")
 
@@ -134,19 +134,9 @@ function PasswordForm({
 
   useEffect(() => onPendingChange(mutation.pending), [mutation.pending, onPendingChange])
 
-  async function submit() {
-    if (busy.current) {
-      return
-    }
-
-    busy.current = true
-
-    try {
-      await mutation.execute({ currentPassword, newPassword })
-    } finally {
-      busy.current = false
-    }
-  }
+  const submit = useSubmitOnce(async () => {
+    await mutation.execute({ currentPassword, newPassword })
+  })
 
   return (
     <form
