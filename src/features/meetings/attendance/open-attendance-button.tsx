@@ -17,7 +17,7 @@ const REFETCH_CODES = new Set([
   "meetings.attendanceClosed",
 ])
 
-const SESSION_QUERIES = [["attendance"], ["sessions"], ["agenda"]]
+const SESSION_QUERIES = [["attendance"], ["sessions"], ["agenda"], ["dashboard"]]
 
 export function OpenAttendanceButton({
   session,

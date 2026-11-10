@@ -63,7 +63,7 @@ function ReopenButton({ board }: { board: Board }) {
 
   const reopen = useApiMutation(reopenAttendanceRequest, {
     toastOnError: false,
-    invalidate: [["attendance"], ["sessions"]],
+    invalidate: [["attendance"], ["sessions"], ["agenda"], ["dashboard"]],
     onSuccess: () => router.push(routes.takeAttendance(id)),
   })
 

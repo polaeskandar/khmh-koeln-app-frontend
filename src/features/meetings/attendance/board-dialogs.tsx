@@ -22,7 +22,7 @@ import {
   removeMarkRequest,
 } from "./api"
 
-const SESSION_QUERIES = [["attendance"], ["sessions"], ["agenda"]]
+const SESSION_QUERIES = [["attendance"], ["sessions"], ["agenda"], ["dashboard"]]
 
 const STATE_QUERIES = [["attendance"], ["sessions"]]
 
