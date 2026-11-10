@@ -23,7 +23,7 @@ import { isolate } from "@/lib/bidi"
 import { PERMISSION_COUNT, RESOURCES } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import { deleteRoleRequest, type RoleRow, roleListQuery } from "./api"
+import { deleteRoleRequest, type RoleRow, roleListQuery, ROLE_QUERIES } from "./api"
 
 function RoleMenu({ role }: { role: RoleRow }) {
   const t = useTranslations()
@@ -32,7 +32,7 @@ function RoleMenu({ role }: { role: RoleRow }) {
 
   const remove = useApiMutation(deleteRoleRequest, {
     successMessage: t("toast.roleDeleted", { name: role.name }),
-    invalidate: [["roles"], ["staff-accounts"], ["me"]],
+    invalidate: ROLE_QUERIES,
   })
 
   return (

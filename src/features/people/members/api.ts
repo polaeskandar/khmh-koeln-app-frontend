@@ -1,5 +1,6 @@
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { Uuid } from "@/lib/api/types/common"
+import { PEOPLE_KEY, SERVICES_KEY, STAGES_KEY } from "@/lib/api/query-keys"
 
 export type Placement = Schemas["PlacementRow"]
 
@@ -16,7 +17,7 @@ export type PeopleFilter = {
 }
 
 export const peopleQuery = (filter: PeopleFilter) => ({
-  queryKey: ["people", "list", filter] as const,
+  queryKey: [...PEOPLE_KEY, "list", filter] as const,
   queryFn: ({ signal }: { signal: AbortSignal }) =>
     dataOf(api.GET("/people", { params: { query: filter }, signal })),
 })
@@ -27,7 +28,7 @@ const nameSearch = (person: PersonRow["person"]) =>
   `${person.firstName} ${person.lastName}`.slice(0, SEARCH_LIMIT).trim()
 
 export const personRowQuery = (person: PersonRow["person"], version: number) => ({
-  queryKey: ["people", "detail", { id: person.id, version }] as const,
+  queryKey: [...PEOPLE_KEY, "detail", { id: person.id, version }] as const,
   queryFn: async ({ signal }: { signal: AbortSignal }) => {
     const list = await dataOf(
       api.GET("/people", { params: { query: { status: "all", q: nameSearch(person) } }, signal })
@@ -40,12 +41,14 @@ export const personRowQuery = (person: PersonRow["person"], version: number) => 
 export type DirectoryPerson = Schemas["DirectoryEntry"]
 
 export const directoryQuery = (q: string) => ({
-  queryKey: ["people", "directory", q] as const,
+  queryKey: [...PEOPLE_KEY, "directory", q] as const,
   queryFn: ({ signal }: { signal: AbortSignal }) =>
     dataOf(api.GET("/people/directory", { params: { query: { q } }, signal })),
 })
 
-export const MEMBERSHIP_QUERIES = [["people"], ["services"], ["stages"]]
+export const MEMBERSHIP_QUERIES = [PEOPLE_KEY, SERVICES_KEY, STAGES_KEY]
+
+export const PERSON_NAME_QUERIES = [PEOPLE_KEY, SERVICES_KEY]
 
 export type PlacementInput = { serviceId: Uuid; stageId: Uuid | null }
 

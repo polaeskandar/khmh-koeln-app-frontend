@@ -1,10 +1,17 @@
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { Uuid } from "@/lib/api/types/common"
+import {
+  ACCOUNT_REQUESTS_KEY,
+  MEMBER_ACCOUNTS_KEY,
+  STAFF_ACCOUNTS_KEY,
+  GUARDIAN_LINKS_KEY,
+  ROLES_KEY,
+} from "@/lib/api/query-keys"
 
 export type AccountRequest = Schemas["AccountRequestListResponse"]["items"][number]
 
 export const accountRequestsQuery = {
-  queryKey: ["accountRequests", "list"] as const,
+  queryKey: [...ACCOUNT_REQUESTS_KEY, "list"] as const,
   queryFn: ({ signal }: { signal: AbortSignal }) =>
     dataOf(api.GET("/account-requests", { signal })),
 }
@@ -17,7 +24,7 @@ export const declineRequest = (account: Uuid) =>
 export type StaffAccount = Schemas["StaffAccountResponse"]
 
 export const staffAccountsQuery = {
-  queryKey: ["staff-accounts"] as const,
+  queryKey: STAFF_ACCOUNTS_KEY,
   queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/staff-accounts", { signal })),
 }
 
@@ -36,7 +43,7 @@ export const approveRequest = (account: Uuid, approval: Approval) =>
 export type MemberCandidate = Schemas["MemberCandidateResponse"]
 
 export const memberCandidatesQuery = (q: string) => ({
-  queryKey: ["accountRequests", "memberCandidates", q] as const,
+  queryKey: [...ACCOUNT_REQUESTS_KEY, "memberCandidates", q] as const,
   queryFn: ({ signal }: { signal: AbortSignal }) =>
     dataOf(api.GET("/account-requests/member-candidates", { params: { query: { q } }, signal })),
 })
@@ -44,7 +51,7 @@ export const memberCandidatesQuery = (q: string) => ({
 export type MemberAccount = Schemas["MemberAccountItemResponse"]
 
 export const memberAccountsQuery = {
-  queryKey: ["member-accounts"] as const,
+  queryKey: MEMBER_ACCOUNTS_KEY,
   queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/member-accounts", { signal })),
 }
 
@@ -61,3 +68,14 @@ export type PasswordLink = Schemas["IssuedPasswordLink"]
 
 export const passwordLinkRequest = (account: Uuid) =>
   dataOf(api.POST("/accounts/{id}/password-link", { params: { path: { id: account } }, body: {} }))
+
+export const ACCOUNT_REQUEST_QUERIES = [ACCOUNT_REQUESTS_KEY]
+
+export const STAFF_APPROVAL_QUERIES = [
+  ACCOUNT_REQUESTS_KEY,
+  STAFF_ACCOUNTS_KEY,
+  ROLES_KEY,
+  GUARDIAN_LINKS_KEY,
+]
+
+export const MEMBER_ACCOUNT_QUERIES = [MEMBER_ACCOUNTS_KEY, ACCOUNT_REQUESTS_KEY]

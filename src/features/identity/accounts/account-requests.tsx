@@ -18,9 +18,13 @@ import { useFormat } from "@/i18n/format"
 import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
-import { type AccountRequest, accountRequestsQuery, declineRequest } from "./api"
-
-const ACCOUNT_QUERIES = [["accountRequests"]]
+import {
+  type AccountRequest,
+  accountRequestsQuery,
+  declineRequest,
+  ACCOUNT_REQUEST_QUERIES,
+} from "./api"
+import { ACCOUNT_REQUESTS_KEY } from "@/lib/api/query-keys"
 
 const KIND = { parent: "asParent", servant: "asServant", member: "asMember" } as const
 
@@ -79,7 +83,7 @@ function DeclineButton({ request }: { request: AccountRequest }) {
 
   const decline = useApiMutation(declineRequest, {
     successMessage: t("toast.accountDeclined", { name: request.account.displayName }),
-    invalidate: ACCOUNT_QUERIES,
+    invalidate: ACCOUNT_REQUEST_QUERIES,
   })
 
   return (
@@ -96,7 +100,7 @@ function DeclineButton({ request }: { request: AccountRequest }) {
         const result = await decline.execute(request.account.id)
 
         if (!result.ok) {
-          void queryClient.invalidateQueries({ queryKey: ["accountRequests"] })
+          void queryClient.invalidateQueries({ queryKey: ACCOUNT_REQUESTS_KEY })
         }
 
         return true

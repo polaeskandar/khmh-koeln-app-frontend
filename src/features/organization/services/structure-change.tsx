@@ -4,6 +4,7 @@ import { useState } from "react"
 
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
+import { STRUCTURE_QUERIES } from "./api"
 
 type Props = Omit<React.ComponentProps<typeof ConfirmDialog>, "onConfirm" | "note"> & {
   run: () => Promise<unknown>
@@ -21,7 +22,7 @@ export function StructureChangeDialog({
   const mutation = useApiMutation(run, {
     successMessage,
     toastOnError: false,
-    invalidate: [["services"], ["stages"], ["schedules"], ["agenda"]],
+    invalidate: STRUCTURE_QUERIES,
     onSuccess,
   })
 

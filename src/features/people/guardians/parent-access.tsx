@@ -34,10 +34,10 @@ import {
   type GuardianLinks,
   guardianLinksQuery,
   revokeAccessRequest,
+  GUARDIAN_LINK_QUERIES,
 } from "./api"
 import { PersonSearch } from "@/features/people/members/person-search"
-
-const LINK_QUERIES = [["guardian-links"]]
+import { GUARDIAN_LINKS_KEY } from "@/lib/api/query-keys"
 
 function GiveAccessDialog({
   accounts,
@@ -56,7 +56,7 @@ function GiveAccessDialog({
 
   const give = useApiMutation(giveAccessRequest, {
     successMessage: toastText("accessGiven"),
-    invalidate: LINK_QUERIES,
+    invalidate: GUARDIAN_LINK_QUERIES,
     toastOnError: false,
     onSuccess: () => onOpenChange(false),
   })
@@ -144,7 +144,7 @@ function LinkRow({ link, today, manage }: { link: GuardianLink; today: string; m
 
   const revoke = useApiMutation(revokeAccessRequest, {
     successMessage: t("toast.accessRemoved"),
-    invalidate: LINK_QUERIES,
+    invalidate: GUARDIAN_LINK_QUERIES,
   })
 
   const child = preferredName(link.child)
@@ -194,7 +194,7 @@ function LinkRow({ link, today, manage }: { link: GuardianLink; today: string; m
             const result = await revoke.execute(link.id)
 
             if (!result.ok && result.problem.status === 404) {
-              void queryClient.invalidateQueries({ queryKey: ["guardian-links"] })
+              void queryClient.invalidateQueries({ queryKey: GUARDIAN_LINKS_KEY })
 
               return true
             }

@@ -39,8 +39,10 @@ import {
   erasureReviewQuery,
   memberRecordOf,
   mentionLabelOf,
+  DATA_REQUEST_QUERIES,
 } from "./api"
 import { DueLabel, RequestStatusBadge, useSubjectLabel } from "./request-bits"
+import { DATA_REQUESTS_KEY } from "@/lib/api/query-keys"
 
 const ERASE_KEYS = [
   "person",
@@ -124,7 +126,7 @@ function EraseAction({
           const result = await erase.execute(mentions > 0 && clearNotes)
 
           if (!result.ok && result.problem.status === 409) {
-            void queryClient.invalidateQueries({ queryKey: ["data-requests"] })
+            void queryClient.invalidateQueries({ queryKey: DATA_REQUESTS_KEY })
 
             return true
           }
@@ -323,7 +325,7 @@ function CopyLinkSection({ data }: { data: DataRequestDetail }) {
 
   const create = useApiMutation(() => createCopyLink(request.id), {
     onSuccess: setCreated,
-    invalidate: [["data-requests"]],
+    invalidate: DATA_REQUEST_QUERIES,
   })
 
   const shown = created
@@ -341,7 +343,7 @@ function CopyLinkSection({ data }: { data: DataRequestDetail }) {
       return false
     }
 
-    void queryClient.invalidateQueries({ queryKey: ["data-requests"] })
+    void queryClient.invalidateQueries({ queryKey: DATA_REQUESTS_KEY })
 
     return true
   })

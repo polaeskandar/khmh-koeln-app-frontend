@@ -30,9 +30,10 @@ import { api, apiDownload, dataOf, type Schemas } from "@/lib/api/client"
 import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { routes } from "@/lib/routes"
+import { ME_KEY } from "@/lib/api/query-keys"
 
 const erasureRequestQuery = {
-  queryKey: ["me", "erasure-request"] as const,
+  queryKey: [...ME_KEY, "erasure-request"] as const,
   queryFn: ({ signal }: { signal: AbortSignal }) =>
     dataOf(api.GET("/me/erasure-request", { signal })),
 }

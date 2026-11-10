@@ -39,10 +39,9 @@ import {
   type ServiceRow,
   updateServiceRequest,
   useServiceInsight,
+  SERVICE_QUERIES,
 } from "./api"
 import { StructureChangeDialog } from "./structure-change"
-
-const SERVICE_QUERIES = [["services"]]
 
 function changesOf(service: ServiceRow, fields: ServiceFields): Partial<ServiceFields> {
   const changes: Partial<ServiceFields> = {}

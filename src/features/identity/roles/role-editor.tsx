@@ -48,6 +48,7 @@ import {
   roleListQuery,
   roleQuery,
   updateRoleRequest,
+  ROLE_QUERIES,
 } from "./api"
 
 const NAME_MAX = 80
@@ -259,20 +260,20 @@ function RoleForm({ role }: { role: RoleDetail | null }) {
 
   const create = useApiMutation(createRoleRequest, {
     successMessage: t("toast.roleCreated", { name: name.trim() }),
-    invalidate: [["roles"], ["staff-accounts"], ["me"]],
+    invalidate: ROLE_QUERIES,
     onSuccess: (saved) => router.push(routes.role(saved.id)),
   })
 
   const update = useApiMutation((input: RoleInput) => updateRoleRequest(role?.id ?? "", input), {
     successMessage: t("toast.roleSaved"),
-    invalidate: [["roles"], ["staff-accounts"], ["me"]],
+    invalidate: ROLE_QUERIES,
   })
 
   const save = role ? update : create
 
   const remove = useApiMutation(deleteRoleRequest, {
     successMessage: t("toast.roleDeleted", { name: role?.name ?? "" }),
-    invalidate: [["roles"], ["staff-accounts"], ["me"]],
+    invalidate: ROLE_QUERIES,
     onSuccess: () => router.push(`${routes.settings()}#roles`),
   })
 

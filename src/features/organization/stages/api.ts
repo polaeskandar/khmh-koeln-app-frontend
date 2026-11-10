@@ -1,10 +1,11 @@
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { Uuid } from "@/lib/api/types/common"
+import { STAGES_KEY, SERVICES_KEY } from "@/lib/api/query-keys"
 
 export type Stage = Schemas["StageResponse"]
 
 export const stageQuery = (id: Uuid) => ({
-  queryKey: ["stages", "detail", id] as const,
+  queryKey: [...STAGES_KEY, "detail", id] as const,
   queryFn: ({ signal }: { signal: AbortSignal }) =>
     dataOf(api.GET("/stages/{id}", { params: { path: { id } }, signal })),
 })
@@ -24,3 +25,5 @@ export const reorderStagesRequest = (service: Uuid, stageIds: Uuid[]) =>
       body: { stageIds },
     })
   )
+
+export const STAGE_QUERIES = [STAGES_KEY, SERVICES_KEY]

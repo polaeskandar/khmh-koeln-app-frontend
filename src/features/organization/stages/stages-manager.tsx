@@ -43,6 +43,7 @@ import { routes } from "@/lib/routes"
 
 import { reorderStagesRequest } from "./api"
 import { AddStageButton, RestoreStageButton, StageActionsMenu } from "./stage-dialogs"
+import { SERVICES_KEY } from "@/lib/api/query-keys"
 
 type StageItem = ServiceStages["stages"][number]
 
@@ -171,7 +172,7 @@ function Manager({ data }: { data: ServiceStages }) {
       setSyncedKey("")
     }
 
-    void queryClient.invalidateQueries({ queryKey: ["services"] })
+    void queryClient.invalidateQueries({ queryKey: SERVICES_KEY })
   }
 
   const move = (id: string, direction: -1 | 1) => {
