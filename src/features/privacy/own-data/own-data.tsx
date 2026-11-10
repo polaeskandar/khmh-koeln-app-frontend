@@ -24,6 +24,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { rememberErasureScheduled } from "@/features/identity/auth/auth-outcome"
 import { PasswordField } from "@/features/identity/auth/password-field"
 import { useSession } from "@/features/identity/auth/session"
+import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { useFormat } from "@/i18n/format"
 import { api, apiDownload, dataOf, type Schemas } from "@/lib/api/client"
 import type { LocalDate } from "@/lib/api/types/common"
@@ -51,7 +52,6 @@ function DeleteAccountForm({
   const t = useTranslations()
   const { endSession } = useSession()
   const formRef = useRef<HTMLFormElement>(null)
-  const busy = useRef(false)
   const [password, setPassword] = useState("")
   const [note, setNote] = useState("")
 
@@ -72,26 +72,15 @@ function DeleteAccountForm({
 
   useEffect(() => onPendingChange(erase.pending), [erase.pending, onPendingChange])
 
-  async function submit() {
-    if (busy.current) {
-      return
-    }
-
-    busy.current = true
+  const submit = useSubmitOnce(async () => {
     const trimmed = note.trim()
 
-    try {
-      const result = await erase.execute(
-        trimmed === "" ? { password } : { password, note: trimmed }
-      )
+    const result = await erase.execute(trimmed === "" ? { password } : { password, note: trimmed })
 
-      if (!result.ok && result.problem.code === "privacy.alreadyRequested") {
-        onAlreadyRequested()
-      }
-    } finally {
-      busy.current = false
+    if (!result.ok && result.problem.code === "privacy.alreadyRequested") {
+      onAlreadyRequested()
     }
-  }
+  })
 
   return (
     <form

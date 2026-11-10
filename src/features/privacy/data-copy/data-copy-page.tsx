@@ -2,7 +2,7 @@
 
 import { CircleAlert, CircleCheck, FileDown, Link2Off } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useRef, useState, useSyncExternalStore } from "react"
+import { useEffect, useState, useSyncExternalStore } from "react"
 
 import { NotFoundPage } from "@/components/not-found-page"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { forgetAddressFragment, tokenInAddress } from "@/features/identity/auth/address-token"
 import { AuthFrame, AuthHeading } from "@/features/identity/auth/auth-frame"
+import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { carryFragment } from "@/i18n/use-switch-locale"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
@@ -40,7 +41,6 @@ function DataCopyFlow() {
   const [token] = useState(tokenInAddress)
   const [outcome, setOutcome] = useState<"saved" | "invalid" | null>(null)
   const [alert, setAlert] = useState<string | null>(null)
-  const downloading = useRef(false)
   const download = useApiMutation(downloadDataCopy, { toastOnError: false })
 
   useEffect(forgetAddressFragment, [])
@@ -51,15 +51,13 @@ function DataCopyFlow() {
     return () => carryFragment(null)
   }, [token, outcome])
 
-  async function save() {
-    if (downloading.current || !token) {
+  const save = useSubmitOnce(async () => {
+    if (!token) {
       return
     }
 
-    downloading.current = true
     setAlert(null)
     const result = await download.execute(token)
-    downloading.current = false
 
     if (result.ok) {
       setOutcome("saved")
@@ -74,7 +72,7 @@ function DataCopyFlow() {
     }
 
     setAlert(result.problem.message)
-  }
+  })
 
   if (token === null) {
     return <NotFoundPage />

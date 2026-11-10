@@ -3,9 +3,10 @@
 import { Check, CircleCheck, Undo2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { QueryKey } from "@tanstack/react-query"
-import { useRef, useState } from "react"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { useFormat } from "@/i18n/format"
 import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -43,27 +44,17 @@ export function useCompletion({
   invalidate,
 }: CompletionOptions) {
   const [local, setLocal] = useState<{ report: Report; from: Report } | null>(null)
-  const busy = useRef(false)
   const done = useApiMutation(reportDone, { invalidate })
   const undo = useApiMutation(undoReport, { invalidate, successMessage: undone })
   const pending = done.pending || undo.pending
   const report = local && (pending || local.from === initial) ? local.report : initial
 
-  async function change(next: Report, run: () => Promise<Report | null>) {
-    if (busy.current) {
-      return
-    }
-
-    busy.current = true
+  const change = useSubmitOnce(async (next: Report, run: () => Promise<Report | null>) => {
     const before = report
     setLocal({ report: next, from: initial })
 
-    try {
-      setLocal({ report: (await run()) ?? before, from: initial })
-    } finally {
-      busy.current = false
-    }
-  }
+    setLocal({ report: (await run()) ?? before, from: initial })
+  })
 
   return {
     report,
