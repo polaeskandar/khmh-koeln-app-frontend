@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query"
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
@@ -6,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
+import { upcomingQuery } from "@/features/meetings/dashboard/api"
 import { SessionPage } from "@/features/meetings/meetings/session-page"
 import type { Locale } from "@/i18n/config"
 import type { SessionView } from "@/lib/api/types/meetings"
@@ -58,6 +60,12 @@ const opened = (board: AttendanceSheet) => ({
   openedAt: "2026-11-08T12:00:00+01:00",
 })
 
+function Upcoming() {
+  useQuery(upcomingQuery)
+
+  return null
+}
+
 function openBoard(
   board: AttendanceSheet,
   {
@@ -68,9 +76,19 @@ function openBoard(
 ) {
   search.value = `session=${board.session.id}`
   let current = board
-  const calls = { open: 0, get: 0 }
+  const calls = { open: 0, get: 0, upcoming: 0 }
 
   server.use(
+    http.get(apiUrl("/dashboard/upcoming"), () => {
+      calls.upcoming++
+
+      return HttpResponse.json({
+        today: "2026-11-08",
+        from: "2026-11-09",
+        to: "2026-11-15",
+        items: [],
+      })
+    }),
     http.get(apiUrl(`/sessions/${board.session.id}`), () => HttpResponse.json(detailOf(current))),
     http.get(apiUrl(`/sessions/${board.session.id}/attendance/corrections`), () =>
       HttpResponse.json({ items: [] })
@@ -95,6 +113,7 @@ function openBoard(
   renderWithProviders(
     <SidebarProvider>
       <TakeAttendancePage />
+      <Upcoming />
     </SidebarProvider>,
     { locale, me: who }
   )
@@ -125,6 +144,12 @@ describe("the board route before and after", () => {
       expect(router.replace).not.toHaveBeenCalled()
     }
   )
+
+  test("opening attendance refetches the dashboard's coming up list", async () => {
+    const calls = openBoard(scheduled({ date: "2026-11-08" }))
+    await userEvent.click(await screen.findByRole("button", { name: "Open attendance" }))
+    await waitFor(() => expect(calls.upcoming).toBe(2))
+  })
 
   test("without attendance: create the servants open it", async () => {
     openBoard(scheduled(), { who: viewer })

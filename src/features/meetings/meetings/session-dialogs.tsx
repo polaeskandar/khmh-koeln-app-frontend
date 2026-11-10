@@ -18,7 +18,7 @@ import { useApiMutation } from "@/lib/api/use-api-mutation"
 
 import { cancelSessionRequest } from "./api"
 
-const MEETING_QUERIES = [["sessions"], ["agenda"], ["schedules"], ["attendance"]]
+const MEETING_QUERIES = [["sessions"], ["agenda"], ["schedules"], ["attendance"], ["dashboard"]]
 
 export function SessionManageMenu({ session }: { session: SessionView }) {
   const t = useTranslations()

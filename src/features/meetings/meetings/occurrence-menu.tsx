@@ -18,7 +18,7 @@ import { useApiMutation } from "@/lib/api/use-api-mutation"
 
 import { cancelOccurrenceRequest } from "./api"
 
-const MEETING_QUERIES = [["agenda"], ["schedules"], ["sessions"]]
+const MEETING_QUERIES = [["agenda"], ["schedules"], ["sessions"], ["attendance"], ["dashboard"]]
 
 export function OccurrenceMenu({ item }: { item: PlannedItem }) {
   const t = useTranslations()

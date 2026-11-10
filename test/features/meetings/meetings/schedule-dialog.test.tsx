@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query"
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
@@ -6,6 +7,8 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
+import { attendanceOverviewQuery } from "@/features/meetings/attendance/api"
+import { upcomingQuery } from "@/features/meetings/dashboard/api"
 import type { ServiceList } from "@/features/organization/services/api"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -34,6 +37,15 @@ const existing = schedule({
   service: { id: sundaySchool.id, name: "Sunday School", tone: 1, archived: false },
 })
 
+const reads = { upcoming: 0, overview: 0 }
+
+function OtherLists() {
+  useQuery(upcomingQuery)
+  useQuery(attendanceOverviewQuery)
+
+  return null
+}
+
 function open({
   list = services,
   write = () => HttpResponse.json({ id: "s-new", createdSessions: 1 }, { status: 201 }),
@@ -46,8 +58,31 @@ function open({
   who?: Me
 } = {}) {
   const sent: { method: string; body: Record<string, unknown> }[] = []
+  reads.upcoming = 0
+  reads.overview = 0
 
   server.use(
+    http.get(apiUrl("/dashboard/upcoming"), () => {
+      reads.upcoming++
+
+      return HttpResponse.json({
+        today: "2026-11-08",
+        from: "2026-11-09",
+        to: "2026-11-15",
+        items: [],
+      })
+    }),
+    http.get(apiUrl("/attendance/overview"), () => {
+      reads.overview++
+
+      return HttpResponse.json({
+        today: "2026-11-08",
+        sessions: [],
+        earlier: [],
+        closed: [],
+        openCount: 0,
+      })
+    }),
     http.get(apiUrl("/schedules"), () =>
       HttpResponse.json({ today: "2026-11-08", items: schedules })
     ),
@@ -67,6 +102,7 @@ function open({
   renderWithProviders(
     <SidebarProvider>
       <SchedulesPage />
+      <OtherLists />
     </SidebarProvider>,
     { me: who }
   )
@@ -260,6 +296,15 @@ test("Escape doesn't close the schedule dialog while it saves", async () => {
   expect(screen.getByRole("dialog")).toBeInTheDocument()
   answer(HttpResponse.json({ id: "s-new", createdSessions: 1 }, { status: 201 }))
   await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
+})
+
+test("creating a schedule refetches the dashboard and the attendance overview", async () => {
+  open()
+  const dialog = await newDialog()
+  await waitFor(() => expect(reads).toEqual({ upcoming: 1, overview: 1 }))
+  await userEvent.type(dialog.getByLabelText("Name"), "Sunday class")
+  await userEvent.click(dialog.getByRole("button", { name: "Create schedule" }))
+  await waitFor(() => expect(reads).toEqual({ upcoming: 2, overview: 2 }))
 })
 
 test("a servant sees neither New schedule nor Edit", async () => {

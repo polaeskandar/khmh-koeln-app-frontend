@@ -14,6 +14,7 @@ import { renderWithProviders } from "@test/support/providers"
 import type { Me } from "@/features/identity/auth/api"
 import type { AttendanceSheet } from "@/features/meetings/attendance/api"
 import { AttendanceSummaryPage } from "@/features/meetings/attendance/attendance-summary"
+import { useAgenda } from "@/features/meetings/meetings/api"
 
 const search = vi.hoisted(() => ({ value: "" }))
 vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
@@ -27,12 +28,31 @@ afterEach(() => {
   router.replace.mockReset()
 })
 
+const reads = { agenda: 0 }
+
+function Agenda() {
+  useAgenda({ from: "2026-11-01", to: "2026-11-30" })
+
+  return null
+}
+
 function open(board: AttendanceSheet, reopen?: (body: unknown) => Response, who: Me = me.leader) {
   search.value = `session=${board.session.id}`
   const sent: unknown[] = []
+  reads.agenda = 0
 
   server.use(
     ...sheetHandlers(board),
+    http.get(apiUrl("/agenda"), () => {
+      reads.agenda++
+
+      return HttpResponse.json({
+        today: "2026-11-08",
+        from: "2026-11-01",
+        to: "2026-11-30",
+        items: [],
+      })
+    }),
     http.post(apiUrl(`/sessions/${board.session.id}/reopen`), async ({ request }) => {
       const body = await request.json()
       sent.push(body)
@@ -44,6 +64,7 @@ function open(board: AttendanceSheet, reopen?: (body: unknown) => Response, who:
   renderWithProviders(
     <SidebarProvider>
       <AttendanceSummaryPage />
+      <Agenda />
     </SidebarProvider>,
     { me: who }
   )
@@ -113,6 +134,14 @@ describe("the 1 Nov summary", () => {
     )
 
     expect(sent).toEqual([{ reason: "Mina was there" }])
+  })
+
+  test("Reopen refetches the agenda, which shows the session's state", async () => {
+    open(closedFirstNovember())
+    await userEvent.click(await screen.findByRole("button", { name: "Reopen for corrections" }))
+    await waitFor(() => expect(reads.agenda).toBe(1))
+    await userEvent.click(screen.getByRole("button", { name: "Reopen" }))
+    await waitFor(() => expect(reads.agenda).toBe(2))
   })
 
   test("Reopen without a reason sends null; a 403 shows in the dialog", async () => {

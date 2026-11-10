@@ -45,7 +45,7 @@ import { EditScheduleButton } from "./schedule-dialog"
 const NEXT_DATES = 8
 const PAST_SESSIONS = 12
 const DAYS = 119
-const INVALIDATE = [["schedules"], ["agenda"], ["sessions"]]
+const INVALIDATE = [["schedules"], ["agenda"], ["sessions"], ["attendance"], ["dashboard"]]
 
 const itemKey = (item: AgendaItem) =>
   item.kind === "planned" ? `${item.scheduleId}-${item.date}` : item.id
@@ -82,7 +82,7 @@ function Actions({ schedule, today }: { schedule: ScheduleSummary; today: LocalD
 
   const remove = useApiMutation(deleteScheduleRequest, {
     successMessage: t("toast.scheduleDeleted"),
-    invalidate: [["schedules", "list"], ["agenda"]],
+    invalidate: [["schedules", "list"], ["agenda"], ["attendance"], ["dashboard"]],
     onSuccess: () => router.push(routes.schedules()),
   })
 

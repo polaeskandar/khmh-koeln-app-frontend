@@ -61,7 +61,7 @@ const WEEKDAYS: IsoWeekday[] = [1, 2, 3, 4, 5, 6, 7]
 const MONTH_WEEKS: MonthWeek[] = [1, 2, 3, 4, -1]
 const PREVIEW_DATES = 4
 const PREVIEW_HORIZON_DAYS = 400
-const MEETING_QUERIES = [["schedules"], ["agenda"], ["sessions"]]
+const MEETING_QUERIES = [["schedules"], ["agenda"], ["sessions"], ["attendance"], ["dashboard"]]
 
 const SELECTED =
   "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:bg-primary/90 data-[state=on]:hover:text-primary-foreground"
