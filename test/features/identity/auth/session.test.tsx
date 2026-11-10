@@ -15,13 +15,9 @@ import { RequireStaff } from "@/features/identity/auth/guards"
 import { safeNext } from "@/features/identity/auth/safe-next"
 import { SessionProvider, useSession } from "@/features/identity/auth/session"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => vi.spyOn(toast, "error"))
 
 afterEach(() => {
-  vi.restoreAllMocks()
-  router.replace.mockReset()
   window.history.replaceState(null, "", "/")
 })
 

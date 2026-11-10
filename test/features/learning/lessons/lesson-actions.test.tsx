@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
@@ -11,29 +11,22 @@ import { homeworkRow, stageHomework } from "@test/support/fixtures/homework"
 import { goodSamaritan, lessonDetail, lessonStage } from "@test/support/fixtures/lessons"
 import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
-import { router } from "@test/support/navigation"
+import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { HomeworkRow } from "@/features/learning/homework/api"
 import type { LessonDetail } from "@/features/learning/lessons/api"
 import { LessonPage } from "@/features/learning/lessons/lesson-page"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 const ID = goodSamaritan.id
 const path = `/lessons/${ID}`
 
 beforeEach(() => {
-  search.value = `id=${ID}`
-  router.push.mockClear()
+  address.set(`id=${ID}`)
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 type Options = { account?: Me; tasks?: HomeworkRow[] }
 

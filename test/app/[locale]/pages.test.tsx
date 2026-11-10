@@ -7,6 +7,8 @@ import { renderWithProviders } from "@test/support/providers"
 import LocaleError from "@/app/[locale]/error"
 import LocaleNotFound from "@/app/[locale]/not-found"
 
+vi.unmock("@/i18n/navigation")
+
 test("the not-found page reads in German and opens the app", () => {
   renderWithProviders(<LocaleNotFound />, { locale: "de" })
   expect(screen.getByRole("heading", { name: "Diese Seite gibt es nicht" })).toBeInTheDocument()

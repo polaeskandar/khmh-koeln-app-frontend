@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -16,8 +16,6 @@ import { renderWithProviders } from "@test/support/providers"
 import MemberLayout from "@/app/[locale]/member/layout"
 import { MemberAccount } from "@/features/portals/member/member-account"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 const nevine: Me = {
   ...me.noRoles,
   account: { ...me.noRoles.account, displayName: "Nevine Boulos", email: "nevine@example.org" },
@@ -26,11 +24,8 @@ const nevine: Me = {
 
 beforeEach(() => {
   navigation.pathname = "/member/account/"
-  router.replace.mockClear()
   vi.spyOn(console, "error").mockImplementation(() => {})
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 function open(
   groups: typeof nevineGroups | (() => Response) = nevineGroups,

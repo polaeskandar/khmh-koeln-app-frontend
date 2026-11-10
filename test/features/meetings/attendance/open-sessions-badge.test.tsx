@@ -16,8 +16,6 @@ import { renderWithProviders } from "@test/support/providers"
 
 import { AttendanceOverview } from "@/features/meetings/attendance/attendance-overview"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
   navigation.pathname = "/services/"
   vi.spyOn(console, "error").mockImplementation(() => {})
@@ -26,7 +24,6 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers()
-  vi.restoreAllMocks()
 })
 
 const overview = (openCount: number) => ({

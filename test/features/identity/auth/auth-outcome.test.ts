@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 const load = async () => {
   vi.resetModules()
@@ -7,8 +7,6 @@ const load = async () => {
 }
 
 beforeEach(() => window.sessionStorage.clear())
-
-afterEach(() => vi.restoreAllMocks())
 
 test("an outcome remembered before a reload is read back after it", async () => {
   ;(await load()).rememberOutcome("unconfirmed")

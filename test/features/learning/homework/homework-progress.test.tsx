@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
@@ -9,6 +9,7 @@ import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type {
@@ -18,18 +19,12 @@ import type {
 } from "@/features/learning/homework/api"
 import { HomeworkProgressPage } from "@/features/learning/homework/homework-progress"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 const HOMEWORK_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea001"
 
 beforeEach(() => {
-  search.value = `id=${HOMEWORK_ID}`
+  address.set(`id=${HOMEWORK_ID}`)
   vi.spyOn(console, "error").mockImplementation(() => {})
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 let seq = 0
 

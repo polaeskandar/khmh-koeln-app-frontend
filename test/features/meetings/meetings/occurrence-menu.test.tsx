@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
@@ -12,21 +12,16 @@ import { me } from "@test/support/fixtures/me"
 import { services } from "@test/support/fixtures/services"
 import { session } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { Agenda } from "@/features/meetings/meetings/api"
 import { AgendaPage } from "@/features/meetings/meetings/agenda-page"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 const bibleStudy = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f17",
@@ -60,7 +55,7 @@ const planned = (service: typeof youth, date: string, scheduleId: string): Plann
 const bibleWednesday = planned(bibleStudy, "2026-11-11", "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8a01")
 
 function open(date: string, items: AgendaItem[], answer?: () => Response, who: Me = me.leader) {
-  search.value = `date=${date}`
+  address.set(`date=${date}`)
   let current = items
   const sent: { path: string; body: unknown }[] = []
 

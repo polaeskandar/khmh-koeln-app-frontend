@@ -18,7 +18,6 @@ import {
   sundaySchool,
 } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
-import { navigation } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { AttendanceOverview } from "@/features/meetings/attendance/api"
@@ -26,22 +25,18 @@ import type { Upcoming } from "@/features/meetings/dashboard/api"
 import { Dashboard } from "@/features/meetings/dashboard/dashboard"
 import { groupUpcoming } from "@/features/meetings/dashboard/group-upcoming"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 const christine: Me = {
   ...me.servant,
   account: { ...me.servant.account, displayName: "Christine Adel" },
 }
 
 beforeEach(() => {
-  navigation.pathname = "/"
   vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-11-08T11:08:00Z") })
   vi.spyOn(console, "error").mockImplementation(() => {})
 })
 
 afterEach(() => {
   vi.useRealTimers()
-  vi.restoreAllMocks()
 })
 
 const STAGES = ["Kindergarten", "1st Class", "2nd Class", "3rd Class", "4th Class", "5th Class"]

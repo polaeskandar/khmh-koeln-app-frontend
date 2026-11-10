@@ -1,7 +1,7 @@
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -15,22 +15,18 @@ import {
 } from "@test/support/fixtures/lessons"
 import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import { toMeeting } from "@/features/learning/lessons/api"
 import { EditLessonPage, NewLessonPage } from "@/features/learning/lessons/lesson-editor"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => {}))
-afterEach(() => vi.restoreAllMocks())
 
 const SCHEDULE_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f90"
 
 function open(page: "new" | "edit", write?: () => Response) {
-  search.value = page === "new" ? `stage=${lessonStage.id}` : `id=${goodSamaritan.id}`
+  address.set(page === "new" ? `stage=${lessonStage.id}` : `id=${goodSamaritan.id}`)
   const sent: Record<string, unknown>[] = []
 
   server.use(

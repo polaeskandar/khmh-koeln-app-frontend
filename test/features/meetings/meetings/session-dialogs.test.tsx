@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
@@ -11,20 +11,15 @@ import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { session, sessionDetail, sessionState } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import { SessionPage } from "@/features/meetings/meetings/session-page"
-
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
 
 beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 function open(
   view: Parameters<typeof session>[0] = {},
@@ -32,7 +27,7 @@ function open(
   who: Me = me.leader
 ) {
   let current = session({ status: "scheduled", date: "2026-11-15", ...view })
-  search.value = `id=${current.id}`
+  address.set(`id=${current.id}`)
   const sent: unknown[] = []
 
   server.use(

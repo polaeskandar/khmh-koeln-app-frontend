@@ -10,7 +10,6 @@ import {
 
 afterEach(() => {
   localStorage.clear()
-  vi.restoreAllMocks()
   document.documentElement.lang = "en"
   document.documentElement.dir = ""
   window.history.replaceState(null, "", "/")

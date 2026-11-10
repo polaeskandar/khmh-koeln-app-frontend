@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, test, vi } from "vitest"
 
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -10,24 +10,17 @@ import { SUNDAY_SCHOOL_ID, THIRD_CLASS_ID, thirdClass } from "@test/support/fixt
 import { server } from "@test/support/msw"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Locale } from "@/i18n/config"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import { StageOverview, useStageCrumbs } from "@/features/organization/stages/stage-layout"
-
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
 
 const ID = THIRD_CLASS_ID
 const SERVICE_ID = SUNDAY_SCHOOL_ID
 
 beforeEach(() => {
-  search.value = `id=${ID}`
+  address.set(`id=${ID}`)
   vi.spyOn(console, "error").mockImplementation(() => {})
-})
-
-afterEach(() => {
-  vi.restoreAllMocks()
 })
 
 const renderPage = (locale: Locale = "en") =>
@@ -143,18 +136,18 @@ describe("missing stages and errors", () => {
   })
 
   test("a malformed id shows not found without asking the API", async () => {
-    search.value = "id=nope"
+    address.set("id=nope")
     const requests = answer(() => HttpResponse.json(thirdClass))
     renderPage()
     expect(await screen.findByText("This page doesn’t exist")).toBeInTheDocument()
     expect(requests()).toBe(0)
   })
 
-  test("Retry after a 500 asks again", { timeout: 15_000 }, async () => {
+  test("Retry after a 500 asks again", async () => {
     let failing = true
     answer(() => (failing ? problem(500, "internal") : HttpResponse.json(thirdClass)))
     renderPage()
-    const retry = await screen.findByRole("button", { name: "Try again" }, { timeout: 10_000 })
+    const retry = await screen.findByRole("button", { name: "Try again" })
     failing = false
     await userEvent.click(retry)
     expect(await screen.findByRole("heading", { level: 1, name: "3rd Class" })).toBeInTheDocument()

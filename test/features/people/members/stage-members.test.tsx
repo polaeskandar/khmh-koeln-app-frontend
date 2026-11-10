@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
@@ -14,20 +14,15 @@ import { peopleList, person } from "@test/support/fixtures/people"
 import { services } from "@test/support/fixtures/services"
 import { SUNDAY_SCHOOL_ID, THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import { StageOverview } from "@/features/organization/stages/stage-layout"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
-  search.value = `id=${THIRD_CLASS_ID}`
+  address.set(`id=${THIRD_CLASS_ID}`)
   vi.spyOn(console, "error").mockImplementation(() => {})
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 const fourteen = [
   person("Kirollos", "Iskander", { displayName: "Kiro", startsOn: "2026-11-08" }),
@@ -143,12 +138,12 @@ test("another stage starts on its first page", async () => {
 
   const view = renderWithProviders(page())
   await screen.findByText("Showing 1–25 of 30")
-  search.value = `id=${otherId}`
+  address.set(`id=${otherId}`)
   view.rerender(page())
   expect(await screen.findByRole("heading", { name: "4th Class" })).toBeInTheDocument()
   await userEvent.click(await (await members()).findByRole("button", { name: "Next page" }))
   await screen.findByText("Showing 26–30 of 30")
-  search.value = `id=${THIRD_CLASS_ID}`
+  address.set(`id=${THIRD_CLASS_ID}`)
   view.rerender(page())
   expect(await screen.findByRole("heading", { name: thirdClass.name })).toBeInTheDocument()
   expect(await screen.findByText("Showing 1–25 of 30")).toBeInTheDocument()
@@ -233,10 +228,10 @@ describe("Add person on an empty roster", () => {
   })
 })
 
-test("Retry after a 500 asks again", { timeout: 15_000 }, async () => {
+test("Retry after a 500 asks again", async () => {
   let failing = true
   open(() => (failing ? problem(500, "internal") : HttpResponse.json(peopleList(fourteen))))
-  const retry = await screen.findByRole("button", { name: "Try again" }, { timeout: 10_000 })
+  const retry = await screen.findByRole("button", { name: "Try again" })
   failing = false
   await userEvent.click(retry)
   expect(await (await members()).findAllByRole("listitem")).toHaveLength(14)

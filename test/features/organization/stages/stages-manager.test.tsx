@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
@@ -12,21 +12,12 @@ import { me } from "@test/support/fixtures/me"
 import { stageRef } from "@test/support/fixtures/sessions"
 import { SUNDAY_SCHOOL_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
-import { router } from "@test/support/navigation"
+import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import { StagesManager } from "@/features/organization/stages/stages-manager"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => {}))
-
-afterEach(() => {
-  vi.restoreAllMocks()
-  router.push.mockReset()
-})
 
 const service = { id: SUNDAY_SCHOOL_ID, name: "Sunday School", tone: 1, archived: false }
 
@@ -47,7 +38,7 @@ function open(
   write?: () => Response | Promise<Response>,
   viewer: Me = me.leader
 ) {
-  search.value = `id=${SUNDAY_SCHOOL_ID}`
+  address.set(`id=${SUNDAY_SCHOOL_ID}`)
   const sent: { method: string; body: unknown }[] = []
 
   server.use(
@@ -215,7 +206,7 @@ test("without stages: delete the menu offers the other actions but no Delete", a
 })
 
 test("an unknown id shows not found", async () => {
-  search.value = `id=${SUNDAY_SCHOOL_ID}`
+  address.set(`id=${SUNDAY_SCHOOL_ID}`)
 
   server.use(
     http.get(apiUrl(`/services/${SUNDAY_SCHOOL_ID}/stages`), () => problem(404, "notFound.service"))

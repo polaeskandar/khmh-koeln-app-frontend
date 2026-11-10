@@ -12,8 +12,6 @@ import type { Registration } from "@/features/identity/auth/api"
 import { forgetOutcome, rememberOutcome } from "@/features/identity/auth/auth-outcome"
 import { RegisteredPage, RegisterPage } from "@/features/identity/auth/register-pages"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 const SERVICES = [
   { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f10", name: "Sunday School" },
   { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f11", name: "Youth Meeting" },
@@ -27,8 +25,6 @@ beforeEach(() => {
 
 afterEach(() => {
   forgetOutcome()
-  vi.restoreAllMocks()
-  router.push.mockReset()
 })
 
 function backend(

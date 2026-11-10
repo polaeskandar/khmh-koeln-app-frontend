@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Locale } from "@/i18n/config"
@@ -17,17 +17,10 @@ import type { Me } from "@/features/identity/auth/api"
 import type { ServiceFields } from "@/features/organization/services/api"
 import { ServicesOverview } from "@/features/organization/services/services-overview"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "error")
   vi.spyOn(toast, "success")
-})
-
-afterEach(() => {
-  vi.restoreAllMocks()
-  router.push.mockReset()
 })
 
 const sundaySchool = services.items[0]

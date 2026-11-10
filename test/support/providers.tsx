@@ -18,9 +18,17 @@ const catalogs = { en, de, ar } as unknown as Record<Locale, Messages>
 
 type ProviderOptions = { locale?: Locale; client?: QueryClient; me?: Me }
 
+export function makeTestQueryClient() {
+  const client = makeQueryClient()
+  const defaults = client.getDefaultOptions()
+  client.setDefaultOptions({ ...defaults, queries: { ...defaults.queries, retryDelay: 0 } })
+
+  return client
+}
+
 export function testProviders({
   locale = "en",
-  client = makeQueryClient(),
+  client = makeTestQueryClient(),
   me,
 }: ProviderOptions = {}) {
   if (me) {

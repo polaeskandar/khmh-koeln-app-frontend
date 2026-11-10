@@ -3,7 +3,7 @@ import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { ServiceList, ServiceRow } from "@/features/organization/services/api"
@@ -22,16 +22,11 @@ import { renderWithProviders } from "@test/support/providers"
 import type { PersonRow } from "@/features/people/members/api"
 import { MembersScreen } from "@/features/people/members/members-page"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-vi.mock("next/navigation", async () => (await import("@test/support/navigation")).searchParamsMock)
-
 beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 const base = services.items[0]!
 

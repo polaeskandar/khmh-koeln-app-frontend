@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
@@ -10,7 +10,7 @@ import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
-import { router } from "@test/support/navigation"
+import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type {
@@ -23,18 +23,11 @@ import type {
 import { HomeworkProgressPage } from "@/features/learning/homework/homework-progress"
 import { StageHomeworkPage } from "@/features/learning/homework/stage-homework"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
-  router.push.mockClear()
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 const ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea001"
 const stage = { id: THIRD_CLASS_ID, name: "3rd Class", position: 2 }
@@ -92,7 +85,7 @@ function openList(
   { account = me.servant, archived = false }: Options = {}
 ) {
   const current = typeof item === "function" ? item : () => item
-  search.value = `id=${THIRD_CLASS_ID}&status=${current().status}`
+  address.set(`id=${THIRD_CLASS_ID}&status=${current().status}`)
 
   server.use(
     http.get(apiUrl(`/stages/${THIRD_CLASS_ID}`), () => HttpResponse.json(thirdClass)),
@@ -313,7 +306,7 @@ test("deleting from the progress page opens the stage's homework list", async ()
   }
 
   let deletes = 0
-  search.value = `id=${ID}`
+  address.set(`id=${ID}`)
 
   server.use(
     http.get(apiUrl(`/homework/${ID}/progress`), () => HttpResponse.json(progress)),
@@ -350,7 +343,7 @@ test("homework taken back to draft can be published again from the same row", as
   let current = homework("draft")
   let publishes = 0
   openList(() => current)
-  search.value = `id=${THIRD_CLASS_ID}`
+  address.set(`id=${THIRD_CLASS_ID}`)
 
   server.use(
     http.post(apiUrl(`/homework/${ID}/publish`), () => {

@@ -3,7 +3,7 @@ import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
@@ -12,25 +12,17 @@ import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { SUNDAY_SCHOOL_ID, THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
-import { router } from "@test/support/navigation"
+import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { HomeworkDetail, StageHomework } from "@/features/learning/homework/api"
 import { EditHomeworkPage, NewHomeworkPage } from "@/features/learning/homework/homework-editor"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
-  router.push.mockClear()
-  router.replace.mockClear()
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 const HOMEWORK_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea001"
 const stageRef = { id: THIRD_CLASS_ID, name: "3rd Class", position: 2 }
@@ -104,7 +96,7 @@ const detail = (extra: Partial<HomeworkDetail> = {}): HomeworkDetail => ({
 })
 
 function openNew(data: StageHomework, query = "", locale: Locale = "en", account: Me = me.servant) {
-  search.value = `stage=${THIRD_CLASS_ID}${query}`
+  address.set(`stage=${THIRD_CLASS_ID}${query}`)
   const posted: { lesson: string; body: unknown }[] = []
 
   server.use(
@@ -130,7 +122,7 @@ function openNew(data: StageHomework, query = "", locale: Locale = "en", account
 const versions: (string | null)[] = []
 
 function openEdit(data: HomeworkDetail, account: Me = me.servant, query = "") {
-  search.value = `id=${HOMEWORK_ID}${query}`
+  address.set(`id=${HOMEWORK_ID}${query}`)
   const put: unknown[] = []
   versions.length = 0
 

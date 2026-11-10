@@ -4,7 +4,7 @@ import { screen, waitFor } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
 import type { ReactNode } from "react"
 import { renderToString } from "react-dom/server"
-import { afterEach, describe, expect, test, vi } from "vitest"
+import { afterEach, describe, expect, test } from "vitest"
 
 import { api, dataOf } from "@/lib/api/client"
 import { apiUrl, problem } from "@test/support/api"
@@ -22,10 +22,7 @@ import {
 } from "@/features/identity/auth/guards"
 import { SessionProvider, useCan } from "@/features/identity/auth/session"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 afterEach(() => {
-  router.replace.mockReset()
   window.history.replaceState(null, "", "/")
 })
 

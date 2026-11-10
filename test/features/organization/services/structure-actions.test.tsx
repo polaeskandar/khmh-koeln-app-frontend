@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { StagesManager } from "@/features/organization/stages/stages-manager"
@@ -12,7 +12,7 @@ import { insightsOf, services } from "@test/support/fixtures/services"
 import { stageRef } from "@test/support/fixtures/sessions"
 import { SUNDAY_SCHOOL_ID } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
-import { router } from "@test/support/navigation"
+import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { Me } from "@/features/identity/auth/api"
@@ -26,17 +26,10 @@ import { ServiceDetails } from "@/features/organization/services/service-details
 import { ServiceActionsMenu } from "@/features/organization/services/service-dialogs"
 import type { Stage } from "@/features/organization/stages/api"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
-  router.push.mockClear()
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 const [, youth, choir] = services.items as [ServiceRow, ServiceRow, ServiceRow]
 
@@ -170,7 +163,7 @@ test("a service with history can't be deleted, and says so in the dialog", async
 
 test("an archived service's details show when and why", async () => {
   const archived = choir
-  search.value = `id=${archived.id}`
+  address.set(`id=${archived.id}`)
 
   const archivedStages: ServiceStages = {
     service: { id: archived.id, name: archived.name, tone: archived.tone, archived: true },
@@ -238,7 +231,7 @@ test("a leader's archived stage moves to Archived stages, and Restore puts it la
         : [],
   })
 
-  search.value = `id=${SUNDAY_SCHOOL_ID}`
+  address.set(`id=${SUNDAY_SCHOOL_ID}`)
 
   server.use(
     http.get(apiUrl(`/services/${SUNDAY_SCHOOL_ID}/stages`), () => HttpResponse.json(data())),

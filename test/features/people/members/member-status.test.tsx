@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
@@ -14,21 +14,18 @@ import { me } from "@test/support/fixtures/me"
 import { peopleList, person } from "@test/support/fixtures/people"
 import { services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
+import { navigation } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { PersonRow } from "@/features/people/members/api"
 import { MembersPage } from "@/features/people/members/members-page"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-vi.mock("next/navigation", async () => (await import("@test/support/navigation")).searchParamsMock)
-
 beforeEach(() => {
+  navigation.pathname = "/members/"
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 function open(
   initial: PersonRow,

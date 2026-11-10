@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import type { Schemas } from "@/lib/api/client"
@@ -16,15 +16,11 @@ import type { DirectoryPerson } from "@/features/people/members/api"
 import type { GuardianLink, GuardianLinks } from "@/features/people/guardians/api"
 import { ParentAccess } from "@/features/people/guardians/parent-access"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 const sundaySchool = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f10",

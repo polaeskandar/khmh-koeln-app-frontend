@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { afterEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -13,12 +13,6 @@ import { renderWithProviders } from "@test/support/providers"
 
 import { isParentActive } from "@/features/portals/parent/parent-nav"
 import { ParentNotAvailable, ParentShell } from "@/features/portals/parent/parent-shell"
-
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
-afterEach(() => {
-  navigation.pathname = "/"
-})
 
 function portal(account: Me = me.parent) {
   server.use(http.get(apiUrl("/me"), () => HttpResponse.json(account)))

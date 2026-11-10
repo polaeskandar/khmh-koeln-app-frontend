@@ -2,7 +2,7 @@ import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
@@ -17,7 +17,7 @@ import {
 } from "@test/support/fixtures/lessons"
 import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
-import { router } from "@test/support/navigation"
+import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { LessonDetail } from "@/features/learning/lessons/api"
@@ -25,19 +25,10 @@ import { EditLessonPage, NewLessonPage } from "@/features/learning/lessons/lesso
 
 const SCHEDULE_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f90"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
-})
-
-afterEach(() => {
-  vi.restoreAllMocks()
-  router.push.mockReset()
 })
 
 const versions: (string | null)[] = []
@@ -80,13 +71,13 @@ function render(page: React.ReactNode, write?: () => Response, account: Me = me.
 }
 
 const openNew = (write?: () => Response) => {
-  search.value = `stage=${lessonStage.id}`
+  address.set(`stage=${lessonStage.id}`)
 
   return render(<NewLessonPage />, write)
 }
 
 const openEdit = (detail: LessonDetail, write?: () => Response, account?: Me) => {
-  search.value = `id=${detail.lesson.id}`
+  address.set(`id=${detail.lesson.id}`)
   server.use(http.get(apiUrl(`/lessons/${detail.lesson.id}`), () => HttpResponse.json(detail)))
 
   return render(<EditLessonPage />, write, account)
@@ -272,7 +263,7 @@ test("a 409 changedMeanwhile keeps the form", async () => {
 })
 
 test("someone who can't create lessons sees no form", async () => {
-  search.value = `stage=${lessonStage.id}`
+  address.set(`stage=${lessonStage.id}`)
   render(<NewLessonPage />, undefined, me.churchOffice)
   expect(await screen.findByText("You can’t prepare lessons here")).toBeInTheDocument()
   expect(screen.queryByLabelText("Title")).toBeNull()

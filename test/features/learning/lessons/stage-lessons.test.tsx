@@ -10,17 +10,14 @@ import { goodSamaritan, stageLessons } from "@test/support/fixtures/lessons"
 import { me } from "@test/support/fixtures/me"
 import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { LessonRow, StageLessons } from "@/features/learning/lessons/api"
 import { StageLessonsPage } from "@/features/learning/lessons/stage-lessons"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
-  search.value = `id=${THIRD_CLASS_ID}`
+  address.set(`id=${THIRD_CLASS_ID}`)
   vi.spyOn(console, "error").mockImplementation(() => {})
 })
 

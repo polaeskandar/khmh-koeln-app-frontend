@@ -1,6 +1,6 @@
 import { screen, within } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { AgendaItem, PlannedItem } from "@/lib/api/types/meetings"
@@ -9,16 +9,11 @@ import { me } from "@test/support/fixtures/me"
 import { services } from "@test/support/fixtures/services"
 import { session, stageRef, sundaySchool } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { Agenda } from "@/features/meetings/meetings/api"
 import { AgendaPage } from "@/features/meetings/meetings/agenda-page"
-
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
-beforeEach(() => (search.value = ""))
 
 const asItem = (s: ReturnType<typeof session>): AgendaItem => ({ ...s, kind: "session" })
 
@@ -45,7 +40,7 @@ const window = (from: string, to: string, items: AgendaItem[] = []): Agenda => (
 })
 
 function open(query: string, answer: (url: URL) => Agenda) {
-  search.value = query
+  address.set(query)
   const requests: string[] = []
 
   server.use(

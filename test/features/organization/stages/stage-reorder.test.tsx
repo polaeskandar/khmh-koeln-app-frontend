@@ -2,7 +2,7 @@ import { act, fireEvent, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
@@ -12,18 +12,15 @@ import { me } from "@test/support/fixtures/me"
 import { stageRef } from "@test/support/fixtures/sessions"
 import { SUNDAY_SCHOOL_ID } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import { StagesManager } from "@/features/organization/stages/stages-manager"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 const ROW = 48
 
 beforeEach(() => {
-  search.value = `id=${SUNDAY_SCHOOL_ID}`
+  address.set(`id=${SUNDAY_SCHOOL_ID}`)
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "error")
 
@@ -48,8 +45,6 @@ beforeEach(() => {
     } as DOMRect
   })
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 const impact = { activeSchedules: 0, upcomingSessions: 0 }
 const kindergarten = { ...stageRef("Kindergarten", 0), description: null, memberCount: 9, impact }

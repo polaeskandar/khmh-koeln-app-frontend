@@ -25,9 +25,17 @@ const subscribe = (listener: () => void) => {
   }
 }
 
-export const useSearchParamsMock = () => useSyncExternalStore(subscribe, () => params)
+const useSearchParamsMock = () => useSyncExternalStore(subscribe, () => params)
 
-const go = (href: string) => address.set(href.split("?")[1] ?? "")
+export const navigation = { pathname: "/" }
+
+function go(href: string) {
+  const url = new URL(href, `http://localhost${navigation.pathname}`)
+
+  if (url.pathname === navigation.pathname) {
+    address.set(url.search)
+  }
+}
 
 export const router = {
   push: vi.fn(go),
@@ -37,8 +45,6 @@ export const router = {
   prefetch: vi.fn(),
 }
 
-export const navigation = { pathname: "/" }
-
 export const navigationMock = {
   useRouter: () => router,
   usePathname: () => navigation.pathname,
@@ -46,4 +52,17 @@ export const navigationMock = {
     createElement("a", { href, ...props }),
 }
 
-export const searchParamsMock = { useSearchParams: useSearchParamsMock }
+export const nextNavigationMock = {
+  useRouter: () => router,
+  usePathname: () => navigation.pathname,
+  useSearchParams: useSearchParamsMock,
+}
+
+export function resetNavigation() {
+  address.set("")
+  navigation.pathname = "/"
+
+  for (const mock of Object.values(router)) {
+    mock.mockReset()
+  }
+}

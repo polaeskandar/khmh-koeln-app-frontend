@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { DirectoryPerson } from "@/features/people/members/api"
@@ -17,16 +17,12 @@ import {
 import { me } from "@test/support/fixtures/me"
 import { sundaySchool } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => {}))
-afterEach(() => vi.restoreAllMocks())
 
 const youth = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f11",
@@ -54,7 +50,7 @@ function open(
   results: (q: string) => DirectoryPerson[],
   { board = thirdClassBoard(), locale = "en" as Locale } = {}
 ) {
-  search.value = `session=${board.session.id}`
+  address.set(`session=${board.session.id}`)
   const queries: string[] = []
   const aborted: string[] = []
   let current = board

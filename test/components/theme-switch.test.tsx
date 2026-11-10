@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event"
 import { ThemeProvider } from "next-themes"
 import { renderToString } from "react-dom/server"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import { Toaster } from "@/components/ui/sonner"
 import { renderWithProviders, testProviders } from "@test/support/providers"
@@ -20,8 +20,6 @@ beforeEach(() => {
   localStorage.clear()
   document.documentElement.className = ""
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 test("Dark adds the dark class and stores it, Light removes it", async () => {
   renderWithProviders(themed(<AppearanceFields />))

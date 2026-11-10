@@ -1,6 +1,6 @@
 import { screen, within } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
-import { afterEach, expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
@@ -15,15 +15,10 @@ import {
   thirdClassRef,
 } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
-import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { AttendanceOverview as Overview } from "@/features/meetings/attendance/api"
 import { AttendanceOverview } from "@/features/meetings/attendance/attendance-overview"
-
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
-afterEach(() => router.replace.mockReset())
 
 const kindergarten = stageRef("Kindergarten", 0)
 const firstClass = stageRef("1st Class", 1)

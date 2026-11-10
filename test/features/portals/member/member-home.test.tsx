@@ -21,8 +21,6 @@ import { renderWithProviders } from "@test/support/providers"
 
 import { MemberHome } from "@/features/portals/member/member-home"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 const member = (displayName: string): Me => ({
   ...me.noRoles,
   account: { ...me.noRoles.account, displayName },
@@ -36,7 +34,6 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers()
-  vi.restoreAllMocks()
 })
 
 type Data = {

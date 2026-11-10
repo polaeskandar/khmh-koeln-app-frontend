@@ -2,33 +2,28 @@ import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
 import { MIMI_ID, MINA_ID, mimi, mina } from "@test/support/fixtures/parent"
 import { server } from "@test/support/msw"
+import { address } from "@test/support/navigation"
 import { testProviders } from "@test/support/providers"
 
 import { type ChildSummary, parentChildrenQuery } from "@/features/people/children/api"
 import { type ParentTaskDetail } from "@/features/learning/homework/api"
 import { ParentTaskPage } from "@/features/learning/homework/parent-task"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 const TASK_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ed001"
 const path = `/parent/children/${MINA_ID}/homework/${TASK_ID}`
 
 beforeEach(() => {
-  search.value = `id=${TASK_ID}&child=${MINA_ID}`
+  address.set(`id=${TASK_ID}&child=${MINA_ID}`)
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "success")
   vi.spyOn(toast, "error")
 })
-
-afterEach(() => vi.restoreAllMocks())
 
 const detail = (
   task: Partial<ParentTaskDetail["task"]> = {},
@@ -240,7 +235,7 @@ test.each([
   ["a missing child", `id=${TASK_ID}`],
   ["a malformed id", `id=nope&child=${MIMI_ID}`],
 ])("%s shows the same not-available page", async (_, query) => {
-  search.value = query
+  address.set(query)
   open(() => problem(404, "homework.notAvailable"))
   expect(await screen.findByText("This page isn’t available")).toBeInTheDocument()
 })

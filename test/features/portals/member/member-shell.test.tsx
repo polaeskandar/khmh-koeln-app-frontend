@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { afterEach, describe, expect, test, vi } from "vitest"
+import { afterEach, describe, expect, test } from "vitest"
 
 import { NavUser } from "@/components/app-shell/account-menu"
 import { SidebarProvider } from "@/components/ui/sidebar"
@@ -18,11 +18,7 @@ import { renderWithProviders } from "@test/support/providers"
 import MemberLayout from "@/app/[locale]/member/layout"
 import { isMemberActive } from "@/features/portals/member/member-nav"
 
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 afterEach(() => {
-  router.replace.mockReset()
-  navigation.pathname = "/"
   window.history.replaceState(null, "", "/")
 })
 

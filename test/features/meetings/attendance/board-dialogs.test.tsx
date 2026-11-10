@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Locale } from "@/i18n/config"
@@ -10,25 +10,16 @@ import { apiUrl, problem } from "@test/support/api"
 import { boardOf, detailOf, rosterPeople, thirdClassBoard } from "@test/support/fixtures/board"
 import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
-import { router } from "@test/support/navigation"
+import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { AttendanceSheet } from "@/features/meetings/attendance/api"
 import { CorrectionDialog } from "@/features/meetings/attendance/board-dialogs"
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
 
-const search = vi.hoisted(() => ({ value: "" }))
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }))
-vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
-
 beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {})
   vi.spyOn(toast, "error")
-})
-
-afterEach(() => {
-  vi.restoreAllMocks()
-  router.replace.mockReset()
 })
 
 const rita = {
@@ -69,7 +60,7 @@ function open(
   handlers: Parameters<typeof server.use> = [],
   locale: Locale = "en"
 ) {
-  search.value = `session=${board.session.id}`
+  address.set(`session=${board.session.id}`)
   let current = board
   const calls = { close: 0, get: 0, removed: [] as unknown[] }
 
