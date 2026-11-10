@@ -191,6 +191,29 @@ test("without stages: update there is no Add stage and no menu", async () => {
   expect(screen.queryByRole("button", { name: /^Actions for/ })).toBeNull()
 })
 
+test("with stages: delete the menu offers Delete", async () => {
+  open(stagesData())
+  await userEvent.click(await screen.findByRole("button", { name: "Actions for 3rd Class" }))
+
+  expect(screen.getByRole("menuitem", { name: "Delete" })).toBeInTheDocument()
+})
+
+test("without stages: delete the menu offers the other actions but no Delete", async () => {
+  const withoutDelete: Me = {
+    ...me.leader,
+    permissions: me.leader.permissions.filter(
+      (permission) => !(permission.resource === "stages" && permission.action === "delete")
+    ),
+  }
+
+  open(stagesData(), undefined, withoutDelete)
+  await userEvent.click(await screen.findByRole("button", { name: "Actions for 3rd Class" }))
+
+  expect(screen.getByRole("menuitem", { name: "Rename" })).toBeInTheDocument()
+  expect(screen.getByRole("menuitem", { name: "Archive" })).toBeInTheDocument()
+  expect(screen.queryByRole("menuitem", { name: "Delete" })).toBeNull()
+})
+
 test("an unknown id shows not found", async () => {
   search.value = `id=${SUNDAY_SCHOOL_ID}`
 
