@@ -32,10 +32,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { FieldGroup } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
+import { useCan } from "@/features/identity/auth/session"
 import { useRouter } from "@/i18n/navigation"
 import type { ServiceRef } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
+import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import { archiveRequest, deleteRequest, restoreRequest } from "@/features/organization/services/api"
@@ -231,8 +233,10 @@ export function StageActionsMenu({
   move?: Move
 }) {
   const t = useTranslations()
+  const can = useCan()
   const [open, setOpen] = useState<"edit" | "archive" | "delete" | null>(null)
   const name = isolate(stage.name)
+  const remove = can("delete", "stages", groupAt(service))
   const close = (next: boolean) => !next && setOpen(null)
 
   return (
@@ -268,10 +272,12 @@ export function StageActionsMenu({
             <Archive />
             {t("common.archive")}
           </DropdownMenuItem>
-          <DropdownMenuItem variant="destructive" onSelect={() => setOpen("delete")}>
-            <Trash2 />
-            {t("common.delete")}
-          </DropdownMenuItem>
+          {remove ? (
+            <DropdownMenuItem variant="destructive" onSelect={() => setOpen("delete")}>
+              <Trash2 />
+              {t("common.delete")}
+            </DropdownMenuItem>
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
       <StageFormDialog
