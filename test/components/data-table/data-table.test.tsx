@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { describe, expect, test, vi } from "vitest"
 
 import type { Locale } from "@/i18n/config"
@@ -26,6 +26,11 @@ const columns: ColumnDef<DataTableFeatures, Row, unknown>[] = [
   },
 ]
 
+const sized: ColumnDef<DataTableFeatures, Row, unknown>[] = [
+  { accessorKey: "name", header: "Name", size: 150 },
+  { accessorKey: "id", header: "Id" },
+]
+
 const rows = (count: number, offset = 0): Row[] =>
   Array.from({ length: count }, (_, i) => ({
     id: `r${i + offset}`,
@@ -42,12 +47,12 @@ function List({
   search?: string
   emptyMessage?: string
 }) {
-  const { table } = useDataTable({
-    data,
-    columns,
-    getRowId: (r) => r.id,
-    initialGlobalFilter: search,
-  })
+  const found = useMemo(
+    () => data.filter((row) => row.name.toLowerCase().includes(search.toLowerCase())),
+    [data, search]
+  )
+
+  const { table } = useDataTable({ data: found, columns, getRowId: (r) => r.id })
 
   return (
     <>
@@ -62,6 +67,18 @@ const names = () =>
     .getAllByRole("row")
     .slice(1)
     .map((row) => row.textContent)
+
+test("a column keeps the width it names, also 150; others take their content's width", () => {
+  function Sized() {
+    const { table } = useDataTable({ data: rows(1), columns: sized, getRowId: (r) => r.id })
+
+    return <DataTableView table={table} />
+  }
+
+  renderWithProviders(<Sized />)
+  expect(screen.getByRole("columnheader", { name: "Name" })).toHaveStyle({ width: "150px" })
+  expect(screen.getByRole("columnheader", { name: "Id" }).style.width).toBe("")
+})
 
 describe("sorting", () => {
   test("a sortable header toggles ascending and descending with the matching arrow", async () => {
