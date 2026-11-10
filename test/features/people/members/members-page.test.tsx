@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
@@ -42,11 +41,9 @@ function open(answer: (url: URL) => PeopleList | Response, locale: Locale = "en"
 
   renderWithProviders(
     <SessionProvider>
-      <SidebarProvider>
-        <MembersPage />
-      </SidebarProvider>
+      <MembersPage />
     </SessionProvider>,
-    { locale }
+    { locale, sidebar: true }
   )
 
   return requests

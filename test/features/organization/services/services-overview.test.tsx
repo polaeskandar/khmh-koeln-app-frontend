@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { describe, expect, test } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -18,12 +17,7 @@ const answerInsights = (rows: ServiceRow[] = services.items) =>
   server.use(http.get(apiUrl("/services/insights"), () => HttpResponse.json(insightsOf(rows))))
 
 function renderOverview(locale: Locale = "en") {
-  renderWithProviders(
-    <SidebarProvider>
-      <ServicesOverview />
-    </SidebarProvider>,
-    { locale, me: me.administrator }
-  )
+  renderWithProviders(<ServicesOverview />, { locale, me: me.administrator, sidebar: true })
 }
 
 function overview(locale: Locale = "en") {

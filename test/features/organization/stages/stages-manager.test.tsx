@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import type { ServiceStages } from "@/features/organization/services/api"
 import type { StageFields } from "@/features/organization/stages/api"
@@ -62,12 +61,7 @@ function open(
     })
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <StagesManager />
-    </SidebarProvider>,
-    { me: viewer }
-  )
+  renderWithProviders(<StagesManager />, { me: viewer, sidebar: true })
 
   return sent
 }
@@ -212,12 +206,7 @@ test("an unknown id shows not found", async () => {
     http.get(apiUrl(`/services/${SUNDAY_SCHOOL_ID}/stages`), () => problem(404, "notFound.service"))
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <StagesManager />
-    </SidebarProvider>,
-    { me: me.leader }
-  )
+  renderWithProviders(<StagesManager />, { me: me.leader, sidebar: true })
 
   expect(await screen.findByText("This page doesn’t exist")).toBeInTheDocument()
 })

@@ -5,7 +5,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
@@ -109,12 +108,7 @@ function openNew(data: StageHomework, query = "", locale: Locale = "en", account
     })
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <NewHomeworkPage />
-    </SidebarProvider>,
-    { locale, me: account }
-  )
+  renderWithProviders(<NewHomeworkPage />, { locale, me: account, sidebar: true })
 
   return posted
 }
@@ -136,12 +130,7 @@ function openEdit(data: HomeworkDetail, account: Me = me.servant, query = "") {
     })
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <EditHomeworkPage />
-    </SidebarProvider>,
-    { me: account }
-  )
+  renderWithProviders(<EditHomeworkPage />, { me: account, sidebar: true })
 
   return put
 }

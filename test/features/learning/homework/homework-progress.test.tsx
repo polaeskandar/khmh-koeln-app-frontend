@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -144,12 +143,7 @@ function open(body: HomeworkProgress | (() => Response), account: Me = me.servan
     )
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <HomeworkProgressPage />
-    </SidebarProvider>,
-    { me: account }
-  )
+  renderWithProviders(<HomeworkProgressPage />, { me: account, sidebar: true })
 }
 
 const tableRows = async () => (await screen.findByRole("table")).querySelectorAll("tbody tr")

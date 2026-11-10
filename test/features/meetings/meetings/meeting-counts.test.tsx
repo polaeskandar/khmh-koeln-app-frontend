@@ -2,7 +2,6 @@ import { screen } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Locale } from "@/i18n/config"
 import type { AgendaItem, ScheduleSummary, SessionView } from "@/lib/api/types/meetings"
 import { apiUrl } from "@test/support/api"
@@ -38,12 +37,7 @@ function agenda(items: AgendaItem[], locale: Locale = "en") {
     http.get(apiUrl("/services"), () => HttpResponse.json(services))
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <AgendaPage />
-    </SidebarProvider>,
-    { locale, me: me.leader }
-  )
+  renderWithProviders(<AgendaPage />, { locale, me: me.leader, sidebar: true })
 }
 
 const rowOf = async (name: string) => (await screen.findByText(name)).closest("li")!
@@ -95,12 +89,7 @@ function schedules(items: ScheduleSummary[], locale: Locale = "en") {
     http.get(apiUrl("/services"), () => HttpResponse.json(services))
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <SchedulesPage />
-    </SidebarProvider>,
-    { locale, me: me.leader }
-  )
+  renderWithProviders(<SchedulesPage />, { locale, me: me.leader, sidebar: true })
 }
 
 test("schedule rows show the roster size", async () => {

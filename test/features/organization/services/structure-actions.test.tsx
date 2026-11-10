@@ -4,7 +4,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import { StagesManager } from "@/features/organization/stages/stages-manager"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -185,12 +184,7 @@ test("an archived service's details show when and why", async () => {
     http.get(apiUrl("/schedules"), () => HttpResponse.json({ today: "2026-11-08", items: [] }))
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <ServiceDetails />
-    </SidebarProvider>,
-    { me: me.administrator }
-  )
+  renderWithProviders(<ServiceDetails />, { me: me.administrator, sidebar: true })
 
   expect(await screen.findByText("Archived on Sun 6 Sep 2026")).toBeInTheDocument()
 
@@ -247,12 +241,7 @@ test("a leader's archived stage moves to Archived stages, and Restore puts it la
     })
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <StagesManager />
-    </SidebarProvider>,
-    { me: me.leader }
-  )
+  renderWithProviders(<StagesManager />, { me: me.leader, sidebar: true })
 
   await userEvent.click(await screen.findByRole("button", { name: "Actions for 3rd Class" }))
   await userEvent.click(await screen.findByRole("menuitem", { name: "Archive" }))

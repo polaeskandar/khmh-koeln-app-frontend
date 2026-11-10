@@ -4,7 +4,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
@@ -57,11 +56,7 @@ function editor(page: React.ReactNode, servants = [daniel, christine], write?: (
     http.put(apiUrl(`/lessons/${goodSamaritan.id}`), save)
   )
 
-  renderWithProviders(
-    <SessionProvider>
-      <SidebarProvider>{page}</SidebarProvider>
-    </SessionProvider>
-  )
+  renderWithProviders(<SessionProvider>{page}</SessionProvider>, { sidebar: true })
 
   return sent
 }
@@ -196,12 +191,7 @@ function list(locale: Locale = "en") {
     )
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <StageLessonsPage />
-    </SidebarProvider>,
-    { locale, me: me.servant }
-  )
+  renderWithProviders(<StageLessonsPage />, { locale, me: me.servant, sidebar: true })
 }
 
 test("rows name the helpers, and the Servant filter matches them", async () => {
@@ -231,12 +221,7 @@ test("the lesson page lists Christine as Helping", async () => {
     )
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <LessonPage />
-    </SidebarProvider>,
-    { me: me.churchOffice }
-  )
+  renderWithProviders(<LessonPage />, { me: me.churchOffice, sidebar: true })
 
   const helper = (await screen.findByText("Christine Adel")).closest("li")!
   expect(helper).toHaveTextContent("Christine AdelHelping")

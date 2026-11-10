@@ -2,7 +2,6 @@ import { screen, within } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
 import { describe, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { AgendaItem, PlannedItem } from "@/lib/api/types/meetings"
 import { apiUrl } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -53,12 +52,7 @@ function open(query: string, answer: (url: URL) => Agenda) {
     http.get(apiUrl("/services"), () => HttpResponse.json(services))
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <AgendaPage />
-    </SidebarProvider>,
-    { me: me.leader }
-  )
+  renderWithProviders(<AgendaPage />, { me: me.leader, sidebar: true })
 
   return requests
 }

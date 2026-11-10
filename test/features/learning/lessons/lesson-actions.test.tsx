@@ -4,7 +4,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { apiUrl, problem } from "@test/support/api"
 import { homeworkRow, stageHomework } from "@test/support/fixtures/homework"
@@ -48,12 +47,7 @@ function open(
     )
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <LessonPage />
-    </SidebarProvider>,
-    { me: account }
-  )
+  renderWithProviders(<LessonPage />, { me: account, sidebar: true })
 
   return { reads: () => reads }
 }

@@ -3,7 +3,6 @@ import { http, HttpResponse } from "msw"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { SidebarNav } from "@/components/app-shell/sidebar-parts"
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Locale } from "@/i18n/config"
@@ -98,12 +97,10 @@ function open(
 
   renderWithProviders(
     <SessionProvider>
-      <SidebarProvider>
-        <SidebarNav />
-        <Dashboard />
-      </SidebarProvider>
+      <SidebarNav />
+      <Dashboard />
     </SessionProvider>,
-    { locale }
+    { locale, sidebar: true }
   )
 }
 

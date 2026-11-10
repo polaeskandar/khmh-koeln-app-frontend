@@ -4,7 +4,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import type { AgendaItem, PlannedItem } from "@/lib/api/types/meetings"
 import { apiUrl, problem } from "@test/support/api"
@@ -98,12 +97,7 @@ function open(date: string, items: AgendaItem[], answer?: () => Response, who: M
     )
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <AgendaPage />
-    </SidebarProvider>,
-    { me: who }
-  )
+  renderWithProviders(<AgendaPage />, { me: who, sidebar: true })
 
   return sent
 }

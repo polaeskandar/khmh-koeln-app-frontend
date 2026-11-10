@@ -4,7 +4,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -86,12 +85,7 @@ function open(body: StageHomework | (() => StageHomework), account: Me = me.serv
     )
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <StageHomeworkPage />
-    </SidebarProvider>,
-    { me: account }
-  )
+  renderWithProviders(<StageHomeworkPage />, { me: account, sidebar: true })
 }
 
 const table = async () => within(await screen.findByRole("table"))

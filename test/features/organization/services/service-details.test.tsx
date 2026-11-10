@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { schedule } from "@test/support/fixtures/schedules"
@@ -127,12 +126,7 @@ function open(
     })
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <ServiceDetails />
-    </SidebarProvider>,
-    { me: viewer }
-  )
+  renderWithProviders(<ServiceDetails />, { me: viewer, sidebar: true })
 
   return scheduleRequests
 }
@@ -276,12 +270,7 @@ test("an unknown id shows not found", async () => {
   address.set(`id=${id}`)
   server.use(http.get(apiUrl(`/services/${id}`), () => problem(404, "notFound.service")))
 
-  renderWithProviders(
-    <SidebarProvider>
-      <ServiceDetails />
-    </SidebarProvider>,
-    { me: me.administrator }
-  )
+  renderWithProviders(<ServiceDetails />, { me: me.administrator, sidebar: true })
 
   expect(await screen.findByText("This page doesn’t exist")).toBeInTheDocument()
 })

@@ -4,7 +4,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import { apiUrl, problem } from "@test/support/api"
 import type { Schemas } from "@/lib/api/client"
 import { boardOf, detailOf, rosterPeople, thirdClassBoard } from "@test/support/fixtures/board"
@@ -125,12 +124,7 @@ function open(
     })
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <TakeAttendancePage />
-    </SidebarProvider>,
-    { me: me.servant }
-  )
+  renderWithProviders(<TakeAttendancePage />, { me: me.servant, sidebar: true })
 
   return calls
 }

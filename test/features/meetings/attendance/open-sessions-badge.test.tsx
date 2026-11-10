@@ -5,7 +5,6 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { MobileTabBar } from "@/components/app-shell/mobile-tab-bar"
 import { SidebarNav } from "@/components/app-shell/sidebar-parts"
-import { SidebarProvider } from "@/components/ui/sidebar"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
@@ -54,13 +53,11 @@ function open(
 
   const { client } = renderWithProviders(
     <SessionProvider>
-      <SidebarProvider>
-        <SidebarNav />
-        <MobileTabBar />
-        {page ? <AttendanceOverview /> : null}
-      </SidebarProvider>
+      <SidebarNav />
+      <MobileTabBar />
+      {page ? <AttendanceOverview /> : null}
     </SessionProvider>,
-    { locale }
+    { locale, sidebar: true }
   )
 
   return { reads: () => reads, client }

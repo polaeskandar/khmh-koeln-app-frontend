@@ -4,7 +4,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Locale } from "@/i18n/config"
@@ -105,11 +104,9 @@ function open(
 
   renderWithProviders(
     <SessionProvider>
-      <SidebarProvider>
-        <MembersPage />
-      </SidebarProvider>
+      <MembersPage />
     </SessionProvider>,
-    { locale }
+    { locale, sidebar: true }
   )
 
   return { requests, posts, reads }

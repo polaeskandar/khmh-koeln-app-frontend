@@ -4,7 +4,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
 import { boardOf, detailOf, rosterPeople, thirdClassBoard } from "@test/support/fixtures/board"
@@ -103,12 +102,7 @@ function open(
     ...handlers
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <TakeAttendancePage />
-    </SidebarProvider>,
-    { locale, me: me.servant }
-  )
+  renderWithProviders(<TakeAttendancePage />, { locale, me: me.servant, sidebar: true })
 
   return calls
 }

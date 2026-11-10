@@ -4,7 +4,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -50,12 +49,7 @@ function open(viewer: Me = me.administrator, locale: Locale = "en") {
     })
   )
 
-  renderWithProviders(
-    <SidebarProvider>
-      <ServicesOverview />
-    </SidebarProvider>,
-    { locale, me: viewer }
-  )
+  renderWithProviders(<ServicesOverview />, { locale, me: viewer, sidebar: true })
 
   return {
     sent,

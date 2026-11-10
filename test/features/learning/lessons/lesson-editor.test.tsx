@@ -4,7 +4,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
 import { apiUrl, problem } from "@test/support/api"
@@ -61,11 +60,7 @@ function render(page: React.ReactNode, write?: () => Response, account: Me = me.
     })
   )
 
-  renderWithProviders(
-    <SessionProvider>
-      <SidebarProvider>{page}</SidebarProvider>
-    </SessionProvider>
-  )
+  renderWithProviders(<SessionProvider>{page}</SessionProvider>, { sidebar: true })
 
   return sent
 }

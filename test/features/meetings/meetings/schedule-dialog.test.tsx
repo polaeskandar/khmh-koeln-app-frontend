@@ -5,7 +5,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { attendanceOverviewQuery } from "@/features/meetings/attendance/api"
 import { upcomingQuery } from "@/features/meetings/dashboard/api"
@@ -93,11 +92,11 @@ function open({
   )
 
   renderWithProviders(
-    <SidebarProvider>
+    <>
       <SchedulesPage />
       <OtherLists />
-    </SidebarProvider>,
-    { me: who }
+    </>,
+    { me: who, sidebar: true }
   )
 
   return sent

@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Schemas } from "@/lib/api/client"
@@ -89,10 +88,9 @@ function open(who: Me = me.administrator) {
 
   renderWithProviders(
     <SessionProvider>
-      <SidebarProvider>
-        <DataRequestsPage />
-      </SidebarProvider>
-    </SessionProvider>
+      <DataRequestsPage />
+    </SessionProvider>,
+    { sidebar: true }
   )
 
   return calls

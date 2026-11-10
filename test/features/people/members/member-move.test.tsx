@@ -5,7 +5,6 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
 import type { ServiceList, ServiceRow } from "@/features/organization/services/api"
 import type { Me } from "@/features/identity/auth/api"
 import { stageQuery } from "@/features/organization/stages/api"
@@ -134,11 +133,11 @@ function open(
   )
 
   renderWithProviders(
-    <SidebarProvider>
+    <>
       <MembersScreen />
       <StageMemberCount />
-    </SidebarProvider>,
-    { locale, me: viewer }
+    </>,
+    { locale, me: viewer, sidebar: true }
   )
 
   return moves
