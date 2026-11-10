@@ -41,9 +41,32 @@ const weekly = (weekday: 1 | 2 | 3 | 4 | 5 | 6 | 7): Recurrence => ({
 
 const stage = (id: string, name: string) => ({ id, name, position: 0 })
 
+const LEVEL_1 = stage("0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef501", "Level 1")
+
+const served = (
+  service: GroupServant["groups"][number]["service"],
+  at: typeof LEVEL_1 | null = null
+): GroupServant["groups"][number] => ({ service, stage: at && { ...at, archived: false } })
+
 export const memberServants: GroupServant[] = [
-  { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef402", name: "Irene Wahba", role: "service_leader" },
-  { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef403", name: "Youssef Nashed", role: "servant" },
+  {
+    id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef402",
+    name: "Irene Wahba",
+    role: "service_leader",
+    groups: [served(BIBLE_STUDY), served(COPTIC, LEVEL_1)],
+  },
+  {
+    id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef404",
+    name: "Samuel Hanna",
+    role: "service_leader",
+    groups: [served(COPTIC, LEVEL_1)],
+  },
+  {
+    id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef403",
+    name: "Youssef Nashed",
+    role: "servant",
+    groups: [served(COPTIC, LEVEL_1)],
+  },
 ]
 
 export const nevineGroups: MemberGroup[] = [
@@ -67,7 +90,7 @@ export const nevineGroups: MemberGroup[] = [
   {
     id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef202",
     service: COPTIC,
-    stage: stage("0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef501", "Level 1"),
+    stage: LEVEL_1,
     since: "2026-09-01",
     schedules: [
       {

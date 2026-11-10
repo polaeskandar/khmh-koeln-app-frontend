@@ -125,10 +125,20 @@ test("lists the groups with schedules, servants and the last lesson", async () =
   expect(cards.map((c) => c.getAttribute("aria-label"))).toEqual(["Bible Study", "Level 1"])
   expect(cards[0]).toHaveTextContent("Every Friday · 19:30–21:00 · Hall")
   expect(await within(cards[0]!).findByText(/Irene Wahba/)).toBeInTheDocument()
-  expect(cards[0]).toHaveTextContent("⁨Irene Wahba⁩ (Service leader), ⁨Youssef Nashed⁩")
-  expect(cards[1]).toHaveTextContent("⁨Irene Wahba⁩ (Service leader), ⁨Youssef Nashed⁩")
   expect(cards[1]).toHaveTextContent("Last lesson: “⁨The first eight letters⁩”")
   expect(within(cards[1]!).getByText("Ⲭⲣⲓⲥⲧⲟⲥ ⲁϥⲧⲱⲛϥ")).toHaveAttribute("dir", "auto")
+})
+
+test("each group lists the servants who serve it, its service leaders first", async () => {
+  open()
+  const cards = await screen.findAllByRole("article")
+  const servants = (card: HTMLElement) => within(card).getByText(/^Servants: /)
+  await within(cards[1]!).findByText(/Samuel Hanna/)
+  expect(servants(cards[0]!)).toHaveTextContent(/^Servants: ⁨Irene Wahba⁩ \(Service leader\)$/)
+
+  expect(servants(cards[1]!)).toHaveTextContent(
+    /^Servants: ⁨Samuel Hanna⁩ \(Service leader\), ⁨Irene Wahba⁩ and ⁨Youssef Nashed⁩$/
+  )
 })
 
 test("a member without homework has no To do section", async () => {
@@ -200,5 +210,8 @@ test("in Arabic servant names are joined with the Arabic comma", async () => {
   open({ locale: "ar" })
   const cards = await screen.findAllByRole("article")
   await within(cards[1]!).findByText(/Irene Wahba/)
-  expect(cards[1]).toHaveTextContent("⁨Irene Wahba⁩ (أمين الخدمة)، ⁨Youssef Nashed⁩")
+
+  expect(cards[1]).toHaveTextContent(
+    "الخدام: ⁨Samuel Hanna⁩ (أمين الخدمة)، ⁨Irene Wahba⁩ و⁨Youssef Nashed⁩"
+  )
 })

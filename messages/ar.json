@@ -2224,6 +2224,7 @@
     "groups": {
       "noSchedule": "لا توجد اجتماعات منتظمة حاليًا.",
       "lastLesson": "آخر درس: «{title}»، {date}",
+      "servants": "الخدام: {names}",
       "serviceLeader": "{name} (أمين الخدمة)"
     },
     "homework": {

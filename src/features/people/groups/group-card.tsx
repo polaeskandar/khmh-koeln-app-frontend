@@ -10,18 +10,30 @@ import { isolate } from "@/lib/bidi"
 
 import { recurrenceOf } from "@/lib/domain/recurrence"
 
-import { type MemberGroup, useMemberServants } from "./api"
+import { type GroupServant, type MemberGroup, useMemberServants } from "./api"
+
+const servesIn = (servant: GroupServant, group: MemberGroup) =>
+  servant.groups.some(
+    (served) =>
+      served.service.id === group.service.id &&
+      (served.stage?.id ?? null) === (group.stage?.id ?? null)
+  )
+
+const leadsServiceOf = (servant: GroupServant, group: MemberGroup) =>
+  servant.role === "service_leader" &&
+  (servant.groups.every((served) => served.service.id === group.service.id) ||
+    servant.groups.some((served) => served.service.id === group.service.id && !served.stage))
 
 export function GroupCard({ group, today }: { group: MemberGroup; today: LocalDate }) {
   const t = useTranslations("member.groups")
   const f = useFormat()
   const name = group.stage?.name ?? group.service.name
 
-  const servants = useMemberServants().map((servant) =>
-    servant.role === "service_leader"
-      ? t("serviceLeader", { name: isolate(servant.name) })
-      : isolate(servant.name)
-  )
+  const servants = useMemberServants()
+    .filter((servant) => servesIn(servant, group))
+    .map((servant) => ({ name: isolate(servant.name), leads: leadsServiceOf(servant, group) }))
+    .sort((a, b) => Number(b.leads) - Number(a.leads))
+    .map((servant) => (servant.leads ? t("serviceLeader", { name: servant.name }) : servant.name))
 
   return (
     <article className="flex flex-col gap-3 border p-4" aria-label={name}>
@@ -56,12 +68,9 @@ export function GroupCard({ group, today }: { group: MemberGroup; today: LocalDa
         <p className="text-sm text-muted-foreground">{t("noSchedule")}</p>
       )}
       {servants.length > 0 ? (
-        <p className="flex items-start gap-2 text-sm">
-          <UsersRound
-            className="mt-0.5 size-3.5 shrink-0 text-muted-foreground"
-            aria-hidden="true"
-          />
-          <span>{servants.join(f.separator)}</span>
+        <p className="flex items-start gap-2 text-sm text-muted-foreground">
+          <UsersRound className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+          <span>{t("servants", { names: f.list(servants) })}</span>
         </p>
       ) : null}
       {group.lastLesson ? (
