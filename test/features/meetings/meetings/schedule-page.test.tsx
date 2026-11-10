@@ -1,4 +1,5 @@
-import { screen, within } from "@testing-library/react"
+import type { QueryClient } from "@tanstack/react-query"
+import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
@@ -6,6 +7,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import type { Me } from "@/features/identity/auth/api"
+import { makeQueryClient } from "@/lib/api/query-provider"
 import type { AgendaItem, PlannedItem, ScheduleSummary } from "@/lib/api/types/meetings"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -50,7 +52,11 @@ const planned = (date: string, scheduleId: string): PlannedItem => ({
 
 const asItem = (s: ReturnType<typeof session>): AgendaItem => ({ ...s, kind: "session" })
 
-function open(data: ScheduleSummary | (() => ScheduleSummary), who: Me = me.leader) {
+function open(
+  data: ScheduleSummary | (() => ScheduleSummary),
+  who: Me = me.leader,
+  client?: QueryClient
+) {
   const current = typeof data === "function" ? data : () => data
   const id = current().id
   search.value = `id=${id}`
@@ -92,7 +98,7 @@ function open(data: ScheduleSummary | (() => ScheduleSummary), who: Me = me.lead
     <SidebarProvider>
       <SchedulePage />
     </SidebarProvider>,
-    { me: who }
+    { me: who, client }
   )
 
   return id
@@ -112,11 +118,28 @@ test("without sessions: update there are no actions and no date menus", async ()
 
 test("failed agenda requests say so with a retry instead of loading forever", async () => {
   open(schedule())
-  server.use(http.get(apiUrl("/agenda"), () => problem(403, "forbidden")))
+  server.use(http.get(apiUrl("/agenda"), () => problem(409, "conflict")))
   const next = await section("Next dates")
   expect(await next.findByRole("button", { name: "Try again" })).toBeInTheDocument()
   const past = await section("Past sessions")
   expect(await past.findByRole("button", { name: "Try again" })).toBeInTheDocument()
+})
+
+test("loaded dates stay on the page when a later refetch fails", async () => {
+  const client = makeQueryClient()
+  open(schedule(), me.leader, client)
+  const next = await section("Next dates")
+  expect(await next.findAllByRole("listitem")).toHaveLength(3)
+  const past = await section("Past sessions")
+  await past.findAllByRole("listitem")
+  server.use(http.get(apiUrl("/agenda"), () => problem(409, "conflict")))
+  await client.invalidateQueries({ queryKey: ["agenda"] })
+
+  await waitFor(() => expect(client.isFetching({ queryKey: ["agenda"] })).toBe(0))
+
+  expect(next.getAllByRole("listitem")).toHaveLength(3)
+  expect(past.getAllByRole("listitem").length).toBeGreaterThan(0)
+  expect(screen.queryByRole("button", { name: "Try again" })).not.toBeInTheDocument()
 })
 
 test("next dates skip completed sessions and keep a date canceled ahead", async () => {

@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl"
 import { Topbar } from "@/components/app-shell/topbar"
 import { NotAssigned } from "@/components/not-assigned"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
-import { QueryErrorState, QueryState } from "@/components/page-states"
+import { QueryState } from "@/components/page-states"
 import { ServiceTag } from "@/components/service-tag"
 import {
   agendaHref,
@@ -256,16 +256,11 @@ function DashboardView({ upcoming }: { upcoming: Upcoming }) {
             </Link>
           }
         >
-          {today.sessions ? (
-            <Today sessions={today.sessions} upcoming={upcoming} />
-          ) : today.overview.isError ? (
-            <QueryErrorState
-              error={today.overview.error}
-              onRetry={() => today.overview.refetch()}
-            />
-          ) : (
-            <Skeleton className="h-32 w-full" />
-          )}
+          <QueryState query={today.overview} loading={<Skeleton className="h-32 w-full" />}>
+            {() =>
+              today.sessions ? <Today sessions={today.sessions} upcoming={upcoming} /> : null
+            }
+          </QueryState>
         </Section>
       ) : null}
       {unassigned ? null : <ComingUp upcoming={upcoming} />}

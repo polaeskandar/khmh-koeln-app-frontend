@@ -1,14 +1,14 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, type UseQueryResult } from "@tanstack/react-query"
 import { Ellipsis, Repeat } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useState } from "react"
+import { type ReactNode, useState } from "react"
 
 import { Topbar } from "@/components/app-shell/topbar"
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
-import { NotFoundState, QueryErrorState, QueryState } from "@/components/page-states"
+import { NotFoundState, QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { ServiceTag } from "@/components/service-tag"
 import { AgendaRow } from "@/components/session-bits"
@@ -161,6 +161,30 @@ function Actions({ schedule, today }: { schedule: ScheduleSummary; today: LocalD
   )
 }
 
+function AgendaList({
+  query,
+  items,
+  empty,
+  children,
+}: {
+  query: UseQueryResult<unknown>
+  items: AgendaItem[]
+  empty: string
+  children: (items: AgendaItem[]) => ReactNode
+}) {
+  return (
+    <QueryState query={query} loading={<Skeleton className="h-32 w-full" />}>
+      {() =>
+        items.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{empty}</p>
+        ) : (
+          children(items)
+        )
+      }
+    </QueryState>
+  )
+}
+
 function Dates({ schedule, today }: { schedule: ScheduleSummary; today: LocalDate }) {
   const t = useTranslations("meetings.schedule")
   const can = useCanIn(meetingGroup(schedule))
@@ -207,28 +231,18 @@ function Dates({ schedule, today }: { schedule: ScheduleSummary; today: LocalDat
   return (
     <div className="flex min-w-0 flex-col gap-8">
       <Section id="next-dates" title={t("nextTitle")} description={t("nextDescription")}>
-        {!schedule.active ? (
-          <p className="text-sm text-muted-foreground">{t("nextInactive")}</p>
-        ) : next.isError ? (
-          <QueryErrorState error={next.error} onRetry={() => next.refetch()} />
-        ) : !next.data ? (
-          <Skeleton className="h-32 w-full" />
-        ) : upcoming.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("nextEmpty")}</p>
+        {schedule.active ? (
+          <AgendaList query={next} items={upcoming} empty={t("nextEmpty")}>
+            {rows}
+          </AgendaList>
         ) : (
-          rows(upcoming)
+          <p className="text-sm text-muted-foreground">{t("nextInactive")}</p>
         )}
       </Section>
       <Section id="past-sessions" title={t("pastTitle")}>
-        {past.isError ? (
-          <QueryErrorState error={past.error} onRetry={() => past.refetch()} />
-        ) : !past.data ? (
-          <Skeleton className="h-32 w-full" />
-        ) : earlier.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("pastEmpty")}</p>
-        ) : (
-          rows(earlier)
-        )}
+        <AgendaList query={past} items={earlier} empty={t("pastEmpty")}>
+          {rows}
+        </AgendaList>
       </Section>
     </div>
   )
