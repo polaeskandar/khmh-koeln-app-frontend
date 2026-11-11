@@ -4,17 +4,15 @@ import { CircleAlert, CircleCheck, Link2Off, MailCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useEffect, useRef, useState } from "react"
 
-import { NotFoundPage } from "@/components/not-found-page"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
-import { useInBrowser } from "@/hooks/use-in-browser"
 import { Link } from "@/i18n/navigation"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { routes } from "@/lib/routes"
 
-import { forgetAddressFragment, tokenInAddress } from "./address-token"
+import { AddressTokenGate } from "./address-token"
 import { confirmEmailRequest } from "./api"
-import { AuthFrame, AuthHeading } from "./auth-frame"
+import { AuthFrame, AuthHeading, StateIcon } from "./auth-frame"
 
 type Outcome =
   | { kind: "confirming" }
@@ -22,28 +20,14 @@ type Outcome =
   | { kind: "invalid" }
   | { kind: "failed"; message: string }
 
-function StateIcon({ icon: Icon, tone }: { icon: typeof MailCheck; tone: string }) {
-  return (
-    <span className={`inline-flex size-11 items-center justify-center ${tone}`}>
-      <Icon className="size-5" aria-hidden="true" />
-    </span>
-  )
-}
-
 export function ConfirmEmailPage() {
-  const inBrowser = useInBrowser()
-
-  return inBrowser ? <ConfirmEmailFlow /> : <AuthFrame>{null}</AuthFrame>
+  return <AddressTokenGate>{(token) => <ConfirmEmailFlow token={token} />}</AddressTokenGate>
 }
 
-function ConfirmEmailFlow() {
+function ConfirmEmailFlow({ token }: { token: string }) {
   const t = useTranslations("auth.confirmEmail")
   const tCommon = useTranslations("common")
-  const [token] = useState(tokenInAddress)
-
-  const [outcome, setOutcome] = useState<Outcome>(() =>
-    token ? { kind: "confirming" } : { kind: "invalid" }
-  )
+  const [outcome, setOutcome] = useState<Outcome>({ kind: "confirming" })
 
   const confirm = useApiMutation(confirmEmailRequest, { toastOnError: false })
   const started = useRef(false)
@@ -65,10 +49,8 @@ function ConfirmEmailFlow() {
     )
   }
 
-  useEffect(forgetAddressFragment, [])
-
   useEffect(() => {
-    if (!token || started.current) {
+    if (started.current) {
       return
     }
 
@@ -76,14 +58,10 @@ function ConfirmEmailFlow() {
     void send(token)
   })
 
-  if (token === null) {
-    return <NotFoundPage />
-  }
-
   if (outcome.kind === "confirmed") {
     return (
       <AuthFrame>
-        <StateIcon icon={CircleCheck} tone="bg-success-soft text-success" />
+        <StateIcon icon={CircleCheck} tone="success" />
         <AuthHeading title={t("confirmedTitle")}>
           <p className="max-w-prose">{t("confirmedText")}</p>
         </AuthHeading>
@@ -97,7 +75,7 @@ function ConfirmEmailFlow() {
   if (outcome.kind === "invalid") {
     return (
       <AuthFrame>
-        <StateIcon icon={Link2Off} tone="bg-warning-soft text-warning" />
+        <StateIcon icon={Link2Off} tone="warning" />
         <AuthHeading title={t("title")}>
           <p className="max-w-prose">{t("linkInvalid")}</p>
         </AuthHeading>
@@ -108,10 +86,10 @@ function ConfirmEmailFlow() {
     )
   }
 
-  if (outcome.kind === "failed" && token) {
+  if (outcome.kind === "failed") {
     return (
       <AuthFrame>
-        <StateIcon icon={CircleAlert} tone="bg-destructive/10 text-destructive" />
+        <StateIcon icon={CircleAlert} tone="destructive" />
         <AuthHeading title={t("title")}>
           <p className="max-w-prose" role="alert">
             {outcome.message}
@@ -126,7 +104,7 @@ function ConfirmEmailFlow() {
 
   return (
     <AuthFrame>
-      <StateIcon icon={MailCheck} tone="bg-muted text-muted-foreground" />
+      <StateIcon icon={MailCheck} tone="muted" />
       <AuthHeading title={t("title")}>
         <p className="inline-flex max-w-prose items-center gap-2" role="status">
           <Spinner aria-hidden="true" />

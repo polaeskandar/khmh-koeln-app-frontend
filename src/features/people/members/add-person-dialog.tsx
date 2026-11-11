@@ -8,6 +8,7 @@ import { toast } from "sonner"
 import { DialogMount } from "@/components/dialog-mount"
 import { FormDialog } from "@/components/form-dialog"
 import { TextField } from "@/components/form-fields"
+import { FormAlert } from "@/components/form-alert"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { FieldGroup } from "@/components/ui/field"
@@ -200,10 +201,7 @@ function AddPersonDialog({ preset, onClose }: { preset?: PlacementInput; onClose
           onAddAnyway={() => void submitAnyway()}
         />
       ) : problem && !shownInFields && problem.status !== 403 ? (
-        <Alert variant="destructive" role="alert">
-          <CircleAlert />
-          <AlertDescription>{problem.message}</AlertDescription>
-        </Alert>
+        <FormAlert message={problem.message} />
       ) : null}
       <FieldGroup>
         <div className="grid gap-4 sm:grid-cols-2">

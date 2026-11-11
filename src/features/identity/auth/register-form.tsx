@@ -1,13 +1,12 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { CircleAlert } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 import { useId, useState } from "react"
 
 import { ChoiceCards } from "@/components/choice-cards"
+import { FormAlert } from "@/components/form-alert"
 import { SelectField, TextAreaField, TextField } from "@/components/form-fields"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -264,12 +263,7 @@ export function RegisterForm() {
         void submit()
       }}
     >
-      {alert ? (
-        <Alert variant="destructive" role="alert">
-          <CircleAlert />
-          <AlertDescription>{alert}</AlertDescription>
-        </Alert>
-      ) : null}
+      <FormAlert message={alert} />
       <FieldGroup>
         <div className="grid gap-6 sm:grid-cols-2">
           <TextField

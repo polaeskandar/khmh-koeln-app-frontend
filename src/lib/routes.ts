@@ -15,6 +15,8 @@ function href(path: `/${string}`, query: Record<string, string | null | undefine
   return qs ? `${path}?${qs}` : path
 }
 
+export const tokenHash = (token: string) => `#token=${encodeURIComponent(token)}`
+
 export const routes = {
   home: () => "/",
   services: () => "/services/",
@@ -67,6 +69,6 @@ export const routes = {
   register: () => "/register/",
   registered: () => "/register/done/",
   forgotPassword: () => "/forgot-password/",
-  setPassword: (token: string) => `/set-password/#token=${encodeURIComponent(token)}`,
+  setPassword: (token: string) => `/set-password/${tokenHash(token)}`,
   privacy: () => "/privacy/",
 } as const

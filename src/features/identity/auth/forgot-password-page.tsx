@@ -1,11 +1,11 @@
 "use client"
 
-import { CircleAlert, KeyRound, MailCheck } from "lucide-react"
+import { KeyRound, MailCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
+import { FormAlert } from "@/components/form-alert"
 import { TextField } from "@/components/form-fields"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
@@ -16,9 +16,7 @@ import { resetByEmail } from "@/lib/env"
 import { routes } from "@/lib/routes"
 
 import { forgotPasswordRequest } from "./api"
-import { AuthFrame, AuthHeading } from "./auth-frame"
-
-import { StateIcon } from "./password-outcome"
+import { AuthFrame, AuthHeading, StateIcon } from "./auth-frame"
 
 export function ForgotPasswordPage() {
   return resetByEmail() ? <ForgotPasswordByEmail /> : <ForgotPasswordAtTheOffice />
@@ -47,7 +45,7 @@ function ForgotPasswordByEmail() {
   if (sentTo) {
     return (
       <AuthFrame>
-        <StateIcon icon={MailCheck} tone="bg-success-soft text-success" />
+        <StateIcon icon={MailCheck} tone="success" />
         <div role="status" className="flex flex-col gap-2">
           <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
             {t("title")}
@@ -76,12 +74,7 @@ function ForgotPasswordByEmail() {
           void submit()
         }}
       >
-        {alert ? (
-          <Alert variant="destructive" role="alert">
-            <CircleAlert />
-            <AlertDescription>{alert}</AlertDescription>
-          </Alert>
-        ) : null}
+        <FormAlert message={alert} />
         <TextField
           label={t("email")}
           type="email"
@@ -113,7 +106,7 @@ function ForgotPasswordAtTheOffice() {
 
   return (
     <AuthFrame>
-      <StateIcon icon={KeyRound} tone="bg-muted text-muted-foreground" />
+      <StateIcon icon={KeyRound} tone="muted" />
       <AuthHeading title={t("title")}>
         <p className="max-w-prose">{t("text")}</p>
       </AuthHeading>

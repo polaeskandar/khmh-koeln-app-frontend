@@ -1,6 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
+import type { LucideIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { ReactNode } from "react"
 
@@ -18,13 +19,15 @@ export function AuthFrame({
   children,
   aside,
   className,
+  keepHash,
 }: {
   children: ReactNode
   aside?: ReactNode
   className?: string
+  keepHash?: string
 }) {
   const t = useTranslations("brand")
-  const switchLocale = useSwitchLocale()
+  const switchLocale = useSwitchLocale(keepHash)
 
   return (
     <div className="flex min-h-svh flex-col bg-background">
@@ -82,9 +85,38 @@ function AuthFooter() {
   )
 }
 
-export function AuthHeading({ title, children }: { title: string; children?: ReactNode }) {
+const STATE_TONES = {
+  success: "bg-success-soft text-success",
+  warning: "bg-warning-soft text-warning",
+  muted: "bg-muted text-muted-foreground",
+  destructive: "bg-destructive/10 text-destructive",
+} as const
+
+export function StateIcon({
+  icon: Icon,
+  tone,
+}: {
+  icon: LucideIcon
+  tone: keyof typeof STATE_TONES
+}) {
   return (
-    <div className="flex flex-col gap-2">
+    <span className={cn("inline-flex size-11 items-center justify-center", STATE_TONES[tone])}>
+      <Icon className="size-5" aria-hidden="true" />
+    </span>
+  )
+}
+
+export function AuthHeading({
+  title,
+  status = false,
+  children,
+}: {
+  title: string
+  status?: boolean
+  children?: ReactNode
+}) {
+  return (
+    <div role={status ? "status" : undefined} className="flex flex-col gap-2">
       <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">{title}</h1>
       {children ? <div className="text-sm text-muted-foreground">{children}</div> : null}
     </div>
