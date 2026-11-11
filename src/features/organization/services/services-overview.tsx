@@ -2,16 +2,13 @@
 
 import { useCan, useUnassigned } from "@/features/identity/auth/session"
 import { useQuery } from "@tanstack/react-query"
-import type { ColumnDef } from "@tanstack/react-table"
-import { Archive, Search, X } from "lucide-react"
+import { Search, X } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useMemo, useState } from "react"
+import { type ReactNode, useMemo, useState } from "react"
 
 import { Topbar } from "@/components/app-shell/topbar"
 import {
   countByTab,
-  DataTableColumnHeader,
-  type DataTableFeatures,
   DataTablePagination,
   DataTableTabs,
   DataTableView,
@@ -21,7 +18,6 @@ import { NotAssigned } from "@/components/not-assigned"
 import { PageBody, PageHeader } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"
 import { ServiceSwatch } from "@/components/service-tag"
-import { StatusBadge } from "@/components/status"
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -36,14 +32,13 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group"
-import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import { fold } from "@/lib/domain/names"
-import { localDateOf } from "@/lib/domain/time"
 import { routes } from "@/lib/routes"
 
-import { type ServiceRow, servicesQuery, useServiceInsights } from "./api"
-import { AttendanceCell, NextMeetingCell, useNextAt } from "./service-bits"
+import { type ServiceRow, servicesQuery } from "./api"
+import { useNextAt } from "./service-bits"
+import { ArchivedBadge, useServiceColumns } from "./service-columns"
 import { NewServiceButton, ServiceActionsMenu } from "./service-dialogs"
 
 type Tab = "active" | "archived" | "all"
@@ -81,145 +76,69 @@ export function ServicesOverview() {
   )
 }
 
-function ArchivedBadge({ row }: { row: ServiceRow }) {
+function ServicesToolbar({
+  tab,
+  onTabChange,
+  counts,
+  search,
+  onSearchChange,
+}: {
+  tab: Tab
+  onTabChange: (tab: Tab) => void
+  counts: Record<Tab, number>
+  search: string
+  onSearchChange: (search: string) => void
+}) {
   const t = useTranslations()
-  const f = useFormat()
 
   return (
-    <StatusBadge
-      tone="muted"
-      icon={Archive}
-      title={
-        row.archivedAt
-          ? t("services.table.archivedOn", { date: f.mediumDate(localDateOf(row.archivedAt)) })
-          : undefined
-      }
-    >
-      {t("common.archived")}
-    </StatusBadge>
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <DataTableTabs
+        value={tab}
+        onValueChange={onTabChange}
+        tabs={TAB_ORDER.map((value) => ({
+          value,
+          label: t(`services.table.tabs.${value}`, { count: counts[value] }),
+        }))}
+      />
+      <InputGroup className="w-full sm:w-72">
+        <InputGroupAddon>
+          <Search />
+        </InputGroupAddon>
+        <InputGroupInput
+          aria-label={t("services.table.search")}
+          placeholder={t("services.table.searchPlaceholder")}
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+        />
+        {search ? (
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton
+              size="icon-xs"
+              aria-label={t("common.clearSearch")}
+              onClick={() => onSearchChange("")}
+            >
+              <X />
+            </InputGroupButton>
+          </InputGroupAddon>
+        ) : null}
+      </InputGroup>
+    </div>
   )
 }
 
-export function ServicesTable({ rows }: { rows: ServiceRow[] }) {
+function ServicesEmpty({
+  search,
+  tab,
+  onClearSearch,
+}: {
+  search: string
+  tab: Tab
+  onClearSearch: () => void
+}) {
   const t = useTranslations()
-  const f = useFormat()
-  const nextAt = useNextAt()
-  const insights = useServiceInsights()
-  const [tab, setTab] = useState<Tab>("active")
-  const [search, setSearch] = useState("")
-  const counts = countByTab(rows, TABS)
 
-  const shown = useMemo(() => {
-    const words = fold(search)
-
-    return rows.filter(
-      (r) =>
-        TABS[tab](r) &&
-        (words === "" ||
-          fold(
-            `${r.name} ${r.description ?? ""} ${r.stages.map((s) => s.name).join(" ")}`
-          ).includes(words))
-    )
-  }, [rows, tab, search])
-
-  const columns = useMemo<ColumnDef<DataTableFeatures, ServiceRow, unknown>[]>(
-    () => [
-      {
-        accessorKey: "name",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t("services.table.service")} />
-        ),
-        cell: ({ row: { original: r } }) => (
-          <div className="flex min-w-0 items-start gap-3 py-1">
-            <ServiceSwatch tone={r.tone} className="mt-1.5 size-2.5" />
-            <div className="flex min-w-0 flex-col gap-0.5">
-              <span className="flex items-center gap-2">
-                <Link
-                  href={routes.service(r.id)}
-                  className="font-medium hover:underline hover:underline-offset-4"
-                >
-                  {r.name}
-                </Link>
-                {r.archived ? <ArchivedBadge row={r} /> : null}
-              </span>
-              {r.description ? (
-                <span
-                  dir="auto"
-                  className="block max-w-[46ch] truncate text-xs text-muted-foreground"
-                >
-                  {r.description}
-                </span>
-              ) : null}
-            </div>
-          </div>
-        ),
-      },
-      {
-        id: "stages",
-        accessorFn: (r) => r.stages.length,
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t("services.table.stages")} />
-        ),
-        cell: ({ row: { original: r } }) =>
-          r.stages.length === 0 ? (
-            <span className="text-muted-foreground">{t("common.none")}</span>
-          ) : (
-            <span className="tabular-nums" title={r.stages.map((s) => s.name).join(f.separator)}>
-              {r.stages.length}
-            </span>
-          ),
-        size: 90,
-      },
-      {
-        accessorKey: "memberCount",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t("services.table.members")} />
-        ),
-        cell: ({ row: { original: r } }) => <span className="tabular-nums">{r.memberCount}</span>,
-        size: 100,
-      },
-      {
-        id: "next",
-        accessorFn: (r) => {
-          const next = insights.get(r.id)?.next
-
-          return next ? `${next.date}T${next.startTime}` : "9999"
-        },
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t("services.table.next")} />
-        ),
-        cell: ({ row: { original: r } }) => <NextMeetingCell service={r} />,
-        size: 150,
-      },
-      {
-        id: "attendance",
-        accessorFn: (r) => insights.get(r.id)?.trend.rate ?? -1,
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t("services.table.attendance")} />
-        ),
-        cell: ({ row: { original: r } }) => <AttendanceCell service={r} />,
-        size: 130,
-      },
-      {
-        id: "actions",
-        header: () => null,
-        cell: ({ row: { original: r } }) => <ServiceActionsMenu service={r} />,
-        enableSorting: false,
-        size: 48,
-      },
-    ],
-    [t, f, insights]
-  )
-
-  const { table } = useDataTable({
-    data: shown,
-    columns,
-    getRowId: (r) => r.id,
-    initialSorting: [{ id: "name", desc: false }],
-    pageSize: 50,
-  })
-
-  const empty = (
+  return (
     <Empty className="py-6">
       <EmptyHeader>
         <EmptyTitle>
@@ -235,82 +154,102 @@ export function ServicesTable({ rows }: { rows: ServiceRow[] }) {
       </EmptyHeader>
       {search ? (
         <EmptyContent>
-          <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+          <Button variant="outline" size="sm" onClick={onClearSearch}>
             {t("common.clearSearch")}
           </Button>
         </EmptyContent>
       ) : null}
     </Empty>
   )
+}
+
+function CompactServiceList({
+  services,
+  empty,
+}: {
+  services: ServiceRow[]
+  empty: ReactNode | null
+}) {
+  const t = useTranslations()
+  const nextAt = useNextAt()
+
+  return (
+    <ul className="flex flex-col divide-y border-y md:hidden" aria-label={t("nav.services")}>
+      {empty ? (
+        <li>{empty}</li>
+      ) : (
+        services.map((r) => (
+          <li key={r.id} className="flex items-start gap-2">
+            <Link
+              href={routes.service(r.id)}
+              className="flex min-w-0 flex-1 items-start gap-3 py-3"
+            >
+              <ServiceSwatch tone={r.tone} className="mt-1.5 size-2.5" />
+              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="flex min-w-0 flex-wrap items-center gap-2 font-medium">
+                  <span className="truncate">{r.name}</span>
+                  {r.archived ? <ArchivedBadge row={r} /> : null}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {[
+                    t("counts.stages", { count: r.stages.length }),
+                    t("counts.members", { count: r.memberCount }),
+                    nextAt(r),
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </span>
+              </span>
+            </Link>
+            <ServiceActionsMenu service={r} />
+          </li>
+        ))
+      )}
+    </ul>
+  )
+}
+
+function matches(service: ServiceRow, words: string) {
+  return fold(
+    `${service.name} ${service.description ?? ""} ${service.stages.map((s) => s.name).join(" ")}`
+  ).includes(words)
+}
+
+export function ServicesTable({ rows }: { rows: ServiceRow[] }) {
+  const [tab, setTab] = useState<Tab>("active")
+  const [search, setSearch] = useState("")
+  const counts = countByTab(rows, TABS)
+  const columns = useServiceColumns()
+
+  const shown = useMemo(() => {
+    const words = fold(search)
+
+    return rows.filter((r) => TABS[tab](r) && (words === "" || matches(r, words)))
+  }, [rows, tab, search])
+
+  const { table } = useDataTable({
+    data: shown,
+    columns,
+    getRowId: (r) => r.id,
+    initialSorting: [{ id: "name", desc: false }],
+    pageSize: 50,
+  })
+
+  const empty = <ServicesEmpty search={search} tab={tab} onClearSearch={() => setSearch("")} />
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <DataTableTabs
-          value={tab}
-          onValueChange={setTab}
-          tabs={TAB_ORDER.map((value) => ({
-            value,
-            label: t(`services.table.tabs.${value}`, { count: counts[value] }),
-          }))}
-        />
-        <InputGroup className="w-full sm:w-72">
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-          <InputGroupInput
-            aria-label={t("services.table.search")}
-            placeholder={t("services.table.searchPlaceholder")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          {search ? (
-            <InputGroupAddon align="inline-end">
-              <InputGroupButton
-                size="icon-xs"
-                aria-label={t("common.clearSearch")}
-                onClick={() => setSearch("")}
-              >
-                <X />
-              </InputGroupButton>
-            </InputGroupAddon>
-          ) : null}
-        </InputGroup>
-      </div>
-
-      <ul className="flex flex-col divide-y border-y md:hidden" aria-label={t("nav.services")}>
-        {shown.length === 0 ? (
-          <li>{empty}</li>
-        ) : (
-          table.getRowModel().rows.map(({ original: r }) => (
-            <li key={r.id} className="flex items-start gap-2">
-              <Link
-                href={routes.service(r.id)}
-                className="flex min-w-0 flex-1 items-start gap-3 py-3"
-              >
-                <ServiceSwatch tone={r.tone} className="mt-1.5 size-2.5" />
-                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="flex min-w-0 flex-wrap items-center gap-2 font-medium">
-                    <span className="truncate">{r.name}</span>
-                    {r.archived ? <ArchivedBadge row={r} /> : null}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {[
-                      t("counts.stages", { count: r.stages.length }),
-                      t("counts.members", { count: r.memberCount }),
-                      nextAt(r),
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </span>
-                </span>
-              </Link>
-              <ServiceActionsMenu service={r} />
-            </li>
-          ))
-        )}
-      </ul>
-
+      <ServicesToolbar
+        tab={tab}
+        onTabChange={setTab}
+        counts={counts}
+        search={search}
+        onSearchChange={setSearch}
+      />
+      <CompactServiceList
+        services={table.getRowModel().rows.map((row) => row.original)}
+        empty={shown.length === 0 ? empty : null}
+      />
       <DataTableView table={table} className="hidden md:block" emptyMessage={empty} />
       {table.getPageCount() > 1 ? <DataTablePagination table={table} /> : null}
     </div>
