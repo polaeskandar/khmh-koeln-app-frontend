@@ -3,6 +3,10 @@ import type { IsoWeekday, LocalDate, MonthWeek, Recurrence } from "@/lib/api/typ
 
 import { addDays, daysBetween, daysInMonth, isoWeekday, mondayOf } from "./time"
 
+export const ISO_WEEKDAYS: IsoWeekday[] = [1, 2, 3, 4, 5, 6, 7]
+
+export const MONTH_WEEKS: MonthWeek[] = [1, 2, 3, 4, -1]
+
 export type RecurrenceProblem =
   | "interval"
   | "weekdays"
@@ -103,8 +107,6 @@ export function occurrencesBetween(r: Recurrence, from: LocalDate, to: LocalDate
 
   return out
 }
-
-const MONTH_WEEKS: MonthWeek[] = [1, 2, 3, 4, -1]
 
 export function recurrenceOf(view: Schemas["RecurrenceSummary"]): Recurrence {
   return {
