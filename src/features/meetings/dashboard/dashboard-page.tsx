@@ -112,12 +112,17 @@ function UpcomingRow({ entry, today }: { entry: UpcomingEntry; today: LocalDate 
   const title = entry.kind === "single" ? entry.item.title : entry.title
   const planned = entry.kind === "single" ? entry.item.kind === "planned" : entry.planned
 
-  const label =
-    entry.kind === "single"
-      ? groupOf(entry.item)
-      : entry.groups.length === 2
-        ? f.list(entry.groups)
-        : `${entry.service?.name ?? ""} · ${t("dashboard.stagesCount", { count: entry.groups.length })}`
+  const groupLabel = () => {
+    if (entry.kind === "single") {
+      return groupOf(entry.item)
+    }
+
+    return entry.groups.length === 2
+      ? f.list(entry.groups)
+      : `${entry.service?.name ?? ""} · ${t("dashboard.stagesCount", { count: entry.groups.length })}`
+  }
+
+  const label = groupLabel()
 
   const href =
     item && item.kind === "session"

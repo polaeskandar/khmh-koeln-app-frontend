@@ -35,6 +35,14 @@ export function AttendanceBoard({
   const roster = sheet.roster.filter((row) => shown(row.person) && passesFilter(filter, row.mark))
   const others = sheet.notOnRoster.filter((row) => shown(row.person) && filter !== "open")
 
+  const emptyRoster = () => {
+    if (q) {
+      return t("noRosterMatch")
+    }
+
+    return filter === "open" ? t("everyoneMarked") : t("nobodyYet")
+  }
+
   return (
     <div className="grid gap-8 pb-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)] lg:pb-0">
       <div className="flex min-w-0 flex-col gap-4">
@@ -50,7 +58,7 @@ export function AttendanceBoard({
           <section aria-label={t("roster")}>
             {roster.length === 0 ? (
               <p className="border border-dashed p-4 text-sm text-muted-foreground">
-                {q ? t("noRosterMatch") : filter === "open" ? t("everyoneMarked") : t("nobodyYet")}
+                {emptyRoster()}
               </p>
             ) : (
               <ul className="divide-y border-y">

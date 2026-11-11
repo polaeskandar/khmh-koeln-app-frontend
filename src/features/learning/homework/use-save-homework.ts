@@ -53,6 +53,14 @@ export function useSaveHomework({
 
   const afterSave = (status: HomeworkStatus) => lessonPage ?? routes.stageHomework(stageId, status)
 
+  const savedToastOf = (status: HomeworkStatus) => {
+    if (status === "published") {
+      return t("savedPublished")
+    }
+
+    return homework ? t("savedDraft") : t("draftSaved")
+  }
+
   const submit = useSubmitOnce(async (next: SaveStep, fieldsOf: () => HomeworkFields) => {
     setStep(next)
     const fields = fieldsOf()
@@ -66,13 +74,7 @@ export function useSaveHomework({
     setVersion(saved.data.version)
 
     if (next === "save") {
-      toast.success(
-        saved.data.status === "published"
-          ? t("savedPublished")
-          : homework
-            ? t("savedDraft")
-            : t("draftSaved")
-      )
+      toast.success(savedToastOf(saved.data.status))
 
       router.push(afterSave(saved.data.status))
 

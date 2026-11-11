@@ -15,6 +15,15 @@ import type { LocalDate } from "@/lib/api/types/common"
 import type { MeetingView } from "./api"
 import { isolate } from "@/lib/bidi"
 
+type SessionMeeting = Extract<NonNullable<MeetingView>, { kind: "session" }>
+
+const SESSION_STATES: Partial<
+  Record<SessionMeeting["status"], "meeting.attendanceOpen" | "meeting.held">
+> = {
+  active: "meeting.attendanceOpen",
+  completed: "meeting.held",
+}
+
 export function MeetingLine({
   meeting,
   today,
@@ -80,6 +89,8 @@ export function MeetingLine({
         )
       }
 
+      const state = SESSION_STATES[meeting.status]
+
       return (
         <span className={cn(base, "text-muted-foreground", className)}>
           <CalendarCheck2 className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
@@ -90,11 +101,7 @@ export function MeetingLine({
               time: f.timeRange(meeting.startTime, meeting.endTime),
             }),
             meeting.location ? isolate(meeting.location) : null,
-            meeting.status === "active"
-              ? t("meeting.attendanceOpen")
-              : meeting.status === "completed"
-                ? t("meeting.held")
-                : null,
+            state ? t(state) : null,
           ]
             .filter(Boolean)
             .join(" · ")}

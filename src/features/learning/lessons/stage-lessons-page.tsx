@@ -99,6 +99,19 @@ function Row({ lesson, today }: { lesson: LessonRow; today: string }) {
   )
 }
 
+type EmptyTexts = {
+  title: "noMatch" | "noUpcoming" | "noPrevious" | "noArchived"
+  hint: "noMatchHint" | "noUpcomingHint" | "noPreviousHint" | null
+}
+
+const FILTERED_EMPTY: EmptyTexts = { title: "noMatch", hint: "noMatchHint" }
+
+const EMPTY_TABS: Record<LessonTab, EmptyTexts> = {
+  upcoming: { title: "noUpcoming", hint: "noUpcomingHint" },
+  previous: { title: "noPrevious", hint: "noPreviousHint" },
+  archived: { title: "noArchived", hint: null },
+}
+
 function LessonList({
   list,
   tab,
@@ -125,27 +138,13 @@ function LessonList({
   )
 
   if (rows.length === 0) {
+    const empty = filtered ? FILTERED_EMPTY : EMPTY_TABS[tab]
+
     return (
       <Empty className="border border-dashed">
         <EmptyHeader>
-          <EmptyTitle>
-            {filtered
-              ? t("noMatch")
-              : tab === "upcoming"
-                ? t("noUpcoming")
-                : tab === "previous"
-                  ? t("noPrevious")
-                  : t("noArchived")}
-          </EmptyTitle>
-          <EmptyDescription>
-            {filtered
-              ? t("noMatchHint")
-              : tab === "upcoming"
-                ? t("noUpcomingHint")
-                : tab === "previous"
-                  ? t("noPreviousHint")
-                  : null}
-          </EmptyDescription>
+          <EmptyTitle>{t(empty.title)}</EmptyTitle>
+          <EmptyDescription>{empty.hint ? t(empty.hint) : null}</EmptyDescription>
         </EmptyHeader>
         {filtered ? (
           <EmptyContent>

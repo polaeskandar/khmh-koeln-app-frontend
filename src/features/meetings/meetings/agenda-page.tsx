@@ -76,13 +76,11 @@ function AgendaView({
   const can = useCan()
   const summary = useDaySummary()
   const dates = datesBetween(agenda.from, agenda.to)
-  const inWindow = (date: LocalDate | null) => date !== null && dates.includes(date)
 
-  const selected = inWindow(requestedDate)
-    ? requestedDate!
-    : inWindow(agenda.today)
-      ? agenda.today
-      : agenda.from
+  const inWindow = (date: LocalDate | null): date is LocalDate =>
+    date !== null && dates.includes(date)
+
+  const selected = [requestedDate, agenda.today].find(inWindow) ?? agenda.from
 
   const dayHref = (date: LocalDate) =>
     routes.meetings({

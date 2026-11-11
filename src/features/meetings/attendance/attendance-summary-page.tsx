@@ -126,15 +126,23 @@ function Corrections({ sheet }: { sheet: AttendanceSheet }) {
         const by = removed.by?.name
         const reason = correction.reason ? isolate(correction.reason) : null
 
+        const line = () => {
+          if (by && reason) {
+            return t.rich("correctionByReason", { ...values, by, reason })
+          }
+
+          if (by) {
+            return t.rich("correctionBy", { ...values, by })
+          }
+
+          return reason
+            ? t.rich("correctionReason", { ...values, reason })
+            : t.rich("correction", values)
+        }
+
         return (
           <li key={correction.id} className="text-muted-foreground">
-            {by && reason
-              ? t.rich("correctionByReason", { ...values, by, reason })
-              : by
-                ? t.rich("correctionBy", { ...values, by })
-                : reason
-                  ? t.rich("correctionReason", { ...values, reason })
-                  : t.rich("correction", values)}
+            {line()}
           </li>
         )
       })}
@@ -157,14 +165,19 @@ function Summary({ sheet }: { sheet: AttendanceSheet }) {
 
   const notMarked = sheet.roster.filter((row) => !row.mark).map((row) => ({ person: row.person }))
 
-  const closed = session.closedAt
-    ? session.closedBy
-      ? t("closedAtBy", {
-          when: f.atLabel(session.closedAt, sheet.today),
-          name: session.closedBy.name,
-        })
-      : t("closedAt", { when: f.atLabel(session.closedAt, sheet.today) })
-    : null
+  const closedWhen = session.closedAt ? f.atLabel(session.closedAt, sheet.today) : null
+
+  const closedLine = () => {
+    if (!closedWhen) {
+      return null
+    }
+
+    return session.closedBy
+      ? t("closedAtBy", { when: closedWhen, name: session.closedBy.name })
+      : t("closedAt", { when: closedWhen })
+  }
+
+  const closed = closedLine()
 
   return (
     <>

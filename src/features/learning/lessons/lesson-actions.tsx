@@ -46,6 +46,16 @@ const STATUS_TOAST: Record<
   completed: "lessons.toast.taught",
 }
 
+const BACK_STEPS: Partial<
+  Record<
+    LessonStatus,
+    { label: "lessons.actions.backToDraft" | "lessons.actions.notTaughtYet"; status: LessonStatus }
+  >
+> = {
+  ready: { label: "lessons.actions.backToDraft", status: "draft" },
+  completed: { label: "lessons.actions.notTaughtYet", status: "ready" },
+}
+
 function useLessonChange<A extends unknown[], T>(
   fn: (...args: A) => Promise<T>,
   successMessage: string,
@@ -144,12 +154,7 @@ export function LessonActions({ detail, flags }: { detail: LessonDetail; flags: 
     ) : null
   }
 
-  const back =
-    flags.manage && lesson.status === "ready"
-      ? { label: t("lessons.actions.backToDraft"), status: "draft" as const }
-      : flags.manage && lesson.status === "completed"
-        ? { label: t("lessons.actions.notTaughtYet"), status: "ready" as const }
-        : null
+  const back = flags.manage ? (BACK_STEPS[lesson.status] ?? null) : null
 
   const changeStatus = (status: LessonStatus) => void change.execute(lesson.id, status)
   const menu = back || flags.archive || flags.delete
@@ -184,7 +189,7 @@ export function LessonActions({ detail, flags }: { detail: LessonDetail; flags: 
           <DropdownMenuContent align="end">
             {back ? (
               <DropdownMenuItem onSelect={() => changeStatus(back.status)}>
-                {back.label}
+                {t(back.label)}
               </DropdownMenuItem>
             ) : null}
             {back && (flags.archive || flags.delete) ? <DropdownMenuSeparator /> : null}

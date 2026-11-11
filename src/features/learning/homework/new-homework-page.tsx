@@ -17,7 +17,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { useCan } from "@/features/identity/auth/session"
-import { stageQuery } from "@/features/organization/stages/api"
+import { type Stage, stageQuery } from "@/features/organization/stages/api"
 import { StageEditorFrame } from "@/features/learning/editor-shell"
 import { useSearchParamId } from "@/hooks/use-search-param-id"
 import { Link } from "@/i18n/navigation"
@@ -57,10 +57,36 @@ function firstLesson(list: HomeworkList, wanted: Uuid | null): Uuid {
   return lessonFrom(list, wanted) ?? list.defaultLessonId ?? list.lessons[0]!.id
 }
 
-function NewHomework({ stageId }: { stageId: Uuid }) {
+function NewHomeworkBody({ stage, data }: { stage: Stage; data: HomeworkList }) {
   const t = useTranslations("homework")
   const can = useCan()
   const wanted = useSearchParamId("lesson")
+  const group = groupAt(stage.service, stage)
+
+  if (data.archived || !can("create", "homework", group)) {
+    return (
+      <NoAccess title={t("new.noAccessTitle")}>{t("new.noAccess", { stage: stage.name })}</NoAccess>
+    )
+  }
+
+  if (data.lessons.length === 0) {
+    return <LessonFirst stageId={stage.id} />
+  }
+
+  return (
+    <HomeworkForm
+      stage={data.stage}
+      group={group}
+      audienceSize={data.audienceSize}
+      lessons={data.lessons}
+      lessonId={firstLesson(data, wanted)}
+      fromLesson={lessonFrom(data, wanted)}
+    />
+  )
+}
+
+function NewHomework({ stageId }: { stageId: Uuid }) {
+  const t = useTranslations("homework")
   const stage = useQuery(stageQuery(stageId))
   const list = useQuery(stageHomeworkQuery(stageId))
 
@@ -74,24 +100,7 @@ function NewHomework({ stageId }: { stageId: Uuid }) {
           description={t("new.description")}
         >
           <QueryState query={list}>
-            {(data) =>
-              data.archived || !can("create", "homework", groupAt(s.service, s)) ? (
-                <NoAccess title={t("new.noAccessTitle")}>
-                  {t("new.noAccess", { stage: s.name })}
-                </NoAccess>
-              ) : data.lessons.length === 0 ? (
-                <LessonFirst stageId={s.id} />
-              ) : (
-                <HomeworkForm
-                  stage={data.stage}
-                  group={groupAt(s.service, s)}
-                  audienceSize={data.audienceSize}
-                  lessons={data.lessons}
-                  lessonId={firstLesson(data, wanted)}
-                  fromLesson={lessonFrom(data, wanted)}
-                />
-              )
-            }
+            {(data) => <NewHomeworkBody stage={s} data={data} />}
           </QueryState>
         </StageEditorFrame>
       )}

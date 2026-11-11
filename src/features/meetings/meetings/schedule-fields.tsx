@@ -38,11 +38,17 @@ function RosterModeField({
   const group =
     stage?.name ?? service?.name ?? (target.mode === "edit" ? groupOf(target.schedule) : undefined)
 
-  const rosterHint = stage
-    ? t("form.rosterStage")
-    : service && service.stages.length > 0
+  const rosterHintOf = () => {
+    if (stage) {
+      return t("form.rosterStage")
+    }
+
+    return service && service.stages.length > 0
       ? t("form.rosterServiceOnly")
       : t("form.rosterService")
+  }
+
+  const rosterHint = rosterHintOf()
 
   return (
     <FieldSet>
@@ -226,6 +232,37 @@ export function SchedulePreview({
       : t("meetings.form.firstOn", { date: f.dayMonth(createdOn) })
   }
 
+  function previewLines() {
+    if (preview.error) {
+      return (
+        <span className="text-muted-foreground">{t(`errors.recurrence.${preview.error}`)}</span>
+      )
+    }
+
+    if (preview.dates.length === 0) {
+      return <span className="text-muted-foreground">{t("meetings.form.previewNone")}</span>
+    }
+
+    return (
+      <>
+        <span>
+          {t("meetings.form.previewPattern", {
+            pattern: f.recurrence(preview.recurrence),
+            time: f.timeRange(draft.startTime, draft.endTime || null),
+          })}
+        </span>
+        <span className="text-muted-foreground">
+          {t("meetings.form.previewNext", {
+            dates: preview.dates
+              .map((date) => f.dayMonth(date))
+              .join(t("meetings.form.dateSeparator")),
+          }).replace(/\.\.$/, ".")}{" "}
+          {firstCreated(preview.dates[0])}
+        </span>
+      </>
+    )
+  }
+
   return (
     <div
       aria-live="polite"
@@ -235,28 +272,7 @@ export function SchedulePreview({
       <span className="text-xs font-semibold tracking-wider uppercase">
         {t("meetings.form.preview")}
       </span>
-      {preview.error ? (
-        <span className="text-muted-foreground">{t(`errors.recurrence.${preview.error}`)}</span>
-      ) : preview.dates.length === 0 ? (
-        <span className="text-muted-foreground">{t("meetings.form.previewNone")}</span>
-      ) : (
-        <>
-          <span>
-            {t("meetings.form.previewPattern", {
-              pattern: f.recurrence(preview.recurrence),
-              time: f.timeRange(draft.startTime, draft.endTime || null),
-            })}
-          </span>
-          <span className="text-muted-foreground">
-            {t("meetings.form.previewNext", {
-              dates: preview.dates
-                .map((date) => f.dayMonth(date))
-                .join(t("meetings.form.dateSeparator")),
-            }).replace(/\.\.$/, ".")}{" "}
-            {firstCreated(preview.dates[0])}
-          </span>
-        </>
-      )}
+      {previewLines()}
     </div>
   )
 }

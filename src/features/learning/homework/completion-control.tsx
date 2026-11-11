@@ -22,6 +22,20 @@ const NOT_DONE: Report = {
 
 const SAVING: Report = { done: true, completedAt: null, completedBy: null, completedByYou: true }
 
+type DoneByTexts = { byYou: string; byName: (name: string) => string; byParent: string }
+
+export function doneByText(report: Report, texts: DoneByTexts): string {
+  if (report.completedByYou) {
+    return texts.byYou
+  }
+
+  if (report.completedBy) {
+    return texts.byName(report.completedBy)
+  }
+
+  return texts.byParent
+}
+
 export function reportOf(task: Report): Report {
   const { done, completedAt, completedBy, completedByYou } = task
 
@@ -112,11 +126,11 @@ export function CompletionControl({
         <span className="text-sm text-muted-foreground">
           {when === null
             ? t("saving")
-            : report.completedByYou
-              ? t("byYou", { when })
-              : report.completedBy
-                ? t("byName", { name: report.completedBy, when })
-                : t("byParent", { when })}
+            : doneByText(report, {
+                byYou: t("byYou", { when }),
+                byName: (name) => t("byName", { name, when }),
+                byParent: t("byParent", { when }),
+              })}
         </span>
       </div>
       <Button

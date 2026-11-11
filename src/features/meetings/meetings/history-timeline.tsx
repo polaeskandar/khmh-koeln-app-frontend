@@ -41,8 +41,13 @@ export function HistoryTimeline({
     return null
   }
 
-  const actorOf = (e: HistoryEntry) =>
-    e.actor ? e.actor.name : e.byGenerator ? null : t("common.formerAccount")
+  const actorOf = (e: HistoryEntry) => {
+    if (e.actor) {
+      return e.actor.name
+    }
+
+    return e.byGenerator ? null : t("common.formerAccount")
+  }
 
   return (
     <ol className="relative flex flex-col gap-5 ps-1">

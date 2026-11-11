@@ -15,6 +15,49 @@ import { SessionBadges } from "./session-badges"
 import { counted, groupOf, useSessionLines } from "./session-lines"
 import { SessionWhen } from "./session-when"
 
+function SessionCount({ session, today }: { session: SessionView; today: LocalDate }) {
+  const lines = useSessionLines()
+  const canceled = session.status === "canceled"
+
+  if (!counted(session)) {
+    return canceled && session.cancelReason ? (
+      <p dir="auto" className="text-sm text-muted-foreground">
+        {session.cancelReason}
+      </p>
+    ) : null
+  }
+
+  if (!canceled && session.rosterMode === "expected" && session.counts.rosterSize) {
+    return (
+      <div className="flex flex-col gap-2">
+        <RosterCells
+          filled={session.counts.rosterPresent}
+          total={session.counts.rosterSize}
+          extra={session.counts.notOnRoster}
+          size="md"
+        />
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
+          <span className="font-medium tabular-nums">{lines.present(session)}</span>
+          <span className="text-muted-foreground tabular-nums">
+            {lines.remainder(session, today)}
+          </span>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+      {!canceled ? <UsersRound className="size-3.5" aria-hidden="true" /> : null}
+      <span className="tabular-nums">
+        {canceled
+          ? lines.remainder(session, today)
+          : `${lines.present(session)} · ${lines.remainder(session, today)}`}
+      </span>
+    </p>
+  )
+}
+
 export function SessionCardView({
   session,
   today,
@@ -28,7 +71,6 @@ export function SessionCardView({
   href?: string | null
   className?: string
 }) {
-  const lines = useSessionLines()
   const canceled = session.status === "canceled"
 
   return (
@@ -65,37 +107,7 @@ export function SessionCardView({
         </p>
         <SessionWhen item={session} />
       </div>
-      {!counted(session) ? (
-        canceled && session.cancelReason ? (
-          <p dir="auto" className="text-sm text-muted-foreground">
-            {session.cancelReason}
-          </p>
-        ) : null
-      ) : !canceled && session.rosterMode === "expected" && session.counts.rosterSize ? (
-        <div className="flex flex-col gap-2">
-          <RosterCells
-            filled={session.counts.rosterPresent}
-            total={session.counts.rosterSize}
-            extra={session.counts.notOnRoster}
-            size="md"
-          />
-          <div className="flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
-            <span className="font-medium tabular-nums">{lines.present(session)}</span>
-            <span className="text-muted-foreground tabular-nums">
-              {lines.remainder(session, today)}
-            </span>
-          </div>
-        </div>
-      ) : (
-        <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-          {!canceled ? <UsersRound className="size-3.5" aria-hidden="true" /> : null}
-          <span className="tabular-nums">
-            {canceled
-              ? lines.remainder(session, today)
-              : `${lines.present(session)} · ${lines.remainder(session, today)}`}
-          </span>
-        </p>
-      )}
+      <SessionCount session={session} today={today} />
       {action ? <div className="mt-auto flex flex-wrap gap-2 pt-1">{action}</div> : null}
     </article>
   )

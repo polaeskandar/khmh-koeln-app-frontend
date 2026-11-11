@@ -136,12 +136,18 @@ function NotOpen({ sheet }: { sheet: AttendanceSheet }) {
   const onTheDay = records ? t("openWhenStarts") : t("servantsOpen")
   const afterTheDay = records ? t("openNow") : t("servantsCanStillOpen")
 
+  const hint = () => {
+    if (!due) {
+      return t("opensOn", { date: f.longDate(session.date) })
+    }
+
+    return past ? afterTheDay : onTheDay
+  }
+
   return (
     <div className="flex flex-col items-start gap-3 border border-dashed p-6">
       <h2 className="font-heading text-lg font-semibold">{past ? t("notTaken") : t("notOpen")}</h2>
-      <p className="max-w-prose text-sm text-muted-foreground">
-        {!due ? t("opensOn", { date: f.longDate(session.date) }) : past ? afterTheDay : onTheDay}
-      </p>
+      <p className="max-w-prose text-sm text-muted-foreground">{hint()}</p>
       {due && records ? <OpenAttendanceButton sessionId={session.id} /> : null}
     </div>
   )
@@ -159,20 +165,25 @@ function Canceled({ sheet }: { sheet: AttendanceSheet }) {
   )
 }
 
+function BoardBody({ sheet, boardAt }: { sheet: AttendanceSheet; boardAt: number }) {
+  switch (sheet.session.status) {
+    case "active":
+      return <ActiveBoard key={sheet.session.id} sheet={sheet} boardAt={boardAt} />
+    case "scheduled":
+      return <NotOpen sheet={sheet} />
+    case "canceled":
+      return <Canceled sheet={sheet} />
+    default:
+      return <Redirect to={routes.attendanceSummary(sheet.session.id)} />
+  }
+}
+
 function LoadedBoard({ id }: { id: string }) {
   return (
     <SheetState id={id} live notFound={<RecordNotFound area="attendance" />}>
       {(sheet, boardAt) => (
         <BoardFrame sheet={sheet}>
-          {sheet.session.status === "active" ? (
-            <ActiveBoard key={sheet.session.id} sheet={sheet} boardAt={boardAt} />
-          ) : sheet.session.status === "scheduled" ? (
-            <NotOpen sheet={sheet} />
-          ) : sheet.session.status === "canceled" ? (
-            <Canceled sheet={sheet} />
-          ) : (
-            <Redirect to={routes.attendanceSummary(sheet.session.id)} />
-          )}
+          <BoardBody sheet={sheet} boardAt={boardAt} />
         </BoardFrame>
       )}
     </SheetState>

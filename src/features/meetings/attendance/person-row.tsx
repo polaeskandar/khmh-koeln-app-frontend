@@ -24,6 +24,67 @@ export type BoardActions = {
 
 const placementText = (placements: PersonGroup[]) => placements.map(placeLabel).join(", ")
 
+function MarkControl({
+  person,
+  mark,
+  canRecord,
+  canRemove,
+  actions,
+}: {
+  person: PersonReference
+  mark: MarkReference | null
+  canRecord: boolean
+  canRemove: boolean
+  actions: BoardActions
+}) {
+  const t = useTranslations("attendance.board")
+  const f = useFormat()
+  const name = preferredName(person)
+
+  if (mark) {
+    return (
+      <span className="flex shrink-0 items-center gap-1">
+        <span className="inline-flex h-10 items-center gap-1.5 px-2 text-sm font-medium text-success">
+          <Check className="size-4" aria-hidden="true" />
+          <span>
+            {t("present")}
+            {mark.recordedAt ? (
+              <span className="hidden sm:inline"> · {f.instantTime(mark.recordedAt)}</span>
+            ) : null}
+          </span>
+        </span>
+        {canRemove ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={t("undo", { name })}
+            disabled={!actions.onUndo || actions.pending?.has(person.id)}
+            onClick={() => actions.onUndo?.(person, mark)}
+          >
+            <Undo2 />
+          </Button>
+        ) : null}
+      </span>
+    )
+  }
+
+  if (canRecord) {
+    return (
+      <Button
+        variant="outline"
+        className="h-10 w-32 shrink-0"
+        aria-label={t("mark", { name })}
+        disabled={!actions.onMark || actions.pending?.has(person.id)}
+        onClick={() => actions.onMark?.(person)}
+      >
+        {t("present")}
+      </Button>
+    )
+  }
+
+  return <span className="text-xs text-muted-foreground">{t("notMarked")}</span>
+}
+
 export function PersonRow({
   person,
   mark,
@@ -40,14 +101,17 @@ export function PersonRow({
   actions: BoardActions
 }) {
   const t = useTranslations("attendance.board")
-  const f = useFormat()
   const name = preferredName(person)
 
-  const detail = placements
-    ? placementText(placements) || t("noGroup")
-    : person.displayName
-      ? fullName(person)
-      : null
+  const detailLine = () => {
+    if (placements) {
+      return placementText(placements) || t("noGroup")
+    }
+
+    return person.displayName ? fullName(person) : null
+  }
+
+  const detail = detailLine()
 
   return (
     <li className={cn("flex items-center gap-3 py-2.5", mark && "bg-success-soft/40")}>
@@ -56,42 +120,13 @@ export function PersonRow({
         <span className="truncate font-medium">{name}</span>
         {detail ? <span className="truncate text-xs text-muted-foreground">{detail}</span> : null}
       </span>
-      {mark ? (
-        <span className="flex shrink-0 items-center gap-1">
-          <span className="inline-flex h-10 items-center gap-1.5 px-2 text-sm font-medium text-success">
-            <Check className="size-4" aria-hidden="true" />
-            <span>
-              {t("present")}
-              {mark.recordedAt ? (
-                <span className="hidden sm:inline"> · {f.instantTime(mark.recordedAt)}</span>
-              ) : null}
-            </span>
-          </span>
-          {canRemove ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={t("undo", { name })}
-              disabled={!actions.onUndo || actions.pending?.has(person.id)}
-              onClick={() => actions.onUndo?.(person, mark)}
-            >
-              <Undo2 />
-            </Button>
-          ) : null}
-        </span>
-      ) : canRecord ? (
-        <Button
-          variant="outline"
-          className="h-10 w-32 shrink-0"
-          aria-label={t("mark", { name })}
-          disabled={!actions.onMark || actions.pending?.has(person.id)}
-          onClick={() => actions.onMark?.(person)}
-        >
-          {t("present")}
-        </Button>
-      ) : (
-        <span className="text-xs text-muted-foreground">{t("notMarked")}</span>
-      )}
+      <MarkControl
+        person={person}
+        mark={mark}
+        canRecord={canRecord}
+        canRemove={canRemove}
+        actions={actions}
+      />
     </li>
   )
 }
