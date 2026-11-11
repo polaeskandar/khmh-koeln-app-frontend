@@ -14,3 +14,14 @@ test("the error page's button renders the screen again", async () => {
   await userEvent.click(screen.getByRole("button", { name: "Erneut versuchen" }))
   expect(reset).toHaveBeenCalledOnce()
 })
+
+test("the error page says the screen couldn't be loaded, without the error's own text", () => {
+  renderWithProviders(<LocaleError error={new Error("boom")} reset={vi.fn()} />, { locale: "de" })
+  expect(screen.getByText("Das konnte nicht geladen werden.")).toBeInTheDocument()
+
+  expect(
+    screen.getByText("Bei uns ist etwas schiefgelaufen. Versuchen Sie es später noch einmal.")
+  ).toBeInTheDocument()
+
+  expect(screen.queryByText("boom")).toBeNull()
+})

@@ -1,18 +1,9 @@
 "use client"
 
-import { SearchX } from "lucide-react"
 import type { ReactNode } from "react"
 
 import { KhmkMark } from "@/components/brand/logo"
-import { Button } from "@/components/ui/button"
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty"
+import { NotFoundState } from "@/components/page-states"
 import { Link } from "@/i18n/navigation"
 
 import { PortalDesktopNav, type PortalNavItem, PortalTabBar } from "./portal-nav"
@@ -69,21 +60,11 @@ export function PortalNotAvailable({
   action: { href: string; label: string }
 }) {
   return (
-    <div className="flex min-h-[50svh] items-center justify-center">
-      <Empty>
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <SearchX />
-          </EmptyMedia>
-          <EmptyTitle>{title}</EmptyTitle>
-          <EmptyDescription>{description}</EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <Button asChild>
-            <Link href={action.href}>{action.label}</Link>
-          </Button>
-        </EmptyContent>
-      </Empty>
-    </div>
+    <NotFoundState
+      home={action.href}
+      homeLabel={action.label}
+      title={title}
+      description={description}
+    />
   )
 }
