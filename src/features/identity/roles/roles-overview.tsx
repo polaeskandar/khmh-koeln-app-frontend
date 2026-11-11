@@ -5,7 +5,6 @@ import { Ellipsis, Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
-import { ConfirmDialog } from "@/components/confirm-dialog"
 import { Section } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"
 import { Button } from "@/components/ui/button"
@@ -18,22 +17,16 @@ import {
 import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
-import { useApiMutation } from "@/lib/api/use-api-mutation"
-import { isolate } from "@/lib/bidi"
 import { PERMISSION_COUNT, RESOURCES } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import { deleteRoleRequest, type RoleRow, rolesQuery, ROLE_QUERIES } from "./api"
+import { type Role, rolesQuery } from "./api"
+import { DeleteRoleDialog } from "./delete-role-dialog"
 
-function RoleMenu({ role }: { role: RoleRow }) {
+function RoleMenu({ role }: { role: Role }) {
   const t = useTranslations()
   const can = useCan()
   const [deleting, setDeleting] = useState(false)
-
-  const remove = useApiMutation(deleteRoleRequest, {
-    successMessage: t("toast.roleDeleted", { name: role.name }),
-    invalidate: ROLE_QUERIES,
-  })
 
   return (
     <>
@@ -60,20 +53,17 @@ function RoleMenu({ role }: { role: RoleRow }) {
           ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
-      <ConfirmDialog
+      <DeleteRoleDialog
+        role={role}
+        holders={role.holderCount}
         open={deleting}
         onOpenChange={setDeleting}
-        title={t("settings.roles.deleteTitle", { name: isolate(role.name) })}
-        description={t("settings.roles.deleteDescription", { count: role.holderCount })}
-        confirmLabel={t("settings.roles.deleteConfirm")}
-        tone="destructive"
-        onConfirm={async () => (await remove.execute(role.id)).ok}
       />
     </>
   )
 }
 
-function RolesTable({ roles }: { roles: RoleRow[] }) {
+function RolesTable({ roles }: { roles: Role[] }) {
   const t = useTranslations()
   const f = useFormat()
   const can = useCan()

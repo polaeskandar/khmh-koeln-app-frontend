@@ -106,11 +106,125 @@ function ServiceSelect({
   )
 }
 
+function RegisteredAsField({
+  value,
+  error,
+  onChange,
+}: {
+  value: RegisteredAs
+  error?: string
+  onChange: (value: RegisteredAs) => void
+}) {
+  const t = useTranslations("auth.register")
+
+  const kinds = [
+    { value: "parent", title: t("asParent"), description: t("asParentHint") },
+    { value: "member", title: t("asMember"), description: t("asMemberHint") },
+    { value: "servant", title: t("asServant"), description: t("asServantHint") },
+  ] as const
+
+  return (
+    <FieldSet data-invalid={error ? true : undefined}>
+      <FieldLegend>{t("as")}</FieldLegend>
+      <RadioGroup
+        value={value}
+        onValueChange={(next) => onChange(oneOf(KIND_VALUES, next) ?? value)}
+        className="grid gap-3"
+      >
+        {kinds.map((kind) => (
+          <FieldLabel
+            key={kind.value}
+            className={cn(
+              "flex w-full cursor-pointer items-start gap-3 border p-4 text-sm font-normal tracking-normal normal-case transition-colors hover:bg-muted/50",
+              value === kind.value && "border-primary bg-primary/5"
+            )}
+          >
+            <RadioGroupItem value={kind.value} className="mt-0.5" />
+            <span className="flex flex-col gap-1">
+              <span className="font-medium">{kind.title}</span>
+              <span className="text-xs text-muted-foreground">{kind.description}</span>
+            </span>
+          </FieldLabel>
+        ))}
+      </RadioGroup>
+      {error ? <FieldError>{error}</FieldError> : null}
+    </FieldSet>
+  )
+}
+
+function PrivacyConsentField({
+  checked,
+  error,
+  onChange,
+}: {
+  checked: boolean
+  error?: string
+  onChange: (accepted: boolean) => void
+}) {
+  const t = useTranslations("auth.register")
+  const id = useId()
+
+  return (
+    <Field orientation="horizontal" data-invalid={error ? true : undefined}>
+      <Checkbox
+        id={id}
+        checked={checked}
+        onCheckedChange={(next) => onChange(next === true)}
+        aria-invalid={error ? true : undefined}
+      />
+      <FieldContent>
+        <FieldLabel htmlFor={id} className="text-sm font-normal tracking-normal normal-case">
+          <span>
+            {t.rich("privacy", {
+              link: (chunks) => (
+                <Link
+                  href={routes.privacy()}
+                  target="_blank"
+                  rel="noopener"
+                  className="font-medium underline underline-offset-4"
+                >
+                  {chunks}
+                </Link>
+              ),
+            })}
+          </span>
+        </FieldLabel>
+        <FieldDescription>{t("privacyHint")}</FieldDescription>
+        {error ? <FieldError>{error}</FieldError> : null}
+      </FieldContent>
+    </Field>
+  )
+}
+
+function RegisterActions({ pending }: { pending: boolean }) {
+  const t = useTranslations("auth.register")
+
+  return (
+    <div className="flex flex-col gap-4">
+      <Button type="submit" size="lg" disabled={pending}>
+        {pending ? <Spinner data-icon="inline-start" /> : null}
+        {t("submit")}
+      </Button>
+      <p className="text-sm text-muted-foreground">
+        {t.rich("haveAccount", {
+          link: (chunks) => (
+            <Link
+              href={routes.signIn()}
+              className="font-medium text-foreground underline underline-offset-4"
+            >
+              {chunks}
+            </Link>
+          ),
+        })}
+      </p>
+    </div>
+  )
+}
+
 export function RegisterForm() {
   const t = useTranslations("auth.register")
   const locale = useLocale()
   const router = useRouter()
-  const privacyId = useId()
   const [alert, setAlert] = useState<string | null>(null)
 
   const [form, setForm] = useState({
@@ -159,12 +273,6 @@ export function RegisterForm() {
       setAlert(result.problem.message)
     }
   })
-
-  const kinds = [
-    { value: "parent", title: t("asParent"), description: t("asParentHint") },
-    { value: "member", title: t("asMember"), description: t("asMemberHint") },
-    { value: "servant", title: t("asServant"), description: t("asServantHint") },
-  ] as const
 
   return (
     <form
@@ -221,35 +329,11 @@ export function RegisterForm() {
         />
       </FieldGroup>
 
-      <FieldSet data-invalid={errors["registration.registeredAs"] ? true : undefined}>
-        <FieldLegend>{t("as")}</FieldLegend>
-        <RadioGroup
-          value={form.registeredAs}
-          onValueChange={(value) =>
-            set("registeredAs", oneOf(KIND_VALUES, value) ?? form.registeredAs)
-          }
-          className="grid gap-3"
-        >
-          {kinds.map((kind) => (
-            <FieldLabel
-              key={kind.value}
-              className={cn(
-                "flex w-full cursor-pointer items-start gap-3 border p-4 text-sm font-normal tracking-normal normal-case transition-colors hover:bg-muted/50",
-                form.registeredAs === kind.value && "border-primary bg-primary/5"
-              )}
-            >
-              <RadioGroupItem value={kind.value} className="mt-0.5" />
-              <span className="flex flex-col gap-1">
-                <span className="font-medium">{kind.title}</span>
-                <span className="text-xs text-muted-foreground">{kind.description}</span>
-              </span>
-            </FieldLabel>
-          ))}
-        </RadioGroup>
-        {errors["registration.registeredAs"] ? (
-          <FieldError>{errors["registration.registeredAs"]}</FieldError>
-        ) : null}
-      </FieldSet>
+      <RegisteredAsField
+        value={form.registeredAs}
+        error={errors["registration.registeredAs"]}
+        onChange={(value) => set("registeredAs", value)}
+      />
 
       <FieldGroup>
         {servant ? (
@@ -269,58 +353,13 @@ export function RegisterForm() {
         />
       </FieldGroup>
 
-      <Field orientation="horizontal" data-invalid={errors["privacy.accepted"] ? true : undefined}>
-        <Checkbox
-          id={privacyId}
-          checked={form.acceptPrivacy}
-          onCheckedChange={(checked) => set("acceptPrivacy", checked === true)}
-          aria-invalid={errors["privacy.accepted"] ? true : undefined}
-        />
-        <FieldContent>
-          <FieldLabel
-            htmlFor={privacyId}
-            className="text-sm font-normal tracking-normal normal-case"
-          >
-            <span>
-              {t.rich("privacy", {
-                link: (chunks) => (
-                  <Link
-                    href={routes.privacy()}
-                    target="_blank"
-                    rel="noopener"
-                    className="font-medium underline underline-offset-4"
-                  >
-                    {chunks}
-                  </Link>
-                ),
-              })}
-            </span>
-          </FieldLabel>
-          <FieldDescription>{t("privacyHint")}</FieldDescription>
-          {errors["privacy.accepted"] ? (
-            <FieldError>{errors["privacy.accepted"]}</FieldError>
-          ) : null}
-        </FieldContent>
-      </Field>
+      <PrivacyConsentField
+        checked={form.acceptPrivacy}
+        error={errors["privacy.accepted"]}
+        onChange={(accepted) => set("acceptPrivacy", accepted)}
+      />
 
-      <div className="flex flex-col gap-4">
-        <Button type="submit" size="lg" disabled={register.pending}>
-          {register.pending ? <Spinner data-icon="inline-start" /> : null}
-          {t("submit")}
-        </Button>
-        <p className="text-sm text-muted-foreground">
-          {t.rich("haveAccount", {
-            link: (chunks) => (
-              <Link
-                href={routes.signIn()}
-                className="font-medium text-foreground underline underline-offset-4"
-              >
-                {chunks}
-              </Link>
-            ),
-          })}
-        </p>
-      </div>
+      <RegisterActions pending={register.pending} />
     </form>
   )
 }

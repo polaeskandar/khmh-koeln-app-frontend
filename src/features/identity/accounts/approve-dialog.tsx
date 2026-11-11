@@ -1,16 +1,11 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { cn } from "cn"
-import { CircleAlert, Layers, Plus, Search, X } from "lucide-react"
+import { Layers, Plus, X } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useId, useState } from "react"
-import { toast } from "sonner"
+import { useState } from "react"
 
-import { FormDialog } from "@/components/form-dialog"
 import { Button } from "@/components/ui/button"
-import { TextAreaField, TextField } from "@/components/form-fields"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   Field,
   FieldDescription,
@@ -19,35 +14,16 @@ import {
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field"
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { QueryErrorState } from "@/components/page-states"
-import { useDebounced } from "@/hooks/use-debounced"
 import { useFormat } from "@/i18n/format"
-import { isStale, useRefetch } from "@/lib/api/refetch"
-import { useApiMutation } from "@/lib/api/use-api-mutation"
-import { isolate } from "@/lib/bidi"
 import { placeLabel } from "@/lib/domain/place"
-import { fold, fullName, preferredName } from "@/lib/domain/names"
-import { oneOf } from "@/lib/one-of"
 
-import {
-  ACCOUNT_REQUEST_QUERIES,
-  type AccountRequest,
-  type AgeCheck,
-  approveRequest,
-  memberCandidatesQuery,
-  MEMBER_ACCOUNT_QUERIES,
-  STAFF_APPROVAL_QUERIES,
-} from "./api"
-import {
-  createPersonRequest,
-  type DirectoryPerson,
-  MEMBERSHIP_QUERIES,
-} from "@/features/people/members/api"
-import { PlacementFields, usePlacement } from "@/features/people/members/placement-fields"
+import { type AccountRequest, STAFF_APPROVAL_QUERIES } from "./api"
+import { ApprovalDialog, useApproval } from "./approval-dialog"
+import { MemberApproval } from "./member-approval"
+import { type DirectoryPerson } from "@/features/people/members/api"
 import { parentPortalOnly, rolesQuery } from "@/features/identity/roles/api"
-import { groupsText, ignoreEnter, PersonSearch } from "@/features/people/members/person-search"
+import { PersonSearch } from "@/features/people/members/person-search"
 import { RolesChoice } from "@/features/identity/roles/roles-choice"
 import type { GroupOption } from "@/features/organization/assignments/api"
 import {
@@ -56,8 +32,6 @@ import {
   useAssignableGroups,
 } from "@/features/organization/assignments/group-choice"
 import type { Group } from "@/lib/permissions"
-
-const CHANGED_MEANWHILE = ["accounts.alreadyApproved", "notFound.user"]
 
 const sameGroup = (a: Group, b: Group) => a.serviceId === b.serviceId && a.stageId === b.stageId
 
@@ -138,15 +112,36 @@ function GroupsChoice({
   )
 }
 
-function Approval({ request, onClose }: { request: AccountRequest; onClose: () => void }) {
-  const t = useTranslations()
+function ChildrenChoice({
+  chosen,
+  error,
+  onChange,
+}: {
+  chosen: DirectoryPerson[]
+  error?: string
+  onChange: (children: DirectoryPerson[]) => void
+}) {
+  const t = useTranslations("accountRequests.approve")
+
+  return (
+    <Field data-invalid={error ? true : undefined}>
+      <FieldLabel>{t("children")}</FieldLabel>
+      <PersonSearch chosen={chosen} onChange={onChange} label={t("findChild")} />
+      {error ? <FieldError>{error}</FieldError> : null}
+    </Field>
+  )
+}
+
+function StaffApproval({ request, onClose }: { request: AccountRequest; onClose: () => void }) {
+  const t = useTranslations("accountRequests.approve")
   const f = useFormat()
-  const refetch = useRefetch()
   const roles = useQuery(rolesQuery)
   const parent = request.registeredAs === "parent"
   const [children, setChildren] = useState<DirectoryPerson[]>([])
   const [ticked, setTicked] = useState<string[] | null>(null)
   const services = useAssignableGroups()
+  const approval = useApproval(request, STAFF_APPROVAL_QUERIES, onClose)
+  const errors = approval.fieldErrors
 
   const [groups, setGroups] = useState<Group[]>(() =>
     request.services
@@ -158,78 +153,36 @@ function Approval({ request, onClose }: { request: AccountRequest; onClose: () =
     services.some((service) => service.id === group.serviceId)
   )
 
-  const approve = useApiMutation(approveRequest, {
-    successMessage: t("toast.accountApproved", { name: request.account.displayName }),
-    invalidate: STAFF_APPROVAL_QUERIES,
-    toastOnError: false,
-    onSuccess: onClose,
-  })
-
   const roleIds =
     ticked ??
     (parent ? (roles.data?.items ?? []).filter(parentPortalOnly).map((role) => role.id) : [])
-
-  async function submit() {
-    const result = await approve.execute(
-      request.account.id,
-      parent
-        ? { as: "parent", childIds: children.map((child) => child.id), roleIds }
-        : { as: "servant", roleIds, assignments: offered }
-    )
-
-    if (!result.ok && isStale(result.problem, CHANGED_MEANWHILE)) {
-      toast.error(result.problem.message)
-      void refetch(ACCOUNT_REQUEST_QUERIES)
-      onClose()
-    }
-  }
-
-  const errors = approve.fieldErrors
 
   const groupErrors = Object.entries(errors).flatMap(([field, error]) =>
     field.startsWith("assignments") && error ? [error] : []
   )
 
-  const generalError =
-    approve.problem &&
-    Object.keys(errors).length === 0 &&
-    !isStale(approve.problem, CHANGED_MEANWHILE)
-      ? approve.problem.message
-      : null
-
   return (
-    <FormDialog
-      title={t("accountRequests.approve.title", { name: request.account.displayName })}
-      description={
-        parent
-          ? t("accountRequests.approve.parentDescription")
-          : t("accountRequests.approve.servantDescription")
-      }
-      pending={approve.pending}
-      problem={approve.problem}
-      submitLabel={t("accountRequests.approve.submit")}
+    <ApprovalDialog
+      request={request}
+      description={parent ? t("parentDescription") : t("servantDescription")}
+      generalError={approval.generalError}
+      pending={approval.pending}
+      problem={approval.problem}
       submitDisabled={roleIds.length === 0 || (parent && children.length === 0)}
-      onSubmit={submit}
+      onSubmit={() =>
+        approval.send(
+          parent
+            ? { as: "parent", childIds: children.map((child) => child.id), roleIds }
+            : { as: "servant", roleIds, assignments: offered }
+        )
+      }
       onClose={onClose}
     >
-      {request.note ? (
-        <blockquote dir="auto" className="border-s-2 ps-3 text-sm text-muted-foreground">
-          {request.note}
-        </blockquote>
-      ) : null}
       {parent ? (
-        <Field data-invalid={errors.childIds ? true : undefined}>
-          <FieldLabel>{t("accountRequests.approve.children")}</FieldLabel>
-          <PersonSearch
-            chosen={children}
-            onChange={setChildren}
-            label={t("accountRequests.approve.findChild")}
-          />
-          {errors.childIds ? <FieldError>{errors.childIds}</FieldError> : null}
-        </Field>
+        <ChildrenChoice chosen={children} error={errors.childIds} onChange={setChildren} />
       ) : request.services.length > 0 ? (
         <p className="text-sm">
-          {t("accountRequests.approve.servesIn", {
+          {t("servesIn", {
             service: request.services.map((service) => service.name).join(f.separator),
           })}
         </p>
@@ -250,320 +203,10 @@ function Approval({ request, onClose }: { request: AccountRequest; onClose: () =
           errors={groupErrors}
         />
       ) : null}
-      {generalError ? <FieldError>{generalError}</FieldError> : null}
       {roles.isError ? (
         <QueryErrorState error={roles.error} onRetry={() => roles.refetch()} />
       ) : null}
-    </FormDialog>
-  )
-}
-
-const NOTE_MAX = 200
-
-const AGE_CHECKS: AgeCheck[] = ["sixteenOrOlder", "guardianConsent"]
-
-function namesOf(displayName: string) {
-  const [firstName = "", ...rest] = displayName.trim().split(/\s+/)
-
-  return { firstName, lastName: rest.join(" ") }
-}
-
-function MemberApproval({ request, onClose }: { request: AccountRequest; onClose: () => void }) {
-  const t = useTranslations()
-  const f = useFormat()
-  const refetch = useRefetch()
-  const id = useId()
-  const name = request.account.displayName
-  const [text, setText] = useState(name)
-  const q = useDebounced(text.trim(), 250)
-  const candidates = useQuery({ ...memberCandidatesQuery(q), enabled: q.length >= 2 })
-  const [picked, setPicked] = useState<string | null | undefined>(undefined)
-  const [ageCheck, setAgeCheck] = useState<AgeCheck | null>(null)
-  const [note, setNote] = useState("")
-  const [newRecord, setNewRecord] = useState(false)
-  const [firstName, setFirstName] = useState(() => namesOf(name).firstName)
-  const [lastName, setLastName] = useState(() => namesOf(name).lastName)
-  const placementChoice = usePlacement()
-  const [createdId, setCreatedId] = useState<string | null>(null)
-
-  const create = useApiMutation(createPersonRequest, {
-    toastOnError: false,
-    invalidate: MEMBERSHIP_QUERIES,
-  })
-
-  const approve = useApiMutation(approveRequest, {
-    successMessage: t("toast.accountApproved", { name }),
-    invalidate: MEMBER_ACCOUNT_QUERIES,
-    toastOnError: false,
-    onSuccess: onClose,
-  })
-
-  const items = candidates.data?.items ?? []
-  const namesakes = items.filter((person) => fold(fullName(person)) === fold(name))
-  const free = namesakes.filter((person) => !person.hasAccount)
-  const shown = items.some((person) => person.id === picked)
-
-  const personId =
-    picked === undefined ? (free.length === 1 ? free[0]!.id : null) : shown ? picked : null
-
-  const noteTooLong = ageCheck === "guardianConsent" && note.length > NOTE_MAX
-  const errors = approve.fieldErrors
-  const busy = approve.pending || create.pending
-  const duplicate = create.problem?.code === "people.duplicate"
-
-  const createError =
-    create.problem && !duplicate && Object.keys(create.fieldErrors).length === 0
-      ? create.problem.message
-      : null
-
-  const generalError =
-    approve.problem &&
-    Object.keys(errors).length === 0 &&
-    !isStale(approve.problem, CHANGED_MEANWHILE)
-      ? approve.problem.message
-      : null
-
-  async function recordId(confirmDuplicate?: boolean) {
-    if (!newRecord) {
-      return personId
-    }
-
-    if (createdId) {
-      return createdId
-    }
-
-    const result = await create.execute({
-      firstName,
-      lastName,
-      displayName: null,
-      placement: placementChoice.placement,
-      ...(confirmDuplicate ? { confirmDuplicate } : {}),
-    })
-
-    if (!result.ok) {
-      return null
-    }
-
-    setCreatedId(result.data.person.id)
-
-    return result.data.person.id
-  }
-
-  async function submit(confirmDuplicate?: boolean) {
-    if (busy || !ageCheck || noteTooLong) {
-      return
-    }
-
-    const chosen = await recordId(confirmDuplicate)
-
-    if (!chosen) {
-      return
-    }
-
-    const result = await approve.execute(request.account.id, {
-      as: "member",
-      member: {
-        personId: chosen,
-        ageCheck,
-        guardianConsentNote: ageCheck === "guardianConsent" ? note.trim() || null : null,
-      },
-    })
-
-    if (!result.ok && isStale(result.problem, CHANGED_MEANWHILE)) {
-      toast.error(result.problem.message)
-      void refetch(ACCOUNT_REQUEST_QUERIES)
-      onClose()
-    }
-  }
-
-  return (
-    <FormDialog
-      title={t("accountRequests.approve.title", { name })}
-      description={t("accountRequests.approve.memberDescription")}
-      pending={busy}
-      problem={approve.problem ?? create.problem}
-      submitLabel={t("accountRequests.approve.submit")}
-      submitDisabled={(!newRecord && !personId) || !ageCheck || noteTooLong}
-      onSubmit={() => submit()}
-      onClose={onClose}
-    >
-      {request.note ? (
-        <blockquote dir="auto" className="border-s-2 ps-3 text-sm text-muted-foreground">
-          {request.note}
-        </blockquote>
-      ) : null}
-      {newRecord ? (
-        <FieldSet>
-          <FieldLegend variant="label">{t("accountRequests.approve.newRecord")}</FieldLegend>
-          <FieldDescription>{t("accountRequests.approve.newRecordHint")}</FieldDescription>
-          {duplicate ? (
-            <Alert>
-              <CircleAlert />
-              <AlertDescription className="flex flex-col gap-3">
-                <span>{create.problem?.message}</span>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="self-start"
-                  disabled={busy || !ageCheck || noteTooLong}
-                  onClick={() => void submit(true)}
-                >
-                  {t("members.newPerson.addAnyway")}
-                </Button>
-              </AlertDescription>
-            </Alert>
-          ) : null}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <TextField
-              label={t("members.fields.firstName")}
-              maxLength={80}
-              disabled={createdId !== null}
-              value={firstName}
-              onChange={(event) => setFirstName(event.target.value)}
-              error={create.fieldErrors.firstName}
-            />
-            <TextField
-              label={t("members.fields.lastName")}
-              maxLength={80}
-              disabled={createdId !== null}
-              value={lastName}
-              onChange={(event) => setLastName(event.target.value)}
-              error={create.fieldErrors.lastName}
-            />
-          </div>
-          <PlacementFields choice={placementChoice} errors={create.fieldErrors} />
-          {createError ? <FieldError>{createError}</FieldError> : null}
-          {createdId === null ? (
-            <Button
-              type="button"
-              variant="link"
-              className="h-auto self-start p-0"
-              disabled={busy}
-              onClick={() => setNewRecord(false)}
-            >
-              {t("accountRequests.approve.chooseExisting")}
-            </Button>
-          ) : null}
-        </FieldSet>
-      ) : (
-        <FieldSet data-invalid={errors["member.personId"] ? true : undefined}>
-          <FieldLegend variant="label">{t("accountRequests.approve.memberRecord")}</FieldLegend>
-          <FieldDescription>
-            {t("accountRequests.approve.memberRecordHint", { name: isolate(name) })}
-          </FieldDescription>
-          <InputGroup>
-            <InputGroupAddon>
-              <Search />
-            </InputGroupAddon>
-            <InputGroupInput
-              aria-label={t("accountRequests.approve.findMember")}
-              placeholder={t("accountRequests.approve.findMember")}
-              value={text}
-              onChange={(event) => setText(event.target.value)}
-              onKeyDown={ignoreEnter}
-            />
-          </InputGroup>
-          {namesakes.length > 1 ? (
-            <p role="status" className="text-sm text-warning">
-              {t("accountRequests.approve.sameName", {
-                count: namesakes.length,
-                name: isolate(name),
-              })}
-            </p>
-          ) : null}
-          {q.length < 2 ? (
-            <p className="text-xs text-muted-foreground">
-              {t("accountRequests.approve.searchMember")}
-            </p>
-          ) : candidates.isError ? (
-            <QueryErrorState error={candidates.error} onRetry={() => candidates.refetch()} />
-          ) : candidates.data && items.length === 0 ? (
-            <p className="text-xs text-muted-foreground">
-              {t("accountRequests.approve.noMemberMatches")}
-            </p>
-          ) : (
-            <RadioGroup
-              value={personId ?? ""}
-              onValueChange={(value) => setPicked(value)}
-              className="flex flex-col gap-0 divide-y border-y"
-            >
-              {items.map((person) => (
-                <label
-                  key={person.id}
-                  htmlFor={`${id}-${person.id}`}
-                  className={cn(
-                    "flex items-start gap-3 py-2.5 text-sm",
-                    person.hasAccount ? "cursor-not-allowed opacity-60" : "cursor-pointer"
-                  )}
-                >
-                  <RadioGroupItem
-                    id={`${id}-${person.id}`}
-                    value={person.id}
-                    disabled={person.hasAccount}
-                    className="mt-0.5"
-                  />
-                  <span className="flex min-w-0 flex-col gap-0.5">
-                    <span className="font-medium">
-                      <bdi>{preferredName(person)}</bdi>
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {person.hasAccount
-                        ? t("accountRequests.approve.hasAccount")
-                        : groupsText(person, f.separator, t("accountRequests.approve.noGroup"))}
-                    </span>
-                  </span>
-                </label>
-              ))}
-            </RadioGroup>
-          )}
-          <Button
-            type="button"
-            variant="link"
-            className="h-auto self-start p-0"
-            onClick={() => setNewRecord(true)}
-          >
-            {t("accountRequests.approve.addNew", { name: isolate(name) })}
-          </Button>
-          {errors["member.personId"] ? <FieldError>{errors["member.personId"]}</FieldError> : null}
-        </FieldSet>
-      )}
-      <FieldSet data-invalid={errors["member.ageCheck"] ? true : undefined}>
-        <FieldLegend variant="label">{t("accountRequests.approve.age")}</FieldLegend>
-        <FieldDescription>{t("accountRequests.approve.ageHint")}</FieldDescription>
-        <RadioGroup
-          value={ageCheck ?? ""}
-          onValueChange={(value) => setAgeCheck(oneOf(AGE_CHECKS, value) ?? ageCheck)}
-          className="flex flex-col gap-2"
-        >
-          {AGE_CHECKS.map((value) => (
-            <label
-              key={value}
-              htmlFor={`${id}-${value}`}
-              className="flex w-full cursor-pointer items-center gap-3 border p-3 text-sm"
-            >
-              <RadioGroupItem id={`${id}-${value}`} value={value} />
-              {t(`accountRequests.approve.ageCheck.${value}`)}
-            </label>
-          ))}
-        </RadioGroup>
-        {errors["member.ageCheck"] ? <FieldError>{errors["member.ageCheck"]}</FieldError> : null}
-      </FieldSet>
-      {ageCheck === "guardianConsent" ? (
-        <TextAreaField
-          label={t("accountRequests.approve.consentNote")}
-          dir="auto"
-          value={note}
-          placeholder={t("accountRequests.approve.consentNotePlaceholder")}
-          onChange={(event) => setNote(event.target.value)}
-          error={
-            noteTooLong
-              ? t("errors.validation.tooLong", { max: String(NOTE_MAX) })
-              : errors["member.guardianConsentNote"]
-          }
-        />
-      ) : null}
-      {generalError ? <FieldError>{generalError}</FieldError> : null}
-    </FormDialog>
+    </ApprovalDialog>
   )
 }
 
@@ -579,7 +222,7 @@ export function ApproveButton({ request }: { request: AccountRequest }) {
         <MemberApproval request={request} onClose={close} />
       ) : null}
       {open && request.registeredAs !== "member" ? (
-        <Approval request={request} onClose={close} />
+        <StaffApproval request={request} onClose={close} />
       ) : null}
     </>
   )
