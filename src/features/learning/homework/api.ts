@@ -1,6 +1,7 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect } from "react"
 
+import { parentChildrenQuery } from "@/features/people/children/api"
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/problem"
 import type { Uuid } from "@/lib/api/types/common"
@@ -10,13 +11,14 @@ export type HomeworkCounts = Schemas["AudienceCountsResponse"]
 export type HomeworkRow = Schemas["HomeworkItemResponse"]
 export type StageHomework = Schemas["HomeworkListResponse"]
 
-export const stageHomeworkQuery = (stage: Uuid) => ({
-  queryKey: ["homework", "list", { stage }] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/stages/{stageId}/homework", { params: { path: { stageId: stage } }, signal })),
-})
-
-export const useStageHomework = (stage: Uuid) => useQuery(stageHomeworkQuery(stage))
+export const stageHomeworkQuery = (stage: Uuid) =>
+  queryOptions({
+    queryKey: ["homework", "list", { stage }],
+    queryFn: ({ signal }) =>
+      dataOf(
+        api.GET("/stages/{stageId}/homework", { params: { path: { stageId: stage } }, signal })
+      ),
+  })
 
 export type HomeworkDetail = Schemas["HomeworkDetailResponse"]
 
@@ -24,11 +26,12 @@ export type Resource = HomeworkDetail["resources"][number]
 
 export type HomeworkInput = Schemas["HomeworkRequest"]
 
-export const homeworkQuery = (id: Uuid) => ({
-  queryKey: ["homework", "detail", id] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/homework/{id}", { params: { path: { id } }, signal })),
-})
+export const homeworkQuery = (id: Uuid) =>
+  queryOptions({
+    queryKey: ["homework", "detail", id],
+    queryFn: ({ signal }) =>
+      dataOf(api.GET("/homework/{id}", { params: { path: { id } }, signal })),
+  })
 
 export const createHomeworkRequest = (lesson: Uuid, input: HomeworkInput) =>
   dataOf(
@@ -47,11 +50,12 @@ export const publishHomeworkRequest = (id: Uuid) =>
 export type ProgressRow = Schemas["AudienceRowResponse"]
 export type HomeworkProgress = Schemas["HomeworkProgressResponse"]
 
-export const homeworkProgressQuery = (id: Uuid) => ({
-  queryKey: ["homework", "progress", id] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/homework/{id}/progress", { params: { path: { id } }, signal })),
-})
+export const homeworkProgressQuery = (id: Uuid) =>
+  queryOptions({
+    queryKey: ["homework", "progress", id],
+    queryFn: ({ signal }) =>
+      dataOf(api.GET("/homework/{id}/progress", { params: { path: { id } }, signal })),
+  })
 
 export type HomeworkTransition = "unpublish" | "archive" | "restore"
 
@@ -104,16 +108,17 @@ export type TaskState = "todo" | "done"
 
 export type ParentTask = Schemas["ParentHomeworkItemResponse"]
 
-export const childHomeworkQuery = (child: Uuid, state: TaskState) => ({
-  queryKey: ["parent", "homework", child, state] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(
-      api.GET("/parent/children/{childId}/homework", {
-        params: { path: { childId: child }, query: { state } },
-        signal,
-      })
-    ),
-})
+const childHomeworkQuery = (child: Uuid, state: TaskState) =>
+  queryOptions({
+    queryKey: ["parent", "homework", child, state],
+    queryFn: ({ signal }) =>
+      dataOf(
+        api.GET("/parent/children/{childId}/homework", {
+          params: { path: { childId: child }, query: { state } },
+          signal,
+        })
+      ),
+  })
 
 export function useChildHomework(child: Uuid, state: TaskState) {
   const queryClient = useQueryClient()
@@ -123,7 +128,7 @@ export function useChildHomework(child: Uuid, state: TaskState) {
   useEffect(() => {
     if (unlinked) {
       void queryClient.invalidateQueries(
-        { queryKey: ["parent", "children"] },
+        { queryKey: parentChildrenQuery.queryKey },
         { cancelRefetch: false }
       )
     }
@@ -138,16 +143,17 @@ export type ParentTaskDetail = Schemas["ChildHomeworkDetailResponse"]
 
 const taskParams = (child: Uuid, id: Uuid) => ({ path: { childId: child, homeworkId: id } })
 
-export const parentTaskQuery = (child: Uuid, id: Uuid) => ({
-  queryKey: ["parent", "task", child, id] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(
-      api.GET("/parent/children/{childId}/homework/{homeworkId}", {
-        params: taskParams(child, id),
-        signal,
-      })
-    ),
-})
+export const parentTaskQuery = (child: Uuid, id: Uuid) =>
+  queryOptions({
+    queryKey: ["parent", "task", child, id],
+    queryFn: ({ signal }) =>
+      dataOf(
+        api.GET("/parent/children/{childId}/homework/{homeworkId}", {
+          params: taskParams(child, id),
+          signal,
+        })
+      ),
+  })
 
 export const reportDoneRequest = (child: Uuid, id: Uuid) =>
   dataOf(
@@ -166,23 +172,23 @@ export const undoReportRequest = (child: Uuid, id: Uuid) =>
 
 export type MemberTask = ParentTask
 
-export const memberHomeworkQuery = (state: TaskState) => ({
-  queryKey: ["member", "homework", state] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/member/homework", { params: { query: { state } }, signal })),
-})
-
-export const useMemberHomework = (state: TaskState) => useQuery(memberHomeworkQuery(state))
+export const memberHomeworkQuery = (state: TaskState) =>
+  queryOptions({
+    queryKey: ["member", "homework", state],
+    queryFn: ({ signal }) =>
+      dataOf(api.GET("/member/homework", { params: { query: { state } }, signal })),
+  })
 
 export type MemberTaskDetail = Schemas["MemberHomeworkDetailResponse"]
 
-export const memberTaskQuery = (id: Uuid) => ({
-  queryKey: ["member", "task", id] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(
-      api.GET("/member/homework/{homeworkId}", { params: { path: { homeworkId: id } }, signal })
-    ),
-})
+export const memberTaskQuery = (id: Uuid) =>
+  queryOptions({
+    queryKey: ["member", "task", id],
+    queryFn: ({ signal }) =>
+      dataOf(
+        api.GET("/member/homework/{homeworkId}", { params: { path: { homeworkId: id } }, signal })
+      ),
+  })
 
 export const reportOwnDoneRequest = (id: Uuid) =>
   dataOf(

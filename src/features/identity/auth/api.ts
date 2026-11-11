@@ -1,3 +1,6 @@
+import { queryOptions } from "@tanstack/react-query"
+
+import type { Locale } from "@/i18n/config"
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import { can } from "@/lib/permissions"
 import { ME_KEY, REGISTRATION_SERVICES_KEY } from "@/lib/api/query-keys"
@@ -12,10 +15,13 @@ export function areasOf(me: Me) {
   }
 }
 
-export const meQuery = {
+export const meQuery = queryOptions({
   queryKey: ME_KEY,
-  queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/me", { signal })),
-}
+  queryFn: ({ signal }) => dataOf(api.GET("/me", { signal })),
+})
+
+export const saveLanguageRequest = (language: Locale) =>
+  dataOf(api.PUT("/me/language", { body: { language } }))
 
 export const signInRequest = (credentials: { email: string; password: string }) =>
   dataOf(api.POST("/auth/sign-in", { body: credentials }))
@@ -28,11 +34,10 @@ export type RegisteredAs = Schemas["RegisteredAs"]
 
 export type Registration = Schemas["RegisterAccountRequest"]
 
-export const registrationServicesQuery = {
-  queryKey: [...REGISTRATION_SERVICES_KEY, "list"] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/auth/register/services", { signal })),
-}
+export const registrationServicesQuery = queryOptions({
+  queryKey: [...REGISTRATION_SERVICES_KEY, "list"],
+  queryFn: ({ signal }) => dataOf(api.GET("/auth/register/services", { signal })),
+})
 
 export const registerRequest = (body: Registration) => dataOf(api.POST("/auth/register", { body }))
 

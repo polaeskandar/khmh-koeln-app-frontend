@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { queryOptions } from "@tanstack/react-query"
 import { useSearchParams } from "next/navigation"
 
 import { api, dataOf, type Schemas } from "@/lib/api/client"
@@ -8,12 +8,10 @@ export type ChildSummary = Schemas["ChildSummaryResponse"]
 
 export type ParentChildren = Schemas["ChildListResponse"]
 
-export const parentChildrenQuery = () => ({
-  queryKey: [...PARENT_KEY, "children"] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/parent/children", { signal })),
+export const parentChildrenQuery = queryOptions({
+  queryKey: [...PARENT_KEY, "children"],
+  queryFn: ({ signal }) => dataOf(api.GET("/parent/children", { signal })),
 })
-
-export const useParentChildren = () => useQuery(parentChildrenQuery())
 
 export function useSelectedChild(items: ChildSummary[]): ChildSummary | null {
   const wanted = useSearchParams().get("child")

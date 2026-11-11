@@ -1,5 +1,6 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import { CircleAlert, ClipboardCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
 
@@ -22,7 +23,7 @@ import {
   type AttendanceOverview as Overview,
   overviewSessionIds,
   useAttendanceCounts,
-  useAttendanceOverview,
+  attendanceOverviewQuery,
   withCounts,
 } from "./api"
 
@@ -182,7 +183,7 @@ function OverviewView({ overview }: { overview: Overview }) {
 export function AttendanceOverview() {
   const t = useTranslations()
   const unassigned = useUnassigned()
-  const query = useAttendanceOverview()
+  const query = useQuery(attendanceOverviewQuery)
 
   return (
     <>

@@ -1,5 +1,6 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import { Plus } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
@@ -18,7 +19,7 @@ import { Link, useRouter } from "@/i18n/navigation"
 import { type Group, groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import { type StageHomework, useStageHomework } from "./api"
+import { type StageHomework, stageHomeworkQuery } from "./api"
 import { HomeworkActions } from "./homework-actions"
 import { DueLine } from "./homework-bits"
 
@@ -133,7 +134,7 @@ function Homework({ stage }: { stage: Stage }) {
   const can = useCanIn(group)
   const search = useSearchParams()
   const router = useRouter()
-  const query = useStageHomework(stage.id)
+  const query = useQuery(stageHomeworkQuery(stage.id))
   const requested = search.get("status")
 
   return (

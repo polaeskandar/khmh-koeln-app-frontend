@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { queryOptions, useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
 import { api, dataOf, type Schemas } from "@/lib/api/client"
@@ -15,11 +15,11 @@ export type ServiceRow = Schemas["ServiceResponse"]
 
 export type ServiceList = Schemas["ServiceListResponse"]
 
-export const serviceInsightsQuery = {
-  queryKey: [...SERVICES_KEY, "insights", { status: "all" }] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
+export const serviceInsightsQuery = queryOptions({
+  queryKey: [...SERVICES_KEY, "insights", { status: "all" }],
+  queryFn: ({ signal }) =>
     dataOf(api.GET("/services/insights", { params: { query: { status: "all" } }, signal })),
-}
+})
 
 export function useServiceInsights(): Map<Uuid, ServiceInsight> {
   const { data } = useQuery(serviceInsightsQuery)
@@ -27,14 +27,15 @@ export function useServiceInsights(): Map<Uuid, ServiceInsight> {
   return useMemo(() => new Map(data?.items.map((item) => [item.serviceId, item])), [data])
 }
 
-export const useServiceInsight = (id: Uuid): ServiceInsight | null =>
-  useServiceInsights().get(id) ?? null
-
-export const servicesQuery = {
-  queryKey: [...SERVICES_KEY, "list", { status: "all" }] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/services", { params: { query: { status: "all" } }, signal })),
+export function useServiceInsight(id: Uuid): ServiceInsight | null {
+  return useServiceInsights().get(id) ?? null
 }
+
+export const servicesQuery = queryOptions({
+  queryKey: [...SERVICES_KEY, "list", { status: "all" }],
+  queryFn: ({ signal }) =>
+    dataOf(api.GET("/services", { params: { query: { status: "all" } }, signal })),
+})
 
 export type ServiceFields = { name: string; description: string | null }
 
@@ -44,29 +45,32 @@ export const createServiceRequest = (fields: ServiceFields) =>
 export const updateServiceRequest = (id: Uuid, fields: ServiceFields) =>
   dataOf(api.PUT("/services/{id}", { params: { path: { id } }, body: fields }))
 
-export const serviceQuery = (id: Uuid) => ({
-  queryKey: [...SERVICES_KEY, "detail", id] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/services/{id}", { params: { path: { id } }, signal })),
-})
+export const serviceQuery = (id: Uuid) =>
+  queryOptions({
+    queryKey: [...SERVICES_KEY, "detail", id],
+    queryFn: ({ signal }) =>
+      dataOf(api.GET("/services/{id}", { params: { path: { id } }, signal })),
+  })
 
 export type ServiceStages = Schemas["StageListResponse"]
 
-export const serviceStagesQuery = (id: Uuid) => ({
-  queryKey: [...SERVICES_KEY, "stages", id] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/services/{id}/stages", { params: { path: { id } }, signal })),
-})
+export const serviceStagesQuery = (id: Uuid) =>
+  queryOptions({
+    queryKey: [...SERVICES_KEY, "stages", id],
+    queryFn: ({ signal }) =>
+      dataOf(api.GET("/services/{id}/stages", { params: { path: { id } }, signal })),
+  })
 
 export type ServiceServant = Schemas["ServiceServant"]
 
 export type ServantAccount = Schemas["AccountReference"]
 
-export const serviceServantsQuery = (id: Uuid) => ({
-  queryKey: [...SERVICES_KEY, "servants", id] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/services/{id}/servants", { params: { path: { id } }, signal })),
-})
+export const serviceServantsQuery = (id: Uuid) =>
+  queryOptions({
+    queryKey: [...SERVICES_KEY, "servants", id],
+    queryFn: ({ signal }) =>
+      dataOf(api.GET("/services/{id}/servants", { params: { path: { id } }, signal })),
+  })
 
 type Structure = "services" | "stages"
 

@@ -21,7 +21,7 @@ import { orderOf, type ScheduleSummary } from "@/lib/api/types/meetings"
 import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import { type ScheduleList as Schedules, useSchedules } from "./api"
+import { type ScheduleList as Schedules, schedulesQuery } from "./api"
 import { MeetingsTabs, ServiceFilter, withQuery } from "./meetings-nav"
 import { EditScheduleButton, NewScheduleButton } from "./schedule-dialog"
 import { ScheduleList } from "./schedule-list"
@@ -158,7 +158,7 @@ function SchedulesScreen() {
   const search = useSearchParams()
   const status = statusOf(search.get("status"))
   const serviceId = search.get("service")
-  const schedules = useSchedules()
+  const schedules = useQuery(schedulesQuery)
   const services = useQuery(servicesQuery)
   const active = services.data?.items.filter((service) => !service.archived) ?? []
 

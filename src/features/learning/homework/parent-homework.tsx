@@ -1,5 +1,6 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
 import { Suspense } from "react"
 
@@ -9,7 +10,7 @@ import { routes } from "@/lib/routes"
 
 import {
   type ChildSummary,
-  useParentChildren,
+  parentChildrenQuery,
   useSelectedChild,
 } from "@/features/people/children/api"
 import { type TaskState, useChildHomework } from "./api"
@@ -17,7 +18,7 @@ import { ChildSwitcher } from "@/features/people/children/child-switcher"
 import { ListSkeleton, TaskList, useChildCompletion } from "./task-list"
 
 function UnlinkedChild() {
-  const children = useParentChildren()
+  const children = useQuery(parentChildrenQuery)
 
   return children.isError ? (
     <QueryErrorState error={children.error} onRetry={() => children.refetch()} />
@@ -90,7 +91,7 @@ function ChildHomework({ items }: { items: ChildSummary[] }) {
 }
 
 function Homework() {
-  const query = useParentChildren()
+  const query = useQuery(parentChildrenQuery)
 
   return (
     <QueryState query={query} loading={<ListSkeleton />}>

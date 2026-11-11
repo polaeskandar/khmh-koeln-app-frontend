@@ -23,7 +23,7 @@ import { addDays, datesBetween, isValidLocalDate } from "@/lib/domain/time"
 import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import { type Agenda, useAgenda } from "./api"
+import { type Agenda, agendaQuery } from "./api"
 import { DayStrip } from "./day-strip"
 import { MeetingsTabs, ServiceFilter, withQuery } from "./meetings-nav"
 import { OccurrenceMenu } from "./occurrence-menu"
@@ -182,10 +182,12 @@ function AgendaScreen({ actions }: { actions?: ReactNode }) {
   const requestedDate = validDate(search.get("date"))
   const serviceId = search.get("service")
 
-  const agenda = useAgenda({
-    ...(windowStart ? { from: windowStart, to: addDays(windowStart, WINDOW_DAYS - 1) } : {}),
-    ...(serviceId ? { serviceId } : {}),
-  })
+  const agenda = useQuery(
+    agendaQuery({
+      ...(windowStart ? { from: windowStart, to: addDays(windowStart, WINDOW_DAYS - 1) } : {}),
+      ...(serviceId ? { serviceId } : {}),
+    })
+  )
 
   const services = useQuery(servicesQuery)
   const active = services.data?.items.filter((service) => !service.archived) ?? []

@@ -1,5 +1,6 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import { Info } from "lucide-react"
 import { useTranslations } from "next-intl"
 
@@ -11,12 +12,12 @@ import { ListSkeleton } from "@/features/learning/homework/task-list"
 import { useFormat } from "@/i18n/format"
 import { ApiError } from "@/lib/api/problem"
 
-import { type MemberGroup, useMemberGroups } from "@/features/people/groups/api"
+import { type MemberGroup, memberGroupsQuery } from "@/features/people/groups/api"
 
 function GroupsLine() {
   const t = useTranslations("member.account")
   const f = useFormat()
-  const groups = useMemberGroups()
+  const groups = useQuery(memberGroupsQuery)
 
   if (groups.error instanceof ApiError && groups.error.status === 403) {
     return <>{t("notLinked")}</>

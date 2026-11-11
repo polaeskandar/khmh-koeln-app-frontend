@@ -73,7 +73,7 @@ function open(
   const { client, wrapper } = testProviders({ locale })
 
   if (children) {
-    client.setQueryData(parentChildrenQuery().queryKey, { today: "2026-11-08", items: children })
+    client.setQueryData(parentChildrenQuery.queryKey, { today: "2026-11-08", items: children })
   }
 
   render(<ParentTaskPage />, { wrapper })

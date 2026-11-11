@@ -5,13 +5,18 @@ import { useTranslations } from "next-intl"
 import { useCallback, useReducer } from "react"
 import { toast } from "sonner"
 
-import { api, dataOf, type Schemas } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/problem"
 import type { PersonRef, Uuid } from "@/lib/api/types/common"
 import { translateProblem } from "@/lib/api/translate-problem"
 import { useProblemTranslator } from "@/lib/api/use-problem-translator"
 
-import type { AttendanceBoard, Mark, Placement } from "./api"
+import {
+  type AttendanceBoard,
+  type Mark,
+  type Placement,
+  recordMarkRequest,
+  removeMarkRequest,
+} from "./api"
 
 export type Visitor = { person: PersonRef; placements: Placement[] }
 
@@ -186,21 +191,12 @@ export function useMarkWrites(sessionId: Uuid) {
 
   async function send(person: PersonRef, present: boolean, visitor?: Visitor) {
     dispatch({ type: "start", personId: person.id, present, visitor })
-    const params = { path: { sessionId, personId: person.id } }
 
     try {
-      const saved = await withRetries<Schemas["MarkResponse"] | void>((signal) =>
+      const saved = await withRetries((signal) =>
         present
-          ? dataOf(
-              api.PUT("/sessions/{sessionId}/attendance/{personId}", { params, body: {}, signal })
-            )
-          : dataOf(
-              api.DELETE("/sessions/{sessionId}/attendance/{personId}", {
-                params,
-                body: {},
-                signal,
-              })
-            )
+          ? recordMarkRequest(sessionId, person.id, signal)
+          : removeMarkRequest(sessionId, person.id, null, signal)
       )
 
       dispatch({

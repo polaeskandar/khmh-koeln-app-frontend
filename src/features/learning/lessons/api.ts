@@ -1,3 +1,5 @@
+import { queryOptions } from "@tanstack/react-query"
+
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { LocalDate, Uuid } from "@/lib/api/types/common"
 import type { LessonStatus } from "@/lib/api/types/learning"
@@ -17,22 +19,23 @@ export type LessonTab = "upcoming" | "previous" | "archived"
 
 export type StageLessons = Schemas["LessonListResponse"]
 
-export const lessonQuery = (id: Uuid) => ({
-  queryKey: ["lessons", "detail", id] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/lessons/{id}", { params: { path: { id } }, signal })),
-})
+export const lessonQuery = (id: Uuid) =>
+  queryOptions({
+    queryKey: ["lessons", "detail", id],
+    queryFn: ({ signal }) => dataOf(api.GET("/lessons/{id}", { params: { path: { id } }, signal })),
+  })
 
-export const stageLessonsQuery = (stage: Uuid, tab: LessonTab = "upcoming", q = "") => ({
-  queryKey: ["lessons", "list", { stage, tab, q }] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(
-      api.GET("/stages/{stageId}/lessons", {
-        params: { path: { stageId: stage }, query: { tab, ...(q ? { q } : {}) } },
-        signal,
-      })
-    ),
-})
+export const stageLessonsQuery = (stage: Uuid, tab: LessonTab = "upcoming", q = "") =>
+  queryOptions({
+    queryKey: ["lessons", "list", { stage, tab, q }],
+    queryFn: ({ signal }) =>
+      dataOf(
+        api.GET("/stages/{stageId}/lessons", {
+          params: { path: { stageId: stage }, query: { tab, ...(q ? { q } : {}) } },
+          signal,
+        })
+      ),
+  })
 
 export type LessonInput = Schemas["LessonRequest"]
 
@@ -54,16 +57,17 @@ export const updateLessonRequest = (lesson: Uuid, version: number, input: Lesson
 export type MeetingOption = Schemas["LessonOptionResponse"]
 export type LessonOptions = Schemas["LessonOptionsResponse"]
 
-export const lessonOptionsQuery = (stage: Uuid, lesson?: Uuid) => ({
-  queryKey: ["lessons", "options", { stage, lesson }] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(
-      api.GET("/stages/{stageId}/lesson-options", {
-        params: { path: { stageId: stage }, query: lesson ? { lessonId: lesson } : {} },
-        signal,
-      })
-    ),
-})
+export const lessonOptionsQuery = (stage: Uuid, lesson?: Uuid) =>
+  queryOptions({
+    queryKey: ["lessons", "options", { stage, lesson }],
+    queryFn: ({ signal }) =>
+      dataOf(
+        api.GET("/stages/{stageId}/lesson-options", {
+          params: { path: { stageId: stage }, query: lesson ? { lessonId: lesson } : {} },
+          signal,
+        })
+      ),
+  })
 
 export const OTHER_DATE = "other"
 

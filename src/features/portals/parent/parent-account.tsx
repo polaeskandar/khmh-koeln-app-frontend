@@ -1,5 +1,6 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import { Info } from "lucide-react"
 import { useTranslations } from "next-intl"
 
@@ -10,14 +11,14 @@ import { OwnData } from "@/features/privacy/own-data/own-data"
 import { useSession } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 
-import { useParentChildren } from "@/features/people/children/api"
+import { parentChildrenQuery } from "@/features/people/children/api"
 import { ListSkeleton } from "@/features/learning/homework/task-list"
 
 export function ParentAccount() {
   const t = useTranslations()
   const f = useFormat()
   const { session } = useSession()
-  const children = useParentChildren()
+  const children = useQuery(parentChildrenQuery)
 
   if (session.status !== "authenticated") {
     return <ListSkeleton />

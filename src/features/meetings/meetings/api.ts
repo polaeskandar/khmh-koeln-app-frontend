@@ -1,44 +1,40 @@
-import { useQuery } from "@tanstack/react-query"
+import { queryOptions } from "@tanstack/react-query"
 
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { LocalDate, Uuid } from "@/lib/api/types/common"
 
 export type ScheduleList = Schemas["ScheduleListResponse"]
 
-export const schedulesQuery = {
-  queryKey: ["schedules", "list"] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/schedules", { signal })),
-}
-
-export const useSchedules = () => useQuery(schedulesQuery)
-
-export const serviceSchedulesQuery = (serviceId: Uuid) => ({
-  queryKey: ["schedules", "list", { serviceId }] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/schedules", { params: { query: { serviceId } }, signal })),
+export const schedulesQuery = queryOptions({
+  queryKey: ["schedules", "list"],
+  queryFn: ({ signal }) => dataOf(api.GET("/schedules", { signal })),
 })
+
+export const serviceSchedulesQuery = (serviceId: Uuid) =>
+  queryOptions({
+    queryKey: ["schedules", "list", { serviceId }],
+    queryFn: ({ signal }) =>
+      dataOf(api.GET("/schedules", { params: { query: { serviceId } }, signal })),
+  })
 
 export type Agenda = Schemas["AgendaResponse"]
 
 export type AgendaFilter = { from?: LocalDate; to?: LocalDate; serviceId?: Uuid; scheduleId?: Uuid }
 
-export const agendaQuery = (filter: AgendaFilter) => ({
-  queryKey: ["agenda", "list", filter] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/agenda", { params: { query: filter }, signal })),
-})
-
-export const useAgenda = (filter: AgendaFilter) => useQuery(agendaQuery(filter))
+export const agendaQuery = (filter: AgendaFilter) =>
+  queryOptions({
+    queryKey: ["agenda", "list", filter],
+    queryFn: ({ signal }) => dataOf(api.GET("/agenda", { params: { query: filter }, signal })),
+  })
 
 export type MeetingSession = Schemas["SessionDetailResponse"]
 
-export const meetingSessionQuery = (id: Uuid) => ({
-  queryKey: ["sessions", "detail", id] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/sessions/{id}", { params: { path: { id } }, signal })),
-})
-
-export const useMeetingSession = (id: Uuid) => useQuery(meetingSessionQuery(id))
+export const meetingSessionQuery = (id: Uuid) =>
+  queryOptions({
+    queryKey: ["sessions", "detail", id],
+    queryFn: ({ signal }) =>
+      dataOf(api.GET("/sessions/{id}", { params: { path: { id } }, signal })),
+  })
 
 export const cancelSessionRequest = (session: Uuid, reason: string | null) =>
   dataOf(api.POST("/sessions/{id}/cancel", { params: { path: { id: session } }, body: { reason } }))
@@ -61,11 +57,12 @@ export const createScheduleRequest = (request: ScheduleRequest) =>
 export const updateScheduleRequest = (id: Uuid, changes: ScheduleChanges) =>
   dataOf(api.PUT("/schedules/{id}", { params: { path: { id } }, body: changes }))
 
-export const scheduleQuery = (id: Uuid) => ({
-  queryKey: ["schedules", "detail", id] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/schedules/{id}", { params: { path: { id } }, signal })),
-})
+export const scheduleQuery = (id: Uuid) =>
+  queryOptions({
+    queryKey: ["schedules", "detail", id],
+    queryFn: ({ signal }) =>
+      dataOf(api.GET("/schedules/{id}", { params: { path: { id } }, signal })),
+  })
 
 export const activateScheduleRequest = (id: Uuid) =>
   dataOf(api.POST("/schedules/{id}/activate", { params: { path: { id } }, body: {} }))
@@ -78,9 +75,7 @@ export const deleteScheduleRequest = (id: Uuid) =>
 
 export type MemberMeeting = Schemas["MemberMeetingResponse"]
 
-export const memberMeetingsQuery = () => ({
-  queryKey: ["member", "meetings"] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/member/meetings", { signal })),
+export const memberMeetingsQuery = queryOptions({
+  queryKey: ["member", "meetings"],
+  queryFn: ({ signal }) => dataOf(api.GET("/member/meetings", { signal })),
 })
-
-export const useMemberMeetings = () => useQuery(memberMeetingsQuery())

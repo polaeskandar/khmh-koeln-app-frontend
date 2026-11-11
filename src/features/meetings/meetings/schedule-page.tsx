@@ -37,7 +37,7 @@ import {
   deactivateScheduleRequest,
   deleteScheduleRequest,
   scheduleQuery,
-  useAgenda,
+  agendaQuery,
 } from "./api"
 import { OccurrenceMenu } from "./occurrence-menu"
 import { EditScheduleButton } from "./schedule-dialog"
@@ -188,13 +188,18 @@ function AgendaList({
 function Dates({ schedule, today }: { schedule: ScheduleSummary; today: LocalDate }) {
   const t = useTranslations("meetings.schedule")
   const can = useCanIn(meetingGroup(schedule))
-  const next = useAgenda({ scheduleId: schedule.id, from: today, to: addDays(today, DAYS) })
 
-  const past = useAgenda({
-    scheduleId: schedule.id,
-    from: addDays(today, -DAYS - 1),
-    to: addDays(today, -1),
-  })
+  const next = useQuery(
+    agendaQuery({ scheduleId: schedule.id, from: today, to: addDays(today, DAYS) })
+  )
+
+  const past = useQuery(
+    agendaQuery({
+      scheduleId: schedule.id,
+      from: addDays(today, -DAYS - 1),
+      to: addDays(today, -1),
+    })
+  )
 
   const upcoming = (next.data?.items ?? [])
     .filter((item) => item.kind === "planned" || item.status !== "completed")

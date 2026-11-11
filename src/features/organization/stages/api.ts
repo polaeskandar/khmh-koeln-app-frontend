@@ -1,14 +1,16 @@
+import { queryOptions } from "@tanstack/react-query"
+
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { Uuid } from "@/lib/api/types/common"
 import { STAGES_KEY, SERVICES_KEY } from "@/lib/api/query-keys"
 
 export type Stage = Schemas["StageResponse"]
 
-export const stageQuery = (id: Uuid) => ({
-  queryKey: [...STAGES_KEY, "detail", id] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/stages/{id}", { params: { path: { id } }, signal })),
-})
+export const stageQuery = (id: Uuid) =>
+  queryOptions({
+    queryKey: [...STAGES_KEY, "detail", id],
+    queryFn: ({ signal }) => dataOf(api.GET("/stages/{id}", { params: { path: { id } }, signal })),
+  })
 
 export type StageFields = { name: string; description: string | null }
 

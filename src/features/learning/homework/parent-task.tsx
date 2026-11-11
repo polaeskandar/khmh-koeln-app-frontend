@@ -14,7 +14,7 @@ import type { Uuid } from "@/lib/api/types/common"
 import { isolate } from "@/lib/bidi"
 import { routes } from "@/lib/routes"
 
-import { type ParentChildren, parentChildrenQuery } from "@/features/people/children/api"
+import { parentChildrenQuery } from "@/features/people/children/api"
 import { type ParentTaskDetail, parentTaskQuery, reportDoneRequest, undoReportRequest } from "./api"
 import { CompletionControl, reportOf } from "./completion-control"
 import { ListSkeleton } from "./task-list"
@@ -24,7 +24,7 @@ const isWebLink = (url: string) => /^https?:\/\//i.test(url)
 
 function BackLink({ child }: { child: ParentTaskDetail["child"] }) {
   const t = useTranslations("parent")
-  const children = useQueryClient().getQueryData<ParentChildren>(parentChildrenQuery().queryKey)
+  const children = useQueryClient().getQueryData(parentChildrenQuery.queryKey)
   const several = (children?.items.length ?? 0) > 1
 
   return (

@@ -1,5 +1,6 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import { Info } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Suspense } from "react"
@@ -14,7 +15,7 @@ import { routes } from "@/lib/routes"
 import {
   type ChildSummary,
   type ParentChildren,
-  useParentChildren,
+  parentChildrenQuery,
   useSelectedChild,
 } from "@/features/people/children/api"
 import { useChildHomework } from "@/features/learning/homework/api"
@@ -121,7 +122,7 @@ function Home() {
   const t = useTranslations("parent.home")
   const f = useFormat()
   const { session } = useSession()
-  const query = useParentChildren()
+  const query = useQuery(parentChildrenQuery)
 
   const firstName =
     session.status === "authenticated" ? session.me.account.displayName.split(" ")[0] : ""
