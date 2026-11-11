@@ -1,4 +1,5 @@
 import type { Locale } from "@/i18n/config"
+import { MONTH_WEEKS } from "@/lib/domain/recurrence"
 import { daysBetween, isoWeekday, localDateOf, localTimeOf } from "@/lib/domain/time"
 import type {
   Instant,
@@ -176,8 +177,6 @@ type Words = {
   recurrence: (r: Recurrence, t: Table) => string
   monthWeek: Record<MonthWeek, string>
 }
-
-const MONTH_WEEKS: MonthWeek[] = [1, 2, 3, 4, -1]
 
 const byMonthWeek = (names: string[]) =>
   Object.fromEntries(MONTH_WEEKS.map((w, i) => [w, names[i]])) as Record<MonthWeek, string>

@@ -250,6 +250,24 @@ describe("saving", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument()
   })
 
+  test("a last-date 422 shows once, on the last date", async () => {
+    open({
+      write: () =>
+        problem(422, "checkFields", {
+          fieldErrors: {
+            "recurrence.span.endsOn": { code: "recurrence.endBeforeStart", params: {} },
+          },
+        }),
+    })
+
+    const dialog = await newDialog()
+    await userEvent.click(dialog.getByRole("button", { name: "Create schedule" }))
+    const lastDate = dialog.getByLabelText("Last date (optional)")
+    await waitFor(() => expect(lastDate).toHaveAttribute("aria-invalid", "true"))
+    expect(lastDate).toHaveFocus()
+    expect(dialog.getAllByText("The end date cannot be before the start date.")).toHaveLength(1)
+  })
+
   test("editing sends the whole schedule as a PUT without its roster", async () => {
     const sent = open()
     await userEvent.click(await screen.findByRole("button", { name: "Edit schedule" }))
