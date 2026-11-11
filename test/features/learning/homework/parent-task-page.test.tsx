@@ -7,6 +7,7 @@ import { beforeEach, expect, test, vi } from "vitest"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
 import { MIMI_ID, MINA_ID, mimi, mina } from "@test/support/fixtures/parent"
+import { expectFullWidthOnPhones } from "@test/support/layout"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { testProviders } from "@test/support/providers"
@@ -241,5 +242,5 @@ test.each([
 
 test("in Arabic the button spans the width on phones", async () => {
   open(detail(), { locale: "ar" })
-  expect(await screen.findByRole("button", { name: "الإبلاغ عن الإنجاز" })).toHaveClass("w-full")
+  expectFullWidthOnPhones(await screen.findByRole("button", { name: "الإبلاغ عن الإنجاز" }))
 })

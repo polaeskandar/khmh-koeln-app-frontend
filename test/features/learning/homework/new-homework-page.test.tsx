@@ -10,6 +10,7 @@ import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
+import { expectWrapsInsideItsColumn } from "@test/support/layout"
 import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
@@ -175,9 +176,7 @@ test.each([
     await screen.findAllByRole("combobox")
 
     for (const name of [week, none]) {
-      const pick = screen.getByRole("button", { name })
-      expect(pick).toHaveClass("h-auto", "shrink", "text-start", "whitespace-normal")
-      expect(pick).not.toHaveClass("h-9", "shrink-0", "whitespace-nowrap")
+      expectWrapsInsideItsColumn(screen.getByRole("button", { name }))
     }
   }
 )

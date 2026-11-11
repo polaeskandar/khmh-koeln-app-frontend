@@ -8,6 +8,7 @@ import type { Locale } from "@/i18n/config"
 import { isolate } from "@/lib/bidi"
 import { apiUrl, problem } from "@test/support/api"
 import { homeworkOf, MIMI_ID, MINA_ID, mimi, mina } from "@test/support/fixtures/parent"
+import { expectTouchTarget } from "@test/support/layout"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
@@ -248,5 +249,5 @@ test("the square sits beside the link, which still opens the task", async () => 
   expect(card).not.toContainElement(tick)
   expect(tick.closest("a")).toBeNull()
   expect(tick).toHaveAttribute("type", "button")
-  expect(tick).toHaveClass("min-h-11", "min-w-11", "focus-visible:ring-2")
+  expectTouchTarget(tick)
 })

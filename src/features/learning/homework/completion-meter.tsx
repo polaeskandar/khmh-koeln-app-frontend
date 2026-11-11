@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
+import { useId } from "react"
 
 export function CompletionMeter({
   completed,
@@ -13,22 +14,25 @@ export function CompletionMeter({
   className?: string
 }) {
   const t = useTranslations("lessons")
-  const ratio = assigned > 0 ? completed / assigned : 0
+  const labelId = useId()
+  const percent = assigned > 0 ? Math.round((completed / assigned) * 100) : 0
 
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      <span className="text-sm tabular-nums">
+      <span id={labelId} className="text-sm tabular-nums">
         {t.rich("completion", {
           completed,
           assigned,
           strong: (chunks) => <span className="font-medium">{chunks}</span>,
         })}
       </span>
-      <span className="h-1 w-full bg-muted" aria-hidden="true">
-        <span
-          className="block h-full bg-primary"
-          style={{ width: `${Math.round(ratio * 100)}%` }}
-        />
+      <span
+        role="progressbar"
+        aria-labelledby={labelId}
+        aria-valuenow={percent}
+        className="h-1 w-full bg-muted"
+      >
+        <span className="block h-full bg-primary" style={{ width: `${percent}%` }} />
       </span>
     </div>
   )

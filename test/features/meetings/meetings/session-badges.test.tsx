@@ -17,13 +17,12 @@ describe("SessionStatusBadge", () => {
     expect(container.querySelector("svg")).not.toBeNull()
   })
 
-  test("active shows the live dot, 'Anwesenheit offen' in German", () => {
-    const { container } = renderWithProviders(<SessionStatusBadge status="active" />, {
-      locale: "de",
-    })
+  test("active shows the live dot instead of an icon, 'Anwesenheit offen' in German", () => {
+    renderWithProviders(<SessionStatusBadge status="active" />, { locale: "de" })
+    const badge = screen.getByText("Anwesenheit offen")
 
-    expect(screen.getByText("Anwesenheit offen")).toBeInTheDocument()
-    expect(container.querySelector(".animate-live")).not.toBeNull()
+    expect(badge.querySelector("[aria-hidden='true']")).not.toBeNull()
+    expect(badge.querySelector("svg")).toBeNull()
   })
 
   test("the one-off badge carries an icon too", () => {

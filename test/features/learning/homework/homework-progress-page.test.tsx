@@ -7,6 +7,7 @@ import type { Me } from "@/features/identity/auth/api"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
+import { expectKeepsLineBreaks } from "@test/support/layout"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
@@ -147,21 +148,16 @@ function open(body: HomeworkProgress | (() => Response), account: Me = me.servan
 
 const tableRows = async () => (await screen.findByRole("table")).querySelectorAll("tbody tr")
 
+const figures = async () =>
+  (await screen.findAllByRole("definition")).map((figure) => figure.textContent)
+
 const names = async () =>
   [...(await tableRows())].map((tr) => tr.querySelector("[dir=auto]")!.textContent)
 
 test("shows the four figures and the tab counts", async () => {
   open(progress())
-  const figures = (await screen.findByText("In 3rd Class")).closest("dl")!
-
-  expect([...figures.querySelectorAll("dt + dd")].map((dd) => dd.textContent)).toEqual([
-    "14",
-    "1",
-    "13",
-    "4",
-  ])
-
-  expect(within(figures).getByText("Can’t report online")).toBeInTheDocument()
+  expect(await figures()).toEqual(["14", "1", "13", "4", "Can’t report online"])
+  expect(screen.getByText("In 3rd Class")).toBeInTheDocument()
 
   for (const name of ["All (14)", "Reported done (1)", "Not yet (13)", "No account (4)"]) {
     expect(screen.getByRole("tab", { name })).toBeInTheDocument()
@@ -233,7 +229,7 @@ test("shows what parents read, the lesson and Edit", async () => {
     )!
   )
 
-  expect(aside.getByText(/Say it once a day\./)).toHaveClass("whitespace-pre-line")
+  expectKeepsLineBreaks(aside.getByText(/Say it once a day\./))
 
   expect(aside.getByRole("link", { name: "The story as a video" })).toHaveAttribute(
     "rel",
@@ -316,14 +312,7 @@ test("members with their own account report it themselves", async () => {
   const data = progress({ counts, rows: level1 })
   data.homework = { ...data.homework, title: "Write the first eight letters", counts }
   open(data)
-  const figures = (await screen.findByText("In 3rd Class")).closest("dl")!
-
-  expect([...figures.querySelectorAll("dt + dd")].map((dd) => dd.textContent)).toEqual([
-    "9",
-    "1",
-    "8",
-    "6",
-  ])
+  expect(await figures()).toEqual(["9", "1", "8", "6", "Can’t report online"])
 
   for (const name of ["All (9)", "Reported done (1)", "Not yet (8)", "No account (6)"]) {
     expect(screen.getByRole("tab", { name })).toBeInTheDocument()

@@ -21,7 +21,7 @@ describe("AgendaRow", () => {
     expect(screen.getByText("Created on Sat 14 Nov")).toBeInTheDocument()
   })
 
-  test("a canceled row is struck through, with its reason in its own direction", () => {
+  test("a canceled row says so, with its reason in its own direction", () => {
     renderWithProviders(
       <AgendaRow
         item={agendaSession({ status: "canceled", cancelReason: "زيارة الأسقف" })}
@@ -29,7 +29,7 @@ describe("AgendaRow", () => {
       />
     )
 
-    expect(screen.getByText("3rd Class")).toHaveClass("line-through")
+    expect(screen.getByText("Canceled")).toBeInTheDocument()
     expect(screen.getByText("زيارة الأسقف")).toHaveAttribute("dir", "auto")
   })
 

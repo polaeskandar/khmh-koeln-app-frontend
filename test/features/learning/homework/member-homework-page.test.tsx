@@ -8,6 +8,7 @@ import type { Locale } from "@/i18n/config"
 import { isolate } from "@/lib/bidi"
 import { apiUrl, problem } from "@test/support/api"
 import { nevineHomework } from "@test/support/fixtures/member"
+import { expectFullWidthOnPhones } from "@test/support/layout"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
@@ -245,6 +246,5 @@ test.each([
 
 test("in Arabic the button spans the width on phones", async () => {
   openTask(detail(), "ar")
-  const buttons = await screen.findAllByRole("button")
-  expect(buttons.find((b) => b.classList.contains("h-12"))).toHaveClass("w-full")
+  expectFullWidthOnPhones(await screen.findByRole("button", { name: "الإبلاغ عن الإنجاز" }))
 })
