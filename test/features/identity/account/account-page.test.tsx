@@ -12,7 +12,6 @@ import { server } from "@test/support/msw"
 import { navigation, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 import { expectToast } from "@test/support/toasts"
-
 import { AccountPage } from "@/features/identity/account/account-page"
 
 let signOuts = 0

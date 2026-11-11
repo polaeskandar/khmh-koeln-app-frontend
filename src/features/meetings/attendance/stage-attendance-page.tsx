@@ -1,19 +1,19 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 
+import { cn } from "@/lib/utils"
 import { Section } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import { preferredName } from "@/lib/domain/names"
 import { routes } from "@/lib/routes"
-
-import { type HistoryCell, stageAttendanceHistoryQuery } from "./api"
 import type { Stage } from "@/features/organization/stages/api"
 import { StageLayout } from "@/features/organization/stages/stage-layout"
+
+import { type HistoryCell, stageAttendanceHistoryQuery } from "./api"
 
 const CELL_TEXT = {
   present: "present",

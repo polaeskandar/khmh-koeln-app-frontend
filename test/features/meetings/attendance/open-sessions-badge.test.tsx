@@ -12,7 +12,6 @@ import { server } from "@test/support/msw"
 import { navigation } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 import { expectNoToast } from "@test/support/toasts"
-
 import { AttendanceOverviewPage } from "@/features/meetings/attendance/attendance-overview-page"
 
 beforeEach(() => {

@@ -3,7 +3,6 @@ import { expect, test } from "vitest"
 
 import { expectVisuallyHidden } from "@test/support/layout"
 import { renderWithProviders } from "@test/support/providers"
-
 import { PageLoading } from "@/components/page-loading"
 
 test("PageLoading is busy and says so to screen readers in German", () => {

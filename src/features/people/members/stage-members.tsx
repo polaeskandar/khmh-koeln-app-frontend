@@ -17,13 +17,13 @@ import {
 } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCanIn } from "@/features/identity/auth/session"
-import { peopleQuery, type PeoplePage } from "./api"
-import { AddPersonButton } from "./add-person-dialog"
 import { useFormat } from "@/i18n/format"
 import { fullName, initials, preferredName } from "@/lib/domain/names"
 import { groupAt } from "@/lib/permissions"
-
 import type { Stage } from "@/features/organization/stages/api"
+
+import { AddPersonButton } from "./add-person-dialog"
+import { peopleQuery, type PeoplePage } from "./api"
 
 function EmptyRoster({ stage }: { stage: Stage }) {
   const t = useTranslations("members.stageRoster")

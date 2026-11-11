@@ -1,8 +1,8 @@
 "use client"
 
-import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 
+import { cn } from "@/lib/utils"
 import { MemberAvatar } from "@/components/member-avatar"
 import { Link } from "@/i18n/navigation"
 import type { Uuid } from "@/lib/api/types/common"

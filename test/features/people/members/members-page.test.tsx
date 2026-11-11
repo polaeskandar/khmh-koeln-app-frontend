@@ -12,7 +12,6 @@ import { services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
 import { address, navigation, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import type { PeoplePage } from "@/features/people/members/api"
 import { MembersPage } from "@/features/people/members/members-page"
 

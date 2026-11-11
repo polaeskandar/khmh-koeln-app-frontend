@@ -1,15 +1,15 @@
 "use client"
 
-import { cn } from "@/lib/utils"
 import { UsersRound } from "lucide-react"
 import type { ReactNode } from "react"
 
+import { cn } from "@/lib/utils"
 import { ServiceTag } from "@/components/service-tag"
 import { RosterCells } from "@/features/meetings/attendance/roster-cells"
 import { Link } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
-import type { SessionView } from "./api"
 
+import type { SessionView } from "./api"
 import { agendaHref } from "./agenda-links"
 import { SessionBadges } from "./session-badges"
 import { counted, groupOf, useSessionLines } from "./session-lines"

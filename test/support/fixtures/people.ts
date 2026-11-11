@@ -1,5 +1,4 @@
 import type { PeoplePage, PersonRow } from "@/features/people/members/api"
-
 import { thirdClass } from "@test/support/fixtures/stages"
 
 let n = 0

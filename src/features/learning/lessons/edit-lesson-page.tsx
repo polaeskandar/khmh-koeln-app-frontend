@@ -13,7 +13,6 @@ import { groupAt } from "@/lib/permissions"
 
 import { type LessonDetail, lessonQuery } from "./api"
 import { LessonForm } from "./lesson-form"
-
 import { WithOptions } from "./lesson-options"
 
 function EditLessonBody({ data }: { data: LessonDetail }) {

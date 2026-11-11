@@ -18,12 +18,12 @@ import { useCanIn } from "@/features/identity/auth/session"
 import { stageHomeworkQuery } from "@/features/learning/homework/api"
 import { Link, useRouter } from "@/i18n/navigation"
 import { useRefetch } from "@/lib/api/refetch"
-import type { LessonStatus } from "./api"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
+import type { LessonStatus } from "./api"
 import {
   archiveLessonRequest,
   changeLessonStatusRequest,

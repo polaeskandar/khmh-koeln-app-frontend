@@ -10,7 +10,6 @@ import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import type { AttendanceSheet } from "@/features/meetings/attendance/api"
 import { CorrectionDialog } from "@/features/meetings/attendance/correction-dialog"
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"

@@ -2,7 +2,6 @@ import { screen } from "@testing-library/react"
 import { expect, test } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
-
 import { PageHeader } from "@/components/page-header"
 
 test("PageHeader renders the page's one h1, with the title isolated in <bdi>", () => {

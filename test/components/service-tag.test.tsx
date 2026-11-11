@@ -3,7 +3,6 @@ import { describe, expect, test } from "vitest"
 
 import type { ServiceReference } from "@/features/organization/services/api"
 import { renderWithProviders } from "@test/support/providers"
-
 import { ServiceSwatch, ServiceTag } from "@/components/service-tag"
 
 describe("service colours", () => {

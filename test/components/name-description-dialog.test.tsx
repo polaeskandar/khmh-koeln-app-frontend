@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event"
 import { describe, expect, test, vi } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
-
 import { NameDescriptionDialog } from "@/components/name-description-dialog"
 
 const texts = {

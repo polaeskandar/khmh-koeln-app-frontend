@@ -3,7 +3,6 @@ import { describe, expect, test, vi } from "vitest"
 
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import { RecordPage } from "@/components/record-page"
 
 const ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f10"

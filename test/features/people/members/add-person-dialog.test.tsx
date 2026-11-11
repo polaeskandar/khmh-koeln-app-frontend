@@ -13,7 +13,6 @@ import { services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 import { expectToast } from "@test/support/toasts"
-
 import { MembersScreen } from "@/features/people/members/members-page"
 
 const sundaySchool = services.items[0]

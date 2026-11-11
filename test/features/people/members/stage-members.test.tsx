@@ -15,7 +15,6 @@ import { SUNDAY_SCHOOL_ID, THIRD_CLASS_ID, thirdClass } from "@test/support/fixt
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import { StagePage } from "@/features/organization/stages/stage-page"
 
 beforeEach(() => {

@@ -3,9 +3,9 @@
 import { useTranslations } from "next-intl"
 import type { ReactNode } from "react"
 
-import { RosterCells } from "./roster-cells"
 import { Button } from "@/components/ui/button"
 
+import { RosterCells } from "./roster-cells"
 import type { AttendanceSheet } from "./api"
 import type { BoardActions } from "./person-row"
 

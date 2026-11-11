@@ -2,7 +2,6 @@ import { act, renderHook } from "@testing-library/react"
 import { describe, expect, test } from "vitest"
 
 import { testProviders } from "@test/support/providers"
-
 import { isStale, useRefetch } from "@/lib/api/refetch"
 
 describe("isStale", () => {

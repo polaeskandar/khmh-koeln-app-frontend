@@ -9,7 +9,6 @@ import { me } from "@test/support/fixtures/me"
 import { insightsOf, services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
-
 import type { Service } from "@/features/organization/services/api"
 import { ServicesOverviewPage } from "@/features/organization/services/services-overview-page"
 

@@ -4,12 +4,12 @@ import { useQuery } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
 
 import { QueryState } from "@/components/page-states"
-import type { TaskState } from "./api"
 import { ListSkeleton } from "@/components/list-skeleton"
-import { TaskList, useOwnCompletion } from "./task-list"
 import { ApiError } from "@/lib/api/problem"
 import { routes } from "@/lib/routes"
 
+import { TaskList, useOwnCompletion } from "./task-list"
+import type { TaskState } from "./api"
 import { type ParentHomeworkItem, memberHomeworkQuery } from "./api"
 
 const taskHref = (task: ParentHomeworkItem) => routes.memberHomeworkTask(task.id)

@@ -16,7 +16,6 @@ import { AddressTokenGate } from "./address-token"
 import { MIN_PASSWORD_LENGTH, setPasswordRequest } from "./api"
 import { AuthFrame, AuthHeading, StateIcon } from "./auth-frame"
 import { PasswordField } from "./password-field"
-
 import { SignInButton } from "./password-outcome"
 
 export function SetPasswordPage() {

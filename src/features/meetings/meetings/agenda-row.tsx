@@ -1,14 +1,14 @@
 "use client"
 
-import { cn } from "@/lib/utils"
 import type { ReactNode } from "react"
 
+import { cn } from "@/lib/utils"
 import { ServiceTag } from "@/components/service-tag"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
-import type { AgendaItem } from "./api"
 
+import type { AgendaItem } from "./api"
 import { agendaHref } from "./agenda-links"
 import { SessionBadges } from "./session-badges"
 import { counted, createdOnOf, groupOf, useSessionLines } from "./session-lines"

@@ -15,7 +15,6 @@ import { server } from "@test/support/msw"
 import { navigation } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 import { expectToast } from "@test/support/toasts"
-
 import type { PersonRow } from "@/features/people/members/api"
 import { MembersPage } from "@/features/people/members/members-page"
 

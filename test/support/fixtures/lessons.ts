@@ -4,7 +4,6 @@ import type {
   LessonOptions,
   LessonListResponse,
 } from "@/features/learning/lessons/api"
-
 import { thirdClass } from "@test/support/fixtures/stages"
 
 const lessonService = thirdClass.service

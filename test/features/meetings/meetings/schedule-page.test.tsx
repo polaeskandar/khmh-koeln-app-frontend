@@ -15,7 +15,6 @@ import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { makeTestQueryClient, renderWithProviders } from "@test/support/providers"
 import { expectToast } from "@test/support/toasts"
-
 import { SchedulePage } from "@/features/meetings/meetings/schedule-page"
 
 const stage = stageRef("3rd Class", 2)

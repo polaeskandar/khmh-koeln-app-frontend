@@ -2,7 +2,6 @@ import { screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
-
 import { forgetOutcome, rememberOutcome } from "@/features/identity/auth/auth-outcome"
 import { UnconfirmedPage } from "@/features/identity/auth/unconfirmed-page"
 

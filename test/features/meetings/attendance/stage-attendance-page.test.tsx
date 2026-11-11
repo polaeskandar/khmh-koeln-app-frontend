@@ -8,7 +8,6 @@ import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import type { HistoryCell, AttendanceHistory } from "@/features/meetings/attendance/api"
 import { StageAttendancePage } from "@/features/meetings/attendance/stage-attendance-page"
 

@@ -1,7 +1,8 @@
-import { cn } from "@/lib/utils"
 import { Eye, LockKeyhole } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { ReactNode } from "react"
+
+import { cn } from "@/lib/utils"
 
 export type Audience = "parents" | "servants"
 

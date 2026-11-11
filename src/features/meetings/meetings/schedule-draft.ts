@@ -1,7 +1,5 @@
 import type { Service } from "@/features/organization/services/api"
-import type { Frequency } from "./api"
 import type { IsoWeekday, LocalDate, MonthWeek, Recurrence, Uuid } from "@/lib/api/types/common"
-import type { RosterMode, ScheduleResponse } from "./api"
 import {
   normalizeWeekdays,
   occurrencesBetween,
@@ -11,6 +9,8 @@ import {
 } from "@/lib/domain/recurrence"
 import { addDays } from "@/lib/domain/time"
 
+import type { RosterMode, ScheduleResponse } from "./api"
+import type { Frequency } from "./api"
 import type { ScheduleChanges, CreateSchedule } from "./api"
 
 export type Draft = {

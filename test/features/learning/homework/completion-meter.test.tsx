@@ -2,7 +2,6 @@ import { screen } from "@testing-library/react"
 import { describe, expect, test } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
-
 import { CompletionMeter } from "@/features/learning/homework/completion-meter"
 
 describe("CompletionMeter", () => {

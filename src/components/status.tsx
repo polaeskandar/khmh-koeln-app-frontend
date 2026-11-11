@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
-import { cn } from "@/lib/utils"
 
+import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 
 export type Tone = "success" | "info" | "warning" | "danger" | "neutral" | "muted"

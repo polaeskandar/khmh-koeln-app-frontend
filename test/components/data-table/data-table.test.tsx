@@ -6,7 +6,6 @@ import { describe, expect, test, vi } from "vitest"
 
 import type { Locale } from "@/i18n/config"
 import { renderWithProviders } from "@test/support/providers"
-
 import {
   countByTab,
   DataTableColumnHeader,

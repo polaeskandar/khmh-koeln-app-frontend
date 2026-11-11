@@ -2,7 +2,6 @@ import { screen } from "@testing-library/react"
 import { describe, expect, test } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
-
 import { RosterCells } from "@/features/meetings/attendance/roster-cells"
 
 describe("RosterCells", () => {

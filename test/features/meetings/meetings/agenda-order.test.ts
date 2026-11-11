@@ -7,7 +7,6 @@ import {
   thirdClassStage,
   youthRef,
 } from "@test/support/fixtures/agenda"
-
 import { compareAgenda } from "@/features/meetings/meetings/agenda-order"
 
 describe("compareAgenda", () => {

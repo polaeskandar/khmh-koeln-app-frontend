@@ -18,7 +18,6 @@ import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 import { expectNoToast, expectToast } from "@test/support/toasts"
-
 import { AccountPage } from "@/features/identity/account/account-page"
 import { OwnData } from "@/features/privacy/own-data/own-data"
 

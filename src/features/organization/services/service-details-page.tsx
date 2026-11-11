@@ -1,11 +1,11 @@
 "use client"
 
-import { useCan, useCanAssign } from "@/features/identity/auth/session"
 import { useQuery } from "@tanstack/react-query"
 import { Archive, ArrowRight, PencilLine } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { type ReactNode, useState } from "react"
 
+import { useCan, useCanAssign } from "@/features/identity/auth/session"
 import { DialogMount } from "@/components/dialog-mount"
 import { RecordNotFound } from "@/features/portals/staff/record-not-found"
 import { Topbar } from "@/features/portals/staff/topbar"
@@ -29,6 +29,7 @@ import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
+import { AddStageButton } from "@/features/organization/stages/stage-dialog"
 
 import {
   type Service,
@@ -37,8 +38,6 @@ import {
   serviceStagesQuery,
   useServiceInsight,
 } from "./api"
-import { AddStageButton } from "@/features/organization/stages/stage-dialog"
-
 import { trendText } from "./service-cells"
 import { ServiceActionsMenu } from "./service-actions"
 import { EditServiceDialog } from "./service-dialog"

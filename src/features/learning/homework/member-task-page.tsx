@@ -6,13 +6,12 @@ import { useTranslations } from "next-intl"
 import { Suspense } from "react"
 
 import { QueryState } from "@/components/page-states"
-import { CompletionControl, reportOf } from "./completion-control"
 import { ListSkeleton } from "@/components/list-skeleton"
-import { HomeworkTaskView } from "./parent-task-page"
 import { useSearchParamId } from "@/hooks/use-search-param-id"
 import { Link } from "@/i18n/navigation"
 import type { Uuid } from "@/lib/api/types/common"
 import { routes } from "@/lib/routes"
+import { MemberNotAvailable } from "@/features/portals/member/member-shell"
 
 import {
   type MemberHomeworkDetail,
@@ -21,7 +20,8 @@ import {
   reportOwnDoneRequest,
   undoOwnReportRequest,
 } from "./api"
-import { MemberNotAvailable } from "@/features/portals/member/member-shell"
+import { HomeworkTaskView } from "./parent-task-page"
+import { CompletionControl, reportOf } from "./completion-control"
 
 function TaskView({ detail }: { detail: MemberHomeworkDetail }) {
   const t = useTranslations("member")

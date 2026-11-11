@@ -3,7 +3,6 @@ import { expect, test } from "vitest"
 
 import { expectClearOfCloseButton } from "@test/support/layout"
 import { renderWithProviders } from "@test/support/providers"
-
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog"
 
 test("the dialog's close button reads 'Schließen' in German", () => {

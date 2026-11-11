@@ -12,7 +12,6 @@ import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 import { expectToast } from "@test/support/toasts"
-
 import type { HomeworkItem } from "@/features/learning/homework/api"
 import type { LessonDetail } from "@/features/learning/lessons/api"
 import { LessonPage } from "@/features/learning/lessons/lesson-page"

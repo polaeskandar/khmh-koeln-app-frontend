@@ -17,8 +17,6 @@ import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useCanIn } from "@/features/identity/auth/session"
-import { CompletionMeter } from "./completion-meter"
-import { HomeworkStatusBadge } from "./homework-status-badge"
 import { useStageCrumbs } from "@/features/organization/stages/stage-layout"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
@@ -30,6 +28,8 @@ import { oneOf } from "@/lib/one-of"
 import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
+import { HomeworkStatusBadge } from "./homework-status-badge"
+import { CompletionMeter } from "./completion-meter"
 import {
   homeworkFlagsFor,
   type HomeworkProgress,

@@ -1,5 +1,4 @@
 import type { HomeworkItem, HomeworkList } from "@/features/learning/homework/api"
-
 import { goodSamaritan, lessonStage } from "@test/support/fixtures/lessons"
 
 export const homeworkRow = (overrides: Partial<HomeworkItem> = {}): HomeworkItem => ({

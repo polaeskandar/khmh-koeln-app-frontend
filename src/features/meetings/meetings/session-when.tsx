@@ -1,9 +1,10 @@
 "use client"
 
-import { cn } from "@/lib/utils"
 import { Clock, MapPin } from "lucide-react"
 
+import { cn } from "@/lib/utils"
 import { useFormat } from "@/i18n/format"
+
 import type { SessionView } from "./api"
 
 export function SessionWhen({

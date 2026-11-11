@@ -12,7 +12,6 @@ import { peopleList, person } from "@test/support/fixtures/people"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import type { DataRequestRow, DataRequestList } from "@/features/privacy/data-requests/api"
 import { DataRequestsPage } from "@/features/privacy/data-requests/data-requests-page"
 import { DueLabel } from "@/features/privacy/data-requests/request-labels"

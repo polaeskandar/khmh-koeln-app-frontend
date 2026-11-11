@@ -1,11 +1,11 @@
 "use client"
 
-import { DialogMount } from "@/components/dialog-mount"
-import { useCan } from "@/features/identity/auth/session"
 import { Archive, ArchiveRestore, Ellipsis, PencilLine, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
+import { useCan } from "@/features/identity/auth/session"
+import { DialogMount } from "@/components/dialog-mount"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -26,7 +26,6 @@ import {
   useServiceInsight,
 } from "./api"
 import { StructureChangeDialog } from "./structure-change"
-
 import { EditServiceDialog } from "./service-dialog"
 
 export function ServiceActionsMenu({ service }: { service: Service }) {

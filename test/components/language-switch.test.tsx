@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { navigation, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import { LanguageMenu, LanguageSubmenu } from "@/components/language-switch"
 import { useSwitchLocale } from "@/features/identity/auth/use-switch-locale"
 

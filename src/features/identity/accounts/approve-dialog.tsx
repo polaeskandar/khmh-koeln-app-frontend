@@ -18,10 +18,6 @@ import {
 import { QueryErrorState } from "@/components/page-states"
 import { useFormat } from "@/i18n/format"
 import { placeLabel } from "@/lib/domain/place"
-
-import { type AccountRequest, STAFF_APPROVAL_QUERIES } from "./api"
-import { ApprovalDialog, useApproval } from "./approval-dialog"
-import { MemberApproval } from "./member-approval"
 import { type DirectoryEntry } from "@/features/people/members/api"
 import { parentPortalOnly, rolesQuery } from "@/features/identity/roles/api"
 import { PersonSearch } from "@/features/people/members/person-search"
@@ -33,6 +29,10 @@ import {
   useAssignableGroups,
 } from "@/features/organization/assignments/group-choice"
 import type { Group } from "@/lib/permissions"
+
+import { MemberApproval } from "./member-approval"
+import { ApprovalDialog, useApproval } from "./approval-dialog"
+import { type AccountRequest, STAFF_APPROVAL_QUERIES } from "./api"
 
 const sameGroup = (a: Group, b: Group) => a.serviceId === b.serviceId && a.stageId === b.stageId
 

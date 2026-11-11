@@ -9,7 +9,6 @@ import { services } from "@test/support/fixtures/services"
 import { stageRef } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
-
 import type { AccountRequest, MemberCandidate } from "@/features/identity/accounts/api"
 import type { Schemas } from "@/lib/api/client"
 import { ApproveButton } from "@/features/identity/accounts/approve-dialog"

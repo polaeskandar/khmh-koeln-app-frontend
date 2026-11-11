@@ -13,7 +13,6 @@ import { address } from "@test/support/navigation"
 import { THIRD_CLASS_ID } from "@test/support/fixtures/stages"
 import { makeTestQueryClient, renderWithProviders } from "@test/support/providers"
 import { clickToastAction, expectNoToast, expectToast } from "@test/support/toasts"
-
 import {
   type AttendanceSheet,
   type MarkReference,

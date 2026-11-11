@@ -21,8 +21,9 @@ import { isStale, useRefetch } from "@/lib/api/refetch"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { preferredName } from "@/lib/domain/names"
-
 import { type DirectoryEntry } from "@/features/people/members/api"
+import { PersonSearch } from "@/features/people/members/person-search"
+
 import {
   giveAccessRequest,
   type ParentAccessItem,
@@ -31,7 +32,6 @@ import {
   revokeAccessRequest,
   GUARDIAN_LINK_QUERIES,
 } from "./api"
-import { PersonSearch } from "@/features/people/members/person-search"
 
 function GiveAccessDialog({
   accounts,

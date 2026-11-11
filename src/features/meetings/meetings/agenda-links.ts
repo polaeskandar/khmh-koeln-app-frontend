@@ -1,5 +1,6 @@
-import type { PlannedSession, AgendaSession } from "./api"
 import { routes } from "@/lib/routes"
+
+import type { PlannedSession, AgendaSession } from "./api"
 
 type Linked =
   Pick<PlannedSession, "kind" | "scheduleId"> | Pick<AgendaSession, "kind" | "id" | "status">

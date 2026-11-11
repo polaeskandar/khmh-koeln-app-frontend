@@ -9,7 +9,6 @@ import { prePaintScript } from "@/i18n/locale-choice"
 import { apiBaseUrl, impressumUrl } from "@/lib/env"
 import { APP_NAME } from "@/lib/app-name"
 import { THEME_COLORS } from "@/lib/theme-colors"
-
 import { fontStack } from "@/lib/font-stack"
 import { cn } from "@/lib/utils"
 

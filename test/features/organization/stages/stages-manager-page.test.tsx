@@ -13,7 +13,6 @@ import { SUNDAY_SCHOOL_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import { StagesManagerPage } from "@/features/organization/stages/stages-manager-page"
 
 const service = { id: SUNDAY_SCHOOL_ID, name: "Sunday School", tone: 1, archived: false }

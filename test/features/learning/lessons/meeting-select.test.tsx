@@ -16,7 +16,6 @@ import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import { toMeeting } from "@/features/learning/lessons/api"
 import { EditLessonPage } from "@/features/learning/lessons/edit-lesson-page"
 import { NewLessonPage } from "@/features/learning/lessons/new-lesson-page"

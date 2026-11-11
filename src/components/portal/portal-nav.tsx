@@ -1,8 +1,8 @@
 "use client"
 
-import { cn } from "@/lib/utils"
 import type { LucideIcon } from "lucide-react"
 
+import { cn } from "@/lib/utils"
 import { Link, usePathname } from "@/i18n/navigation"
 import { isActive } from "@/lib/active-path"
 

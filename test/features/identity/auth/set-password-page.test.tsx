@@ -7,7 +7,6 @@ import { apiUrl, problem } from "@test/support/api"
 import { server } from "@test/support/msw"
 import { navigation, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import { SetPasswordPage } from "@/features/identity/auth/set-password-page"
 
 afterEach(() => {

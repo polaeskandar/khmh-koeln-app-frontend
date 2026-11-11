@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
 import { screen, waitFor } from "@testing-library/react"
-
 import { http, HttpResponse } from "msw"
 import type { ReactNode } from "react"
 import { renderToString } from "react-dom/server"
@@ -12,7 +11,6 @@ import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders, testProviders } from "@test/support/providers"
-
 import type { Me } from "@/features/identity/auth/api"
 import {
   RedirectIfSignedIn,

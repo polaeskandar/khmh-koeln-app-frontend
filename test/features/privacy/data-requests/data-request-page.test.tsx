@@ -12,7 +12,6 @@ import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 import { expectToast } from "@test/support/toasts"
-
 import type { DataRequestDetail, ErasureReview } from "@/features/privacy/data-requests/api"
 import { DataRequestPage } from "@/features/privacy/data-requests/data-request-page"
 

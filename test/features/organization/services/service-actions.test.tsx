@@ -12,7 +12,6 @@ import { SUNDAY_SCHOOL_ID } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import type { Me } from "@/features/identity/auth/api"
 import {
   type ArchiveImpact,

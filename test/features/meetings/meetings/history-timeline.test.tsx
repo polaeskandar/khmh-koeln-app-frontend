@@ -4,7 +4,6 @@ import { afterEach, describe, expect, test, vi } from "vitest"
 import type { HistoryEntry } from "@/features/meetings/meetings/api"
 import { AGENDA_TODAY } from "@test/support/fixtures/agenda"
 import { renderWithProviders } from "@test/support/providers"
-
 import { HistoryTimeline } from "@/features/meetings/meetings/history-timeline"
 
 afterEach(() => vi.unstubAllEnvs())

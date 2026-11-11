@@ -24,11 +24,9 @@ import { useCan } from "@/features/identity/auth/session"
 import type { ServiceReference } from "@/features/organization/services/api"
 import { isolate } from "@/lib/bidi"
 import { groupAt } from "@/lib/permissions"
-
 import { StructureChangeDialog } from "@/features/organization/services/structure-change"
 
 import { archiveStageRequest, deleteStageRequest, restoreStageRequest } from "./api"
-
 import { EditStageDialog, type EditableStage } from "./stage-dialog"
 
 type Move = { up: boolean; down: boolean; onMove: (direction: -1 | 1) => void }

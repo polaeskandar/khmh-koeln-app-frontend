@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest"
 
 import { LOCALES } from "@/i18n/config"
-
 import { readPrivacyNotice } from "@/features/privacy/notice/notice"
 import { PRIVACY_NOTICE_VERSION } from "@/features/privacy/notice/privacy-notice"
 

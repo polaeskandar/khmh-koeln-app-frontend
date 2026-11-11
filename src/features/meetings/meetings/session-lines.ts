@@ -4,10 +4,11 @@ import { useFormat } from "@/i18n/format"
 import type { LocalDate } from "@/lib/api/types/common"
 import type { ServiceReference } from "@/features/organization/services/api"
 import type { StageReference } from "@/features/organization/stages/api"
-import type { PlannedSession, SessionView } from "./api"
 import { isolate } from "@/lib/bidi"
 import { addDays } from "@/lib/domain/time"
 import type { Format } from "@/lib/format"
+
+import type { PlannedSession, SessionView } from "./api"
 
 export type Placed = { service: ServiceReference | null; stage: StageReference | null }
 

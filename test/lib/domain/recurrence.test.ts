@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest"
 
 import type { Recurrence } from "@/lib/api/types/common"
-
 import cases from "@/lib/domain/recurrence-cases.json"
 import {
   occurrencesBetween,

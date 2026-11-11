@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest"
 
 import { agendaSession, plannedDate } from "@test/support/fixtures/agenda"
-
 import { agendaHref } from "@/features/meetings/meetings/agenda-links"
 
 describe("agendaHref", () => {

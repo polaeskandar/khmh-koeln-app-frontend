@@ -14,9 +14,9 @@ import { RecordPage } from "@/components/record-page"
 import { ServiceTag } from "@/components/service-tag"
 import { StatusBadge } from "@/components/status"
 import type { ServiceReference } from "@/features/organization/services/api"
-import type { StageReference } from "./api"
 import { routes } from "@/lib/routes"
 
+import type { StageReference } from "./api"
 import { type Stage, stageQuery } from "./api"
 
 export type StageTab = "overview" | "attendance" | "lessons" | "homework"

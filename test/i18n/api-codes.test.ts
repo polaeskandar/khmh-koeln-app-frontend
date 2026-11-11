@@ -1,10 +1,11 @@
 import { type MessageFormatElement, parse, TYPE } from "@formatjs/icu-messageformat-parser"
 import { describe, expect, test } from "vitest"
 
+import codes from "@/i18n/api-codes.json"
+
 import ar from "../../messages/ar.json"
 import de from "../../messages/de.json"
 import en from "../../messages/en.json"
-import codes from "@/i18n/api-codes.json"
 
 type Catalog = { [key: string]: string | Catalog }
 

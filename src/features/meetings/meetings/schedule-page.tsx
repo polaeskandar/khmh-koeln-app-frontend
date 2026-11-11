@@ -12,7 +12,6 @@ import { PageBody, PageHeader, Section } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { ServiceTag } from "@/components/service-tag"
-import { AgendaRow } from "./agenda-row"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -25,8 +24,6 @@ import { useCanIn } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { useRouter } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
-import type { AgendaItem, ScheduleResponse } from "./api"
-import { groupOf } from "./session-lines"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { recurrenceOf } from "@/lib/domain/recurrence"
@@ -34,6 +31,9 @@ import { addDays } from "@/lib/domain/time"
 import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
+import { groupOf } from "./session-lines"
+import type { AgendaItem, ScheduleResponse } from "./api"
+import { AgendaRow } from "./agenda-row"
 import {
   activateScheduleRequest,
   deactivateScheduleRequest,

@@ -11,7 +11,6 @@ import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import type { LessonRow, LessonListResponse } from "@/features/learning/lessons/api"
 import { StageLessonsPage } from "@/features/learning/lessons/stage-lessons-page"
 

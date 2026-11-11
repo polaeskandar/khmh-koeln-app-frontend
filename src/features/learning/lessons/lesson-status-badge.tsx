@@ -4,6 +4,7 @@ import { Archive, CheckCheck, CircleCheck, PencilLine } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { StatusBadge } from "@/components/status"
+
 import type { LessonStatus } from "./api"
 
 export function LessonStatusBadge({

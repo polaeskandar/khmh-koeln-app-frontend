@@ -12,7 +12,6 @@ import { nevineGroups } from "@test/support/fixtures/member"
 import { server } from "@test/support/msw"
 import { navigation, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import MemberLayout from "@/app/[locale]/member/layout"
 import { MemberAccountPage } from "@/features/portals/member/member-account-page"
 

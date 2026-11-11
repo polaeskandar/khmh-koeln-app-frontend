@@ -2,7 +2,6 @@ import { screen } from "@testing-library/react"
 import { expect, test } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
-
 import type { Report } from "@/features/learning/homework/api"
 import { CompletionControl } from "@/features/learning/homework/completion-control"
 

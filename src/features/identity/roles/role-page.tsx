@@ -17,7 +17,6 @@ import {
   updateRoleRequest,
 } from "./api"
 import { RoleForm, useRoleDraft } from "./role-form"
-
 import { RoleEditorFrame, NoRoles } from "./role-editor"
 
 function EditRoleForm({ role }: { role: RoleDetails }) {
