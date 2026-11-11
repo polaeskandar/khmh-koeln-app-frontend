@@ -82,9 +82,11 @@ production; off unless set, the page says to ask the church office.
   most twice, and only after status 0 or a 5xx; 4xx answers and mutations are never retried.
 - **MSW** answers the API in tests (`test/support/msw.ts`, with `problem()` and `renderWithQuery()` in
   `test/support/api.tsx`); a request without a handler fails the test.
-- **Tests** share one setup (`test/support/setup.ts`): both navigation modules are mocked once, queries retry
-  without a delay, and a test fails on any `console.error`, so a React or Radix warning, or a request MSW
-  doesn't answer, is fixed rather than silenced. A test that expects an error stubs `console.error` itself.
+- **Tests** mirror `src/` (AGENTS.md, Tests) and share one setup (`test/support/setup.ts`): both navigation
+  modules are mocked once, queries retry without a delay, and a test fails on any `console.error`, so a React
+  or Radix warning, or a request MSW doesn't answer, is fixed rather than silenced. Checks over the whole code
+  base sit in `test/conventions/`: the catalogs agree, no component uses physical sides or raw colours, and no
+  message key is unused. A test that expects an error stubs `console.error` itself.
   React warns when a client render creates a `<script>`, and next-themes' `ThemeProvider` renders its
   pre-paint script, which only the static HTML runs; the tests that render the provider give it
   `scriptProps={{ type: "text/plain" }}`.
@@ -109,12 +111,19 @@ per resource:
 | `portals`      | `staff`, `parent`, `member` (no backend context, see below) |
 
 A file sits in the context whose endpoints it calls, as in the backend's `Interface/Api/<Area>`: the parent and
-member portals' homework is in `learning/homework`, a parent's children in `people/children`, a member's groups
-in `people/groups` and their meetings in `meetings/meetings`. A screen that combines several contexts sits with
-its main one (the Settings page in `identity/accounts`). `portals/staff`, `portals/parent` and `portals/member`
-hold only what has no backend counterpart: each area's shell and navigation, and the portals' home and account
-pages. The staff shell (sidebar, top bar, phone tab bar, account menu and `RecordNotFound`) is in `portals/staff`. Tests in `test/features/`
-use the same folders.
+member portals' homework is in `learning/homework`, a parent's children in `people/children`, a member's groups in
+`people/groups` and their meetings in `meetings/meetings`. A screen that combines several contexts sits with its
+main one (the Settings page in `identity/accounts`). `portals/staff`, `portals/parent` and `portals/member` hold
+only what has no backend counterpart: each area's shell and navigation, and the portals' home and account pages.
+The staff shell (sidebar, top bar, phone tab bar, account menu and `RecordNotFound`) is in `portals/staff`. Tests
+in `test/features/` use the same folders.
+
+A screen that a route renders is `<Name>Page` in `<name>-page.tsx`, one per file (`ServiceDetailsPage` in
+`organization/services/service-details-page.tsx`); `src/app` only reads its title and renders it. Every other file
+is named after what it holds (`service-actions.tsx`, `session-lines.ts`, `use-stage-order.ts`), never a grab-bag of
+unrelated parts (`*-bits`, `*-parts`, `*-dialogs`). ESLint caps a file in `src` at 400 lines and a function in a
+`.tsx` file at 150, the vendored `src/components/ui` aside: a screen that outgrows them splits by section, as the
+person sheet, the schedule form and the lesson and homework forms did.
 
 Shared code in `src/components`, `src/hooks`, `src/i18n` and `src/lib` doesn't import from `src/features`: a
 feature builds on it, never the other way round, and ESLint rejects such an import (`no-restricted-imports` for
@@ -124,8 +133,13 @@ gets the account and sign-out from the portal's menu, and `LanguageMenu` the swi
 
 ### Data access
 
-- **One `api.ts` per feature** (`src/features/<context>/<resource>/api.ts`) holds its response types, query options and
-  calls; screens never build URLs or call `api` themselves.
+- **One `api.ts` per feature** (`src/features/<context>/<resource>/api.ts`) holds its types, query options,
+  calls and change lists; screens never build URLs or call `api` themselves.
+- **Types** are aliases of the generated ones, one per schema, in the `api.ts` of the resource it describes, and
+  named after the schema without `Response` or `Request`: `Service` for `ServiceResponse`, `CreatePerson` for
+  `CreatePersonRequest`. Where that name belongs to another schema or a component, the alias keeps the suffix:
+  `ServiceRequest` next to `Service`, `LessonRequest` next to `Lesson`, `ScheduleListResponse` next to the
+  `ScheduleList` component. Shared code, which can't import a feature, writes `Schemas["ServiceReference"]`.
 - **Queries** are TanStack's `queryOptions()`: a constant for a query without parameters (`rolesQuery`), a
   function for one with them (`roleQuery(roleId)`). Screens pass them to `useQuery`, adding only options of their
   own (`enabled`, `placeholderData`, a refresh interval); a `use…` hook wraps one only to add behaviour
@@ -159,6 +173,11 @@ gets the account and sign-out from the portal's menu, and `LanguageMenu` the swi
   action on data it has just changed. `data` and `problem` hold the last result for a screen that shows it.
   A change starts from what the person does, never from an effect: React runs effects twice in StrictMode,
   so a password link sent on mount went out twice.
+- **Forms** have no form library. A field is a `TextField`, `TextAreaField`, `SelectField` or `FormField`
+  (`src/components/form-fields.tsx`), which link its label, hint and error to the control; after a 422,
+  `useFocusFirstInvalid` moves focus to the first invalid field. A dialog with fields is a `FormDialog`, rendered
+  by the component that owns its change inside a `DialogMount`, so it is locked by its own pending state, starts
+  fresh every time and still fades out (`docs/ui-conventions.md`, Dialogs).
 - **Changed meanwhile:** a refusal that means the screen shows outdated data (a 409, a 404, or a code such as
   `accounts.alreadyApproved`) refetches it, and a dialog about it closes. `isStale(problem, [409])` from
   `src/lib/api/refetch.ts` says whether a problem is one of the given statuses or codes, and `useRefetch()`
@@ -205,7 +224,9 @@ The project uses pnpm 12, pinned in `package.json` (`packageManager` and `devEng
 
 The UI is in English, German and Arabic; Arabic is read right to left. The texts live in
 `messages/{en,de,ar}.json`, copied once from the UI prototype without its prototype-only texts; feature PRs
-only add keys. `test/i18n/messages.test.ts` keeps the three catalogs in step (same keys, same ICU arguments,
+only add keys. A feature's texts sit in its namespace (`services`, `roles` with `roles.editor`, `roles.list` and
+`roles.permissions`), its success toasts under `<namespace>.toast`; `common`, `ui`, `status`, `toast` and `errors`
+hold the texts several features share, and `pages` every page's title. `test/i18n/messages.test.ts` keeps the three catalogs in step (same keys, same ICU arguments,
 no empty texts), `pnpm messages:unused` lists the keys no code reads (a key read through a template literal,
 ``t(`status.${status}`)``, matches a pattern in `DYNAMIC_KEYS` of `scripts/message-usage.mjs`), and every
 `t()` call is type-checked against `messages/en.json` through the declaration next-intl generates
@@ -286,6 +307,19 @@ through `next/font`, which puts them into the build, so the apps don't load them
 that import and installs its own `lib/utils.ts` where the alias points to no file, so the file stays: it
 re-exports `cn` from the `cn` package. ESLint rejects importing the package anywhere else, the vendored
 components in `src/components/ui` included.
+
+### Checks
+
+CI runs `task setup`, then `task lint`, `format:check`, `api:types:check`, `typecheck`, `test`, `unused` and
+`build`; `task check` runs the same locally. Every one fails the build:
+
+- **ESLint** (`eslint.config.mjs`): Next.js's rules, no comments (`local/no-comments`), braces and blank lines,
+  the static-export import bans, `fetch` only in `src/lib/api`, dates only through `useFormat()`, `cn` only from
+  `@/lib/utils`, no import of `src/features` from shared code, and the size caps above.
+- **Tests** (`pnpm test`), the conventions in `test/conventions/` among them, unused message keys included;
+  `pnpm messages:unused` lists those keys.
+- **knip** (`knip.json`, in `task unused`): no unused file, export or dependency. Its Next.js and Vitest plugins
+  find the entry points; the vendored `src/components/ui` is left out.
 
 ### TypeScript 5.9
 

@@ -46,9 +46,19 @@ OpenAPI document. `pnpm api:types` copies that document from the backend's dev s
 `openapi/openapi.json`, the contract snapshot, and generates `src/lib/api/schema.d.ts` from the copy. When a
 backend change reaches the frontend, update both in the same PR; never edit either by hand, which
 `pnpm api:types:check` rejects. Types of API data are `Schemas["…"]` from the same module; don't write them by hand.
+A feature names them once, in its `api.ts`: one alias per schema, named after it without `Response` or `Request`
+(`export type Service = Schemas["ServiceResponse"]`), keeping the suffix only where the bare name is taken
+(`ServiceRequest`). Shared code writes `Schemas["…"]`.
 
 ## Names and structure
 
+- **Screens and files.** A screen a route renders is `<Name>Page` in `<name>-page.tsx`, one per file
+  (`ServiceDetailsPage` in `src/features/organization/services/service-details-page.tsx`). Every other file is
+  named after what it holds; there are no `*-bits`, `*-parts` or `*-dialogs` files. ESLint caps a file in `src`
+  at 400 lines and a `.tsx` function at 150: split by section before that.
+- **Shared code** in `src/components`, `src/hooks`, `src/i18n` and `src/lib` never imports `src/features`
+  (ESLint rejects it); it takes what a feature owns as props from its caller (`PortalAccountMenu`). What only
+  one feature uses lives in that feature, not in `src/components`.
 - **Components and hooks** are named function declarations, `export function ServiceDetailsPage()`, never arrow
   constants. A hook starts with `use`; one that two features need lives in `src/hooks/use-<name>.ts`
   (`src/hooks/use-today.ts`), not pasted into both.
@@ -56,6 +66,10 @@ backend change reaches the frontend, update both in the same PR; never edit eith
   (`addStageRequest` and `stageQuery` in `src/features/organization/stages/api.ts`). The lists of query keys a
   change invalidates are exported from an `api.ts` too (`ASSIGNMENT_QUERIES` in
   `src/features/organization/assignments/api.ts`); a component never retypes a key.
+- **Changes** go through `useApiMutation` and start from what the person does, never from an effect. A refusal
+  that means the screen is outdated refetches through `isStale` and `useRefetch` (`src/lib/api/refetch.ts`). A
+  dialog with fields is a `FormDialog` in a `DialogMount`, rendered by the component that owns its change
+  (`docs/ui-conventions.md`, Dialogs).
 - **Callbacks.** A callback prop is `on<Event>` (`onOpenChange`, `onDone`). A local function is named for what it
   does (`submit`, `saveDraft`, `removeResource`), not for the event that calls it; there is no `handle<Event>`.
 - **One term per thing**, taken from the vocabulary table of the backend's `docs/code-style.md` (section 7):
