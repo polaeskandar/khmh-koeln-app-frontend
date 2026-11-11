@@ -1,5 +1,6 @@
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import type { ComponentProps } from "react"
 import { describe, expect, test, vi } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
@@ -74,6 +75,7 @@ describe("ConfirmDialog", () => {
     renderWithProviders(
       <ConfirmDialog
         open
+        onOpenChange={() => {}}
         title="Archivieren?"
         confirmLabel="Archivieren"
         onConfirm={async () => true}
@@ -138,6 +140,7 @@ describe("ReasonDialog", () => {
     renderWithProviders(
       <ReasonDialog
         open
+        onOpenChange={() => {}}
         title="Verschieben?"
         confirmLabel="Verschieben"
         onConfirm={async () => true}
@@ -152,6 +155,7 @@ describe("ReasonDialog", () => {
     renderWithProviders(
       <ReasonDialog
         open
+        onOpenChange={() => {}}
         title="Cancel the meeting?"
         reasonHint="Members see it on their agenda."
         confirmLabel="Cancel meeting"
@@ -164,3 +168,13 @@ describe("ReasonDialog", () => {
     )
   })
 })
+
+export function openingsThatCannotWork(onConfirm: () => Promise<boolean>) {
+  const texts = { title: "Archive Choir?", confirmLabel: "Archive", onConfirm }
+  // @ts-expect-error: open without onOpenChange could never close
+  const uncloseable: ComponentProps<typeof ConfirmDialog> = { ...texts, open: true }
+  // @ts-expect-error: without a trigger or open it could never open
+  const unopenable: ComponentProps<typeof ConfirmDialog> = texts
+
+  return [uncloseable, unopenable]
+}

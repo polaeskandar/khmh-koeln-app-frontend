@@ -7,7 +7,12 @@ import { useApiMutation } from "@/lib/api/use-api-mutation"
 
 import { STRUCTURE_QUERIES } from "./api"
 
-type Props = Omit<ComponentProps<typeof ConfirmDialog>, "onConfirm" | "note"> & {
+type Props = Omit<
+  ComponentProps<typeof ConfirmDialog>,
+  "onConfirm" | "note" | "open" | "onOpenChange" | "trigger"
+> & {
+  open: boolean
+  onOpenChange: (open: boolean) => void
   request: () => Promise<unknown>
   successMessage: string
   onSuccess?: () => void
@@ -17,6 +22,7 @@ export function StructureChangeDialog({
   request,
   successMessage,
   onSuccess,
+  open,
   onOpenChange,
   ...props
 }: Props) {
@@ -30,12 +36,13 @@ export function StructureChangeDialog({
   return (
     <ConfirmDialog
       {...props}
-      onOpenChange={(open) => {
-        if (!open) {
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) {
           mutation.reset()
         }
 
-        onOpenChange?.(open)
+        onOpenChange(next)
       }}
       note={
         mutation.problem ? (
