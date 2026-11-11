@@ -1,17 +1,16 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { cn } from "@/lib/utils"
 import { TriangleAlert } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { type ReactNode, useId, useState } from "react"
+import { type ReactNode, useState } from "react"
 
+import { ChoiceCards } from "@/components/choice-cards"
 import { FormPanel } from "@/components/form-panel"
 import { TextField } from "@/components/form-fields"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { FieldError } from "@/components/ui/field"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Spinner } from "@/components/ui/spinner"
 import { useCan, useSession } from "@/features/identity/auth/session"
 import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
@@ -20,7 +19,6 @@ import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
 import { isolate } from "@/lib/bidi"
 import { nameKey } from "@/lib/domain/names"
-import { oneOf } from "@/lib/one-of"
 import type { Action, Resource, RoleScope } from "./api"
 import { PERMISSION_COUNT } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
@@ -30,13 +28,6 @@ import { DeleteRoleDialog } from "./delete-role-dialog"
 import { PermissionGrid, permissionKey, permissionsOf } from "./permission-grid"
 
 const NAME_MAX = 80
-
-const SCOPES: { value: RoleScope; label: "scopeChurch" | "scopeAssigned" }[] = [
-  { value: "church", label: "scopeChurch" },
-  { value: "assignedGroups", label: "scopeAssigned" },
-]
-
-const SCOPE_VALUES = SCOPES.map((scope) => scope.value)
 
 function ScopeChoice({
   value,
@@ -50,41 +41,24 @@ function ScopeChoice({
   error: string | undefined
 }) {
   const t = useTranslations("roles.editor")
-  const id = useId()
 
   return (
     <FormPanel title={t("scope")}>
-      <RadioGroup
+      <ChoiceCards
         value={value}
-        onValueChange={(next) => onChange(oneOf(SCOPE_VALUES, next) ?? value)}
+        choices={[
+          { value: "church", label: t("scopeChurch"), hint: t("scopeChurchHint") },
+          { value: "assignedGroups", label: t("scopeAssigned"), hint: t("scopeAssignedHint") },
+        ]}
+        onChange={onChange}
         disabled={disabled}
         aria-label={t("scope")}
-        className="flex flex-col gap-2"
-      >
-        {SCOPES.map((option) => (
-          <label
-            key={option.value}
-            htmlFor={`${id}-${option.value}`}
-            className={cn(
-              "flex w-full items-start gap-3 border p-3 text-sm",
-              value === option.value && "border-primary bg-primary/5",
-              disabled ? "cursor-default" : "cursor-pointer"
-            )}
-          >
-            <RadioGroupItem id={`${id}-${option.value}`} value={option.value} className="mt-0.5" />
-            <span className="flex flex-col gap-0.5">
-              <span className="font-medium">{t(option.label)}</span>
-              <span className="text-xs text-pretty text-muted-foreground">
-                {t(`${option.label}Hint`)}
-              </span>
-            </span>
-          </label>
-        ))}
-      </RadioGroup>
+      />
       {error ? <FieldError>{error}</FieldError> : null}
     </FormPanel>
   )
 }
+
 function Holders({ role }: { role: RoleDetails | null }) {
   const t = useTranslations("roles.editor")
   const f = useFormat()

@@ -259,6 +259,85 @@ describe("the record dialog", () => {
     })
   })
 
+  function answerAccountsAndRecord(posts: unknown[]) {
+    server.use(
+      http.get(apiUrl("/guardian-links"), () =>
+        HttpResponse.json({
+          items: [],
+          accounts: [
+            {
+              id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7eb001",
+              name: "Hoda Farag",
+              email: "hoda@example.org",
+            },
+            {
+              id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7eb002",
+              name: "Mina Gerges",
+              email: "mina@example.org",
+            },
+          ],
+          today: "2026-11-08",
+        } satisfies Schemas["ParentAccessListResponse"])
+      ),
+      http.post(apiUrl("/data-requests"), async ({ request }) => {
+        posts.push(await request.json())
+
+        return HttpResponse.json({ id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea999" }, { status: 201 })
+      })
+    )
+  }
+
+  test("an account is found by name or email and recorded by its id", async () => {
+    const calls = open()
+    answerAccountsAndRecord(calls.posts)
+    const dialog = await openDialog()
+    await userEvent.click(dialog.getByRole("radio", { name: "An account" }))
+    const search = dialog.getByRole("textbox", { name: "Find an account by name or email" })
+    await userEvent.type(search, "mina@")
+
+    expect(
+      await dialog.findByRole("radio", { name: "Mina Gerges · mina@example.org" })
+    ).toBeInTheDocument()
+
+    expect(dialog.queryByRole("radio", { name: /Hoda Farag/ })).toBeNull()
+    await userEvent.clear(search)
+    await userEvent.type(search, "hoda")
+
+    await userEvent.click(
+      await dialog.findByRole("radio", { name: "Hoda Farag · hoda@example.org" })
+    )
+
+    await userEvent.type(dialog.getByRole("textbox", { name: "Asked by" }), "Hoda Farag")
+    await userEvent.click(dialog.getByRole("button", { name: "Record request" }))
+
+    await waitFor(() =>
+      expect(calls.posts[0]).toMatchObject({
+        subject: { accountId: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7eb001" },
+      })
+    )
+
+    expect(calls.posts[0]).not.toHaveProperty("subject.personId")
+  })
+
+  test("switching between a member and an account clears the choice and the search", async () => {
+    const calls = open()
+    answerAccountsAndRecord(calls.posts)
+    const dialog = await openDialog()
+    await userEvent.type(dialog.getByRole("textbox", { name: "Find a member by name" }), "Kirollos")
+    await userEvent.click(await dialog.findByRole("radio", { name: "Kirollos Iskander" }))
+    await userEvent.click(dialog.getByRole("radio", { name: "An account" }))
+
+    expect(dialog.getByRole("textbox", { name: "Find an account by name or email" })).toHaveValue(
+      ""
+    )
+
+    await userEvent.click(dialog.getByRole("radio", { name: "A member" }))
+    expect(dialog.getByRole("textbox", { name: "Find a member by name" })).toHaveValue("")
+    await userEvent.click(dialog.getByRole("radio", { name: "An account" }))
+    await userEvent.click(dialog.getByRole("button", { name: "Record request" }))
+    await waitFor(() => expect(calls.posts[0]).toMatchObject({ subject: { accountId: null } }))
+  })
+
   test("Cancel closes it without recording", async () => {
     const calls = open()
 
