@@ -150,7 +150,9 @@ the portal account menu and the language switch); the warning becomes an error o
   and never throws for an API problem, so a dialog stays open until it succeeds. Failures are never
   retried. With `awaitRefetch`, `pending` lasts until the invalidated queries have been fetched again, for
   a screen that shows the changed data next to the button (the person sheet), so it never offers an
-  action on data it has just changed.
+  action on data it has just changed. `data` and `problem` hold the last result for a screen that shows it.
+  A change starts from what the person does, never from an effect: React runs effects twice in StrictMode,
+  so a password link sent on mount went out twice.
 - **Changed meanwhile:** a refusal that means the screen shows outdated data (a 409, a 404, or a code such as
   `accounts.alreadyApproved`) refetches it, and a dialog about it closes. `isStale(problem, [409])` from
   `src/lib/api/refetch.ts` says whether a problem is one of the given statuses or codes, and `useRefetch()`
