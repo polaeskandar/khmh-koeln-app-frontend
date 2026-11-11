@@ -1,6 +1,6 @@
 "use client"
 
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import type { LucideIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { ReactNode, RefObject } from "react"

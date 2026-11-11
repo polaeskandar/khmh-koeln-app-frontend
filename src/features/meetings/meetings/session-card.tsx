@@ -1,6 +1,6 @@
 "use client"
 
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { UsersRound } from "lucide-react"
 import type { ReactNode } from "react"
 

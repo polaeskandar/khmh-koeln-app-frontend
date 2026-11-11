@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { CircleAlert } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 import { useId, useState } from "react"
