@@ -14,6 +14,32 @@ import { SessionBadges } from "./session-badges"
 import { counted, createdOnOf, groupOf, useSessionLines } from "./session-lines"
 import { SessionWhen } from "./session-when"
 
+function AgendaDetail({ item, today }: { item: AgendaItem; today: LocalDate }) {
+  const lines = useSessionLines()
+
+  if (item.kind === "planned") {
+    return (
+      <span className="text-xs text-muted-foreground">
+        {lines.createdOn(createdOnOf(item, today), today)}
+      </span>
+    )
+  }
+
+  if ((item.status === "active" || item.status === "completed") && counted(item)) {
+    return <span className="text-xs text-muted-foreground tabular-nums">{lines.present(item)}</span>
+  }
+
+  if (item.status === "canceled" && item.cancelReason) {
+    return (
+      <span dir="auto" className="max-w-64 text-xs text-pretty text-muted-foreground">
+        {item.cancelReason}
+      </span>
+    )
+  }
+
+  return null
+}
+
 export function AgendaRow({
   item,
   today,
@@ -28,21 +54,8 @@ export function AgendaRow({
   className?: string
 }) {
   const f = useFormat()
-  const lines = useSessionLines()
   const planned = item.kind === "planned"
   const canceled = !planned && item.status === "canceled"
-
-  const detail = planned ? (
-    <span className="text-xs text-muted-foreground">
-      {lines.createdOn(createdOnOf(item, today), today)}
-    </span>
-  ) : (item.status === "active" || item.status === "completed") && counted(item) ? (
-    <span className="text-xs text-muted-foreground tabular-nums">{lines.present(item)}</span>
-  ) : canceled && item.cancelReason ? (
-    <span dir="auto" className="max-w-64 text-xs text-pretty text-muted-foreground">
-      {item.cancelReason}
-    </span>
-  ) : null
 
   const name = (
     <span
@@ -80,7 +93,7 @@ export function AgendaRow({
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1 text-end">
         {trailing ?? <SessionBadges item={item} />}
-        {detail}
+        <AgendaDetail item={item} today={today} />
       </div>
     </>
   )

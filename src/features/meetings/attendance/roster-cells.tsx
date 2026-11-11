@@ -1,6 +1,16 @@
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 
+const CELL_HEIGHTS = { sm: "h-1.5", md: "h-2.5", lg: "h-4" } as const
+
+function cellTone(index: number, filled: number, total: number) {
+  if (index < filled) {
+    return "bg-primary"
+  }
+
+  return index >= total ? "bg-primary/35" : "bg-muted ring-1 ring-foreground/10 ring-inset"
+}
+
 export function RosterCells({
   filled,
   total,
@@ -35,17 +45,7 @@ export function RosterCells({
       }
     >
       {Array.from({ length: cells }).map((_, i) => (
-        <span
-          key={i}
-          className={cn(
-            size === "sm" ? "h-1.5" : size === "md" ? "h-2.5" : "h-4",
-            i < filled
-              ? "bg-primary"
-              : i >= total
-                ? "bg-primary/35"
-                : "bg-muted ring-1 ring-foreground/10 ring-inset"
-          )}
-        />
+        <span key={i} className={cn(CELL_HEIGHTS[size], cellTone(i, filled, total))} />
       ))}
     </div>
   )

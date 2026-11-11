@@ -11,14 +11,44 @@ import { StageEditorFrame } from "@/features/learning/editor-shell"
 import { useCan } from "@/features/identity/auth/session"
 import { groupAt } from "@/lib/permissions"
 
-import { lessonQuery } from "./api"
+import { type LessonDetail, lessonQuery } from "./api"
 import { LessonForm } from "./lesson-form"
 
 import { WithOptions } from "./lesson-options"
 
-function EditLesson({ id }: { id: string }) {
+function EditLessonBody({ data }: { data: LessonDetail }) {
   const t = useTranslations("lessons")
   const can = useCan()
+  const group = groupAt(data.service, data.stage)
+
+  if (data.lesson.archivedAt) {
+    return <NoAccess title={t("noAccess.archivedTitle")}>{t("noAccess.archivedBody")}</NoAccess>
+  }
+
+  if (data.archived || !can("update", "lessons", group)) {
+    return (
+      <NoAccess title={t("noAccess.changeTitle")}>
+        {t("noAccess.changeBody", { stage: data.stage.name })}
+      </NoAccess>
+    )
+  }
+
+  return (
+    <WithOptions stage={data.stage} lesson={data.lesson.id}>
+      {(choices) => (
+        <LessonForm
+          stage={data.stage}
+          lesson={data.lesson}
+          viewNotes={can("read", "members", group)}
+          choices={choices}
+        />
+      )}
+    </WithOptions>
+  )
+}
+
+function EditLesson({ id }: { id: string }) {
+  const t = useTranslations("lessons")
   const query = useQuery(lessonQuery(id))
 
   return (
@@ -30,24 +60,7 @@ function EditLesson({ id }: { id: string }) {
           title={t("editLesson")}
           description={t("newDescription")}
         >
-          {data.lesson.archivedAt ? (
-            <NoAccess title={t("noAccess.archivedTitle")}>{t("noAccess.archivedBody")}</NoAccess>
-          ) : data.archived || !can("update", "lessons", groupAt(data.service, data.stage)) ? (
-            <NoAccess title={t("noAccess.changeTitle")}>
-              {t("noAccess.changeBody", { stage: data.stage.name })}
-            </NoAccess>
-          ) : (
-            <WithOptions stage={data.stage} lesson={data.lesson.id}>
-              {(choices) => (
-                <LessonForm
-                  stage={data.stage}
-                  lesson={data.lesson}
-                  viewNotes={can("read", "members", groupAt(data.service, data.stage))}
-                  choices={choices}
-                />
-              )}
-            </WithOptions>
-          )}
+          <EditLessonBody data={data} />
         </StageEditorFrame>
       )}
     </QueryState>

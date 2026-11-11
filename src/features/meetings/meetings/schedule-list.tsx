@@ -47,6 +47,16 @@ export function ScheduleList({
   const t = useTranslations("meetings")
   const f = useFormat()
 
+  const rosterText = (schedule: ScheduleResponse) => {
+    if (schedule.rosterMode === "open") {
+      return t("roster.open")
+    }
+
+    return schedule.rosterSize === null
+      ? t("roster.ofGroup", { group: groupOf(schedule) })
+      : t("roster.size", { count: schedule.rosterSize })
+  }
+
   if (schedules.length === 0) {
     return <p className="text-sm text-muted-foreground">{emptyText}</p>
   }
@@ -103,11 +113,7 @@ export function ScheduleList({
                 ) : null}
                 <span className="inline-flex items-center gap-1">
                   <UsersRound className="size-3 shrink-0" aria-hidden="true" />
-                  {schedule.rosterMode === "open"
-                    ? t("roster.open")
-                    : schedule.rosterSize === null
-                      ? t("roster.ofGroup", { group: groupOf(schedule) })
-                      : t("roster.size", { count: schedule.rosterSize })}
+                  {rosterText(schedule)}
                 </span>
               </span>
             </span>

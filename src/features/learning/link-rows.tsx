@@ -14,6 +14,14 @@ const EMPTY_ROW: LinkRow = { label: "", url: null }
 
 const isBlank = (row: LinkRow) => !row.label.trim() && !(row.url ?? "").trim()
 
+function sentAfterRemoving(sent: number, removed: number) {
+  if (sent === removed) {
+    return -1
+  }
+
+  return sent > removed ? sent - 1 : sent
+}
+
 export function useLinkRows(initial: LinkRow[], { keepOneRow }: { keepOneRow: boolean }) {
   const [rows, setRows] = useState(initial.length === 0 && keepOneRow ? [EMPTY_ROW] : initial)
   const [sent, setSent] = useState<number[]>([])
@@ -27,7 +35,7 @@ export function useLinkRows(initial: LinkRow[], { keepOneRow }: { keepOneRow: bo
       keepOneRow && list.length === 1 ? [EMPTY_ROW] : list.filter((_, i) => i !== row)
     )
 
-    setSent((list) => list.map((i) => (i === row ? -1 : i > row ? i - 1 : i)))
+    setSent((list) => list.map((i) => sentAfterRemoving(i, row)))
   }
 
   function toPayload(): LinkRow[] {

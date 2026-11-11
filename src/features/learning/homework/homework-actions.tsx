@@ -46,16 +46,20 @@ function useChangeHomework(homework: Homework, onDeleted?: () => void) {
         ? (await deleteHomeworkRequest(homework.id), { change, status: null })
         : { change, status: (await transitionHomeworkRequest(homework.id, change)).status },
     {
-      successMessage: ({ change, status }) =>
-        change === "unpublish"
-          ? t("unpublished", { title })
-          : change === "archive"
-            ? t("archived", { title })
-            : change === "restore"
-              ? status === "published"
-                ? t("restoredPublished", { title })
-                : t("restoredDraft", { title })
-              : shared("deletedTitle", { title }),
+      successMessage: ({ change, status }) => {
+        switch (change) {
+          case "unpublish":
+            return t("unpublished", { title })
+          case "archive":
+            return t("archived", { title })
+          case "restore":
+            return status === "published"
+              ? t("restoredPublished", { title })
+              : t("restoredDraft", { title })
+          case "delete":
+            return shared("deletedTitle", { title })
+        }
+      },
       invalidate: HOMEWORK_QUERIES,
       onSuccess: ({ change }) => {
         if (change === "delete") {

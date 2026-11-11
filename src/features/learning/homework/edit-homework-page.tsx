@@ -14,13 +14,47 @@ import type { Uuid } from "@/lib/api/types/common"
 import { groupAt, within } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import { homeworkFlagsFor, homeworkQuery } from "./api"
+import { type HomeworkDetail, homeworkFlagsFor, homeworkQuery } from "./api"
 import { HomeworkForm } from "./homework-form"
 
-function EditHomework({ id }: { id: Uuid }) {
+function EditHomeworkBody({ data }: { data: HomeworkDetail }) {
   const t = useTranslations("homework")
   const can = useCan()
   const fromLesson = useSearchParamId("lesson")
+  const group = groupAt(data.service, data.stage)
+
+  if (data.status === "archived") {
+    return (
+      <NoAccess
+        title={t("edit.archivedTitle")}
+        back={{ href: routes.homework(data.id), label: t("edit.backToHomework") }}
+      >
+        {t("edit.archived")}
+      </NoAccess>
+    )
+  }
+
+  if (!homeworkFlagsFor(within(can, group), data, data.archived).edit) {
+    return (
+      <NoAccess title={t("edit.noAccessTitle")}>
+        {t("edit.noAccess", { stage: data.stage.name })}
+      </NoAccess>
+    )
+  }
+
+  return (
+    <HomeworkForm
+      stage={data.stage}
+      group={group}
+      audienceSize={data.audienceSize}
+      fromLesson={fromLesson}
+      homework={data}
+    />
+  )
+}
+
+function EditHomework({ id }: { id: Uuid }) {
+  const t = useTranslations("homework")
   const query = useQuery(homeworkQuery(id))
 
   return (
@@ -31,27 +65,7 @@ function EditHomework({ id }: { id: Uuid }) {
           tab="homework"
           title={t("edit.title", { title: data.title })}
         >
-          {data.status === "archived" ? (
-            <NoAccess
-              title={t("edit.archivedTitle")}
-              back={{ href: routes.homework(data.id), label: t("edit.backToHomework") }}
-            >
-              {t("edit.archived")}
-            </NoAccess>
-          ) : !homeworkFlagsFor(within(can, groupAt(data.service, data.stage)), data, data.archived)
-              .edit ? (
-            <NoAccess title={t("edit.noAccessTitle")}>
-              {t("edit.noAccess", { stage: data.stage.name })}
-            </NoAccess>
-          ) : (
-            <HomeworkForm
-              stage={data.stage}
-              group={groupAt(data.service, data.stage)}
-              audienceSize={data.audienceSize}
-              fromLesson={fromLesson}
-              homework={data}
-            />
-          )}
+          <EditHomeworkBody data={data} />
         </StageEditorFrame>
       )}
     </QueryState>

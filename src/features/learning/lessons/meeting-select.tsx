@@ -12,6 +12,13 @@ import { addDays } from "@/lib/domain/time"
 
 import { type LessonOption, OTHER_DATE, optionValue } from "./api"
 
+const OPTION_STATES: Partial<
+  Record<LessonOption["state"], "editor.option.canceled" | "meeting.held">
+> = {
+  canceled: "editor.option.canceled",
+  completed: "meeting.held",
+}
+
 export function MeetingSelect({
   options,
   today,
@@ -35,24 +42,23 @@ export function MeetingSelect({
   const f = useFormat()
   const selected = options.find((o) => optionValue(o) === value)
 
-  const label = (o: LessonOption) =>
-    [
+  const label = (o: LessonOption) => {
+    const state = OPTION_STATES[o.state]
+
+    return [
       t("editor.option.when", {
         day: o.date === today ? f.relativeDay(o.date, today) : f.dayMonth(o.date),
         time: o.startTime,
       }),
       o.title,
-      o.state === "canceled"
-        ? t("editor.option.canceled")
-        : o.state === "completed"
-          ? t("meeting.held")
-          : null,
+      state ? t(state) : null,
       o.takenBy && optionValue(o) !== saved
         ? t("editor.option.taken", { title: isolate(o.takenBy.title) })
         : null,
     ]
       .filter(Boolean)
       .join(" · ")
+  }
 
   const hint = () => {
     if (!selected) {

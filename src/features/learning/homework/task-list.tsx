@@ -21,7 +21,7 @@ import {
   undoOwnReportRequest,
   undoReportRequest,
 } from "./api"
-import { useCompletion } from "./completion-control"
+import { doneByText, useCompletion } from "./completion-control"
 import { DueLine } from "./due-line"
 
 export type TaskCompletion = {
@@ -142,11 +142,11 @@ function TaskCard({
             <span className="text-xs text-success">
               {saving
                 ? t("completion.saving")
-                : report.completedByYou
-                  ? t("task.doneByYou", { when })
-                  : report.completedBy
-                    ? t("task.doneBy", { name: report.completedBy, when })
-                    : t("task.doneByParent", { when })}
+                : doneByText(report, {
+                    byYou: t("task.doneByYou", { when }),
+                    byName: (name) => t("task.doneBy", { name, when }),
+                    byParent: t("task.doneByParent", { when }),
+                  })}
             </span>
           ) : (
             <DueLine dueDate={task.dueDate} today={today} />
@@ -185,11 +185,10 @@ export function TaskList({
           {tasks.length}
         </span>
       </h2>
-      {tasks.length === 0 ? (
-        empty ? (
-          <div className="border border-dashed p-5 text-sm text-muted-foreground">{empty}</div>
-        ) : null
-      ) : (
+      {tasks.length === 0 && empty ? (
+        <div className="border border-dashed p-5 text-sm text-muted-foreground">{empty}</div>
+      ) : null}
+      {tasks.length > 0 ? (
         <ul className="flex flex-col gap-2">
           {tasks.map((task) => (
             <li key={task.id}>
@@ -197,7 +196,7 @@ export function TaskList({
             </li>
           ))}
         </ul>
-      )}
+      ) : null}
     </section>
   )
 }
