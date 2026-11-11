@@ -5,34 +5,20 @@ import { Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
+import { FormDialog } from "@/components/form-dialog"
 import { SelectField } from "@/components/form-fields"
 import { MemberAvatar } from "@/components/member-avatar"
 import { Section } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { FieldGroup } from "@/components/ui/field"
 import { NativeSelectOption } from "@/components/ui/native-select"
-import { Spinner } from "@/components/ui/spinner"
 import { initialsOf } from "@/features/identity/auth/role-summary"
-import {
-  ASSIGNMENT_QUERIES,
-  assignRequest,
-  type GroupOption,
-  whereOf,
-} from "@/features/organization/assignments/api"
+import { type GroupOption } from "@/features/organization/assignments/api"
 import { AssignmentChip, GroupFields } from "@/features/organization/assignments/group-choice"
+import { useAssignGroup } from "@/features/organization/assignments/use-assign-group"
 import type { Uuid } from "@/lib/api/types/common"
-import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
-import type { Group } from "@/lib/permissions"
 
 import { type ServantAccount, type ServiceServant, serviceServantsQuery } from "./api"
 
@@ -52,86 +38,53 @@ function rowsByAccount(servants: ServiceServant[]): ServantRow[] {
 function AssignServantDialog({
   service,
   accounts,
-  onOpenChange,
+  onClose,
 }: {
   service: GroupOption
   accounts: ServantAccount[]
-  onOpenChange: (open: boolean) => void
+  onClose: () => void
 }) {
   const t = useTranslations()
   const [accountId, setAccountId] = useState("")
   const [stageId, setStageId] = useState<string | null>(null)
   const account = accounts.find((option) => option.id === accountId)
-
-  const assign = useApiMutation((chosen: string, group: Group) => assignRequest(chosen, group), {
-    successMessage: (assignment) =>
-      t("toast.groupAssigned", {
-        name: isolate(account?.name ?? ""),
-        where: isolate(whereOf(assignment)),
-      }),
-    invalidate: ASSIGNMENT_QUERIES,
-    onSuccess: () => onOpenChange(false),
-  })
+  const assign = useAssignGroup(account?.name ?? "", onClose)
 
   return (
-    <Dialog open onOpenChange={(next) => (next || !assign.pending) && onOpenChange(next)}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {t("services.detail.servants.dialog.title", { service: isolate(service.name) })}
-          </DialogTitle>
-          <DialogDescription>{t("assignments.dialog.description")}</DialogDescription>
-        </DialogHeader>
-        <form
-          className="flex flex-col gap-6"
-          onSubmit={(event) => {
-            event.preventDefault()
-
-            if (accountId) {
-              void assign.execute(accountId, { serviceId: service.id, stageId })
-            }
-          }}
+    <FormDialog
+      title={t("services.detail.servants.dialog.title", { service: isolate(service.name) })}
+      description={t("assignments.dialog.description")}
+      pending={assign.pending}
+      problem={assign.problem}
+      submitLabel={t("assignments.assign")}
+      submitDisabled={!accountId}
+      onSubmit={() => assign.execute(accountId, { serviceId: service.id, stageId })}
+      onClose={onClose}
+    >
+      <FieldGroup>
+        <SelectField
+          label={t("services.detail.servants.dialog.account")}
+          value={accountId}
+          onChange={(event) => setAccountId(event.target.value)}
         >
-          <FieldGroup>
-            <SelectField
-              label={t("services.detail.servants.dialog.account")}
-              value={accountId}
-              onChange={(event) => setAccountId(event.target.value)}
-            >
-              <NativeSelectOption value="" disabled>
-                {t("services.detail.servants.dialog.chooseAccount")}
-              </NativeSelectOption>
-              {accounts.map((option) => (
-                <NativeSelectOption key={option.id} value={option.id}>
-                  {option.name}
-                </NativeSelectOption>
-              ))}
-            </SelectField>
-            <GroupFields
-              services={[service]}
-              value={{ serviceId: service.id, stageId }}
-              onChange={(group) => setStageId(group.stageId)}
-              errors={assign.fieldErrors}
-              fixedService
-            />
-          </FieldGroup>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={assign.pending}
-              onClick={() => onOpenChange(false)}
-            >
-              {t("common.cancel")}
-            </Button>
-            <Button type="submit" disabled={!accountId || assign.pending}>
-              {assign.pending ? <Spinner data-icon="inline-start" /> : null}
-              {t("assignments.assign")}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+          <NativeSelectOption value="" disabled>
+            {t("services.detail.servants.dialog.chooseAccount")}
+          </NativeSelectOption>
+          {accounts.map((option) => (
+            <NativeSelectOption key={option.id} value={option.id}>
+              {option.name}
+            </NativeSelectOption>
+          ))}
+        </SelectField>
+        <GroupFields
+          services={[service]}
+          value={{ serviceId: service.id, stageId }}
+          onChange={(group) => setStageId(group.stageId)}
+          errors={assign.fieldErrors}
+          fixedService
+        />
+      </FieldGroup>
+    </FormDialog>
   )
 }
 
@@ -197,7 +150,11 @@ export function ServiceServants({
         {(data) => <ServantRows service={service} servants={data.servants} />}
       </QueryState>
       {assigning && assignable ? (
-        <AssignServantDialog service={service} accounts={assignable} onOpenChange={setAssigning} />
+        <AssignServantDialog
+          service={service}
+          accounts={assignable}
+          onClose={() => setAssigning(false)}
+        />
       ) : null}
     </Section>
   )

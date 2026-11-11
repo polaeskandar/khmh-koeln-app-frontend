@@ -29,7 +29,9 @@ the first item if the viewer may take it. A search without matches says so and o
 Changes go through `useApiMutation` (`docs/architecture.md`, Data access):
 
 - **Field errors (422)** appear inline under their fields, never as a toast. After a 422, focus moves to the
-  first invalid field (`focusFirstInvalid`, #10).
+  first invalid field (`useFocusFirstInvalid`, which `FormDialog` uses, #10). A field is a `TextField`,
+  `TextAreaField`, `SelectField` or `FormField` (`src/components/form-fields.tsx`), which make its error, or
+  else its hint, the control's description.
 - **Everything else that fails** (403, 409, 5xx, no connection) is an error toast with the problem in words,
   e.g. "Choir has meeting history (12 sessions). Archive it instead of deleting it." A screen that shows the
   problem itself (the sign-in form's alert) turns the toast off.
@@ -43,6 +45,13 @@ A dialog stays open until its action succeeds: while it runs, its buttons are di
 nothing; on failure it stays open with the problem shown, so nothing typed is lost. Destructive actions use
 `ConfirmDialog` with the destructive tone and say what happens; actions that need a reason use
 `ReasonDialog` (#10).
+
+A dialog with fields is a `FormDialog` (`src/components/form-dialog.tsx`): the title and description, the
+form, Cancel and the submit button with its spinner. It is rendered by the component that owns the change, and
+that component is mounted only while the dialog is open (`{open ? <ServiceDialog onClose={…} /> : null}`), so
+every opening starts from a fresh form and the dialog is locked by the pending state of its own change. Enter in
+a field submits it; Enter in a search box (`ignoreEnter`) doesn't. `role="alertdialog"` makes it an alert
+dialog, as for deleting one's own account.
 
 ## Text and direction
 

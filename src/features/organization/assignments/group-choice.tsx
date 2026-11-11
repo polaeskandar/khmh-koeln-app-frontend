@@ -5,20 +5,11 @@ import { Layers, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
+import { FormDialog } from "@/components/form-dialog"
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { SelectField } from "@/components/form-fields"
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { FieldGroup } from "@/components/ui/field"
 import { NativeSelectOption } from "@/components/ui/native-select"
-import { Spinner } from "@/components/ui/spinner"
 import { useCanAssign } from "@/features/identity/auth/session"
 import { servicesQuery } from "@/features/organization/services/api"
 import type { Uuid } from "@/lib/api/types/common"
@@ -28,12 +19,12 @@ import { type Group, groupAt } from "@/lib/permissions"
 
 import {
   ASSIGNMENT_QUERIES,
-  assignRequest,
   type GroupOption,
   type Place,
   removeAssignmentRequest,
   whereOf,
 } from "./api"
+import { useAssignGroup } from "./use-assign-group"
 
 export const NO_GROUP: Group = { serviceId: "", stageId: null }
 
@@ -111,69 +102,36 @@ export function GroupFields({
 export function AssignGroupDialog({
   account,
   services,
-  onOpenChange,
+  onClose,
 }: {
   account: { id: Uuid; displayName: string }
   services: GroupOption[]
-  onOpenChange: (open: boolean) => void
+  onClose: () => void
 }) {
   const t = useTranslations()
   const [group, setGroup] = useState<Group>(NO_GROUP)
-
-  const assign = useApiMutation((chosen: Group) => assignRequest(account.id, chosen), {
-    successMessage: (assignment) =>
-      t("toast.groupAssigned", {
-        name: isolate(account.displayName),
-        where: isolate(whereOf(assignment)),
-      }),
-    invalidate: ASSIGNMENT_QUERIES,
-    onSuccess: () => onOpenChange(false),
-  })
+  const assign = useAssignGroup(account.displayName, onClose)
 
   return (
-    <Dialog open onOpenChange={(next) => (next || !assign.pending) && onOpenChange(next)}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {t("assignments.dialog.title", { name: isolate(account.displayName) })}
-          </DialogTitle>
-          <DialogDescription>{t("assignments.dialog.description")}</DialogDescription>
-        </DialogHeader>
-        <form
-          className="flex flex-col gap-6"
-          onSubmit={(event) => {
-            event.preventDefault()
-
-            if (group.serviceId) {
-              void assign.execute(group)
-            }
-          }}
-        >
-          <FieldGroup>
-            <GroupFields
-              services={services}
-              value={group}
-              onChange={setGroup}
-              errors={assign.fieldErrors}
-            />
-          </FieldGroup>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={assign.pending}
-              onClick={() => onOpenChange(false)}
-            >
-              {t("common.cancel")}
-            </Button>
-            <Button type="submit" disabled={!group.serviceId || assign.pending}>
-              {assign.pending ? <Spinner data-icon="inline-start" /> : null}
-              {t("assignments.assign")}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <FormDialog
+      title={t("assignments.dialog.title", { name: isolate(account.displayName) })}
+      description={t("assignments.dialog.description")}
+      pending={assign.pending}
+      problem={assign.problem}
+      submitLabel={t("assignments.assign")}
+      submitDisabled={!group.serviceId}
+      onSubmit={() => assign.execute(account.id, group)}
+      onClose={onClose}
+    >
+      <FieldGroup>
+        <GroupFields
+          services={services}
+          value={group}
+          onChange={setGroup}
+          errors={assign.fieldErrors}
+        />
+      </FieldGroup>
+    </FormDialog>
   )
 }
 

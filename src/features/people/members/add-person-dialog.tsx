@@ -2,24 +2,15 @@
 
 import { CircleAlert, UserPlus } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 
+import { FormDialog } from "@/components/form-dialog"
 import { TextField } from "@/components/form-fields"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { FieldGroup } from "@/components/ui/field"
-import { Spinner } from "@/components/ui/spinner"
 import { useCan } from "@/features/identity/auth/session"
-import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useFormat } from "@/i18n/format"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
@@ -42,15 +33,7 @@ const blockingGroupOf = (candidate: DirectoryPerson, placement: PlacementInput) 
     blocksPlacement({ serviceId: group.service.id, stageId: group.stage?.id ?? null }, placement)
   )
 
-function AddPersonForm({
-  preset,
-  onDone,
-  onPendingChange,
-}: {
-  preset?: PlacementInput
-  onDone: () => void
-  onPendingChange: (pending: boolean) => void
-}) {
+function AddPersonDialog({ preset, onClose }: { preset?: PlacementInput; onClose: () => void }) {
   const t = useTranslations()
   const f = useFormat()
   const can = useCan()
@@ -64,13 +47,13 @@ function AddPersonForm({
     toastOnError: false,
     successMessage: (saved) => t("toast.added", { name: preferredName(saved.person) }),
     invalidate: MEMBERSHIP_QUERIES,
-    onSuccess: onDone,
+    onSuccess: onClose,
   })
 
   const join = useApiMutation(addMembershipRequest, {
     toastOnError: false,
     invalidate: MEMBERSHIP_QUERIES,
-    onSuccess: onDone,
+    onSuccess: onClose,
   })
 
   const busy = create.pending || join.pending
@@ -82,10 +65,6 @@ function AddPersonForm({
 
   const errors = create.fieldErrors
   const shownInFields = Object.keys(errors).length > 0
-
-  const formRef = useFocusFirstInvalid(create.problem)
-
-  useEffect(() => onPendingChange(busy), [busy, onPendingChange])
 
   const person: NewPerson = {
     firstName,
@@ -123,14 +102,14 @@ function AddPersonForm({
   }
 
   return (
-    <form
-      ref={formRef}
-      noValidate
-      className="flex flex-col gap-6"
-      onSubmit={(event) => {
-        event.preventDefault()
-        void submit()
-      }}
+    <FormDialog
+      title={t("members.newPerson.title")}
+      description={t("members.newPerson.description")}
+      pending={busy}
+      problem={create.problem}
+      submitLabel={t("members.addPerson")}
+      onSubmit={submit}
+      onClose={onClose}
     >
       {duplicate ? (
         <Alert>
@@ -231,23 +210,13 @@ function AddPersonForm({
         />
         <PlacementFields choice={placementChoice} errors={errors} />
       </FieldGroup>
-      <DialogFooter>
-        <Button type="button" variant="outline" disabled={busy} onClick={onDone}>
-          {t("common.cancel")}
-        </Button>
-        <Button type="submit" disabled={busy}>
-          {create.pending ? <Spinner data-icon="inline-start" /> : null}
-          {t("members.addPerson")}
-        </Button>
-      </DialogFooter>
-    </form>
+    </FormDialog>
   )
 }
 
 export function AddPersonButton({ placement }: { placement?: PlacementInput }) {
   const t = useTranslations("members")
   const [open, setOpen] = useState(false)
-  const [pending, setPending] = useState(false)
 
   return (
     <>
@@ -255,21 +224,7 @@ export function AddPersonButton({ placement }: { placement?: PlacementInput }) {
         <UserPlus data-icon="inline-start" />
         {t("addPerson")}
       </Button>
-      <Dialog open={open} onOpenChange={(next) => (next || !pending) && setOpen(next)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("newPerson.title")}</DialogTitle>
-            <DialogDescription>{t("newPerson.description")}</DialogDescription>
-          </DialogHeader>
-          {open ? (
-            <AddPersonForm
-              preset={placement}
-              onDone={() => setOpen(false)}
-              onPendingChange={setPending}
-            />
-          ) : null}
-        </DialogContent>
-      </Dialog>
+      {open ? <AddPersonDialog preset={placement} onClose={() => setOpen(false)} /> : null}
     </>
   )
 }

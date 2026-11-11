@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { useInBrowser } from "@/hooks/use-in-browser"
+import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { Link } from "@/i18n/navigation"
 import { carryFragment } from "@/i18n/use-switch-locale"
@@ -53,6 +54,7 @@ function SetPasswordFlow() {
   const [outcome, setOutcome] = useState<"saved" | "invalid" | null>(null)
   const [alert, setAlert] = useState<string | null>(null)
   const save = useApiMutation(setPasswordRequest, { toastOnError: false })
+  const formRef = useFocusFirstInvalid(save.problem)
 
   useEffect(forgetAddressFragment, [])
 
@@ -111,6 +113,7 @@ function SetPasswordFlow() {
     <AuthFrame>
       <AuthHeading title={t("title")}>{t("intro")}</AuthHeading>
       <form
+        ref={formRef}
         method="post"
         className="flex flex-col gap-6"
         onSubmit={(event) => {
@@ -151,6 +154,7 @@ function ForgotPasswordByEmail() {
   const [sentTo, setSentTo] = useState<string | null>(null)
   const [alert, setAlert] = useState<string | null>(null)
   const send = useApiMutation(forgotPasswordRequest, { toastOnError: false })
+  const formRef = useFocusFirstInvalid(send.problem)
 
   const submit = useSubmitOnce(async () => {
     setAlert(null)
@@ -188,6 +192,7 @@ function ForgotPasswordByEmail() {
     <AuthFrame>
       <AuthHeading title={t("title")}>{t("intro")}</AuthHeading>
       <form
+        ref={formRef}
         method="post"
         className="flex flex-col gap-6"
         onSubmit={(event) => {

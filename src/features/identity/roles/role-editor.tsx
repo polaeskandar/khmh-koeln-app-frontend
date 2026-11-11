@@ -22,6 +22,7 @@ import { FieldError } from "@/components/ui/field"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Spinner } from "@/components/ui/spinner"
 import { useCan, useSession } from "@/features/identity/auth/session"
+import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
@@ -294,6 +295,8 @@ function RoleForm({ role }: { role: RoleDetail | null }) {
 
   const blocked = !name.trim() || taken !== undefined || save.pending
 
+  const formRef = useFocusFirstInvalid(save.problem)
+
   const submit = useSubmitOnce(() => save.execute({ name, scope, permissions }), {
     keepLocked: (result) => result.ok && !role,
   })
@@ -301,6 +304,7 @@ function RoleForm({ role }: { role: RoleDetail | null }) {
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
       <form
+        ref={formRef}
         noValidate
         className="flex min-w-0 flex-col gap-6"
         onSubmit={(event) => {

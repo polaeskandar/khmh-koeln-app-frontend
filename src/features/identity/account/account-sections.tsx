@@ -2,27 +2,17 @@
 
 import { KeyRound } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
-import { useEffect, useId, useState } from "react"
+import { useId, useState } from "react"
 
+import { FormDialog } from "@/components/form-dialog"
 import { FormPanel } from "@/components/form-panel"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 import { FieldGroup, FieldLabel } from "@/components/ui/field"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Spinner } from "@/components/ui/spinner"
 import { AppearanceFields } from "@/components/theme-switch"
 import { type Me, MIN_PASSWORD_LENGTH } from "@/features/identity/auth/api"
 import { PasswordField } from "@/features/identity/auth/password-field"
-import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { isLocale, LOCALE_NAMES, LOCALES } from "@/i18n/config"
 import { useSwitchLocale } from "@/i18n/use-switch-locale"
@@ -102,22 +92,15 @@ export function PreferencesFields() {
   )
 }
 
-function PasswordForm({
-  onDone,
-  onPendingChange,
-}: {
-  onDone: () => void
-  onPendingChange: (pending: boolean) => void
-}) {
+function PasswordDialog({ onClose }: { onClose: () => void }) {
   const t = useTranslations("account.password")
-  const tCommon = useTranslations("common")
   const [currentPassword, setCurrent] = useState("")
   const [newPassword, setNew] = useState("")
 
   const mutation = useApiMutation(changePasswordRequest, {
     successMessage: t("saved"),
     toastOnError: false,
-    onSuccess: onDone,
+    onSuccess: onClose,
   })
 
   const errors = mutation.fieldErrors
@@ -125,23 +108,19 @@ function PasswordForm({
   const problem =
     mutation.problem && Object.keys(errors).length === 0 ? mutation.problem.message : null
 
-  const formRef = useFocusFirstInvalid(mutation.problem)
-
-  useEffect(() => onPendingChange(mutation.pending), [mutation.pending, onPendingChange])
-
   const submit = useSubmitOnce(async () => {
     await mutation.execute({ currentPassword, newPassword })
   })
 
   return (
-    <form
-      ref={formRef}
-      noValidate
-      className="flex flex-col gap-6"
-      onSubmit={(event) => {
-        event.preventDefault()
-        void submit()
-      }}
+    <FormDialog
+      title={t("submit")}
+      description={t("intro")}
+      pending={mutation.pending}
+      problem={mutation.problem}
+      submitLabel={t("submit")}
+      onSubmit={submit}
+      onClose={onClose}
     >
       {problem ? (
         <Alert variant="destructive">
@@ -165,42 +144,22 @@ function PasswordForm({
           error={errors.newPassword}
         />
       </FieldGroup>
-      <DialogFooter>
-        <Button type="button" variant="outline" disabled={mutation.pending} onClick={onDone}>
-          {tCommon("cancel")}
-        </Button>
-        <Button type="submit" disabled={mutation.pending}>
-          {mutation.pending ? <Spinner data-icon="inline-start" /> : null}
-          {t("submit")}
-        </Button>
-      </DialogFooter>
-    </form>
+    </FormDialog>
   )
 }
 
 export function PasswordSection() {
   const t = useTranslations("account.password")
   const [open, setOpen] = useState(false)
-  const [pending, setPending] = useState(false)
 
   return (
     <FormPanel title={t("title")}>
       <p className="text-sm text-muted-foreground">{t("intro")}</p>
-      <Dialog open={open} onOpenChange={(next) => (next || !pending) && setOpen(next)}>
-        <DialogTrigger asChild>
-          <Button variant="outline" className="self-start">
-            <KeyRound data-icon="inline-start" />
-            {t("submit")}…
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("submit")}</DialogTitle>
-            <DialogDescription>{t("intro")}</DialogDescription>
-          </DialogHeader>
-          <PasswordForm onDone={() => setOpen(false)} onPendingChange={setPending} />
-        </DialogContent>
-      </Dialog>
+      <Button variant="outline" className="self-start" onClick={() => setOpen(true)}>
+        <KeyRound data-icon="inline-start" />
+        {t("submit")}…
+      </Button>
+      {open ? <PasswordDialog onClose={() => setOpen(false)} /> : null}
     </FormPanel>
   )
 }
