@@ -1,21 +1,9 @@
-import { readdirSync, readFileSync } from "node:fs"
-import { join } from "node:path"
+import { readFileSync } from "node:fs"
 
 import { describe, expect, test } from "vitest"
 
 import { physicalClasses } from "@test/support/physical-classes"
-
-function sourceFiles(dir: string): string[] {
-  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-    const path = join(dir, entry.name)
-
-    if (entry.isDirectory()) {
-      return path === join("src", "components", "ui") ? [] : sourceFiles(path)
-    }
-
-    return entry.name.endsWith(".tsx") ? [path] : []
-  })
-}
+import { componentFiles } from "@test/support/source-files"
 
 describe("the physical-class guard", () => {
   test.each([
@@ -44,7 +32,7 @@ describe("the physical-class guard", () => {
 })
 
 test("no component outside components/ui uses a physical side", () => {
-  const found = sourceFiles("src").flatMap((file) =>
+  const found = componentFiles().flatMap((file) =>
     physicalClasses(readFileSync(file, "utf8")).map((cls) => `${file}: ${cls}`)
   )
 

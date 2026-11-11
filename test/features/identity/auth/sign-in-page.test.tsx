@@ -21,9 +21,6 @@ import {
 } from "@/features/identity/auth/auth-outcome"
 import { PendingPage } from "@/features/identity/auth/pending-page"
 import { SignInPage } from "@/features/identity/auth/sign-in-page"
-import { UnconfirmedPage } from "@/features/identity/auth/unconfirmed-page"
-
-const PASSWORD = "correct horse battery"
 
 beforeEach(() => {
   vi.spyOn(toast, "error")
@@ -39,6 +36,8 @@ afterEach(() => {
   sessionStorage.clear()
   window.history.replaceState(null, "", "/")
 })
+
+const PASSWORD = "correct horse battery"
 
 function backend(answer: () => Response, account: Me = me.servant) {
   let signedIn = false
@@ -228,54 +227,6 @@ test("the sign-in page links to self-registration", async () => {
     "href",
     "/register/"
   )
-})
-
-test("the confirm-first page explains the link and offers to register again", () => {
-  rememberOutcome("unconfirmed")
-  renderWithProviders(<UnconfirmedPage />)
-
-  expect(
-    screen.getByRole("heading", { name: "Confirm your email address first" })
-  ).toBeInTheDocument()
-
-  expect(
-    screen.getByText("The link works for 7 days. Check your spam folder too.")
-  ).toBeInTheDocument()
-
-  expect(screen.getByRole("link", { name: "Register again" })).toHaveAttribute("href", "/register/")
-  expect(screen.getByRole("link", { name: "Back to sign-in" })).toHaveAttribute("href", "/sign-in/")
-})
-
-test("the waiting page promises no email", () => {
-  rememberOutcome("pending")
-  renderWithProviders(<PendingPage />)
-
-  expect(
-    screen.getByRole("heading", { name: "Your account is waiting for approval" })
-  ).toBeInTheDocument()
-
-  expect(
-    screen.getByText("The church office tells you when the account is ready.")
-  ).toBeInTheDocument()
-
-  expect(screen.getByText(/links the account to their own record/)).toBeInTheDocument()
-  expect(document.body.textContent).not.toMatch(/email as soon|Prototype/)
-})
-
-test.each([
-  ["waiting", <PendingPage key="pending" />],
-  ["confirm-first", <UnconfirmedPage key="unconfirmed" />],
-])("the %s page is a 404 unless sign-in just led there", (_, page) => {
-  renderWithProviders(page)
-
-  expect(screen.getByRole("heading", { name: "This page doesn’t exist" })).toBeInTheDocument()
-})
-
-test("the waiting page is a 404 after the confirm-first outcome, and the other way round", () => {
-  rememberOutcome("unconfirmed")
-  renderWithProviders(<PendingPage />)
-
-  expect(screen.getByRole("heading", { name: "This page doesn’t exist" })).toBeInTheDocument()
 })
 
 test("a successful sign-in forgets the last status outcome", async () => {

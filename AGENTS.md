@@ -33,9 +33,11 @@ exists, its issue (#294–#301) lists what it covers.
 
 ## Tests
 
-Tests live in `test/`, mirroring `src/`: `test/lib/api/client.test.ts` tests `src/lib/api/client.ts`. Shared
-helpers (the setup file, MSW, render helpers, fixtures) live in `test/support/` and are imported as
-`@test/support/…`; tests import the code under test as `@/…`.
+Tests live in `test/`, mirroring `src/`: `test/lib/api/client.test.ts` tests `src/lib/api/client.ts`. A file
+with several behaviours worth their own file adds one to the name (`stages-manager-page.reorder.test.tsx`).
+Shared helpers (the setup file, MSW, render helpers, fixtures) live in `test/support/` and are imported as
+`@test/support/…`; tests import the code under test as `@/…`. Checks over the whole code base (the catalogs, no
+physical classes, no raw colours, no unused message key) live in `test/conventions/`.
 
 ## API
 

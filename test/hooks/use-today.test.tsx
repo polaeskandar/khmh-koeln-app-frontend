@@ -2,8 +2,6 @@ import { act, render, renderHook } from "@testing-library/react"
 import { renderToString } from "react-dom/server"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
-import { fold, matchesQuery } from "@/lib/domain/names"
-
 import { useNow, useToday } from "@/hooks/use-today"
 
 function Today() {
@@ -38,11 +36,4 @@ describe.each(["UTC", "America/New_York"])("with the device in %s", (zone) => {
 
     expect(result.current).toEqual({ date: "2026-11-09", time: "00:31" })
   })
-})
-
-test("matchesQuery ignores accents and case", () => {
-  const person = { firstName: "Mína", lastName: "Hánna", displayName: null }
-  expect(matchesQuery(person, "MINA hanna")).toBe(true)
-  expect(matchesQuery(person, "mina girgis")).toBe(false)
-  expect(fold("  Kirollos  ÉLIAS ")).toBe("kirollos elias")
 })
