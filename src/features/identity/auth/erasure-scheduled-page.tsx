@@ -1,14 +1,12 @@
 "use client"
 
-import { CalendarX2, CircleAlert, CircleCheck } from "lucide-react"
+import { CalendarX2, CircleCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
-import { TextField } from "@/components/form-fields"
+import { FormAlert } from "@/components/form-alert"
 import { NotFoundPage } from "@/components/not-found-page"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { FieldGroup } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { useInBrowser } from "@/hooks/use-in-browser"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
@@ -19,17 +17,9 @@ import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { routes } from "@/lib/routes"
 
 import { cancelErasureRequest } from "./api"
-import { AuthFrame, AuthHeading } from "./auth-frame"
+import { AuthFrame, AuthHeading, StateIcon } from "./auth-frame"
 import { scheduledErasureOn } from "./auth-outcome"
-import { PasswordField } from "./password-field"
-
-function StateIcon({ icon: Icon, tone }: { icon: typeof CalendarX2; tone: string }) {
-  return (
-    <span className={`inline-flex size-11 items-center justify-center ${tone}`}>
-      <Icon className="size-5" aria-hidden="true" />
-    </span>
-  )
-}
+import { CredentialsFields } from "./credentials-fields"
 
 export function ErasureScheduledPage() {
   const inBrowser = useInBrowser()
@@ -70,15 +60,10 @@ function ErasureScheduled({ erasesOn }: { erasesOn: LocalDate }) {
   if (canceled) {
     return (
       <AuthFrame>
-        <StateIcon icon={CircleCheck} tone="bg-success-soft text-success" />
-        <div role="status" className="flex flex-col gap-2">
-          <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
-            {t("erasureScheduled.canceledTitle")}
-          </h1>
-          <p className="max-w-prose text-sm text-muted-foreground">
-            {t("erasureScheduled.canceledText")}
-          </p>
-        </div>
+        <StateIcon icon={CircleCheck} tone="success" />
+        <AuthHeading title={t("erasureScheduled.canceledTitle")} status>
+          <p className="max-w-prose">{t("erasureScheduled.canceledText")}</p>
+        </AuthHeading>
         <Button asChild className="self-start">
           <Link href={routes.signIn()}>{t("erasureScheduled.signIn")}</Link>
         </Button>
@@ -88,7 +73,7 @@ function ErasureScheduled({ erasesOn }: { erasesOn: LocalDate }) {
 
   return (
     <AuthFrame>
-      <StateIcon icon={CalendarX2} tone="bg-warning-soft text-warning" />
+      <StateIcon icon={CalendarX2} tone="warning" />
       <AuthHeading title={t("erasureScheduled.title")}>
         <p className="max-w-prose">{t("erasureScheduled.text", { date: f.longDate(erasesOn) })}</p>
       </AuthHeading>
@@ -108,41 +93,13 @@ function ErasureScheduled({ erasesOn }: { erasesOn: LocalDate }) {
             {t("erasureScheduled.cancelText")}
           </p>
         </div>
-        {error ? (
-          <Alert variant="destructive" role="alert">
-            <CircleAlert />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : null}
-        <FieldGroup>
-          <TextField
-            label={t("signIn.email")}
-            type="email"
-            name="email"
-            autoComplete="username"
-            inputMode="email"
-            dir="ltr"
-            required
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
-          <PasswordField
-            label={t("signIn.password")}
-            name="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            labelExtra={
-              <Link
-                href={routes.forgotPassword()}
-                className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-              >
-                {t("signIn.forgot")}
-              </Link>
-            }
-          />
-        </FieldGroup>
+        <FormAlert message={error} />
+        <CredentialsFields
+          email={email}
+          password={password}
+          onEmailChange={setEmail}
+          onPasswordChange={setPassword}
+        />
         <Button type="submit" size="lg" disabled={cancel.pending}>
           {cancel.pending ? <Spinner data-icon="inline-start" /> : null}
           {t("erasureScheduled.submit")}

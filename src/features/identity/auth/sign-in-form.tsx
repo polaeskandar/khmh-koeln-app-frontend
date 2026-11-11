@@ -1,22 +1,19 @@
 "use client"
 
-import { CircleAlert } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
-import { TextField } from "@/components/form-fields"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { FormAlert } from "@/components/form-alert"
 import { Button } from "@/components/ui/button"
-import { FieldGroup } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
-import { Link, useRouter } from "@/i18n/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { routes } from "@/lib/routes"
 
 import { forgetOutcome, rememberErasureScheduled, rememberOutcome } from "./auth-outcome"
 import { signInRequest } from "./api"
-import { PasswordField } from "./password-field"
+import { CredentialsFields } from "./credentials-fields"
 import { useSession } from "./session"
 
 export function SignInForm() {
@@ -67,41 +64,13 @@ export function SignInForm() {
         void submit()
       }}
     >
-      {error ? (
-        <Alert variant="destructive" role="alert">
-          <CircleAlert />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      ) : null}
-      <FieldGroup>
-        <TextField
-          label={t("auth.signIn.email")}
-          type="email"
-          name="email"
-          autoComplete="username"
-          inputMode="email"
-          dir="ltr"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <PasswordField
-          label={t("auth.signIn.password")}
-          name="password"
-          autoComplete="current-password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          labelExtra={
-            <Link
-              href={routes.forgotPassword()}
-              className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-            >
-              {t("auth.signIn.forgot")}
-            </Link>
-          }
-        />
-      </FieldGroup>
+      <FormAlert message={error} />
+      <CredentialsFields
+        email={email}
+        password={password}
+        onEmailChange={setEmail}
+        onPasswordChange={setPassword}
+      />
       <Button type="submit" size="lg" disabled={signIn.pending}>
         {signIn.pending ? <Spinner data-icon="inline-start" /> : null}
         {t("auth.signIn.submit")}
