@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { Search, X } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useState } from "react"
+import { type KeyboardEvent, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
@@ -24,6 +24,12 @@ export function groupsText(person: DirectoryPerson, separator: string, none: str
   return person.groups
     .map((g) => (g.stage ? `${g.service.name} · ${g.stage.name}` : g.service.name))
     .join(separator)
+}
+
+export function ignoreEnter(event: KeyboardEvent<HTMLInputElement>) {
+  if (event.key === "Enter") {
+    event.preventDefault()
+  }
 }
 
 export function PersonSearch({
@@ -84,6 +90,7 @@ export function PersonSearch({
           placeholder={t("findChild")}
           value={text}
           onChange={(event) => setText(event.target.value)}
+          onKeyDown={ignoreEnter}
         />
       </InputGroup>
       {!ready ? (

@@ -5,6 +5,7 @@ import { KeyRound, Plus, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
+import { FormDialog } from "@/components/form-dialog"
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { SelectField } from "@/components/form-fields"
 import { Section } from "@/components/page-header"
@@ -16,7 +17,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -53,11 +53,11 @@ import { type Role, rolesQuery, ROLE_QUERIES } from "@/features/identity/roles/a
 function GiveRoleDialog({
   account,
   roles,
-  onOpenChange,
+  onClose,
 }: {
   account: StaffAccount
   roles: Role[]
-  onOpenChange: (open: boolean) => void
+  onClose: () => void
 }) {
   const t = useTranslations()
   const refetch = useRefetch()
@@ -66,7 +66,7 @@ function GiveRoleDialog({
   const give = useApiMutation((id: string) => giveRoleRequest(account.id, id), {
     successMessage: t("toast.roleAssigned"),
     invalidate: ROLE_QUERIES,
-    onSuccess: () => onOpenChange(false),
+    onSuccess: onClose,
   })
 
   async function submit() {
@@ -74,68 +74,44 @@ function GiveRoleDialog({
 
     if (!result.ok && isStale(result.problem, [409])) {
       void refetch(STAFF_ACCOUNT_QUERIES)
-      onOpenChange(false)
+      onClose()
     }
   }
 
   return (
-    <Dialog open onOpenChange={(next) => (next || !give.pending) && onOpenChange(next)}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {t("settings.users.assign.title", { name: isolate(account.displayName) })}
-          </DialogTitle>
-          <DialogDescription>{t("settings.users.assign.description")}</DialogDescription>
-        </DialogHeader>
-        <form
-          className="flex flex-col gap-6"
-          onSubmit={(event) => {
-            event.preventDefault()
-
-            if (roleId) {
-              void submit()
-            }
-          }}
-        >
-          <SelectField
-            label={t("settings.users.assign.role")}
-            value={roleId}
-            error={give.fieldErrors.roleId}
-            description={t.rich("settings.users.assign.roleHint", {
-              link: (chunks) => (
-                <Link href={`${routes.settings()}#roles`} className="underline underline-offset-4">
-                  {chunks}
-                </Link>
-              ),
-            })}
-            onChange={(event) => setRoleId(event.target.value)}
-          >
-            <NativeSelectOption value="" disabled>
-              {t("settings.users.assign.choose")}
-            </NativeSelectOption>
-            {roles.map((role) => (
-              <NativeSelectOption key={role.id} value={role.id}>
-                {role.name}
-              </NativeSelectOption>
-            ))}
-          </SelectField>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={give.pending}
-              onClick={() => onOpenChange(false)}
-            >
-              {t("common.cancel")}
-            </Button>
-            <Button type="submit" disabled={!roleId || give.pending}>
-              {give.pending ? <Spinner data-icon="inline-start" /> : null}
-              {t("settings.users.assign.submit")}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <FormDialog
+      title={t("settings.users.assign.title", { name: isolate(account.displayName) })}
+      description={t("settings.users.assign.description")}
+      pending={give.pending}
+      problem={give.problem}
+      submitLabel={t("settings.users.assign.submit")}
+      submitDisabled={!roleId}
+      onSubmit={submit}
+      onClose={onClose}
+    >
+      <SelectField
+        label={t("settings.users.assign.role")}
+        value={roleId}
+        error={give.fieldErrors.roleId}
+        description={t.rich("settings.users.assign.roleHint", {
+          link: (chunks) => (
+            <Link href={`${routes.settings()}#roles`} className="underline underline-offset-4">
+              {chunks}
+            </Link>
+          ),
+        })}
+        onChange={(event) => setRoleId(event.target.value)}
+      >
+        <NativeSelectOption value="" disabled>
+          {t("settings.users.assign.choose")}
+        </NativeSelectOption>
+        {roles.map((role) => (
+          <NativeSelectOption key={role.id} value={role.id}>
+            {role.name}
+          </NativeSelectOption>
+        ))}
+      </SelectField>
+    </FormDialog>
   )
 }
 
@@ -143,20 +119,22 @@ function PasswordLinkDialog({
   account,
   today,
   link,
+  pending,
   problem,
-  onOpenChange,
+  onClose,
 }: {
   account: StaffAccount
   today: LocalDate
   link: PasswordLink | undefined
+  pending: boolean
   problem: Problem | null
-  onOpenChange: (open: boolean) => void
+  onClose: () => void
 }) {
   const t = useTranslations()
   const f = useFormat()
 
   return (
-    <Dialog open onOpenChange={onOpenChange}>
+    <Dialog open onOpenChange={(open) => !open && !pending && onClose()}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
@@ -261,7 +239,6 @@ function AccountRow({
   const [dialog, setDialog] = useState<"role" | "group" | "link" | null>(null)
   const passwordLink = useApiMutation(passwordLinkRequest, { toastOnError: false })
   const left = roles.filter((role) => !account.roles.some((had) => had.id === role.id))
-  const close = (open: boolean) => !open && setDialog(null)
 
   function sendPasswordLink() {
     setDialog("link")
@@ -345,18 +322,19 @@ function AccountRow({
         </Button>
       ) : null}
       {dialog === "role" ? (
-        <GiveRoleDialog account={account} roles={left} onOpenChange={close} />
+        <GiveRoleDialog account={account} roles={left} onClose={() => setDialog(null)} />
       ) : null}
       {dialog === "group" ? (
-        <AssignGroupDialog account={account} services={groups} onOpenChange={close} />
+        <AssignGroupDialog account={account} services={groups} onClose={() => setDialog(null)} />
       ) : null}
       {dialog === "link" ? (
         <PasswordLinkDialog
           account={account}
           today={today}
           link={passwordLink.data}
+          pending={passwordLink.pending}
           problem={passwordLink.problem}
-          onOpenChange={close}
+          onClose={() => setDialog(null)}
         />
       ) : null}
     </li>

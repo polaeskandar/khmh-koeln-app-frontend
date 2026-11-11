@@ -4,19 +4,12 @@ import { useQuery } from "@tanstack/react-query"
 import { cn } from "cn"
 import { CalendarClock, Info, Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 
+import { FormDialog } from "@/components/form-dialog"
 import { SelectField, TextAreaField, TextField } from "@/components/form-fields"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import {
   Field,
   FieldDescription,
@@ -28,10 +21,8 @@ import {
 } from "@/components/ui/field"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Spinner } from "@/components/ui/spinner"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { type ServiceRow, servicesQuery } from "@/features/organization/services/api"
-import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useFormat } from "@/i18n/format"
 import { useRouter } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
@@ -210,15 +201,13 @@ function ScheduleForm({
   today,
   schedule,
   fixedServiceId,
-  onDone,
-  onPendingChange,
+  onClose,
 }: {
   services: ServiceRow[]
   today: LocalDate
   schedule?: ScheduleSummary
   fixedServiceId?: Uuid
-  onDone: () => void
-  onPendingChange: (pending: boolean) => void
+  onClose: () => void
 }) {
   const t = useTranslations()
   const f = useFormat()
@@ -239,7 +228,7 @@ function ScheduleForm({
     successMessage: (saved) => t("toast.scheduleCreated", { created: saved.createdSessions }),
     invalidate: SCHEDULE_QUERIES,
     onSuccess: (saved) => {
-      onDone()
+      onClose()
       router.push(routes.schedule(saved.id))
     },
   })
@@ -249,7 +238,7 @@ function ScheduleForm({
     {
       successMessage: (saved) => t("toast.scheduleSaved", { created: saved.createdSessions }),
       invalidate: SCHEDULE_QUERIES,
-      onSuccess: onDone,
+      onSuccess: onClose,
     }
   )
 
@@ -260,10 +249,6 @@ function ScheduleForm({
   const stage = service?.stages.find((s) => s.id === d.stageId)
   const group = stage?.name ?? service?.name ?? (schedule ? groupOf(schedule) : undefined)
   const recurrenceError = RECURRENCE_FIELDS.map((field) => errors[field]).find(Boolean)
-
-  const formRef = useFocusFirstInvalid(mutation.problem)
-
-  useEffect(() => onPendingChange(mutation.pending), [mutation.pending, onPendingChange])
 
   function firstCreated(first: LocalDate) {
     if (first <= addDays(today, 1)) {
@@ -318,331 +303,324 @@ function ScheduleForm({
   )
 
   return (
-    <form
-      ref={formRef}
-      noValidate
-      onSubmit={(event) => {
-        event.preventDefault()
-        submit()
-      }}
-      className="flex min-h-0 flex-1 flex-col"
+    <FormDialog
+      size="wide"
+      icon={CalendarClock}
+      title={schedule ? t("meetings.actions.edit") : t("meetings.form.newTitle")}
+      description={
+        schedule
+          ? `${groupOf(schedule)} · ${f.recurrence(recurrenceOf(schedule.recurrence))}`
+          : t("meetings.form.newDescription")
+      }
+      pending={mutation.pending}
+      problem={mutation.problem}
+      submitLabel={schedule ? t("meetings.form.save") : t("meetings.form.create")}
+      submitDisabled={preview.error !== null}
+      onSubmit={submit}
+      onClose={onClose}
     >
-      <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto p-6">
-        {schedule ? (
-          <Alert>
-            <Info />
-            <AlertTitle>{t("meetings.form.editAlertTitle")}</AlertTitle>
-            <AlertDescription>{t("meetings.form.editAlertDescription")}</AlertDescription>
-          </Alert>
-        ) : null}
-        <div className="grid gap-y-8 md:grid-cols-2">
-          <FieldGroup className="gap-6 md:pe-8">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <SelectField
-                label={t("meetings.fields.service")}
-                value={d.serviceId}
-                disabled={!!schedule || !!fixedServiceId}
-                error={errors[FIELDS.service]}
-                onChange={(event) =>
-                  setD((prev) => ({ ...prev, serviceId: event.target.value, stageId: "" }))
-                }
-              >
-                {schedule?.service ? (
-                  <NativeSelectOption value={schedule.service.id}>
-                    {schedule.service.name}
-                  </NativeSelectOption>
-                ) : null}
-                {services
-                  .filter((s) => s.id !== schedule?.service?.id)
-                  .map((s) => (
-                    <NativeSelectOption key={s.id} value={s.id}>
-                      {s.name}
-                    </NativeSelectOption>
-                  ))}
-              </SelectField>
-              <SelectField
-                label={t("meetings.fields.stage")}
-                value={d.stageId}
-                disabled={!!schedule}
-                error={errors[FIELDS.stage]}
-                onChange={(event) => set("stageId", event.target.value)}
-              >
-                <NativeSelectOption value="">
-                  {t("meetings.fields.wholeService")}
+      {schedule ? (
+        <Alert>
+          <Info />
+          <AlertTitle>{t("meetings.form.editAlertTitle")}</AlertTitle>
+          <AlertDescription>{t("meetings.form.editAlertDescription")}</AlertDescription>
+        </Alert>
+      ) : null}
+      <div className="grid gap-y-8 md:grid-cols-2">
+        <FieldGroup className="gap-6 md:pe-8">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SelectField
+              label={t("meetings.fields.service")}
+              value={d.serviceId}
+              disabled={!!schedule || !!fixedServiceId}
+              error={errors[FIELDS.service]}
+              onChange={(event) =>
+                setD((prev) => ({ ...prev, serviceId: event.target.value, stageId: "" }))
+              }
+            >
+              {schedule?.service ? (
+                <NativeSelectOption value={schedule.service.id}>
+                  {schedule.service.name}
                 </NativeSelectOption>
-                {schedule?.stage ? (
-                  <NativeSelectOption value={schedule.stage.id}>
-                    {schedule.stage.name}
+              ) : null}
+              {services
+                .filter((s) => s.id !== schedule?.service?.id)
+                .map((s) => (
+                  <NativeSelectOption key={s.id} value={s.id}>
+                    {s.name}
                   </NativeSelectOption>
-                ) : null}
-                {service?.stages
-                  .filter((s) => s.id !== schedule?.stage?.id)
-                  .map((s) => (
-                    <NativeSelectOption key={s.id} value={s.id}>
-                      {s.name}
-                    </NativeSelectOption>
-                  ))}
-              </SelectField>
-            </div>
-            <TextField
-              label={t("meetings.fields.name")}
-              value={d.name}
-              onChange={(event) => set("name", event.target.value)}
-              maxLength={120}
-              placeholder={t("meetings.form.namePlaceholder")}
-              description={t("meetings.form.nameHint")}
-              error={errors[FIELDS.name]}
-            />
-            <TextField
-              label={t("meetings.fields.place")}
-              optional
-              value={d.location}
-              onChange={(event) => set("location", event.target.value)}
-              maxLength={120}
-              placeholder={t("meetings.form.placePlaceholder")}
-              error={errors[FIELDS.location]}
-            />
-            <FieldSet>
-              <FieldLegend>{t("meetings.fields.whoIsExpected")}</FieldLegend>
-              <RadioGroup
-                value={d.rosterMode}
-                onValueChange={(value) =>
-                  set("rosterMode", oneOf(ROSTER_MODES, value) ?? d.rosterMode)
-                }
-              >
-                <Field orientation="horizontal">
-                  <RadioGroupItem value="expected" id="roster-expected" />
-                  <div className="flex flex-col gap-0.5">
-                    <FieldLabel htmlFor="roster-expected" className="font-normal">
-                      {group
-                        ? t("meetings.form.rosterOf", { group })
-                        : t("meetings.form.rosterOfService")}
-                    </FieldLabel>
-                    <FieldDescription>
-                      {[
-                        stage
-                          ? t("meetings.form.rosterStage")
-                          : service && service.stages.length > 0
-                            ? t("meetings.form.rosterServiceOnly")
-                            : t("meetings.form.rosterService"),
-                        t("meetings.form.rosterHint"),
-                      ].join(" ")}
-                    </FieldDescription>
-                  </div>
-                </Field>
-                <Field orientation="horizontal">
-                  <RadioGroupItem value="open" id="roster-open" />
-                  <div className="flex flex-col gap-0.5">
-                    <FieldLabel htmlFor="roster-open" className="font-normal">
-                      {t("meetings.roster.open")}
-                    </FieldLabel>
-                    <FieldDescription>{t("meetings.form.openHint")}</FieldDescription>
-                  </div>
-                </Field>
-              </RadioGroup>
-            </FieldSet>
-            <TextAreaField
-              label={t("meetings.form.notes")}
-              optional
-              dir="auto"
-              value={d.description}
-              onChange={(event) => set("description", event.target.value)}
-              maxLength={500}
-              error={errors[FIELDS.description]}
-            />
-          </FieldGroup>
-
-          <div className="flex min-w-0 flex-col gap-6 md:border-s md:ps-8">
-            <FieldSet data-invalid={recurrenceError ? true : undefined}>
-              <FieldLegend>{t("meetings.schedule.repeats")}</FieldLegend>
-              <ToggleGroup
-                type="single"
-                variant="outline"
-                spacing={0}
-                value={d.frequency}
-                onValueChange={(value) => {
-                  const frequency = oneOf(FREQUENCIES, value)
-
-                  if (frequency) {
-                    changeFrequency(frequency)
-                  }
-                }}
-                aria-label={t("meetings.form.frequency")}
-              >
-                <ToggleGroupItem value="weekly" className={SELECTED}>
-                  {t("meetings.form.weekly")}
-                </ToggleGroupItem>
-                <ToggleGroupItem value="monthly" className={SELECTED}>
-                  {t("meetings.form.monthly")}
-                </ToggleGroupItem>
-              </ToggleGroup>
-              {d.frequency === "weekly" ? (
-                <div className="flex flex-col gap-3">
-                  <div className="flex flex-wrap items-center gap-2 text-sm">
-                    {t.rich("meetings.form.everyWeeks", {
-                      count: d.interval,
-                      interval: () =>
-                        intervalSelect(t("meetings.form.weeksInterval"), INTERVALS.weekly),
-                    })}
-                  </div>
-                  <ToggleGroup
-                    type="multiple"
-                    variant="outline"
-                    spacing={0}
-                    value={d.weekdays.map(String)}
-                    onValueChange={(value) =>
-                      set(
-                        "weekdays",
-                        value.flatMap((day) => oneOf(WEEKDAYS, Number(day)) ?? [])
-                      )
-                    }
-                    aria-label={t("meetings.form.weekdays")}
-                    aria-invalid={errors["recurrence.weekdays"] ? true : undefined}
-                    className="flex-wrap"
-                  >
-                    {WEEKDAYS.map((weekday) => (
-                      <ToggleGroupItem
-                        key={weekday}
-                        value={String(weekday)}
-                        aria-label={f.weekdayName(weekday)}
-                        className={cn("px-3!", SELECTED)}
-                      >
-                        {f.weekdayMin(weekday)}
-                      </ToggleGroupItem>
-                    ))}
-                  </ToggleGroup>
+                ))}
+            </SelectField>
+            <SelectField
+              label={t("meetings.fields.stage")}
+              value={d.stageId}
+              disabled={!!schedule}
+              error={errors[FIELDS.stage]}
+              onChange={(event) => set("stageId", event.target.value)}
+            >
+              <NativeSelectOption value="">{t("meetings.fields.wholeService")}</NativeSelectOption>
+              {schedule?.stage ? (
+                <NativeSelectOption value={schedule.stage.id}>
+                  {schedule.stage.name}
+                </NativeSelectOption>
+              ) : null}
+              {service?.stages
+                .filter((s) => s.id !== schedule?.stage?.id)
+                .map((s) => (
+                  <NativeSelectOption key={s.id} value={s.id}>
+                    {s.name}
+                  </NativeSelectOption>
+                ))}
+            </SelectField>
+          </div>
+          <TextField
+            label={t("meetings.fields.name")}
+            value={d.name}
+            onChange={(event) => set("name", event.target.value)}
+            maxLength={120}
+            placeholder={t("meetings.form.namePlaceholder")}
+            description={t("meetings.form.nameHint")}
+            error={errors[FIELDS.name]}
+          />
+          <TextField
+            label={t("meetings.fields.place")}
+            optional
+            value={d.location}
+            onChange={(event) => set("location", event.target.value)}
+            maxLength={120}
+            placeholder={t("meetings.form.placePlaceholder")}
+            error={errors[FIELDS.location]}
+          />
+          <FieldSet>
+            <FieldLegend>{t("meetings.fields.whoIsExpected")}</FieldLegend>
+            <RadioGroup
+              value={d.rosterMode}
+              onValueChange={(value) =>
+                set("rosterMode", oneOf(ROSTER_MODES, value) ?? d.rosterMode)
+              }
+            >
+              <Field orientation="horizontal">
+                <RadioGroupItem value="expected" id="roster-expected" />
+                <div className="flex flex-col gap-0.5">
+                  <FieldLabel htmlFor="roster-expected" className="font-normal">
+                    {group
+                      ? t("meetings.form.rosterOf", { group })
+                      : t("meetings.form.rosterOfService")}
+                  </FieldLabel>
+                  <FieldDescription>
+                    {[
+                      stage
+                        ? t("meetings.form.rosterStage")
+                        : service && service.stages.length > 0
+                          ? t("meetings.form.rosterServiceOnly")
+                          : t("meetings.form.rosterService"),
+                      t("meetings.form.rosterHint"),
+                    ].join(" ")}
+                  </FieldDescription>
                 </div>
-              ) : (
+              </Field>
+              <Field orientation="horizontal">
+                <RadioGroupItem value="open" id="roster-open" />
+                <div className="flex flex-col gap-0.5">
+                  <FieldLabel htmlFor="roster-open" className="font-normal">
+                    {t("meetings.roster.open")}
+                  </FieldLabel>
+                  <FieldDescription>{t("meetings.form.openHint")}</FieldDescription>
+                </div>
+              </Field>
+            </RadioGroup>
+          </FieldSet>
+          <TextAreaField
+            label={t("meetings.form.notes")}
+            optional
+            dir="auto"
+            value={d.description}
+            onChange={(event) => set("description", event.target.value)}
+            maxLength={500}
+            error={errors[FIELDS.description]}
+          />
+        </FieldGroup>
+
+        <div className="flex min-w-0 flex-col gap-6 md:border-s md:ps-8">
+          <FieldSet data-invalid={recurrenceError ? true : undefined}>
+            <FieldLegend>{t("meetings.schedule.repeats")}</FieldLegend>
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              spacing={0}
+              value={d.frequency}
+              onValueChange={(value) => {
+                const frequency = oneOf(FREQUENCIES, value)
+
+                if (frequency) {
+                  changeFrequency(frequency)
+                }
+              }}
+              aria-label={t("meetings.form.frequency")}
+            >
+              <ToggleGroupItem value="weekly" className={SELECTED}>
+                {t("meetings.form.weekly")}
+              </ToggleGroupItem>
+              <ToggleGroupItem value="monthly" className={SELECTED}>
+                {t("meetings.form.monthly")}
+              </ToggleGroupItem>
+            </ToggleGroup>
+            {d.frequency === "weekly" ? (
+              <div className="flex flex-col gap-3">
                 <div className="flex flex-wrap items-center gap-2 text-sm">
-                  {t.rich("meetings.form.monthlyOn", {
+                  {t.rich("meetings.form.everyWeeks", {
                     count: d.interval,
-                    week: () => (
-                      <NativeSelect
-                        aria-label={t("meetings.form.monthWeek")}
-                        className="w-24"
-                        value={String(d.monthWeek)}
-                        onChange={(event) =>
-                          set(
-                            "monthWeek",
-                            oneOf(MONTH_WEEKS, Number(event.target.value)) ?? d.monthWeek
-                          )
-                        }
-                      >
-                        {MONTH_WEEKS.map((week) => (
-                          <NativeSelectOption key={week} value={week}>
-                            {f.monthWeekName(week)}
-                          </NativeSelectOption>
-                        ))}
-                      </NativeSelect>
-                    ),
-                    weekday: () => (
-                      <NativeSelect
-                        aria-label={t("meetings.form.weekday")}
-                        className="w-32"
-                        value={String(d.monthWeekday)}
-                        onChange={(event) =>
-                          set(
-                            "monthWeekday",
-                            oneOf(WEEKDAYS, Number(event.target.value)) ?? d.monthWeekday
-                          )
-                        }
-                      >
-                        {WEEKDAYS.map((weekday) => (
-                          <NativeSelectOption key={weekday} value={weekday}>
-                            {f.weekdayName(weekday)}
-                          </NativeSelectOption>
-                        ))}
-                      </NativeSelect>
-                    ),
                     interval: () =>
-                      intervalSelect(t("meetings.form.monthsInterval"), INTERVALS.monthly),
+                      intervalSelect(t("meetings.form.weeksInterval"), INTERVALS.weekly),
                   })}
                 </div>
-              )}
-              {recurrenceError ? <FieldError>{recurrenceError}</FieldError> : null}
-            </FieldSet>
+                <ToggleGroup
+                  type="multiple"
+                  variant="outline"
+                  spacing={0}
+                  value={d.weekdays.map(String)}
+                  onValueChange={(value) =>
+                    set(
+                      "weekdays",
+                      value.flatMap((day) => oneOf(WEEKDAYS, Number(day)) ?? [])
+                    )
+                  }
+                  aria-label={t("meetings.form.weekdays")}
+                  aria-invalid={errors["recurrence.weekdays"] ? true : undefined}
+                  className="flex-wrap"
+                >
+                  {WEEKDAYS.map((weekday) => (
+                    <ToggleGroupItem
+                      key={weekday}
+                      value={String(weekday)}
+                      aria-label={f.weekdayName(weekday)}
+                      className={cn("px-3!", SELECTED)}
+                    >
+                      {f.weekdayMin(weekday)}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-2 text-sm">
+                {t.rich("meetings.form.monthlyOn", {
+                  count: d.interval,
+                  week: () => (
+                    <NativeSelect
+                      aria-label={t("meetings.form.monthWeek")}
+                      className="w-24"
+                      value={String(d.monthWeek)}
+                      onChange={(event) =>
+                        set(
+                          "monthWeek",
+                          oneOf(MONTH_WEEKS, Number(event.target.value)) ?? d.monthWeek
+                        )
+                      }
+                    >
+                      {MONTH_WEEKS.map((week) => (
+                        <NativeSelectOption key={week} value={week}>
+                          {f.monthWeekName(week)}
+                        </NativeSelectOption>
+                      ))}
+                    </NativeSelect>
+                  ),
+                  weekday: () => (
+                    <NativeSelect
+                      aria-label={t("meetings.form.weekday")}
+                      className="w-32"
+                      value={String(d.monthWeekday)}
+                      onChange={(event) =>
+                        set(
+                          "monthWeekday",
+                          oneOf(WEEKDAYS, Number(event.target.value)) ?? d.monthWeekday
+                        )
+                      }
+                    >
+                      {WEEKDAYS.map((weekday) => (
+                        <NativeSelectOption key={weekday} value={weekday}>
+                          {f.weekdayName(weekday)}
+                        </NativeSelectOption>
+                      ))}
+                    </NativeSelect>
+                  ),
+                  interval: () =>
+                    intervalSelect(t("meetings.form.monthsInterval"), INTERVALS.monthly),
+                })}
+              </div>
+            )}
+            {recurrenceError ? <FieldError>{recurrenceError}</FieldError> : null}
+          </FieldSet>
 
-            <div className="grid grid-cols-2 gap-4">
-              <TextField
-                label={t("meetings.form.startsAt")}
-                type="time"
-                value={d.startTime}
-                onChange={(event) => set("startTime", event.target.value)}
-                error={errors[FIELDS.startTime]}
-              />
-              <TextField
-                label={t("meetings.form.endsAt")}
-                type="time"
-                optional
-                value={d.endTime}
-                onChange={(event) => set("endTime", event.target.value)}
-                error={errors[FIELDS.endTime]}
-              />
-              <TextField
-                label={t("meetings.form.firstDate")}
-                type="date"
-                value={d.startsOn}
-                onChange={(event) => set("startsOn", event.target.value)}
-                error={errors["recurrence.span.startsOn"]}
-              />
-              <TextField
-                label={t("meetings.form.lastDate")}
-                type="date"
-                optional
-                value={d.endsOn}
-                onChange={(event) => set("endsOn", event.target.value)}
-                description={t("meetings.form.lastDateHint")}
-                error={errors["recurrence.span.endsOn"]}
-              />
-            </div>
+          <div className="grid grid-cols-2 gap-4">
+            <TextField
+              label={t("meetings.form.startsAt")}
+              type="time"
+              value={d.startTime}
+              onChange={(event) => set("startTime", event.target.value)}
+              error={errors[FIELDS.startTime]}
+            />
+            <TextField
+              label={t("meetings.form.endsAt")}
+              type="time"
+              optional
+              value={d.endTime}
+              onChange={(event) => set("endTime", event.target.value)}
+              error={errors[FIELDS.endTime]}
+            />
+            <TextField
+              label={t("meetings.form.firstDate")}
+              type="date"
+              value={d.startsOn}
+              onChange={(event) => set("startsOn", event.target.value)}
+              error={errors["recurrence.span.startsOn"]}
+            />
+            <TextField
+              label={t("meetings.form.lastDate")}
+              type="date"
+              optional
+              value={d.endsOn}
+              onChange={(event) => set("endsOn", event.target.value)}
+              description={t("meetings.form.lastDateHint")}
+              error={errors["recurrence.span.endsOn"]}
+            />
+          </div>
 
-            <div
-              aria-live="polite"
-              data-testid="schedule-preview"
-              className="flex flex-col gap-1.5 bg-muted/60 p-4 text-sm"
-            >
-              <span className="text-xs font-semibold tracking-wider uppercase">
-                {t("meetings.form.preview")}
+          <div
+            aria-live="polite"
+            data-testid="schedule-preview"
+            className="flex flex-col gap-1.5 bg-muted/60 p-4 text-sm"
+          >
+            <span className="text-xs font-semibold tracking-wider uppercase">
+              {t("meetings.form.preview")}
+            </span>
+            {preview.error ? (
+              <span className="text-muted-foreground">
+                {t(`errors.recurrence.${preview.error}`)}
               </span>
-              {preview.error ? (
-                <span className="text-muted-foreground">
-                  {t(`errors.recurrence.${preview.error}`)}
+            ) : preview.dates.length === 0 ? (
+              <span className="text-muted-foreground">{t("meetings.form.previewNone")}</span>
+            ) : (
+              <>
+                <span>
+                  {t("meetings.form.previewPattern", {
+                    pattern: f.recurrence(preview.recurrence),
+                    time: f.timeRange(d.startTime, d.endTime || null),
+                  })}
                 </span>
-              ) : preview.dates.length === 0 ? (
-                <span className="text-muted-foreground">{t("meetings.form.previewNone")}</span>
-              ) : (
-                <>
-                  <span>
-                    {t("meetings.form.previewPattern", {
-                      pattern: f.recurrence(preview.recurrence),
-                      time: f.timeRange(d.startTime, d.endTime || null),
-                    })}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {t("meetings.form.previewNext", {
-                      dates: preview.dates
-                        .map((date) => f.dayMonth(date))
-                        .join(t("meetings.form.dateSeparator")),
-                    }).replace(/\.\.$/, ".")}{" "}
-                    {firstCreated(preview.dates[0])}
-                  </span>
-                </>
-              )}
-            </div>
+                <span className="text-muted-foreground">
+                  {t("meetings.form.previewNext", {
+                    dates: preview.dates
+                      .map((date) => f.dayMonth(date))
+                      .join(t("meetings.form.dateSeparator")),
+                  }).replace(/\.\.$/, ".")}{" "}
+                  {firstCreated(preview.dates[0])}
+                </span>
+              </>
+            )}
           </div>
         </div>
       </div>
-
-      <DialogFooter className="border-t px-6 py-4">
-        <Button type="button" variant="outline" disabled={mutation.pending} onClick={onDone}>
-          {t("common.cancel")}
-        </Button>
-        <Button type="submit" disabled={mutation.pending || preview.error !== null}>
-          {mutation.pending ? <Spinner data-icon="inline-start" /> : null}
-          {schedule ? t("meetings.form.save") : t("meetings.form.create")}
-        </Button>
-      </DialogFooter>
-    </form>
+    </FormDialog>
   )
 }
 
@@ -650,47 +628,27 @@ function ScheduleDialog({
   today,
   schedule,
   fixedServiceId,
-  open,
-  onOpenChange,
+  onClose,
 }: {
   today: LocalDate
   schedule?: ScheduleSummary
   fixedServiceId?: Uuid
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  onClose: () => void
 }) {
-  const t = useTranslations()
-  const f = useFormat()
-  const [pending, setPending] = useState(false)
   const services = useQuery(servicesQuery)
-  const manageable = services.data?.items.filter((s) => !s.archived) ?? []
+
+  if (!services.data) {
+    return null
+  }
 
   return (
-    <Dialog open={open} onOpenChange={(next) => (next || !pending) && onOpenChange(next)}>
-      <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 p-0 sm:max-w-4xl">
-        <DialogHeader className="border-b p-6 pe-16">
-          <DialogTitle className="flex items-center gap-2">
-            <CalendarClock className="size-4" />
-            {schedule ? t("meetings.actions.edit") : t("meetings.form.newTitle")}
-          </DialogTitle>
-          <DialogDescription>
-            {schedule
-              ? `${groupOf(schedule)} · ${f.recurrence(recurrenceOf(schedule.recurrence))}`
-              : t("meetings.form.newDescription")}
-          </DialogDescription>
-        </DialogHeader>
-        {open && services.data ? (
-          <ScheduleForm
-            services={manageable}
-            today={today}
-            schedule={schedule}
-            fixedServiceId={fixedServiceId}
-            onDone={() => onOpenChange(false)}
-            onPendingChange={setPending}
-          />
-        ) : null}
-      </DialogContent>
-    </Dialog>
+    <ScheduleForm
+      services={services.data.items.filter((s) => !s.archived)}
+      today={today}
+      schedule={schedule}
+      fixedServiceId={fixedServiceId}
+      onClose={onClose}
+    />
   )
 }
 
@@ -710,12 +668,13 @@ export function NewScheduleButton({
         <Plus data-icon="inline-start" />
         {t("newButton")}
       </Button>
-      <ScheduleDialog
-        today={today}
-        fixedServiceId={fixedServiceId}
-        open={open}
-        onOpenChange={setOpen}
-      />
+      {open ? (
+        <ScheduleDialog
+          today={today}
+          fixedServiceId={fixedServiceId}
+          onClose={() => setOpen(false)}
+        />
+      ) : null}
     </>
   )
 }
@@ -735,7 +694,9 @@ export function EditScheduleButton({
       <Button variant="ghost" size="sm" onClick={() => setOpen(true)}>
         {t("edit")}
       </Button>
-      <ScheduleDialog today={today} schedule={schedule} open={open} onOpenChange={setOpen} />
+      {open ? (
+        <ScheduleDialog today={today} schedule={schedule} onClose={() => setOpen(false)} />
+      ) : null}
     </>
   )
 }

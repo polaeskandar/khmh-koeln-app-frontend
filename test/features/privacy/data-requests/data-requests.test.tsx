@@ -179,6 +179,41 @@ describe("the record dialog", () => {
     expect(dialog.getByText("The date can’t be in the future.")).toBeInTheDocument()
   })
 
+  test("after a 422, focus moves to the first field with an error", async () => {
+    open()
+
+    server.use(
+      http.post(apiUrl("/data-requests"), () =>
+        problem(422, "validation.failed", {
+          fieldErrors: {
+            subject: { code: "privacy.chooseSubject", params: {} },
+            "receipt.requestedBy": { code: "privacy.requestedByRequired", params: {} },
+          },
+        })
+      )
+    )
+
+    const dialog = await openDialog()
+    await userEvent.click(dialog.getByRole("button", { name: "Record request" }))
+
+    await waitFor(() =>
+      expect(dialog.getByRole("textbox", { name: "Find a member by name" })).toHaveFocus()
+    )
+  })
+
+  test("Enter in the search looks for the subject without recording the request", async () => {
+    const calls = open()
+    const dialog = await openDialog()
+
+    await userEvent.type(
+      dialog.getByRole("textbox", { name: "Find a member by name" }),
+      "Kiro{Enter}"
+    )
+
+    expect(await dialog.findByRole("radio", { name: "Kirollos Iskander" })).toBeInTheDocument()
+    expect(calls.posts).toEqual([])
+  })
+
   test("stays open while saving, then opens the new request", async () => {
     let release!: () => void
     const gate = new Promise<void>((resolve) => (release = resolve))

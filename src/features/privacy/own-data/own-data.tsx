@@ -3,27 +3,17 @@
 import { useQuery } from "@tanstack/react-query"
 import { Download, Hourglass, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
+import { FormDialog } from "@/components/form-dialog"
 import { TextAreaField } from "@/components/form-fields"
 import { FormPanel } from "@/components/form-panel"
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { FieldGroup } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { rememberErasureScheduled } from "@/features/identity/auth/auth-outcome"
 import { PasswordField } from "@/features/identity/auth/password-field"
 import { useSession } from "@/features/identity/auth/session"
-import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { useFormat } from "@/i18n/format"
 import { isStale, useRefetch } from "@/lib/api/refetch"
@@ -38,17 +28,11 @@ import {
   requestErasureRequest,
 } from "./api"
 
-function DeleteAccountForm({
-  parent,
-  onAlreadyRequested,
-  onPendingChange,
-}: {
-  parent: boolean
-  onAlreadyRequested: () => void
-  onPendingChange: (pending: boolean) => void
-}) {
+function DeleteAccountDialog({ onClose }: { onClose: () => void }) {
   const t = useTranslations()
-  const { endSession } = useSession()
+  const refetch = useRefetch()
+  const { session, endSession } = useSession()
+  const areas = session.status === "authenticated" ? session.areas : null
   const [password, setPassword] = useState("")
   const [note, setNote] = useState("")
 
@@ -61,31 +45,39 @@ function DeleteAccountForm({
 
   const errors = erase.fieldErrors
 
-  const formRef = useFocusFirstInvalid(erase.problem)
-
-  useEffect(() => onPendingChange(erase.pending), [erase.pending, onPendingChange])
-
   const submit = useSubmitOnce(async () => {
     const trimmed = note.trim()
 
     const result = await erase.execute(trimmed === "" ? { password } : { password, note: trimmed })
 
     if (!result.ok && isStale(result.problem, ["privacy.alreadyRequested"])) {
-      onAlreadyRequested()
+      onClose()
+      void refetch(ERASURE_REQUEST_QUERIES)
     }
   })
 
   return (
-    <form
-      ref={formRef}
-      method="post"
-      noValidate
-      className="flex flex-col gap-6"
-      onSubmit={(event) => {
-        event.preventDefault()
-        void submit()
-      }}
+    <FormDialog
+      role="alertdialog"
+      tone="destructive"
+      title={t("privacy.own.confirmTitle")}
+      description={t("privacy.own.confirmText")}
+      pending={erase.pending}
+      problem={erase.problem}
+      submitLabel={t("privacy.own.confirm")}
+      onSubmit={submit}
+      onClose={onClose}
     >
+      <div className="flex flex-col gap-2 text-sm">
+        <ul className="flex list-disc flex-col gap-1 bg-destructive/10 py-4 ps-8 pe-4 text-destructive marker:text-muted-foreground">
+          <li>{t("privacy.own.goesAccount")}</li>
+          {areas?.member ? <li>{t("privacy.own.goesMember")}</li> : null}
+        </ul>
+        <p className="text-muted-foreground">
+          {areas?.parent ? `${t("privacy.own.staysChildren")} ` : null}
+          {t("privacy.own.staysTotals")}
+        </p>
+      </div>
       <FieldGroup>
         <PasswordField
           label={t("privacy.own.password")}
@@ -97,7 +89,7 @@ function DeleteAccountForm({
         />
         <TextAreaField
           label={t("privacy.own.noteLabel")}
-          description={parent ? t("privacy.own.noteHint") : undefined}
+          description={areas?.parent ? t("privacy.own.noteHint") : undefined}
           optional
           maxLength={2000}
           value={note}
@@ -105,58 +97,22 @@ function DeleteAccountForm({
           error={errors.note}
         />
       </FieldGroup>
-      <AlertDialogFooter>
-        <AlertDialogCancel disabled={erase.pending}>{t("common.cancel")}</AlertDialogCancel>
-        <Button type="submit" variant="destructive" disabled={erase.pending}>
-          {erase.pending ? <Spinner data-icon="inline-start" /> : null}
-          {t("privacy.own.confirm")}
-        </Button>
-      </AlertDialogFooter>
-    </form>
+    </FormDialog>
   )
 }
 
-function DeleteAccountDialog() {
+function DeleteAccountButton() {
   const t = useTranslations("privacy.own")
-  const refetch = useRefetch()
-  const { session } = useSession()
-  const areas = session.status === "authenticated" ? session.areas : null
   const [open, setOpen] = useState(false)
-  const [pending, setPending] = useState(false)
 
   return (
-    <AlertDialog open={open} onOpenChange={(next) => !pending && setOpen(next)}>
-      <AlertDialogTrigger asChild>
-        <Button variant="outline" className="shrink-0">
-          <Trash2 data-icon="inline-start" />
-          {t("delete")}
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{t("confirmTitle")}</AlertDialogTitle>
-          <AlertDialogDescription>{t("confirmText")}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <div className="flex flex-col gap-2 text-sm">
-          <ul className="flex list-disc flex-col gap-1 bg-destructive/10 py-4 ps-8 pe-4 text-destructive marker:text-muted-foreground">
-            <li>{t("goesAccount")}</li>
-            {areas?.member ? <li>{t("goesMember")}</li> : null}
-          </ul>
-          <p className="text-muted-foreground">
-            {areas?.parent ? `${t("staysChildren")} ` : null}
-            {t("staysTotals")}
-          </p>
-        </div>
-        <DeleteAccountForm
-          parent={areas?.parent ?? false}
-          onPendingChange={setPending}
-          onAlreadyRequested={() => {
-            setOpen(false)
-            void refetch(ERASURE_REQUEST_QUERIES)
-          }}
-        />
-      </AlertDialogContent>
-    </AlertDialog>
+    <>
+      <Button variant="outline" className="shrink-0" onClick={() => setOpen(true)}>
+        <Trash2 data-icon="inline-start" />
+        {t("delete")}
+      </Button>
+      {open ? <DeleteAccountDialog onClose={() => setOpen(false)} /> : null}
+    </>
   )
 }
 
@@ -214,7 +170,7 @@ export function OwnData({ today }: { today: LocalDate }) {
             </Button>
           </span>
         ) : null}
-        {erasure.data && !requested ? <DeleteAccountDialog /> : null}
+        {erasure.data && !requested ? <DeleteAccountButton /> : null}
       </div>
     </FormPanel>
   )

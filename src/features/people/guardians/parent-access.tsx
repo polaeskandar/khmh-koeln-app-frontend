@@ -5,23 +5,15 @@ import { Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
+import { FormDialog } from "@/components/form-dialog"
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { SelectField } from "@/components/form-fields"
 import { Section } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { Field, FieldError, FieldGroup } from "@/components/ui/field"
 import { NativeSelectOption } from "@/components/ui/native-select"
-import { Spinner } from "@/components/ui/spinner"
 import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { isStale, useRefetch } from "@/lib/api/refetch"
@@ -42,24 +34,21 @@ import { PersonSearch } from "@/features/people/members/person-search"
 
 function GiveAccessDialog({
   accounts,
-  open,
-  onOpenChange,
+  onClose,
 }: {
   accounts: GuardianLinks["accounts"]
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  onClose: () => void
 }) {
   const t = useTranslations("settings.parents")
   const [userId, setUserId] = useState("")
   const [child, setChild] = useState<DirectoryPerson | null>(null)
   const toastText = useTranslations("toast")
-  const tCommon = useTranslations("common")
 
   const give = useApiMutation(giveAccessRequest, {
     successMessage: toastText("accessGiven"),
     invalidate: GUARDIAN_LINK_QUERIES,
     toastOnError: false,
-    onSuccess: () => onOpenChange(false),
+    onSuccess: onClose,
   })
 
   const childError = give.fieldErrors.personId
@@ -68,68 +57,46 @@ function GiveAccessDialog({
     give.problem && Object.keys(give.fieldErrors).length === 0 ? give.problem.message : null
 
   return (
-    <Dialog open={open} onOpenChange={(next) => (next || !give.pending) && onOpenChange(next)}>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{t("giveTitle")}</DialogTitle>
-          <DialogDescription>{t("giveDescription")}</DialogDescription>
-        </DialogHeader>
-        <form
-          className="flex flex-col gap-6"
-          onSubmit={(event) => {
-            event.preventDefault()
-
-            if (userId && child) {
-              void give.execute({ userId, personId: child.id })
-            }
-          }}
+    <FormDialog
+      title={t("giveTitle")}
+      description={t("giveDescription")}
+      pending={give.pending}
+      problem={give.problem}
+      submitLabel={t("giveAccess")}
+      submitDisabled={!userId || !child}
+      onSubmit={() => child && give.execute({ userId, personId: child.id })}
+      onClose={onClose}
+    >
+      {problem ? (
+        <Alert variant="destructive">
+          <AlertDescription>{problem}</AlertDescription>
+        </Alert>
+      ) : null}
+      <FieldGroup>
+        <SelectField
+          label={t("parentAccount")}
+          value={userId}
+          onChange={(event) => setUserId(event.target.value)}
         >
-          {problem ? (
-            <Alert variant="destructive">
-              <AlertDescription>{problem}</AlertDescription>
-            </Alert>
-          ) : null}
-          <FieldGroup>
-            <SelectField
-              label={t("parentAccount")}
-              value={userId}
-              onChange={(event) => setUserId(event.target.value)}
-            >
-              <NativeSelectOption value="" disabled>
-                {t("parentAccount")}
-              </NativeSelectOption>
-              {accounts.map((account) => (
-                <NativeSelectOption key={account.id} value={account.id}>
-                  {`${account.name} · ${account.email}`}
-                </NativeSelectOption>
-              ))}
-            </SelectField>
-            <Field data-invalid={childError ? true : undefined}>
-              <PersonSearch
-                label={t("child")}
-                chosen={child ? [child] : []}
-                onChange={(people) => setChild(people.at(-1) ?? null)}
-              />
-              {childError ? <FieldError>{childError}</FieldError> : null}
-            </Field>
-          </FieldGroup>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={give.pending}
-              onClick={() => onOpenChange(false)}
-            >
-              {tCommon("cancel")}
-            </Button>
-            <Button type="submit" disabled={!userId || !child || give.pending}>
-              {give.pending ? <Spinner data-icon="inline-start" /> : null}
-              {t("giveAccess")}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+          <NativeSelectOption value="" disabled>
+            {t("parentAccount")}
+          </NativeSelectOption>
+          {accounts.map((account) => (
+            <NativeSelectOption key={account.id} value={account.id}>
+              {`${account.name} · ${account.email}`}
+            </NativeSelectOption>
+          ))}
+        </SelectField>
+        <Field data-invalid={childError ? true : undefined}>
+          <PersonSearch
+            label={t("child")}
+            chosen={child ? [child] : []}
+            onChange={(people) => setChild(people.at(-1) ?? null)}
+          />
+          {childError ? <FieldError>{childError}</FieldError> : null}
+        </Field>
+      </FieldGroup>
+    </FormDialog>
   )
 }
 
@@ -258,7 +225,7 @@ export function ParentAccess() {
               </div>
             ) : null}
             {giving ? (
-              <GiveAccessDialog accounts={data.accounts} open={giving} onOpenChange={setGiving} />
+              <GiveAccessDialog accounts={data.accounts} onClose={() => setGiving(false)} />
             ) : null}
           </div>
         )}

@@ -1,21 +1,14 @@
 "use client"
 
-import { useIsMutating, useQuery } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { cn } from "cn"
 import { CircleAlert, Layers, Plus, Search, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useId, useState } from "react"
 import { toast } from "sonner"
 
+import { FormDialog } from "@/components/form-dialog"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { TextAreaField, TextField } from "@/components/form-fields"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
@@ -28,7 +21,6 @@ import {
 } from "@/components/ui/field"
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Spinner } from "@/components/ui/spinner"
 import { QueryErrorState } from "@/components/page-states"
 import { useDebounced } from "@/hooks/use-debounced"
 import { useFormat } from "@/i18n/format"
@@ -54,7 +46,7 @@ import {
 } from "@/features/people/members/api"
 import { PlacementFields, usePlacement } from "@/features/people/members/placement-fields"
 import { parentPortalOnly, rolesQuery } from "@/features/identity/roles/api"
-import { groupsText, PersonSearch } from "@/features/people/members/person-search"
+import { groupsText, ignoreEnter, PersonSearch } from "@/features/people/members/person-search"
 import { RolesChoice } from "@/features/identity/roles/roles-choice"
 import type { GroupOption } from "@/features/organization/assignments/api"
 import {
@@ -145,7 +137,7 @@ function GroupsChoice({
   )
 }
 
-function Approval({ request, onDone }: { request: AccountRequest; onDone: () => void }) {
+function Approval({ request, onClose }: { request: AccountRequest; onClose: () => void }) {
   const t = useTranslations()
   const f = useFormat()
   const refetch = useRefetch()
@@ -169,7 +161,7 @@ function Approval({ request, onDone }: { request: AccountRequest; onDone: () => 
     successMessage: t("toast.accountApproved", { name: request.account.displayName }),
     invalidate: STAFF_APPROVAL_QUERIES,
     toastOnError: false,
-    onSuccess: onDone,
+    onSuccess: onClose,
   })
 
   const roleIds =
@@ -187,7 +179,7 @@ function Approval({ request, onDone }: { request: AccountRequest; onDone: () => 
     if (!result.ok && isStale(result.problem, CHANGED_MEANWHILE)) {
       toast.error(result.problem.message)
       void refetch(ACCOUNT_REQUEST_QUERIES)
-      onDone()
+      onClose()
     }
   }
 
@@ -205,7 +197,20 @@ function Approval({ request, onDone }: { request: AccountRequest; onDone: () => 
       : null
 
   return (
-    <>
+    <FormDialog
+      title={t("accountRequests.approve.title", { name: request.account.displayName })}
+      description={
+        parent
+          ? t("accountRequests.approve.parentDescription")
+          : t("accountRequests.approve.servantDescription")
+      }
+      pending={approve.pending}
+      problem={approve.problem}
+      submitLabel={t("accountRequests.approve.submit")}
+      submitDisabled={roleIds.length === 0 || (parent && children.length === 0)}
+      onSubmit={submit}
+      onClose={onClose}
+    >
       {request.note ? (
         <blockquote dir="auto" className="border-s-2 ps-3 text-sm text-muted-foreground">
           {request.note}
@@ -248,20 +253,7 @@ function Approval({ request, onDone }: { request: AccountRequest; onDone: () => 
       {roles.isError ? (
         <QueryErrorState error={roles.error} onRetry={() => roles.refetch()} />
       ) : null}
-      <DialogFooter>
-        <Button type="button" variant="outline" disabled={approve.pending} onClick={onDone}>
-          {t("common.cancel")}
-        </Button>
-        <Button
-          type="button"
-          disabled={approve.pending || roleIds.length === 0 || (parent && children.length === 0)}
-          onClick={() => void submit()}
-        >
-          {approve.pending ? <Spinner data-icon="inline-start" /> : null}
-          {t("accountRequests.approve.submit")}
-        </Button>
-      </DialogFooter>
-    </>
+    </FormDialog>
   )
 }
 
@@ -275,7 +267,7 @@ function namesOf(displayName: string) {
   return { firstName, lastName: rest.join(" ") }
 }
 
-function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: () => void }) {
+function MemberApproval({ request, onClose }: { request: AccountRequest; onClose: () => void }) {
   const t = useTranslations()
   const f = useFormat()
   const refetch = useRefetch()
@@ -302,7 +294,7 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
     successMessage: t("toast.accountApproved", { name }),
     invalidate: MEMBER_ACCOUNT_QUERIES,
     toastOnError: false,
-    onSuccess: onDone,
+    onSuccess: onClose,
   })
 
   const items = candidates.data?.items ?? []
@@ -379,12 +371,21 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
     if (!result.ok && isStale(result.problem, CHANGED_MEANWHILE)) {
       toast.error(result.problem.message)
       void refetch(ACCOUNT_REQUEST_QUERIES)
-      onDone()
+      onClose()
     }
   }
 
   return (
-    <>
+    <FormDialog
+      title={t("accountRequests.approve.title", { name })}
+      description={t("accountRequests.approve.memberDescription")}
+      pending={busy}
+      problem={approve.problem ?? create.problem}
+      submitLabel={t("accountRequests.approve.submit")}
+      submitDisabled={(!newRecord && !personId) || !ageCheck || noteTooLong}
+      onSubmit={() => submit()}
+      onClose={onClose}
+    >
       {request.note ? (
         <blockquote dir="auto" className="border-s-2 ps-3 text-sm text-muted-foreground">
           {request.note}
@@ -458,6 +459,7 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
               placeholder={t("accountRequests.approve.findMember")}
               value={text}
               onChange={(event) => setText(event.target.value)}
+              onKeyDown={ignoreEnter}
             />
           </InputGroup>
           {namesakes.length > 1 ? (
@@ -560,54 +562,24 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
         />
       ) : null}
       {generalError ? <FieldError>{generalError}</FieldError> : null}
-      <DialogFooter>
-        <Button type="button" variant="outline" disabled={busy} onClick={onDone}>
-          {t("common.cancel")}
-        </Button>
-        <Button
-          type="button"
-          disabled={busy || (!newRecord && !personId) || !ageCheck || noteTooLong}
-          onClick={() => void submit()}
-        >
-          {approve.pending ? <Spinner data-icon="inline-start" /> : null}
-          {t("accountRequests.approve.submit")}
-        </Button>
-      </DialogFooter>
-    </>
+    </FormDialog>
   )
 }
 
 export function ApproveButton({ request }: { request: AccountRequest }) {
   const t = useTranslations("accountRequests")
   const [open, setOpen] = useState(false)
-  const busy = useIsMutating() > 0
+  const close = () => setOpen(false)
 
   return (
     <>
       <Button onClick={() => setOpen(true)}>{t("approveButton")}</Button>
-      <Dialog open={open} onOpenChange={(next) => !busy && setOpen(next)}>
-        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{t("approve.title", { name: request.account.displayName })}</DialogTitle>
-            <DialogDescription>
-              {request.registeredAs === "member"
-                ? t("approve.memberDescription")
-                : request.registeredAs === "parent"
-                  ? t("approve.parentDescription")
-                  : t("approve.servantDescription")}
-            </DialogDescription>
-          </DialogHeader>
-          {open ? (
-            <div className="flex flex-col gap-4">
-              {request.registeredAs === "member" ? (
-                <MemberApproval request={request} onDone={() => setOpen(false)} />
-              ) : (
-                <Approval request={request} onDone={() => setOpen(false)} />
-              )}
-            </div>
-          ) : null}
-        </DialogContent>
-      </Dialog>
+      {open && request.registeredAs === "member" ? (
+        <MemberApproval request={request} onClose={close} />
+      ) : null}
+      {open && request.registeredAs !== "member" ? (
+        <Approval request={request} onClose={close} />
+      ) : null}
     </>
   )
 }

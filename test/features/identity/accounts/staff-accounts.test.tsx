@@ -293,6 +293,23 @@ test("one click sends one link, also where StrictMode runs effects twice", async
   expect(sent).toEqual([`link ${sara.id} {}`])
 })
 
+test("Escape doesn't close the password link dialog while the link is being created", async () => {
+  open()
+
+  server.use(
+    http.post(apiUrl("/accounts/:id/password-link"), () => new Promise<Response>(() => {}))
+  )
+
+  await userEvent.click(
+    await within(await rowOf("Sara Wissa")).findByRole("button", { name: "Password link…" })
+  )
+
+  const dialog = within(await screen.findByRole("dialog"))
+  expect(await dialog.findByText("Sending the link…")).toBeInTheDocument()
+  await userEvent.keyboard("{Escape}")
+  expect(screen.getByRole("dialog")).toBeInTheDocument()
+})
+
 test("a disabled account's link refusal shows its text", async () => {
   open({ link: () => problem(409, "auth.disabled") })
   const row = within(await rowOf("Rebecca Girgis"))

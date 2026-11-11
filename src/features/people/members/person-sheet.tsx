@@ -34,6 +34,7 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { servicesQuery } from "@/features/organization/services/api"
 import { useCan } from "@/features/identity/auth/session"
+import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useInlineEnd } from "@/i18n/direction"
 import { useFormat } from "@/i18n/format"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -83,6 +84,7 @@ function NameForm({ person }: { person: PersonRow["person"] }) {
     onSuccess: () => setEdits({}),
   })
 
+  const formRef = useFocusFirstInvalid(rename.problem)
   const next: PersonNames = { ...names, displayName: names.displayName || null }
 
   const changed =
@@ -92,6 +94,7 @@ function NameForm({ person }: { person: PersonRow["person"] }) {
 
   return (
     <form
+      ref={formRef}
       noValidate
       className="flex flex-col gap-4"
       onSubmit={(event) => {

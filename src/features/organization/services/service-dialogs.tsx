@@ -1,20 +1,13 @@
 "use client"
 
+import { FormDialog } from "@/components/form-dialog"
 import { useCan } from "@/features/identity/auth/session"
 import { Archive, ArchiveRestore, Ellipsis, PencilLine, Plus, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import { TextAreaField, TextField } from "@/components/form-fields"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,8 +15,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { FieldGroup } from "@/components/ui/field"
-import { Spinner } from "@/components/ui/spinner"
-import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useRouter } from "@/i18n/navigation"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
@@ -57,15 +48,7 @@ function changesOf(service: ServiceRow, fields: ServiceFields): Partial<ServiceF
   return changes
 }
 
-function ServiceForm({
-  service,
-  onDone,
-  onPendingChange,
-}: {
-  service?: ServiceRow
-  onDone: () => void
-  onPendingChange: (pending: boolean) => void
-}) {
+export function ServiceDialog({ service, onClose }: { service?: ServiceRow; onClose: () => void }) {
   const t = useTranslations()
   const router = useRouter()
   const [name, setName] = useState(service?.name ?? "")
@@ -79,15 +62,11 @@ function ServiceForm({
 
   const update = useApiMutation(
     (fields: ServiceFields) => updateServiceRequest(service!.id, fields),
-    { successMessage: t("toast.saved"), invalidate: SERVICE_QUERIES, onSuccess: onDone }
+    { successMessage: t("toast.saved"), invalidate: SERVICE_QUERIES, onSuccess: onClose }
   )
 
   const mutation = service ? update : create
   const errors = mutation.fieldErrors
-
-  const formRef = useFocusFirstInvalid(mutation.problem)
-
-  useEffect(() => onPendingChange(mutation.pending), [mutation.pending, onPendingChange])
 
   async function submit() {
     const fields = { name, description: description.trim() === "" ? null : description }
@@ -101,21 +80,21 @@ function ServiceForm({
     const changes = changesOf(service, fields)
 
     if (Object.keys(changes).length === 0) {
-      onDone()
+      onClose()
     } else {
       await update.execute(fields)
     }
   }
 
   return (
-    <form
-      ref={formRef}
-      noValidate
-      className="flex flex-col gap-6"
-      onSubmit={(event) => {
-        event.preventDefault()
-        void submit()
-      }}
+    <FormDialog
+      title={service ? t("services.form.editTitle", { name: service.name }) : t("services.new")}
+      description={service ? t("services.form.editDescription") : t("services.form.newDescription")}
+      pending={mutation.pending}
+      problem={mutation.problem}
+      submitLabel={service ? t("common.saveChanges") : t("services.form.create")}
+      onSubmit={submit}
+      onClose={onClose}
     >
       <FieldGroup>
         <TextField
@@ -139,51 +118,7 @@ function ServiceForm({
           error={errors.description}
         />
       </FieldGroup>
-      <DialogFooter>
-        <Button type="button" variant="outline" disabled={mutation.pending} onClick={onDone}>
-          {t("common.cancel")}
-        </Button>
-        <Button type="submit" disabled={mutation.pending}>
-          {mutation.pending ? <Spinner data-icon="inline-start" /> : null}
-          {service ? t("common.saveChanges") : t("services.form.create")}
-        </Button>
-      </DialogFooter>
-    </form>
-  )
-}
-
-export function ServiceFormDialog({
-  service,
-  open,
-  onOpenChange,
-}: {
-  service?: ServiceRow
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}) {
-  const t = useTranslations("services")
-  const [pending, setPending] = useState(false)
-
-  return (
-    <Dialog open={open} onOpenChange={(next) => (next || !pending) && onOpenChange(next)}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {service ? t("form.editTitle", { name: service.name }) : t("new")}
-          </DialogTitle>
-          <DialogDescription>
-            {service ? t("form.editDescription") : t("form.newDescription")}
-          </DialogDescription>
-        </DialogHeader>
-        {open ? (
-          <ServiceForm
-            service={service}
-            onDone={() => onOpenChange(false)}
-            onPendingChange={setPending}
-          />
-        ) : null}
-      </DialogContent>
-    </Dialog>
+    </FormDialog>
   )
 }
 
@@ -197,7 +132,7 @@ export function NewServiceButton() {
         <Plus data-icon="inline-start" />
         {t("new")}
       </Button>
-      <ServiceFormDialog open={open} onOpenChange={setOpen} />
+      {open ? <ServiceDialog onClose={() => setOpen(false)} /> : null}
     </>
   )
 }
@@ -261,8 +196,8 @@ export function ServiceActionsMenu({ service }: { service: ServiceRow }) {
           ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
-      {edit ? (
-        <ServiceFormDialog service={service} open={open === "edit"} onOpenChange={close} />
+      {edit && open === "edit" ? (
+        <ServiceDialog service={service} onClose={() => setOpen(null)} />
       ) : null}
       <StructureChangeDialog
         open={open === "archive"}

@@ -1,20 +1,13 @@
 "use client"
 
-import { useIsMutating, useQuery } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useId, useState } from "react"
 
+import { FormDialog } from "@/components/form-dialog"
 import { SelectField, TextAreaField, TextField } from "@/components/form-fields"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import {
   Field,
   FieldDescription,
@@ -26,9 +19,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { NativeSelectOption } from "@/components/ui/native-select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Spinner } from "@/components/ui/spinner"
 import { guardianLinksQuery } from "@/features/people/guardians/api"
 import { peopleQuery } from "@/features/people/members/api"
+import { ignoreEnter } from "@/features/people/members/person-search"
 import { useDebounced } from "@/hooks/use-debounced"
 import { useRouter } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
@@ -123,6 +116,7 @@ function SubjectSearch({
           setText(event.target.value)
           onChange(null)
         }}
+        onKeyDown={ignoreEnter}
       />
       {q.length < 2 ? (
         <FieldDescription>{t("searchHint")}</FieldDescription>
@@ -151,7 +145,7 @@ function SubjectSearch({
   )
 }
 
-function RecordForm({ today, onDone }: { today: LocalDate; onDone: () => void }) {
+function RecordRequestDialog({ today, onClose }: { today: LocalDate; onClose: () => void }) {
   const t = useTranslations()
   const router = useRouter()
   const id = useId()
@@ -167,7 +161,7 @@ function RecordForm({ today, onDone }: { today: LocalDate; onDone: () => void })
     successMessage: t("toast.dataRequestRecorded"),
     invalidate: DATA_REQUEST_QUERIES,
     onSuccess: (saved) => {
-      onDone()
+      onClose()
       router.push(routes.dataRequest(saved.id))
     },
   })
@@ -186,13 +180,14 @@ function RecordForm({ today, onDone }: { today: LocalDate; onDone: () => void })
   }
 
   return (
-    <form
-      noValidate
-      className="flex flex-col gap-6"
-      onSubmit={(event) => {
-        event.preventDefault()
-        submit()
-      }}
+    <FormDialog
+      title={t("privacy.record.title")}
+      description={t("privacy.record.description")}
+      pending={record.pending}
+      problem={record.problem}
+      submitLabel={t("privacy.record.submit")}
+      onSubmit={submit}
+      onClose={onClose}
     >
       <FieldGroup>
         <FieldSet>
@@ -279,23 +274,13 @@ function RecordForm({ today, onDone }: { today: LocalDate; onDone: () => void })
           error={errors.note}
         />
       </FieldGroup>
-      <DialogFooter>
-        <Button type="button" variant="outline" disabled={record.pending} onClick={onDone}>
-          {t("common.cancel")}
-        </Button>
-        <Button type="submit" disabled={record.pending}>
-          {record.pending ? <Spinner data-icon="inline-start" /> : null}
-          {t("privacy.record.submit")}
-        </Button>
-      </DialogFooter>
-    </form>
+    </FormDialog>
   )
 }
 
 export function RecordRequestButton({ today }: { today: LocalDate }) {
   const t = useTranslations("privacy.record")
   const [open, setOpen] = useState(false)
-  const saving = useIsMutating() > 0
 
   return (
     <>
@@ -303,15 +288,7 @@ export function RecordRequestButton({ today }: { today: LocalDate }) {
         <Plus data-icon="inline-start" />
         {t("open")}
       </Button>
-      <Dialog open={open} onOpenChange={(next) => !saving && setOpen(next)}>
-        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{t("title")}</DialogTitle>
-            <DialogDescription>{t("description")}</DialogDescription>
-          </DialogHeader>
-          {open ? <RecordForm today={today} onDone={() => setOpen(false)} /> : null}
-        </DialogContent>
-      </Dialog>
+      {open ? <RecordRequestDialog today={today} onClose={() => setOpen(false)} /> : null}
     </>
   )
 }

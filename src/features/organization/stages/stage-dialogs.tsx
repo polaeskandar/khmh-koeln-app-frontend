@@ -11,18 +11,11 @@ import {
   Trash2,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
+import { FormDialog } from "@/components/form-dialog"
 import { TextAreaField, TextField } from "@/components/form-fields"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,9 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { FieldGroup } from "@/components/ui/field"
-import { Spinner } from "@/components/ui/spinner"
 import { useCan } from "@/features/identity/auth/session"
-import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useRouter } from "@/i18n/navigation"
 import type { ServiceRef } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -53,16 +44,14 @@ import {
 
 export type EditableStage = Pick<Stage, "id" | "name" | "description">
 
-function StageForm({
+function StageDialog({
   service,
   stage,
-  onDone,
-  onPendingChange,
+  onClose,
 }: {
   service: ServiceRef
   stage?: EditableStage
-  onDone: () => void
-  onPendingChange: (pending: boolean) => void
+  onClose: () => void
 }) {
   const t = useTranslations()
   const router = useRouter()
@@ -80,16 +69,12 @@ function StageForm({
     successMessage: t("toast.saved"),
     invalidate: STAGE_QUERIES,
     toastOnError: false,
-    onSuccess: onDone,
+    onSuccess: onClose,
   })
 
   const mutation = stage ? update : add
   const errors = mutation.fieldErrors
   const shownInFields = Object.keys(errors).length > 0
-
-  const formRef = useFocusFirstInvalid(mutation.problem)
-
-  useEffect(() => onPendingChange(mutation.pending), [mutation.pending, onPendingChange])
 
   async function submit() {
     const fields = { name, description: description.trim() === "" ? null : description }
@@ -111,21 +96,25 @@ function StageForm({
     }
 
     if (Object.keys(changes).length === 0) {
-      onDone()
+      onClose()
     } else {
       await update.execute(fields)
     }
   }
 
   return (
-    <form
-      ref={formRef}
-      noValidate
-      className="flex flex-col gap-6"
-      onSubmit={(event) => {
-        event.preventDefault()
-        void submit()
-      }}
+    <FormDialog
+      title={
+        stage
+          ? t("stages.form.editTitle", { name: stage.name })
+          : t("stages.form.addTitle", { service: service.name })
+      }
+      description={stage ? t("stages.form.editDescription") : t("stages.form.addDescription")}
+      pending={mutation.pending}
+      problem={mutation.problem}
+      submitLabel={stage ? t("common.saveChanges") : t("stages.form.add")}
+      onSubmit={submit}
+      onClose={onClose}
     >
       {mutation.problem && !shownInFields ? (
         <p role="alert" className="text-sm text-destructive">
@@ -154,56 +143,7 @@ function StageForm({
           error={errors.description}
         />
       </FieldGroup>
-      <DialogFooter>
-        <Button type="button" variant="outline" disabled={mutation.pending} onClick={onDone}>
-          {t("common.cancel")}
-        </Button>
-        <Button type="submit" disabled={mutation.pending}>
-          {mutation.pending ? <Spinner data-icon="inline-start" /> : null}
-          {stage ? t("common.saveChanges") : t("stages.form.add")}
-        </Button>
-      </DialogFooter>
-    </form>
-  )
-}
-
-function StageFormDialog({
-  service,
-  stage,
-  open,
-  onOpenChange,
-}: {
-  service: ServiceRef
-  stage?: EditableStage
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}) {
-  const t = useTranslations("stages.form")
-  const [pending, setPending] = useState(false)
-
-  return (
-    <Dialog open={open} onOpenChange={(next) => (next || !pending) && onOpenChange(next)}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {stage
-              ? t("editTitle", { name: stage.name })
-              : t("addTitle", { service: service.name })}
-          </DialogTitle>
-          <DialogDescription>
-            {stage ? t("editDescription") : t("addDescription")}
-          </DialogDescription>
-        </DialogHeader>
-        {open ? (
-          <StageForm
-            service={service}
-            stage={stage}
-            onDone={() => onOpenChange(false)}
-            onPendingChange={setPending}
-          />
-        ) : null}
-      </DialogContent>
-    </Dialog>
+    </FormDialog>
   )
 }
 
@@ -225,7 +165,7 @@ export function AddStageButton({
         <Plus data-icon="inline-start" />
         {label ?? t("add")}
       </Button>
-      <StageFormDialog service={service} open={open} onOpenChange={setOpen} />
+      {open ? <StageDialog service={service} onClose={() => setOpen(false)} /> : null}
     </>
   )
 }
@@ -289,12 +229,9 @@ export function StageActionsMenu({
           ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
-      <StageFormDialog
-        service={service}
-        stage={stage}
-        open={open === "edit"}
-        onOpenChange={close}
-      />
+      {open === "edit" ? (
+        <StageDialog service={service} stage={stage} onClose={() => setOpen(null)} />
+      ) : null}
       <StructureChangeDialog
         open={open === "archive"}
         onOpenChange={close}

@@ -38,7 +38,7 @@ import {
 import { AddStageButton } from "@/features/organization/stages/stage-dialogs"
 
 import { trendText } from "./service-bits"
-import { ServiceActionsMenu, ServiceFormDialog } from "./service-dialogs"
+import { ServiceActionsMenu, ServiceDialog } from "./service-dialogs"
 import { ServiceServants } from "./service-servants"
 
 function EditButton({ service }: { service: ServiceRow }) {
@@ -51,7 +51,7 @@ function EditButton({ service }: { service: ServiceRow }) {
         <PencilLine data-icon="inline-start" />
         {t("edit")}
       </Button>
-      <ServiceFormDialog service={service} open={open} onOpenChange={setOpen} />
+      {open ? <ServiceDialog service={service} onClose={() => setOpen(false)} /> : null}
     </>
   )
 }
