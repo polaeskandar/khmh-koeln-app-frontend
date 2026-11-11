@@ -21,9 +21,10 @@ import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { LessonDetail, LessonRow } from "@/features/learning/lessons/api"
-import { EditLessonPage, NewLessonPage } from "@/features/learning/lessons/lesson-editor"
+import { EditLessonPage } from "@/features/learning/lessons/edit-lesson-page"
+import { NewLessonPage } from "@/features/learning/lessons/new-lesson-page"
 import { LessonPage } from "@/features/learning/lessons/lesson-page"
-import { StageLessonsPage } from "@/features/learning/lessons/stage-lessons"
+import { StageLessonsPage } from "@/features/learning/lessons/stage-lessons-page"
 
 const daniel = { id: me.administrator.account.id, name: "Daniel Michael" }
 const christine = { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f03", name: "Christine Adel" }

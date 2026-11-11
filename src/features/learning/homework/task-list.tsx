@@ -4,6 +4,7 @@ import type { QueryKey } from "@tanstack/react-query"
 import { cn } from "cn"
 import { Check, ChevronRight } from "lucide-react"
 import { useTranslations } from "next-intl"
+import type { MouseEvent, ReactNode } from "react"
 
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
@@ -83,7 +84,7 @@ function TaskCard({
   const busy = pending || saving
   const when = report.completedAt ? f.atLabel(report.completedAt, today) : ""
 
-  function toggle(event: React.MouseEvent) {
+  function toggle(event: MouseEvent) {
     if (busy || event.detail > 1) {
       return
     }
@@ -174,7 +175,7 @@ export function TaskList({
   today: LocalDate
   href: (task: ParentTask) => string
   completion: TaskCompletion
-  empty?: React.ReactNode
+  empty?: ReactNode
 }) {
   return (
     <section className="flex flex-col gap-3" aria-label={title}>

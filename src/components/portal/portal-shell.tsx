@@ -1,6 +1,7 @@
 "use client"
 
 import { SearchX } from "lucide-react"
+import type { ReactNode } from "react"
 
 import { KhmkMark } from "@/components/brand/logo"
 import { Button } from "@/components/ui/button"
@@ -28,8 +29,8 @@ export function PortalShell({
   audience: string
   navLabel: string
   items: PortalNavItem[]
-  menu: React.ReactNode
-  children: React.ReactNode
+  menu: ReactNode
+  children: ReactNode
 }) {
   return (
     <div className="flex min-h-svh flex-col">

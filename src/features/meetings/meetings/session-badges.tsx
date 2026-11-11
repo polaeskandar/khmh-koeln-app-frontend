@@ -23,7 +23,7 @@ export function SessionStatusBadge({
   switch (status) {
     case "active":
       return (
-        <StatusBadge tone="success" live {...props}>
+        <StatusBadge tone="success" variant="live" {...props}>
           {t("active")}
         </StatusBadge>
       )
@@ -47,7 +47,7 @@ export function SessionStatusBadge({
       )
     case "planned":
       return (
-        <StatusBadge tone="muted" icon={CircleDashed} dashed {...props}>
+        <StatusBadge tone="muted" icon={CircleDashed} variant="dashed" {...props}>
           {t("planned")}
         </StatusBadge>
       )

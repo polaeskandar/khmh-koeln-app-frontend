@@ -19,8 +19,8 @@ import type {
   HomeworkRow,
   StageHomework,
 } from "@/features/learning/homework/api"
-import { HomeworkProgressPage } from "@/features/learning/homework/homework-progress"
-import { StageHomeworkPage } from "@/features/learning/homework/stage-homework"
+import { HomeworkProgressPage } from "@/features/learning/homework/homework-progress-page"
+import { StageHomeworkPage } from "@/features/learning/homework/stage-homework-page"
 
 beforeEach(() => {
   vi.spyOn(toast, "success")

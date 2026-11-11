@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
-import { MemberHomework } from "@/features/learning/homework/member-homework"
+import { MemberHomeworkPage } from "@/features/learning/homework/member-homework-page"
 import { pageLocale } from "@/i18n/page"
 
 export async function generateMetadata({
@@ -15,5 +15,5 @@ export async function generateMetadata({
 export default async function Page({ params }: PageProps<"/[locale]/member/homework">) {
   await pageLocale(params)
 
-  return <MemberHomework />
+  return <MemberHomeworkPage />
 }

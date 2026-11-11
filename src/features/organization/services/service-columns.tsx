@@ -14,7 +14,7 @@ import { localDateOf } from "@/lib/domain/time"
 import { routes } from "@/lib/routes"
 
 import { type ServiceRow, useServiceInsights } from "./api"
-import { AttendanceCell, NextMeetingCell } from "./service-bits"
+import { AttendanceCell, NextMeetingCell } from "./service-cells"
 import { ServiceActionsMenu } from "./service-actions"
 
 export function ArchivedBadge({ row }: { row: ServiceRow }) {

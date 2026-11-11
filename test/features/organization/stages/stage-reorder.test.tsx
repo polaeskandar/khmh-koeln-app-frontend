@@ -14,7 +14,7 @@ import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import { StagesManager } from "@/features/organization/stages/stages-manager"
+import { StagesManagerPage } from "@/features/organization/stages/stages-manager-page"
 
 const ROW = 48
 
@@ -71,7 +71,7 @@ function open(
     })
   )
 
-  renderWithProviders(<StagesManager />, { me: viewer, sidebar: true })
+  renderWithProviders(<StagesManagerPage />, { me: viewer, sidebar: true })
 
   return puts
 }

@@ -1,6 +1,7 @@
 import { cn } from "cn"
 import { Eye, LockKeyhole } from "lucide-react"
 import { useTranslations } from "next-intl"
+import type { ReactNode } from "react"
 
 export type Audience = "parents" | "servants"
 
@@ -36,8 +37,8 @@ export function LessonPanel({
 }: {
   title: string
   who?: Audience
-  actions?: React.ReactNode
-  children: React.ReactNode
+  actions?: ReactNode
+  children: ReactNode
   className?: string
 }) {
   return (

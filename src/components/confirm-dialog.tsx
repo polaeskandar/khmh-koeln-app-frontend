@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { type ReactNode, useState } from "react"
 import { useTranslations } from "next-intl"
 import { cn } from "cn"
 
@@ -45,11 +45,11 @@ export function ConfirmDialog({
   open: controlledOpen,
   onOpenChange,
 }: Controlled & {
-  trigger?: React.ReactNode
+  trigger?: ReactNode
   title: string
-  description?: React.ReactNode
-  consequences?: React.ReactNode[]
-  note?: React.ReactNode
+  description?: ReactNode
+  consequences?: ReactNode[]
+  note?: ReactNode
   confirmLabel: string
   tone?: "default" | "destructive"
   onConfirm: () => Promise<boolean>
@@ -116,9 +116,9 @@ export function ReasonDialog({
   onOpenChange,
   children,
 }: Controlled & {
-  trigger?: React.ReactNode
+  trigger?: ReactNode
   title: string
-  description?: React.ReactNode
+  description?: ReactNode
   reasonLabel?: string
   reasonHint?: string
   placeholder?: string
@@ -126,7 +126,7 @@ export function ReasonDialog({
   dismissLabel?: string
   tone?: "default" | "destructive"
   onConfirm: (reason: string | null) => Promise<boolean>
-  children?: React.ReactNode
+  children?: ReactNode
 }) {
   const t = useTranslations("common")
   const [innerOpen, setInnerOpen] = useState(false)

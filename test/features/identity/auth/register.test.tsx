@@ -10,7 +10,8 @@ import { renderWithProviders } from "@test/support/providers"
 
 import type { Registration } from "@/features/identity/auth/api"
 import { forgetOutcome, rememberOutcome } from "@/features/identity/auth/auth-outcome"
-import { RegisteredPage, RegisterPage } from "@/features/identity/auth/register-pages"
+import { RegisteredPage } from "@/features/identity/auth/registered-page"
+import { RegisterPage } from "@/features/identity/auth/register-page"
 
 const SERVICES = [
   { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f10", name: "Sunday School" },

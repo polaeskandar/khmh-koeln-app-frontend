@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { type StageCrumbsOf, useStageCrumbs } from "@/features/organization/stages/stage-layout"
 
-export function StageEditorPage({
+export function StageEditorFrame({
   stage,
   tab,
   title,

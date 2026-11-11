@@ -1,4 +1,5 @@
 import { cn } from "cn"
+import type { ReactNode } from "react"
 
 import type { ServiceRef } from "@/lib/api/types/common"
 
@@ -21,7 +22,7 @@ export function ServiceTag({
   className,
 }: {
   service: Pick<ServiceRef, "name" | "tone"> | null
-  label?: React.ReactNode
+  label?: ReactNode
   className?: string
 }) {
   if (!service) {

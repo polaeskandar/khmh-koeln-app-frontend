@@ -47,7 +47,7 @@ backend change reaches the frontend, update both in the same PR; never edit eith
 
 ## Names and structure
 
-- **Components and hooks** are named function declarations, `export function ServiceDetails()`, never arrow
+- **Components and hooks** are named function declarations, `export function ServiceDetailsPage()`, never arrow
   constants. A hook starts with `use`; one that two features need lives in `src/hooks/use-<name>.ts`
   (`src/hooks/use-today.ts`), not pasted into both.
 - **API calls** are `<verb><Noun>Request` and queries `<noun>Query`, in the feature's `api.ts`
@@ -61,7 +61,7 @@ backend change reaches the frontend, update both in the same PR; never edit eith
   keeps its name from the API to the screen; an id is `<thing>Id`, never the bare noun.
 - **States, not flags.** A value with a fixed set of states is a union of literals
   (`useState<"edit" | "archive" | "restore" | "delete" | null>` in
-  `src/features/organization/services/service-dialogs.tsx`). A component that creates or edits takes a
+  `src/features/organization/services/service-actions.tsx`). A component that creates or edits takes a
   discriminated union, not optional props that allow both at once. No positional booleans: `submitAnyway()`, not
   `submit(true)`.
 - **Types** come from `react` by name: `import type { ReactNode } from "react"`

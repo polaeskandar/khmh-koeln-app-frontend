@@ -1,0 +1,43 @@
+"use client"
+
+import { useQuery } from "@tanstack/react-query"
+import { useTranslations } from "next-intl"
+
+import { RecordNotFound } from "@/features/portals/staff/record-not-found"
+import { QueryState } from "@/components/page-states"
+import { RecordPage } from "@/components/record-page"
+import { useCan } from "@/features/identity/auth/session"
+
+import { roleQuery } from "./api"
+import { RoleForm } from "./role-form"
+
+import { RoleEditorFrame, NoRoles } from "./role-editor"
+
+function ExistingRole({ id }: { id: string }) {
+  const t = useTranslations("roleEditor")
+  const query = useQuery(roleQuery(id))
+
+  return (
+    <QueryState query={query} notFound={<RecordNotFound area="settings" />}>
+      {(role) => (
+        <RoleEditorFrame title={role.name} description={t("description")}>
+          <RoleForm role={role} />
+        </RoleEditorFrame>
+      )}
+    </QueryState>
+  )
+}
+
+export function RolePage() {
+  const can = useCan()
+
+  if (!can("read", "roles")) {
+    return <NoRoles />
+  }
+
+  return (
+    <RecordPage notFound={<RecordNotFound area="settings" />}>
+      {(id) => <ExistingRole id={id} />}
+    </RecordPage>
+  )
+}

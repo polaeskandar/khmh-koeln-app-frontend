@@ -4,7 +4,7 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { StagesManager } from "@/features/organization/stages/stages-manager"
+import { StagesManagerPage } from "@/features/organization/stages/stages-manager-page"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { insightsOf, services } from "@test/support/fixtures/services"
@@ -21,7 +21,7 @@ import {
   type ServiceRow,
   type ServiceStages,
 } from "@/features/organization/services/api"
-import { ServiceDetails } from "@/features/organization/services/service-details"
+import { ServiceDetailsPage } from "@/features/organization/services/service-details-page"
 import { ServiceActionsMenu } from "@/features/organization/services/service-actions"
 import type { Stage } from "@/features/organization/stages/api"
 
@@ -208,7 +208,7 @@ test("an archived service's details show when and why", async () => {
     http.get(apiUrl("/schedules"), () => HttpResponse.json({ today: "2026-11-08", items: [] }))
   )
 
-  renderWithProviders(<ServiceDetails />, { me: me.administrator, sidebar: true })
+  renderWithProviders(<ServiceDetailsPage />, { me: me.administrator, sidebar: true })
 
   expect(await screen.findByText("Archived on Sun 6 Sep 2026")).toBeInTheDocument()
 
@@ -265,7 +265,7 @@ test("a leader's archived stage moves to Archived stages, and Restore puts it la
     })
   )
 
-  renderWithProviders(<StagesManager />, { me: me.leader, sidebar: true })
+  renderWithProviders(<StagesManagerPage />, { me: me.leader, sidebar: true })
 
   await userEvent.click(await screen.findByRole("button", { name: "Actions for 3rd Class" }))
   await userEvent.click(await screen.findByRole("menuitem", { name: "Archive" }))

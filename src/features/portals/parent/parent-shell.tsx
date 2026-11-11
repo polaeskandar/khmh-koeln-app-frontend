@@ -1,6 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
+import type { ReactNode } from "react"
 
 import { PortalNotAvailable, PortalShell } from "@/components/portal/portal-shell"
 import { routes } from "@/lib/routes"
@@ -8,7 +9,7 @@ import { routes } from "@/lib/routes"
 import { ParentAccountMenu } from "./parent-account-menu"
 import { useParentNav } from "./parent-nav"
 
-export function ParentShell({ children }: { children: React.ReactNode }) {
+export function ParentShell({ children }: { children: ReactNode }) {
   const t = useTranslations("parent")
 
   return (

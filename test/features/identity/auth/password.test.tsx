@@ -8,7 +8,8 @@ import { server } from "@test/support/msw"
 import { navigation, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import { ForgotPasswordPage, SetPasswordPage } from "@/features/identity/auth/password-pages"
+import { ForgotPasswordPage } from "@/features/identity/auth/forgot-password-page"
+import { SetPasswordPage } from "@/features/identity/auth/set-password-page"
 
 type Sent = { url: string; address: string; body: unknown }
 

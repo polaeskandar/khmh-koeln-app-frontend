@@ -22,6 +22,7 @@ import {
 import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, ChevronsUpDown } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { cn } from "cn"
+import type { ReactNode } from "react"
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { oneOf } from "@/lib/one-of"
@@ -193,7 +194,7 @@ export function DataTableView<TData extends RowData>({
 }: {
   table: ReactTable<DataTableFeatures, TData>
   className?: string
-  emptyMessage?: React.ReactNode
+  emptyMessage?: ReactNode
 }) {
   const t = useTranslations("table")
   const columnCount = table.getAllLeafColumns().length

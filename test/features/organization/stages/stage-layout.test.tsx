@@ -12,7 +12,8 @@ import type { Locale } from "@/i18n/config"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import { StageOverview, useStageCrumbs } from "@/features/organization/stages/stage-layout"
+import { StagePage } from "@/features/organization/stages/stage-page"
+import { useStageCrumbs } from "@/features/organization/stages/stage-layout"
 
 const ID = THIRD_CLASS_ID
 const SERVICE_ID = SUNDAY_SCHOOL_ID
@@ -22,7 +23,7 @@ beforeEach(() => {
 })
 
 const renderPage = (locale: Locale = "en") =>
-  renderWithProviders(<StageOverview />, { locale, me: me.administrator, sidebar: true })
+  renderWithProviders(<StagePage />, { locale, me: me.administrator, sidebar: true })
 
 function answer(stage: () => Response) {
   let requests = 0

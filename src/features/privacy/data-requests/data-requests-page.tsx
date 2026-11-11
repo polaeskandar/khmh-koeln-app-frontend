@@ -14,7 +14,7 @@ import { routes } from "@/lib/routes"
 
 import { type DataRequestRow, dataRequestsQuery } from "./api"
 import { RecordRequestButton } from "./record-request-dialog"
-import { DueLabel, RequestStatusBadge, useSubjectLabel } from "./request-bits"
+import { DueLabel, RequestStatusBadge, useSubjectLabel } from "./request-labels"
 
 function ClosedCell({ row, today }: { row: DataRequestRow; today: string }) {
   const t = useTranslations("privacy.list")

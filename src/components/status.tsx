@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react"
+import type { ReactNode } from "react"
 import { cn } from "cn"
 
 import { Badge } from "@/components/ui/badge"
@@ -14,20 +15,28 @@ const toneText: Record<Tone, string> = {
   muted: "text-muted-foreground",
 }
 
+type BadgeVariant = "default" | "live" | "dashed"
+
+function BadgeMark({ variant, icon: Icon }: { variant: BadgeVariant; icon?: LucideIcon }) {
+  if (variant === "live") {
+    return <LiveDot />
+  }
+
+  return Icon ? <Icon data-icon="inline-start" /> : null
+}
+
 export function StatusBadge({
   tone,
-  icon: Icon,
-  live,
-  dashed,
+  icon,
+  variant = "default",
   children,
   className,
   title,
 }: {
   tone: Tone
   icon?: LucideIcon
-  live?: boolean
-  dashed?: boolean
-  children: React.ReactNode
+  variant?: BadgeVariant
+  children: ReactNode
   className?: string
   title?: string
 }) {
@@ -35,9 +44,9 @@ export function StatusBadge({
     <Badge
       variant="outline"
       title={title}
-      className={cn(toneText[tone], dashed && "border-dashed", className)}
+      className={cn(toneText[tone], variant === "dashed" && "border-dashed", className)}
     >
-      {live ? <LiveDot /> : Icon ? <Icon data-icon="inline-start" /> : null}
+      <BadgeMark variant={variant} icon={icon} />
       {children}
     </Badge>
   )

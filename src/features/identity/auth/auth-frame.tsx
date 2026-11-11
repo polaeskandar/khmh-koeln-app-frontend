@@ -2,6 +2,7 @@
 
 import { cn } from "cn"
 import { useTranslations } from "next-intl"
+import type { ReactNode } from "react"
 
 import { KhmkMark } from "@/components/brand/logo"
 import { LanguageMenu } from "@/components/language-switch"
@@ -18,8 +19,8 @@ export function AuthFrame({
   aside,
   className,
 }: {
-  children: React.ReactNode
-  aside?: React.ReactNode
+  children: ReactNode
+  aside?: ReactNode
   className?: string
 }) {
   const t = useTranslations("brand")
@@ -81,7 +82,7 @@ function AuthFooter() {
   )
 }
 
-export function AuthHeading({ title, children }: { title: string; children?: React.ReactNode }) {
+export function AuthHeading({ title, children }: { title: string; children?: ReactNode }) {
   return (
     <div className="flex flex-col gap-2">
       <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">{title}</h1>

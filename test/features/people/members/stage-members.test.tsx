@@ -16,7 +16,7 @@ import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import { StageOverview } from "@/features/organization/stages/stage-layout"
+import { StagePage } from "@/features/organization/stages/stage-page"
 
 beforeEach(() => {
   address.set(`id=${THIRD_CLASS_ID}`)
@@ -48,7 +48,7 @@ function open(
     })
   )
 
-  renderWithProviders(<StageOverview />, { locale, me: viewer, sidebar: true })
+  renderWithProviders(<StagePage />, { locale, me: viewer, sidebar: true })
 
   return pages
 }
@@ -123,15 +123,15 @@ test("another stage starts on its first page", async () => {
     })
   )
 
-  const view = renderWithProviders(<StageOverview />, { sidebar: true })
+  const view = renderWithProviders(<StagePage />, { sidebar: true })
   await screen.findByText("Showing 1–25 of 30")
   address.set(`id=${otherId}`)
-  view.rerender(<StageOverview />)
+  view.rerender(<StagePage />)
   expect(await screen.findByRole("heading", { name: "4th Class" })).toBeInTheDocument()
   await userEvent.click(await (await members()).findByRole("button", { name: "Next page" }))
   await screen.findByText("Showing 26–30 of 30")
   address.set(`id=${THIRD_CLASS_ID}`)
-  view.rerender(<StageOverview />)
+  view.rerender(<StagePage />)
   expect(await screen.findByRole("heading", { name: thirdClass.name })).toBeInTheDocument()
   expect(await screen.findByText("Showing 1–25 of 30")).toBeInTheDocument()
   expect(pages).not.toContain(`${THIRD_CLASS_ID}:2`)

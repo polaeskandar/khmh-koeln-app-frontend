@@ -1,4 +1,4 @@
-import { useId } from "react"
+import { type ReactNode, useId } from "react"
 import { cn } from "cn"
 
 import { OptionalNote } from "@/components/form-fields"
@@ -12,8 +12,8 @@ export function FormPanel({
 }: {
   title: string
   optional?: boolean
-  note?: React.ReactNode
-  children: React.ReactNode
+  note?: ReactNode
+  children: ReactNode
   className?: string
 }) {
   const id = useId()
