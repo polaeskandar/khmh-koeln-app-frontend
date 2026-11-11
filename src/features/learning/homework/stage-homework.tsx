@@ -16,6 +16,7 @@ import type { Stage } from "@/features/organization/stages/api"
 import { StageLayout } from "@/features/organization/stages/stage-layout"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
+import { oneOf } from "@/lib/one-of"
 import { type Group, groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
@@ -140,7 +141,7 @@ function Homework({ stage }: { stage: Stage }) {
   return (
     <QueryState query={query}>
       {(data) => {
-        const tab = TABS.includes(requested as Tab) ? (requested as Tab) : defaultTab(data)
+        const tab = oneOf(TABS, requested) ?? defaultTab(data)
         const creatable = !data.archived && can("create", "homework")
 
         return (

@@ -42,6 +42,7 @@ import { useFormat } from "@/i18n/format"
 import { useRouter } from "@/i18n/navigation"
 import { isolate } from "@/lib/bidi"
 import { fullName, initials, preferredName } from "@/lib/domain/names"
+import { oneOf } from "@/lib/one-of"
 import { routes } from "@/lib/routes"
 
 import { type PeopleList, peopleQuery, type PersonRow, personRowQuery, type Placement } from "./api"
@@ -244,7 +245,7 @@ type Show = (next: Partial<ListView>, history: "push" | "replace") => void
 const viewOf = (params: URLSearchParams): ListView => ({
   q: params.get("q")?.trim() ?? "",
   group: params.get("group") ?? "",
-  status: STATUSES.find((status) => status === params.get("status")) ?? "active",
+  status: oneOf(STATUSES, params.get("status")) ?? "active",
 })
 
 const addressOf = (view: ListView) =>
@@ -437,7 +438,10 @@ export function MembersScreen() {
           </NativeSelect>
         </span>
       </div>
-      <Tabs value={status} onValueChange={(value) => show({ status: value as Status }, "push")}>
+      <Tabs
+        value={status}
+        onValueChange={(value) => show({ status: oneOf(STATUSES, value) ?? status }, "push")}
+      >
         <TabsList>
           <TabsTrigger value="active">
             {t("members.tabs.active", { count: active.data?.total ?? 0 })}

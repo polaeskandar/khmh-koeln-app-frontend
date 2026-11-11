@@ -209,5 +209,5 @@ export function RedirectIfSignedIn({ children }: { children: ReactNode }) {
 
   const [, locale, ...rest] = next.split("/")
 
-  return <Redirect to={`/${rest.join("/")}`} locale={locale as Locale} />
+  return <Redirect to={`/${rest.join("/")}`} locale={isLocale(locale) ? locale : undefined} />
 }

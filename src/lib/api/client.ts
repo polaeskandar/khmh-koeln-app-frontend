@@ -7,6 +7,12 @@ import type { components, paths } from "./schema"
 
 export type Schemas = components["schemas"]
 
+export type QueryParams<Path extends keyof paths> = paths[Path] extends {
+  get: { parameters: { query?: infer Query } }
+}
+  ? NonNullable<Query>
+  : never
+
 const WRITES = new Set(["POST", "PUT", "PATCH", "DELETE"])
 
 const unauthorizedListeners = new Set<() => void>()

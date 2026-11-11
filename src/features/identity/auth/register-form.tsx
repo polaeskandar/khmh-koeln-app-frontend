@@ -26,9 +26,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Spinner } from "@/components/ui/spinner"
 import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
-import type { Locale } from "@/i18n/config"
 import { Link, useRouter } from "@/i18n/navigation"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
+import { oneOf } from "@/lib/one-of"
 import { PRIVACY_NOTICE_VERSION } from "@/lib/privacy"
 import { routes } from "@/lib/routes"
 
@@ -51,6 +51,8 @@ const SHOWN_FIELDS = [
   "registration.note",
   "privacy.accepted",
 ]
+
+const KIND_VALUES: RegisteredAs[] = ["parent", "member", "servant"]
 
 const NOTE = {
   parent: { label: "children", hint: "childrenHint" },
@@ -112,7 +114,7 @@ function ServiceSelect({
 
 export function RegisterForm() {
   const t = useTranslations("auth.register")
-  const locale = useLocale() as Locale
+  const locale = useLocale()
   const router = useRouter()
   const privacyId = useId()
   const [alert, setAlert] = useState<string | null>(null)
@@ -229,7 +231,9 @@ export function RegisterForm() {
         <FieldLegend>{t("as")}</FieldLegend>
         <RadioGroup
           value={form.registeredAs}
-          onValueChange={(value) => set("registeredAs", value as RegisteredAs)}
+          onValueChange={(value) =>
+            set("registeredAs", oneOf(KIND_VALUES, value) ?? form.registeredAs)
+          }
           className="grid gap-3"
         >
           {kinds.map((kind) => (

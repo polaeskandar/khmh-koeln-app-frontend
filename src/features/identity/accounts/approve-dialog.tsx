@@ -36,6 +36,7 @@ import { isStale, useRefetch } from "@/lib/api/refetch"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { fold, fullName, preferredName } from "@/lib/domain/names"
+import { oneOf } from "@/lib/one-of"
 
 import {
   ACCOUNT_REQUEST_QUERIES,
@@ -265,6 +266,8 @@ function Approval({ request, onDone }: { request: AccountRequest; onDone: () => 
 }
 
 const NOTE_MAX = 200
+
+const AGE_CHECKS: AgeCheck[] = ["sixteenOrOlder", "guardianConsent"]
 
 function namesOf(displayName: string) {
   const [firstName = "", ...rest] = displayName.trim().split(/\s+/)
@@ -526,10 +529,10 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
         <FieldDescription>{t("accountRequests.approve.ageHint")}</FieldDescription>
         <RadioGroup
           value={ageCheck ?? ""}
-          onValueChange={(value) => setAgeCheck(value as AgeCheck)}
+          onValueChange={(value) => setAgeCheck(oneOf(AGE_CHECKS, value) ?? ageCheck)}
           className="flex flex-col gap-2"
         >
-          {(["sixteenOrOlder", "guardianConsent"] as const).map((value) => (
+          {AGE_CHECKS.map((value) => (
             <label
               key={value}
               htmlFor={`${id}-${value}`}

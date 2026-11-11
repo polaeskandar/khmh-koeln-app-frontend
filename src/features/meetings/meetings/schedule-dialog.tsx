@@ -54,6 +54,7 @@ import {
   recurrenceOf,
 } from "@/lib/domain/recurrence"
 import { addDays } from "@/lib/domain/time"
+import { oneOf } from "@/lib/one-of"
 
 import {
   type ScheduleChanges,
@@ -64,6 +65,8 @@ import {
 
 const WEEKDAYS: IsoWeekday[] = [1, 2, 3, 4, 5, 6, 7]
 const MONTH_WEEKS: MonthWeek[] = [1, 2, 3, 4, -1]
+const FREQUENCIES: Frequency[] = ["weekly", "monthly"]
+const ROSTER_MODES: RosterMode[] = ["expected", "open"]
 const PREVIEW_DATES = 4
 const PREVIEW_HORIZON_DAYS = 400
 
@@ -413,7 +416,9 @@ function ScheduleForm({
               <FieldLegend>{t("meetings.fields.whoIsExpected")}</FieldLegend>
               <RadioGroup
                 value={d.rosterMode}
-                onValueChange={(value) => set("rosterMode", value as RosterMode)}
+                onValueChange={(value) =>
+                  set("rosterMode", oneOf(ROSTER_MODES, value) ?? d.rosterMode)
+                }
               >
                 <Field orientation="horizontal">
                   <RadioGroupItem value="expected" id="roster-expected" />
@@ -465,7 +470,13 @@ function ScheduleForm({
                 variant="outline"
                 spacing={0}
                 value={d.frequency}
-                onValueChange={(value) => value && changeFrequency(value as Draft["frequency"])}
+                onValueChange={(value) => {
+                  const frequency = oneOf(FREQUENCIES, value)
+
+                  if (frequency) {
+                    changeFrequency(frequency)
+                  }
+                }}
                 aria-label={t("meetings.form.frequency")}
               >
                 <ToggleGroupItem value="weekly" className={SELECTED}>
@@ -489,7 +500,12 @@ function ScheduleForm({
                     variant="outline"
                     spacing={0}
                     value={d.weekdays.map(String)}
-                    onValueChange={(value) => set("weekdays", value.map(Number) as IsoWeekday[])}
+                    onValueChange={(value) =>
+                      set(
+                        "weekdays",
+                        value.flatMap((day) => oneOf(WEEKDAYS, Number(day)) ?? [])
+                      )
+                    }
                     aria-label={t("meetings.form.weekdays")}
                     aria-invalid={errors["recurrence.weekdays"] ? true : undefined}
                     className="flex-wrap"
@@ -516,7 +532,10 @@ function ScheduleForm({
                         className="w-24"
                         value={String(d.monthWeek)}
                         onChange={(event) =>
-                          set("monthWeek", Number(event.target.value) as MonthWeek)
+                          set(
+                            "monthWeek",
+                            oneOf(MONTH_WEEKS, Number(event.target.value)) ?? d.monthWeek
+                          )
                         }
                       >
                         {MONTH_WEEKS.map((week) => (
@@ -532,7 +551,10 @@ function ScheduleForm({
                         className="w-32"
                         value={String(d.monthWeekday)}
                         onChange={(event) =>
-                          set("monthWeekday", Number(event.target.value) as IsoWeekday)
+                          set(
+                            "monthWeekday",
+                            oneOf(WEEKDAYS, Number(event.target.value)) ?? d.monthWeekday
+                          )
                         }
                       >
                         {WEEKDAYS.map((weekday) => (

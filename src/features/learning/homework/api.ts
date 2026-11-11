@@ -2,7 +2,7 @@ import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect } from "react"
 
 import { parentChildrenQuery } from "@/features/people/children/api"
-import { api, dataOf, type Schemas } from "@/lib/api/client"
+import { api, dataOf, type QueryParams, type Schemas } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/problem"
 import { HOMEWORK_KEY, LESSONS_KEY, MEMBER_KEY, PARENT_KEY } from "@/lib/api/query-keys"
 import type { Uuid } from "@/lib/api/types/common"
@@ -105,7 +105,7 @@ export const transitionHomeworkRequest = (id: Uuid, transition: HomeworkTransiti
 export const deleteHomeworkRequest = (id: Uuid) =>
   dataOf(api.DELETE("/homework/{id}", { params: { path: { id } } }))
 
-export type TaskState = "todo" | "done"
+export type TaskState = NonNullable<QueryParams<"/member/homework">["state"]>
 
 export type ParentTask = Schemas["ParentHomeworkItemResponse"]
 

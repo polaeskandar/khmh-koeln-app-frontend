@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query"
 
-import { api, dataOf, type Schemas } from "@/lib/api/client"
+import { api, dataOf, type QueryParams, type Schemas } from "@/lib/api/client"
 import { HOMEWORK_KEY, LESSONS_KEY } from "@/lib/api/query-keys"
 import type { LocalDate, Uuid } from "@/lib/api/types/common"
 import type { LessonStatus } from "@/lib/api/types/learning"
@@ -16,7 +16,7 @@ export type LessonStage = LessonDetail["stage"]
 
 export type Material = Lesson["materials"][number]
 
-export type LessonTab = "upcoming" | "previous" | "archived"
+export type LessonTab = NonNullable<QueryParams<"/stages/{stageId}/lessons">["tab"]>
 
 export type StageLessons = Schemas["LessonListResponse"]
 

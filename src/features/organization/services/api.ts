@@ -37,7 +37,7 @@ export const servicesQuery = queryOptions({
     dataOf(api.GET("/services", { params: { query: { status: "all" } }, signal })),
 })
 
-export type ServiceFields = { name: string; description: string | null }
+export type ServiceFields = Schemas["ServiceRequest"]
 
 export const createServiceRequest = (fields: ServiceFields) =>
   dataOf(api.POST("/services", { body: fields }))

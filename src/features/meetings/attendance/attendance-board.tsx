@@ -20,11 +20,14 @@ import { useFormat } from "@/i18n/format"
 import { isolate } from "@/lib/bidi"
 import type { PersonRef } from "@/lib/api/types/common"
 import { fullName, initials, matchesQuery, preferredName } from "@/lib/domain/names"
+import { oneOf } from "@/lib/one-of"
 import { meetingGroup } from "@/lib/permissions"
 
 import type { AttendanceSheet as Board, Mark, Placement } from "./api"
 
 type Filter = "all" | "open" | "present"
+
+const FILTERS: Filter[] = ["all", "open", "present"]
 
 export type BoardActions = {
   onMark?: (person: PersonRef) => void
@@ -266,7 +269,10 @@ export function AttendanceBoard({
             ) : null}
           </InputGroup>
           {expected ? (
-            <Tabs value={filter} onValueChange={(value) => setFilter(value as Filter)}>
+            <Tabs
+              value={filter}
+              onValueChange={(value) => setFilter(oneOf(FILTERS, value) ?? filter)}
+            >
               <TabsList className="w-full sm:w-auto">
                 <TabsTrigger value="all">{t("tabAll", { count: rosterSize })}</TabsTrigger>
                 <TabsTrigger value="open">{t("tabOpen", { count: notMarked })}</TabsTrigger>

@@ -198,7 +198,7 @@ export function useMarkWrites(sessionId: Uuid) {
     } catch (error) {
       dispatch({ type: "fail", personId: person.id })
 
-      if (retryable(error)) {
+      if (!(error instanceof ApiError) || retryable(error)) {
         toast.error(t("errors.notSaved"), {
           action: { label: t("common.retry"), onClick: () => void send(person, present, visitor) },
         })
@@ -206,10 +206,9 @@ export function useMarkWrites(sessionId: Uuid) {
         return
       }
 
-      const problem = error as ApiError
-      toast.error(translateProblem(problem, translate))
+      toast.error(translateProblem(error, translate))
 
-      if (isStale(problem, CHANGED_MEANWHILE)) {
+      if (isStale(error, CHANGED_MEANWHILE)) {
         void refetch([...MARK_QUERIES, meetingSessionQuery(sessionId).queryKey])
       }
     }
