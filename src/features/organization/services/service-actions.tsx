@@ -27,7 +27,7 @@ import {
 } from "./api"
 import { StructureChangeDialog } from "./structure-change"
 
-import { ServiceDialog } from "./service-dialog"
+import { EditServiceDialog } from "./service-dialog"
 
 export function ServiceActionsMenu({ service }: { service: Service }) {
   const t = useTranslations()
@@ -89,7 +89,7 @@ export function ServiceActionsMenu({ service }: { service: Service }) {
         </DropdownMenuContent>
       </DropdownMenu>
       <DialogMount open={edit && open === "edit"}>
-        <ServiceDialog service={service} onClose={() => setOpen(null)} />
+        <EditServiceDialog service={service} onClose={() => setOpen(null)} />
       </DialogMount>
       <StructureChangeDialog
         open={open === "archive"}

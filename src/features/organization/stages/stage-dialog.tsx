@@ -2,13 +2,11 @@
 
 import { Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useState } from "react"
+import { type ComponentProps, useState } from "react"
 
 import { DialogMount } from "@/components/dialog-mount"
-import { FormDialog } from "@/components/form-dialog"
-import { TextAreaField, TextField } from "@/components/form-fields"
+import { NameDescriptionDialog } from "@/components/name-description-dialog"
 import { Button } from "@/components/ui/button"
-import { FieldGroup } from "@/components/ui/field"
 import { useRouter } from "@/i18n/navigation"
 import type { ServiceReference } from "@/features/organization/services/api"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -24,19 +22,29 @@ import {
 
 export type EditableStage = Pick<Stage, "id" | "name" | "description">
 
-export function StageDialog({
-  service,
-  stage,
-  onClose,
-}: {
-  service: ServiceReference
-  stage?: EditableStage
-  onClose: () => void
-}) {
+function StageFormDialog(
+  props: Omit<ComponentProps<typeof NameDescriptionDialog>, "texts" | "limits" | "problemShown">
+) {
+  const t = useTranslations("stages.form")
+
+  return (
+    <NameDescriptionDialog
+      {...props}
+      texts={{
+        name: t("name"),
+        namePlaceholder: t("namePlaceholder"),
+        description: t("description"),
+        descriptionPlaceholder: t("descriptionPlaceholder"),
+      }}
+      limits={{ name: 80, description: 500, descriptionRows: 2 }}
+      problemShown="inline"
+    />
+  )
+}
+
+function AddStageDialog({ service, onClose }: { service: ServiceReference; onClose: () => void }) {
   const t = useTranslations()
   const router = useRouter()
-  const [name, setName] = useState(stage?.name ?? "")
-  const [description, setDescription] = useState(stage?.description ?? "")
 
   const add = useApiMutation((fields: StageRequest) => addStageRequest(service.id, fields), {
     successMessage: (created) => t("toast.added", { name: created.name }),
@@ -45,85 +53,36 @@ export function StageDialog({
     onSuccess: (created) => router.push(routes.stage(created.id)),
   })
 
-  const update = useApiMutation((fields: StageRequest) => updateStageRequest(stage!.id, fields), {
+  return (
+    <StageFormDialog
+      title={t("stages.form.addTitle", { service: service.name })}
+      description={t("stages.form.addDescription")}
+      submitLabel={t("stages.form.add")}
+      mutation={add}
+      onClose={onClose}
+    />
+  )
+}
+
+export function EditStageDialog({ stage, onClose }: { stage: EditableStage; onClose: () => void }) {
+  const t = useTranslations()
+
+  const update = useApiMutation((fields: StageRequest) => updateStageRequest(stage.id, fields), {
     successMessage: t("toast.saved"),
     invalidate: STAGE_QUERIES,
     toastOnError: false,
     onSuccess: onClose,
   })
 
-  const mutation = stage ? update : add
-  const errors = mutation.fieldErrors
-  const shownInFields = Object.keys(errors).length > 0
-
-  async function submit() {
-    const fields = { name, description: description.trim() === "" ? null : description }
-
-    if (!stage) {
-      await add.execute(fields)
-
-      return
-    }
-
-    const changes: Partial<StageRequest> = {}
-
-    if (fields.name !== stage.name) {
-      changes.name = fields.name
-    }
-
-    if (fields.description !== stage.description) {
-      changes.description = fields.description
-    }
-
-    if (Object.keys(changes).length === 0) {
-      onClose()
-    } else {
-      await update.execute(fields)
-    }
-  }
-
   return (
-    <FormDialog
-      title={
-        stage
-          ? t("stages.form.editTitle", { name: stage.name })
-          : t("stages.form.addTitle", { service: service.name })
-      }
-      description={stage ? t("stages.form.editDescription") : t("stages.form.addDescription")}
-      pending={mutation.pending}
-      problem={mutation.problem}
-      submitLabel={stage ? t("common.saveChanges") : t("stages.form.add")}
-      onSubmit={submit}
+    <StageFormDialog
+      saved={stage}
+      title={t("stages.form.editTitle", { name: stage.name })}
+      description={t("stages.form.editDescription")}
+      submitLabel={t("common.saveChanges")}
+      mutation={update}
       onClose={onClose}
-    >
-      {mutation.problem && !shownInFields ? (
-        <p role="alert" className="text-sm text-destructive">
-          {mutation.problem.message}
-        </p>
-      ) : null}
-      <FieldGroup>
-        <TextField
-          label={t("stages.form.name")}
-          placeholder={t("stages.form.namePlaceholder")}
-          autoFocus
-          maxLength={80}
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          error={errors.name}
-        />
-        <TextAreaField
-          label={t("stages.form.description")}
-          placeholder={t("stages.form.descriptionPlaceholder")}
-          optional
-          dir="auto"
-          rows={2}
-          maxLength={500}
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
-          error={errors.description}
-        />
-      </FieldGroup>
-    </FormDialog>
+    />
   )
 }
 
@@ -146,7 +105,7 @@ export function AddStageButton({
         {label ?? t("add")}
       </Button>
       <DialogMount open={open}>
-        <StageDialog service={service} onClose={() => setOpen(false)} />
+        <AddStageDialog service={service} onClose={() => setOpen(false)} />
       </DialogMount>
     </>
   )
