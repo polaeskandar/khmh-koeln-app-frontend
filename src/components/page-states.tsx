@@ -22,7 +22,17 @@ import { translateProblem } from "@/lib/api/translate-problem"
 import { useProblemTranslator } from "@/lib/api/use-problem-translator"
 import { routes } from "@/lib/routes"
 
-export function NotFoundState({ home = routes.home() }: { home?: string }) {
+export function NotFoundState({
+  home = routes.home(),
+  homeLabel,
+  title,
+  description,
+}: {
+  home?: string
+  homeLabel?: string
+  title?: string
+  description?: string
+}) {
   const t = useTranslations("notFound")
 
   return (
@@ -32,12 +42,12 @@ export function NotFoundState({ home = routes.home() }: { home?: string }) {
           <EmptyMedia variant="icon">
             <SearchX />
           </EmptyMedia>
-          <EmptyTitle>{t("title")}</EmptyTitle>
-          <EmptyDescription>{t("app.description")}</EmptyDescription>
+          <EmptyTitle>{title ?? t("title")}</EmptyTitle>
+          <EmptyDescription>{description ?? t("app.description")}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <Button asChild>
-            <Link href={home}>{t("app.action")}</Link>
+            <Link href={home}>{homeLabel ?? t("app.action")}</Link>
           </Button>
         </EmptyContent>
       </Empty>
