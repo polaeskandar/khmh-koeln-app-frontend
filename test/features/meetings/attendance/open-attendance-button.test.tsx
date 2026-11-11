@@ -2,8 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { upcomingQuery } from "@/features/meetings/dashboard/api"
@@ -16,13 +15,10 @@ import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { AttendanceSheet } from "@/features/meetings/attendance/api"
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "error")
-})
 
 const viewer: Me = {
   ...me.servant,
@@ -212,11 +208,7 @@ describe("the board route before and after", () => {
 
     await userEvent.click(await screen.findByRole("button", { name: "Anwesenheit öffnen" }))
 
-    await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith(
-        "Die Anwesenheit kann erst am Tag des Termins geöffnet werden."
-      )
-    )
+    await expectToast("Die Anwesenheit kann erst am Tag des Termins geöffnet werden.")
 
     await waitFor(() => expect(calls.get).toBe(2))
   })

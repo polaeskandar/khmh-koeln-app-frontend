@@ -1,8 +1,7 @@
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -18,14 +17,10 @@ import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { LessonDetail } from "@/features/learning/lessons/api"
 import { EditLessonPage } from "@/features/learning/lessons/edit-lesson-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
-})
 
 const versions: (string | null)[] = []
 
@@ -148,7 +143,7 @@ test("an editor who can't read members sends no notes and sees no notes field", 
 test("a 409 changedMeanwhile keeps the form", async () => {
   openEdit(lessonDetail(), () => problem(409, "lessons.changedMeanwhile"))
   await userEvent.click(await screen.findByRole("button", { name: "Save draft" }))
-  await waitFor(() => expect(toast.error).toHaveBeenCalled())
+  await expectToast("Someone else changed this lesson in the meantime. Reload it and save again.")
   expect(router.push).not.toHaveBeenCalled()
   expect(screen.getByLabelText("Title")).toHaveValue("The Good Samaritan")
 })

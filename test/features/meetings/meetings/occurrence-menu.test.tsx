@@ -1,8 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import type { AgendaItem, PlannedSession } from "@/features/meetings/meetings/api"
@@ -13,13 +12,10 @@ import { session } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectNoToast, expectToast } from "@test/support/toasts"
 
 import type { Agenda } from "@/features/meetings/meetings/api"
 import { AgendaPage } from "@/features/meetings/meetings/agenda-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-})
 
 const bibleStudy = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f17",
@@ -125,9 +121,7 @@ test("cancelling Bible Study's Wed 11 Nov posts the trimmed reason; the row turn
     ])
   )
 
-  expect(toast.success).toHaveBeenCalledWith(
-    "That date is canceled. The schedule and its other dates are unchanged."
-  )
+  await expectToast("That date is canceled. The schedule and its other dates are unchanged.")
 
   const day = within(
     (await screen.findByRole("heading", { name: "Wednesday 11 November 2026" })).closest("section")!
@@ -148,7 +142,7 @@ test("a 409 dateInPast keeps the dialog open with its text and no toast", async 
   const dialog = await cancelDialog("Change Bible Study on Wednesday 11 November")
   await userEvent.click(dialog.getByRole("button", { name: "Cancel this date" }))
   expect(await dialog.findByRole("alert")).toHaveTextContent("Choose today or a later date.")
-  expect(toast.success).not.toHaveBeenCalled()
+  expectNoToast()
   expect(screen.getByRole("alertdialog")).toBeInTheDocument()
 })
 

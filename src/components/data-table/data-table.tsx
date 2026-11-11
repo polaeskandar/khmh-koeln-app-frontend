@@ -97,7 +97,13 @@ export function useDataTable<TData extends RowData>(options: UseDataTableOptions
   return { table }
 }
 
-function SortIcon({ sorted }: { sorted: false | "asc" | "desc" }) {
+type Sorted = false | "asc" | "desc"
+
+const ARIA_SORT = { asc: "ascending", desc: "descending" } as const
+
+const ariaSortOf = (sorted: Sorted) => (sorted ? ARIA_SORT[sorted] : undefined)
+
+function SortIcon({ sorted }: { sorted: Sorted }) {
   if (sorted === "desc") {
     return <ArrowDown className="size-3.5" />
   }
@@ -212,7 +218,11 @@ export function DataTableView<TData extends RowData>({
           {table.getHeaderGroups().map((hg) => (
             <TableRow key={hg.id} className="hover:bg-transparent">
               {hg.headers.map((header) => (
-                <TableHead key={header.id} style={{ width: header.column.columnDef.size }}>
+                <TableHead
+                  key={header.id}
+                  aria-sort={ariaSortOf(header.column.getIsSorted())}
+                  style={{ width: header.column.columnDef.size }}
+                >
                   {header.isPlaceholder
                     ? null
                     : flexRender(header.column.columnDef.header, header.getContext())}

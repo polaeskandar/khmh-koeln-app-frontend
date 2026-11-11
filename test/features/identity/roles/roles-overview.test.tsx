@@ -1,8 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -12,14 +11,10 @@ import { church, me } from "@test/support/fixtures/me"
 import { answerSettingsLists } from "@test/support/fixtures/settings"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { RoleRow } from "@/features/identity/roles/api"
 import { SettingsPage } from "@/features/identity/accounts/settings-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
-})
 
 const all: Action[] = ["read", "create", "update", "delete"]
 
@@ -177,7 +172,7 @@ test("deleting a role says who loses it and refetches", async () => {
   ).toBeInTheDocument()
 
   await userEvent.dblClick(dialog.getByRole("button", { name: "Delete role" }))
-  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Role “Servant” deleted."))
+  await expectToast("Role “Servant” deleted.")
   expect(page.deletes).toEqual([roles[5]!.id])
   await waitFor(async () => expect(await rows()).toHaveLength(5))
 })
@@ -192,10 +187,8 @@ test("the last role manager's role stays", async () => {
     within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Delete role" })
   )
 
-  await waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith(
-      "At least one active account must be able to change roles. Give that permission to someone else first."
-    )
+  await expectToast(
+    "At least one active account must be able to change roles. Give that permission to someone else first."
   )
 
   expect(screen.getByRole("alertdialog")).toBeInTheDocument()

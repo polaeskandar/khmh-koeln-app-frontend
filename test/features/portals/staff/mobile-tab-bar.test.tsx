@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event"
 import { describe, expect, test } from "vitest"
 
 import { me } from "@test/support/fixtures/me"
+import { expectOnlyBelowMd } from "@test/support/layout"
 import { navigation } from "@test/support/navigation"
 
 import { NavUser } from "@/features/portals/staff/staff-account-menu"
@@ -15,7 +16,7 @@ describe("the phone's tab bar", () => {
     renderStaffShell(me.servant, "en", <NavUser />)
     const bar = await screen.findByRole("navigation", { name: "Main" })
     await within(bar).findByRole("link", { name: "Members" })
-    expect(bar).toHaveClass("md:hidden")
+    expectOnlyBelowMd(bar)
 
     expect(within(bar).getByRole("link", { name: "Meetings" })).toHaveAttribute(
       "aria-current",

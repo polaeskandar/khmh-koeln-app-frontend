@@ -1,8 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { beforeEach, expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -15,14 +14,13 @@ import { services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
 import { navigation } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { PersonRow } from "@/features/people/members/api"
 import { MembersPage } from "@/features/people/members/members-page"
 
 beforeEach(() => {
   navigation.pathname = "/members/"
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
 })
 
 function open(
@@ -149,7 +147,7 @@ test("marking as inactive on Active keeps the sheet on the person while the row 
   expect(dialog.getByText(/You can reactivate them at any time/)).toBeInTheDocument()
   await userEvent.click(dialog.getByRole("button", { name: "Mark as inactive" }))
 
-  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Marked Lydia Aziz as inactive."))
+  await expectToast("Marked Lydia Aziz as inactive.")
 
   await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument())
   expect(await sheet.findByRole("button", { name: "Reactivate" })).toBeInTheDocument()
@@ -198,13 +196,13 @@ test("reactivating keeps the sheet open, so a group can be added straight away",
   await userEvent.click(await screen.findByRole("tab", { name: /^Inactive/ }))
   const sheet = await openSheet()
   await userEvent.click(sheet.getByRole("button", { name: "Reactivate" }))
-  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Reactivated Lydia Aziz."))
+  await expectToast("Reactivated Lydia Aziz.")
   const addTo = await sheet.findByRole("combobox", { name: "Add to" })
   expect(sheet.queryByText("Inactive")).toBeNull()
   expect(sheet.getByText("No service at the moment.")).toBeInTheDocument()
   await userEvent.selectOptions(addTo, "Sunday School · 1st Class")
   await userEvent.click(sheet.getByRole("button", { name: "Add" }))
-  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Added."))
+  await expectToast("Added.")
   expect(await sheet.findByText("1st Class (Sunday School)")).toBeInTheDocument()
   expect(posts).toEqual(["reactivate", "join"])
   await userEvent.keyboard("{Escape}")
@@ -229,7 +227,7 @@ test.each([
     within(await screen.findByRole("alertdialog")).getByRole("button", { name: button })
   )
 
-  await waitFor(() => expect(toast.success).toHaveBeenCalledWith(text))
+  await expectToast(text)
 })
 
 test("Reactivate is disabled with the spinner while it runs", async () => {
@@ -253,7 +251,7 @@ test("Reactivate is disabled with the spinner while it runs", async () => {
   await waitFor(() => expect(reactivate).toBeDisabled())
   expect(within(reactivate).getByRole("status", { name: "Loading" })).toBeInTheDocument()
   release()
-  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Reactivated Lydia Aziz."))
+  await expectToast("Reactivated Lydia Aziz.")
 })
 
 test("without members: update there is no footer", async () => {
@@ -274,7 +272,7 @@ test("a 403 on deactivate toasts and changes nothing", async () => {
     within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Mark as inactive" })
   )
 
-  await waitFor(() => expect(toast.error).toHaveBeenCalled())
+  await expectToast("You can’t change people or their stages.")
   expect(screen.getByRole("alertdialog")).toBeInTheDocument()
   expect(sheet.getByRole("button", { name: "Mark as inactive", hidden: true })).toBeInTheDocument()
 })

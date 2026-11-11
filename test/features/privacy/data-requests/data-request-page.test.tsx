@@ -1,7 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
@@ -12,6 +11,7 @@ import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { DataRequestDetail, ErasureReview } from "@/features/privacy/data-requests/api"
 import { DataRequestPage } from "@/features/privacy/data-requests/data-request-page"
@@ -20,7 +20,6 @@ const ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea901"
 
 beforeEach(() => {
   address.set(`id=${ID}`)
-  vi.spyOn(toast, "error")
 })
 
 const review = (extra: Partial<DataRequestDetail> = {}): DataRequestDetail => ({
@@ -280,9 +279,7 @@ test("a request closed meanwhile toasts and refetches", async () => {
     within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Erase data" })
   )
 
-  await waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith("This request has already been closed.")
-  )
+  await expectToast("This request has already been closed.")
 
   await waitFor(() => expect(page.reads()).toBeGreaterThanOrEqual(2))
 })
@@ -409,9 +406,7 @@ describe("a copy request", () => {
     return { posted, reads: () => reads }
   }
 
-  beforeEach(() => {
-    vi.spyOn(toast, "success")
-  })
+  beforeEach(() => {})
 
   test("without a link it offers Create download link and no erasure", async () => {
     openCopy(copyRequest())
@@ -452,7 +447,7 @@ describe("a copy request", () => {
 
     const user = userEvent.setup()
     await user.click(panel.getByRole("button", { name: "Copy" }))
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Link copied."))
+    await expectToast("Link copied.")
     expect(await navigator.clipboard.readText()).toBe(URL_SENT)
   })
 
@@ -465,11 +460,7 @@ describe("a copy request", () => {
     vi.spyOn(navigator.clipboard, "writeText").mockRejectedValue(new Error("denied"))
     await user.click(panel.getByRole("button", { name: "Copy" }))
 
-    await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith(
-        "Couldn’t copy. Select the link and copy it yourself."
-      )
-    )
+    await expectToast("Couldn’t copy. Select the link and copy it yourself.")
   })
 
   test("a member without an account gets a link to hand over", async () => {
@@ -577,7 +568,7 @@ describe("a copy request", () => {
     const page = openCopy(copyRequest(), [() => problem(409, code)])
     const panel = await section("Download link")
     await userEvent.click(panel.getByRole("button", { name: "Create download link" }))
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(text))
+    await expectToast(text)
     await waitFor(() => expect(page.reads()).toBeGreaterThanOrEqual(2))
     expect(panel.queryByRole("textbox")).not.toBeInTheDocument()
   })

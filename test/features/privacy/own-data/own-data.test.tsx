@@ -1,7 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { type Me, meQuery } from "@/features/identity/auth/api"
@@ -18,6 +17,7 @@ import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectNoToast, expectToast } from "@test/support/toasts"
 
 import { AccountPage } from "@/features/identity/account/account-page"
 import { OwnData } from "@/features/privacy/own-data/own-data"
@@ -29,8 +29,6 @@ let clicks: { href: string; download: string }[] = []
 
 beforeEach(() => {
   clicks = []
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
   URL.createObjectURL = vi.fn(() => "blob:khmk-my-data")
   URL.revokeObjectURL = vi.fn()
 
@@ -93,7 +91,7 @@ test("a failed download toasts and saves nothing", async () => {
   server.use(http.get(apiUrl("/me/personal-data"), () => problem(500, "internal")))
   open()
   await userEvent.click(await screen.findByRole("button", { name: "Download (JSON)" }))
-  await vi.waitFor(() => expect(toast.error).toHaveBeenCalled())
+  await expectToast("Something went wrong on our side. Try again later.")
   expect(clicks).toEqual([])
   expect(URL.createObjectURL).not.toHaveBeenCalled()
 })
@@ -152,7 +150,7 @@ test.each([
     expect(lastOutcome()).toBe("erasureScheduled")
     expect(scheduledErasureOn()).toBe("2026-11-22")
     expect(page.client.getQueryData(meQuery.queryKey)).toBeUndefined()
-    expect(toast.error).not.toHaveBeenCalled()
+    expectNoToast()
   }
 )
 
@@ -212,7 +210,7 @@ test("a wrong password shows under the field and keeps the dialog and the sessio
   expect(dialog.getByLabelText("Your password")).toHaveAttribute("aria-invalid", "true")
   await waitFor(() => expect(dialog.getByLabelText("Your password")).toHaveFocus())
   expect(posted).toHaveLength(1)
-  expect(toast.error).not.toHaveBeenCalled()
+  expectNoToast()
   expect(router.replace).not.toHaveBeenCalled()
   expect(screen.getByRole("alertdialog")).toBeInTheDocument()
   expect(lastOutcome()).toBeNull()
@@ -235,7 +233,7 @@ test.each([
   const dialog = await openDialog()
   await userEvent.type(dialog.getByLabelText("Your password"), PASSWORD)
   await userEvent.click(dialog.getByRole("button", { name: "Delete my account" }))
-  await waitFor(() => expect(toast.error).toHaveBeenCalledWith(text))
+  await expectToast(text)
   expect(screen.getByRole("alertdialog")).toBeInTheDocument()
   expect(router.replace).not.toHaveBeenCalled()
 })
@@ -254,10 +252,8 @@ test("a request made meanwhile toasts its text, closes the dialog and refetches"
   await userEvent.type(dialog.getByLabelText("Your password"), PASSWORD)
   await userEvent.click(dialog.getByRole("button", { name: "Delete my account" }))
 
-  await waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith(
-      "You have already asked for your account and data to be deleted. The church office will answer within one month of your request."
-    )
+  await expectToast(
+    "You have already asked for your account and data to be deleted. The church office will answer within one month of your request."
   )
 
   expect(await screen.findByRole("status")).toHaveTextContent("You asked today at 12:08")

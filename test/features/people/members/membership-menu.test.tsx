@@ -2,8 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 
 import type { ServiceList, Service } from "@/features/organization/services/api"
 import type { Me } from "@/features/identity/auth/api"
@@ -17,14 +16,10 @@ import { services } from "@test/support/fixtures/services"
 import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { PersonRow } from "@/features/people/members/api"
 import { MembersScreen } from "@/features/people/members/members-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
-})
 
 const base = services.items[0]!
 
@@ -166,9 +161,7 @@ test("moving from 2nd to 3rd Class sends one move and shows the new stage since 
   const targets = await moveTargets()
   await userEvent.click(targets.getByRole("menuitem", { name: "3rd Class" }))
 
-  await waitFor(() =>
-    expect(toast.success).toHaveBeenCalledWith("Moved. Past attendance stays with the old stage.")
-  )
+  await expectToast("Moved. Past attendance stays with the old stage.")
 
   expect(moves).toEqual([{ stageId: third.id }])
   expect(await sheet.findByText(/3rd Class/)).toBeInTheDocument()
@@ -253,9 +246,7 @@ test("a refusal toasts and leaves the sheet as it was", async () => {
   const targets = await moveTargets()
   await userEvent.click(targets.getByRole("menuitem", { name: "3rd Class" }))
 
-  await waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith("Lydia Aziz is already in 3rd Class.")
-  )
+  await expectToast("Lydia Aziz is already in 3rd Class.")
 
   expect(sheet.getByText(/2nd Class/)).toBeInTheDocument()
 })
@@ -270,7 +261,7 @@ test("a 422 on the stage is toasted", async () => {
   await openMenu()
   const targets = await moveTargets()
   await userEvent.click(targets.getByRole("menuitem", { name: "3rd Class" }))
-  await waitFor(() => expect(toast.error).toHaveBeenCalled())
+  await expectToast("3rd Class is archived.")
 })
 
 test("in German the 403 reads in German", async () => {
@@ -287,7 +278,5 @@ test("in German the 403 reads in German", async () => {
   const targets = await screen.findAllByRole("menuitem", { name: "3rd Class" })
   await userEvent.click(targets[0]!)
 
-  await waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith("Sie können keine Personen oder ihre Stufen ändern.")
-  )
+  await expectToast("Sie können keine Personen oder ihre Stufen ändern.")
 })

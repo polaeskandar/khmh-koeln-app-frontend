@@ -1,8 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test, vi } from "vitest"
 
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Locale } from "@/i18n/config"
@@ -12,13 +11,10 @@ import { mimi, mina } from "@test/support/fixtures/parent"
 import { server } from "@test/support/msw"
 import { navigation, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { ChildSummary } from "@/features/people/children/api"
 import { ParentAccountPage } from "@/features/portals/parent/parent-account-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-})
 
 const mariam = { ...mimi, fullName: "Mariam Hanna", name: "Mariam" }
 
@@ -108,7 +104,7 @@ describe("Account", () => {
     await userEvent.click(dialog.getByRole("button", { name: "Change password" }))
     expect(await dialog.findByText("This is not your current password.")).toBeInTheDocument()
     await userEvent.click(dialog.getByRole("button", { name: "Change password" }))
-    await vi.waitFor(() => expect(toast.success).toHaveBeenCalledWith("Your password is changed."))
+    await expectToast("Your password is changed.")
     await vi.waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
     expect(screen.getByText("Mina Farag")).toBeInTheDocument()
   })

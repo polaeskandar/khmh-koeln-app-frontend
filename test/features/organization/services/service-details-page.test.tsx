@@ -197,7 +197,13 @@ test("Servants lists each servant with their groups, and Assign adds one", async
   const section = await servantsSection()
   const christine = (await section.findByText("Christine Adel")).closest("li")!
   expect(christine).toHaveTextContent("The whole service")
-  expect(section.getByText("Daniel Mikhail").closest("li")).toHaveTextContent("3rd Class4th Class")
+  const daniel = within(section.getByText("Daniel Mikhail").closest("li")!)
+
+  expect(daniel.getAllByRole("listitem").map((group) => group.textContent)).toEqual([
+    "3rd Class",
+    "4th Class",
+  ])
+
   expect(section.queryByText("Rebecca Girgis")).toBeNull()
   await userEvent.click(section.getByRole("button", { name: "Assign" }))
   const dialog = within(await screen.findByRole("dialog"))

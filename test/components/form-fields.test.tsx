@@ -1,6 +1,7 @@
 import { screen } from "@testing-library/react"
 import { describe, expect, test } from "vitest"
 
+import { expectVisuallyHidden } from "@test/support/layout"
 import { renderWithProviders } from "@test/support/providers"
 
 import { FormField, SelectField, TextAreaField, TextField } from "@/components/form-fields"
@@ -84,7 +85,7 @@ describe("FormField", () => {
     )
 
     const control = screen.getByLabelText("Due date")
-    expect(screen.getByText("Due date")).toHaveClass("sr-only")
+    expectVisuallyHidden(screen.getByText("Due date"))
     expect(control).toHaveAccessibleDescription("Optional")
   })
 

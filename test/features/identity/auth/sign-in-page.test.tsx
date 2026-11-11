@@ -1,7 +1,6 @@
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import type { Locale } from "@/i18n/config"
@@ -10,6 +9,7 @@ import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectNoToast } from "@test/support/toasts"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -23,8 +23,6 @@ import { PendingPage } from "@/features/identity/auth/pending-page"
 import { SignInPage } from "@/features/identity/auth/sign-in-page"
 
 beforeEach(() => {
-  vi.spyOn(toast, "error")
-
   for (const method of ["log", "info", "warn", "debug"] as const) {
     vi.spyOn(console, method).mockImplementation(() => {})
   }
@@ -132,7 +130,7 @@ describe("when signing in fails", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(text)
     expect(screen.getByLabelText("Email address")).toHaveValue("daniel@example.org")
     expect(screen.getByLabelText("Password")).toHaveValue(PASSWORD)
-    expect(toast.error).not.toHaveBeenCalled()
+    expectNoToast()
     expect(router.replace).not.toHaveBeenCalled()
   })
 

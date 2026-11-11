@@ -6,6 +6,7 @@ import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
 import { Toaster } from "@/components/ui/sonner"
+import { expectTheme } from "@test/support/layout"
 import { renderWithProviders, testProviders } from "@test/support/providers"
 
 import { AppearanceFields, AppearanceMenu } from "@/components/theme-switch"
@@ -26,13 +27,13 @@ beforeEach(() => {
   document.documentElement.className = ""
 })
 
-test("Dark adds the dark class and stores it, Light removes it", async () => {
+test("Dark turns the page dark and stores it, Light turns it back", async () => {
   renderWithProviders(themed(<AppearanceFields />))
   await userEvent.click(screen.getByRole("radio", { name: "Dark" }))
-  expect(document.documentElement).toHaveClass("dark")
+  expectTheme("dark")
   expect(localStorage.getItem("theme")).toBe("dark")
   await userEvent.click(screen.getByRole("radio", { name: "Light" }))
-  expect(document.documentElement).not.toHaveClass("dark")
+  expectTheme("light")
   expect(localStorage.getItem("theme")).toBe("light")
 })
 
@@ -53,7 +54,7 @@ test("Like the device follows the colour scheme", async () => {
   renderWithProviders(themed(<AppearanceFields />))
   await userEvent.click(screen.getByRole("radio", { name: "Like the device" }))
   expect(screen.getByRole("radio", { name: "Like the device" })).toBeChecked()
-  expect(document.documentElement).toHaveClass("dark")
+  expectTheme("dark")
 })
 
 test("before mount the menu shows the device icon", () => {

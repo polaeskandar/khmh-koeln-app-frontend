@@ -1,6 +1,7 @@
 import { screen } from "@testing-library/react"
 import { expect, test } from "vitest"
 
+import { expectNeverScrollsVertically, expectScrollsSideways } from "@test/support/layout"
 import { renderWithProviders } from "@test/support/providers"
 
 import { LinkTabs } from "@/components/link-tabs"
@@ -31,8 +32,7 @@ test("LinkTabs scroll sideways but never vertically", () => {
     />
   )
 
-  expect(screen.getByRole("navigation", { name: "Tabs" })).toHaveClass(
-    "overflow-x-auto",
-    "overflow-y-hidden"
-  )
+  const tabs = screen.getByRole("navigation", { name: "Tabs" })
+  expectScrollsSideways(tabs)
+  expectNeverScrollsVertically(tabs)
 })

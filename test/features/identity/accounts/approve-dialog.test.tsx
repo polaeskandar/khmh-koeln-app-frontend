@@ -1,8 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Schemas } from "@/lib/api/client"
@@ -11,16 +10,12 @@ import { me } from "@test/support/fixtures/me"
 import { services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { AccountRequest } from "@/features/identity/accounts/api"
 import type { DirectoryEntry } from "@/features/people/members/api"
 import type { RoleRow } from "@/features/identity/roles/api"
 import { SettingsPage } from "@/features/identity/accounts/settings-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
-})
 
 const sandra: AccountRequest = {
   account: {
@@ -174,7 +169,7 @@ test("children are found from two letters and kept across searches; both are sen
     ])
   )
 
-  expect(toast.success).toHaveBeenCalledWith("Sandra Samuel can sign in now.")
+  await expectToast("Sandra Samuel can sign in now.")
 })
 
 test("a chosen child is taken off with its named remove button", async () => {
@@ -245,7 +240,7 @@ test("a 409 closes the dialog and refetches", async () => {
   await userEvent.click(await dialog.findByRole("button", { name: /Demiana Fanous/ }))
   await userEvent.click(dialog.getByRole("button", { name: "Approve account" }))
   await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull())
-  expect(toast.error).toHaveBeenCalled()
+  await expectToast("This account has already been approved.")
 })
 
 test("approving a parent refetches the staff accounts, the roles and the parent links", async () => {

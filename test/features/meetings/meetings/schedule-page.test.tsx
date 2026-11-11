@@ -2,8 +2,7 @@ import type { QueryClient } from "@tanstack/react-query"
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test, vi } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import type { AgendaItem, PlannedSession, ScheduleResponse } from "@/features/meetings/meetings/api"
@@ -15,13 +14,9 @@ import { session, stageRef, sundaySchool } from "@test/support/fixtures/sessions
 import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { makeTestQueryClient, renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import { SchedulePage } from "@/features/meetings/meetings/schedule-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
-})
 
 const stage = stageRef("3rd Class", 2)
 
@@ -181,11 +176,7 @@ test("activating toasts the sessions it created", async () => {
 
   await userEvent.click(await screen.findByRole("button", { name: "Activate" }))
 
-  await vi.waitFor(() =>
-    expect(toast.success).toHaveBeenCalledWith(
-      "Schedule activated. 1 session was created for today and tomorrow."
-    )
-  )
+  await expectToast("Schedule activated. 1 session was created for today and tomorrow.")
 
   await vi.waitFor(() =>
     expect(screen.queryByRole("button", { name: "Activate" })).not.toBeInTheDocument()
@@ -214,11 +205,7 @@ test("deactivating confirms with the history it keeps", async () => {
 
   await userEvent.click(dialog.getByRole("button", { name: "Deactivate" }))
 
-  await vi.waitFor(() =>
-    expect(toast.success).toHaveBeenCalledWith(
-      "Schedule deactivated. No new sessions will be created; existing ones stay."
-    )
-  )
+  await expectToast("Schedule deactivated. No new sessions will be created; existing ones stay.")
 
   expect(posts).toEqual([{}])
 })
@@ -254,7 +241,7 @@ test("deleting a schedule without sessions returns to the list", async () => {
   const dialog = within(await screen.findByRole("alertdialog"))
   await userEvent.click(dialog.getByRole("button", { name: "Delete schedule" }))
   await vi.waitFor(() => expect(router.push).toHaveBeenCalledWith("/meetings/schedules/"))
-  expect(toast.success).toHaveBeenCalledWith("Schedule deleted.")
+  await expectToast("Schedule deleted.")
 })
 
 test("a schedule with lessons can't be deleted", async () => {
@@ -271,10 +258,8 @@ test("a schedule with lessons can't be deleted", async () => {
   const dialog = within(await screen.findByRole("alertdialog"))
   await userEvent.click(dialog.getByRole("button", { name: "Delete schedule" }))
 
-  await vi.waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith(
-      "2 lessons are linked to this schedule. Deactivate it instead: no new sessions are created and the history stays."
-    )
+  await expectToast(
+    "2 lessons are linked to this schedule. Deactivate it instead: no new sessions are created and the history stays."
   )
 
   expect(router.push).not.toHaveBeenCalled()

@@ -1,8 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test, vi } from "vitest"
 
 import { StagesManagerPage } from "@/features/organization/stages/stages-manager-page"
 import { apiUrl, problem } from "@test/support/api"
@@ -17,17 +16,12 @@ import { renderWithProviders } from "@test/support/providers"
 import type { Me } from "@/features/identity/auth/api"
 import {
   type ArchiveImpact,
-  serviceInsightsQuery,
   type Service,
   type StageList,
 } from "@/features/organization/services/api"
 import { ServiceDetailsPage } from "@/features/organization/services/service-details-page"
 import { ServiceActionsMenu } from "@/features/organization/services/service-actions"
 import type { Stage } from "@/features/organization/stages/api"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-})
 
 const [, youth, choir] = services.items as [Service, Service, Service]
 
@@ -87,18 +81,13 @@ test("the archive dialog lists the impact, and a refusal stays in it", async () 
     })
   )
 
-  const { client } = menu(youth, me.administrator, { activeSchedules: 1, upcomingSessions: 2 })
-
-  await vi.waitFor(() =>
-    expect(client.getQueryState(serviceInsightsQuery.queryKey)?.status).toBe("success")
-  )
-
+  menu(youth, me.administrator, { activeSchedules: 1, upcomingSessions: 2 })
   await items("Youth Meeting")
   await userEvent.click(screen.getByRole("menuitem", { name: "Archive" }))
   const dialog = within(await screen.findByRole("alertdialog"))
 
   expect(
-    dialog.getByText("No new sessions are created for its 1 active schedule.")
+    await dialog.findByText("No new sessions are created for its 1 active schedule.")
   ).toBeInTheDocument()
 
   expect(

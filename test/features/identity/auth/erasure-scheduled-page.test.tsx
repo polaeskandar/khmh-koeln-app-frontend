@@ -1,13 +1,13 @@
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { afterEach, expect, test } from "vitest"
 
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
+import { expectNoToast } from "@test/support/toasts"
 
 import {
   forgetOutcome,
@@ -17,10 +17,6 @@ import {
 import { ErasureScheduledPage } from "@/features/identity/auth/erasure-scheduled-page"
 
 const PASSWORD = "correct horse battery"
-
-beforeEach(() => {
-  vi.spyOn(toast, "error")
-})
 
 afterEach(() => {
   forgetOutcome()
@@ -90,7 +86,7 @@ test("cancelling sends the email and password, then says the account is back", a
 
   expect(screen.getByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/sign-in/")
   expect(sent).toEqual([{ email: "daniel@example.org", password: PASSWORD }])
-  expect(toast.error).not.toHaveBeenCalled()
+  expectNoToast()
 })
 
 test.each([
@@ -122,7 +118,7 @@ test.each([
   expect(screen.getByLabelText("Email address")).toHaveValue("daniel@example.org")
   expect(screen.getByLabelText("Password")).toHaveValue(PASSWORD)
   expect(screen.queryByRole("heading", { name: "Your account is back" })).not.toBeInTheDocument()
-  expect(toast.error).not.toHaveBeenCalled()
+  expectNoToast()
 })
 
 test("a second try after a wrong password succeeds", async () => {

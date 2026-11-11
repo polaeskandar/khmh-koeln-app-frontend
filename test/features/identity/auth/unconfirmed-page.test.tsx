@@ -1,5 +1,4 @@
 import { screen } from "@testing-library/react"
-import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
@@ -8,8 +7,6 @@ import { forgetOutcome, rememberOutcome } from "@/features/identity/auth/auth-ou
 import { UnconfirmedPage } from "@/features/identity/auth/unconfirmed-page"
 
 beforeEach(() => {
-  vi.spyOn(toast, "error")
-
   for (const method of ["log", "info", "warn", "debug"] as const) {
     vi.spyOn(console, method).mockImplementation(() => {})
   }

@@ -12,11 +12,7 @@ import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import {
-  type Service,
-  serviceInsightsQuery,
-  type StageList,
-} from "@/features/organization/services/api"
+import { type Service, type StageList } from "@/features/organization/services/api"
 import { ServiceDetailsPage } from "@/features/organization/services/service-details-page"
 import { ServicesTable } from "@/features/organization/services/services-overview-page"
 
@@ -50,17 +46,9 @@ const insights: ServiceInsightList = insightsOf(rows, {
   },
 })
 
-async function table(locale: Locale = "en", items = rows, answer = insights) {
+function table(locale: Locale = "en", items = rows, answer = insights) {
   server.use(http.get(apiUrl("/services/insights"), () => HttpResponse.json(answer)))
-
-  const { client } = renderWithProviders(<ServicesTable rows={items} />, {
-    locale,
-    me: me.administrator,
-  })
-
-  await waitFor(() =>
-    expect(client.getQueryState(serviceInsightsQuery.queryKey)?.status).toBe("success")
-  )
+  renderWithProviders(<ServicesTable rows={items} />, { locale, me: me.administrator })
 }
 
 const row = (name: string) =>
@@ -69,39 +57,45 @@ const row = (name: string) =>
     .find((r) => within(r).queryByRole("link", { name }))!
 
 test("attendance reads as a percent with a bar, an average, or no sessions", async () => {
-  await table()
+  table()
+  await waitFor(() => expect(row("Sunday School")).toHaveTextContent("82%"))
   const sunday = row("Sunday School")
-  expect(sunday).toHaveTextContent("82%")
   expect(sunday.querySelector("[aria-hidden] > span")).toHaveStyle({ width: "82%" })
   expect(row("Youth Meeting")).toHaveTextContent("9 on average")
   expect(row("Deacons' School")).toHaveTextContent("No sessions")
 })
 
 test("German writes the percent with a space", async () => {
-  await table("de")
-  expect(row("Sunday School")).toHaveTextContent("82 %")
+  table("de")
+  await waitFor(() => expect(row("Sunday School")).toHaveTextContent("82 %"))
 })
 
 test("the next meeting reads the day and time with the stage or its status", async () => {
-  await table()
-  expect(row("Sunday School")).toHaveTextContent("Today, 12:00Kindergarten")
+  table()
+  await waitFor(() => expect(row("Sunday School")).toHaveTextContent("Today, 12:00Kindergarten"))
   expect(row("Youth Meeting")).toHaveTextContent(/Fri 13 Nov, 19:00\s*Planned/)
   expect(row("Deacons' School")).toHaveTextContent("Nothing planned")
 })
 
 test("archived services show a dash as next meeting", async () => {
   const choir = services.items.find((s) => s.archived)!
-  await table("en", [choir], insightsOf([choir]))
+  table("en", [choir], insightsOf([choir]))
   await userEvent.click(screen.getByRole("tab", { name: "Archived (1)" }))
+  await waitFor(() => expect(row("Choir")).toHaveTextContent("No sessions"))
   const cells = within(row("Choir")).getAllByRole("cell")
   expect(cells.filter((cell) => cell.textContent === "—").length).toBeGreaterThanOrEqual(1)
   expect(row("Choir")).not.toHaveTextContent("Nothing planned")
 })
 
 test("phone cards add the next meeting", async () => {
-  await table()
+  table()
   const cards = within(screen.getByRole("list", { name: "Services" }))
-  expect(cards.getByRole("link", { name: /Sunday School/ })).toHaveTextContent("next today, 12:00")
+
+  await waitFor(() =>
+    expect(cards.getByRole("link", { name: /Sunday School/ })).toHaveTextContent(
+      "next today, 12:00"
+    )
+  )
 })
 
 test("details show the attendance stat and no leaders", async () => {

@@ -1,8 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -12,15 +11,11 @@ import { church, me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { RoleDetails } from "@/features/identity/roles/api"
 import { NewRolePage } from "@/features/identity/roles/new-role-page"
 import { RolePage } from "@/features/identity/roles/role-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
-})
 
 const all: Action[] = ["read", "create", "update", "delete"]
 
@@ -251,10 +246,8 @@ test("unticking Roles: Change on the only way warns, and a refusal keeps what wa
   await userEvent.type(name, "Admins")
   await userEvent.click(screen.getByRole("button", { name: "Save changes" }))
 
-  await waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith(
-      "At least one active account must be able to change roles. Give that permission to someone else first."
-    )
+  await expectToast(
+    "At least one active account must be able to change roles. Give that permission to someone else first."
   )
 
   expect(name).toHaveValue("Admins")
@@ -318,5 +311,5 @@ test("deleting the role from the editor asks first, then returns to the roles li
 
   await waitFor(() => expect(router.push).toHaveBeenCalledWith("/settings/#roles"))
   expect(deleted).toEqual([SERVANT_ID])
-  expect(toast.success).toHaveBeenCalledWith("Role “Servant” deleted.")
+  await expectToast("Role “Servant” deleted.")
 })

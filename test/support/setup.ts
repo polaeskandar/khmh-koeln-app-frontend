@@ -6,6 +6,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, vi } from "vitest"
 import { checkConsoleErrors, watchConsoleErrors } from "@test/support/console"
 import { server } from "@test/support/msw"
 import { resetNavigation } from "@test/support/navigation"
+import { watchToasts } from "@test/support/toasts"
 
 vi.mock("@/i18n/navigation", async () => (await import("@test/support/navigation")).navigationMock)
 
@@ -41,7 +42,10 @@ vi.stubGlobal(
 
 beforeAll(() => server.listen({ onUnhandledFrame: "error" }))
 
-beforeEach(() => watchConsoleErrors())
+beforeEach(() => {
+  watchConsoleErrors()
+  watchToasts()
+})
 
 afterEach(() => {
   cleanup()

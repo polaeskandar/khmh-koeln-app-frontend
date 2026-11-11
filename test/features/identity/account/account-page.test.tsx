@@ -1,7 +1,6 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
 import { NavUser } from "@/features/portals/staff/staff-account-menu"
@@ -12,6 +11,7 @@ import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { navigation, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import { AccountPage } from "@/features/identity/account/account-page"
 
@@ -20,7 +20,6 @@ let signOuts = 0
 beforeEach(() => {
   navigation.pathname = "/account/"
   signOuts = 0
-  vi.spyOn(toast, "success")
 
   server.use(
     http.get(apiUrl("/me"), () => HttpResponse.json(me.servant)),
@@ -106,7 +105,7 @@ test("a password change sends once, closes with a toast and reopens empty", asyn
   await userEvent.type(dialog.getByLabelText("Current password"), "old-password-1")
   await userEvent.type(dialog.getByLabelText("New password"), "new-password-12")
   await userEvent.dblClick(dialog.getByRole("button", { name: "Change password" }))
-  await vi.waitFor(() => expect(toast.success).toHaveBeenCalledWith("Your password is changed."))
+  await expectToast("Your password is changed.")
   await vi.waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
   expect(bodies).toEqual([{ currentPassword: "old-password-1", newPassword: "new-password-12" }])
   dialog = await openDialog()

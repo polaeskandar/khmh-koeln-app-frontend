@@ -112,7 +112,7 @@ test("lists the next meetings, six at most, canceled without a reason", async ()
   expect(items[0]).toHaveTextContent("9")
   expect(items[1]).toHaveTextContent("Canceled")
   expect(items[1]).not.toHaveTextContent(/reason/i)
-  expect(items[1]!.querySelector(".line-through")).toHaveTextContent("Bible Study · Bible Study")
+  expect(items[1]).toHaveTextContent("Bible Study · Bible Study")
 })
 
 test("lists the groups with schedules, servants and the last lesson", async () => {

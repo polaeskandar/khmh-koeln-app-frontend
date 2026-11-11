@@ -1,8 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import type { SessionView } from "@/features/meetings/meetings/api"
@@ -12,12 +11,9 @@ import { session, sessionDetail, sessionState } from "@test/support/fixtures/ses
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import { SessionPage } from "@/features/meetings/meetings/session-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-})
 
 function open(
   view: Parameters<typeof session>[0] = {},
@@ -69,9 +65,7 @@ test("cancel trims the reason, toasts and the page shows the canceled banner", a
   await userEvent.click(dialog.getByRole("button", { name: "Cancel session" }))
   await waitFor(() => expect(sent).toEqual([{ reason: "Church trip to Hamburg" }]))
 
-  expect(toast.success).toHaveBeenCalledWith(
-    "Session canceled. The schedule and its other sessions are unchanged."
-  )
+  await expectToast("Session canceled. The schedule and its other sessions are unchanged.")
 
   expect(await screen.findByRole("status")).toHaveTextContent(/Reason: .Church trip to Hamburg./)
   expect(screen.queryByRole("alertdialog")).toBeNull()

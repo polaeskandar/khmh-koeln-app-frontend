@@ -1,8 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test, vi } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { apiUrl } from "@test/support/api"
@@ -11,14 +10,10 @@ import { SUNDAY_SCHOOL_ID, THIRD_CLASS_ID, thirdClass } from "@test/support/fixt
 import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { HomeworkDetail } from "@/features/learning/homework/api"
 import { EditHomeworkPage } from "@/features/learning/homework/edit-homework-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
-})
 
 const HOMEWORK_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea001"
 
@@ -127,9 +122,7 @@ test("editing published homework puts the whole task at its version, with minDue
 
   expect(versions).toEqual(["3"])
 
-  await vi.waitFor(() =>
-    expect(toast.success).toHaveBeenCalledWith("Saved. Parents and members see the new version.")
-  )
+  await expectToast("Saved. Parents and members see the new version.")
 
   expect(router.push).toHaveBeenCalledWith(
     `/stages/homework/?id=${THIRD_CLASS_ID}&status=published`

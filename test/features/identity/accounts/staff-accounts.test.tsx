@@ -2,8 +2,7 @@ import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { StrictMode } from "react"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -13,14 +12,10 @@ import { me } from "@test/support/fixtures/me"
 import { services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
 import { testProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { StaffAccount } from "@/features/identity/accounts/api"
 import { StaffAccounts } from "@/features/identity/accounts/staff-accounts"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
-})
 
 const role = (n: number, name: string) => ({
   id: `0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ee${String(n).padStart(3, "0")}`,
@@ -220,7 +215,7 @@ test("giving a role offers the ones not held, and sends it once", async () => {
   expect(dialog.getByRole("button", { name: "Give role" })).toBeDisabled()
   await userEvent.selectOptions(select, helper.id)
   await userEvent.click(dialog.getByRole("button", { name: "Give role" }))
-  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Role given."))
+  await expectToast("Role given.")
   expect(sent).toEqual([`give ${rebecca.id} ${helper.id}`])
 
   expect(
@@ -255,10 +250,8 @@ test("removing asks first; the last role manager keeps the role", async () => {
   const dialog = within(await screen.findByRole("alertdialog"))
   await userEvent.click(dialog.getByRole("button", { name: "Remove role" }))
 
-  await waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith(
-      "At least one active account must be able to change roles. Give that permission to someone else first."
-    )
+  await expectToast(
+    "At least one active account must be able to change roles. Give that permission to someone else first."
   )
 
   expect(sent).toEqual([`remove ${mariam.id} ${administrator.id}`])
@@ -443,11 +436,7 @@ test("assigning a group sends the service and stage once and shows the chip", as
   await userEvent.selectOptions(stage, thirdClass.id)
   await userEvent.dblClick(dialog.getByRole("button", { name: "Assign" }))
 
-  await waitFor(() =>
-    expect(toast.success).toHaveBeenCalledWith(
-      "⁨Rebecca Girgis⁩ now serves in ⁨Sunday School · 3rd Class⁩."
-    )
-  )
+  await expectToast("⁨Rebecca Girgis⁩ now serves in ⁨Sunday School · 3rd Class⁩.")
 
   expect(sent).toEqual([`assign ${rebecca.id} ${sundaySchool.id} ${thirdClass.id}`])
 
@@ -477,9 +466,7 @@ test("an account already in the group keeps the dialog open with the reason", as
   await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Service" }), youth.id)
   await userEvent.click(dialog.getByRole("button", { name: "Assign" }))
 
-  await waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith("Rebecca Girgis is already assigned to Youth.")
-  )
+  await expectToast("Rebecca Girgis is already assigned to Youth.")
 
   expect(screen.getByRole("dialog")).toBeInTheDocument()
 })
@@ -490,11 +477,7 @@ test("a refused assignment says who may assign", async () => {
   await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Service" }), youth.id)
   await userEvent.click(dialog.getByRole("button", { name: "Assign" }))
 
-  await waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith(
-      "You can’t assign people to this group or take them out of it."
-    )
-  )
+  await expectToast("You can’t assign people to this group or take them out of it.")
 })
 
 test("taking someone out of a group asks first and removes the chip", async () => {
@@ -509,11 +492,7 @@ test("taking someone out of a group asks first and removes the chip", async () =
   await userEvent.click(dialog.getByRole("button", { name: "Take out" }))
   await waitFor(() => expect(sent).toEqual([`unassign ${inThirdClass.id}`]))
 
-  await waitFor(() =>
-    expect(toast.success).toHaveBeenCalledWith(
-      "⁨Daniel Mikhail⁩ no longer serves in ⁨Sunday School · 3rd Class⁩."
-    )
-  )
+  await expectToast("⁨Daniel Mikhail⁩ no longer serves in ⁨Sunday School · 3rd Class⁩.")
 
   await waitFor(() => expect(screen.queryByText("Sunday School · 3rd Class")).toBeNull())
 })

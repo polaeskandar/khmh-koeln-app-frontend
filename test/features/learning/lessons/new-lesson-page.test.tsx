@@ -1,8 +1,7 @@
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -17,13 +16,9 @@ import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import { NewLessonPage } from "@/features/learning/lessons/new-lesson-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
-})
 
 const SCHEDULE_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f90"
 
@@ -113,7 +108,7 @@ test("Mark ready posts ready, two materials, null for empty texts and no empty r
     status: "ready",
   })
 
-  expect(toast.success).toHaveBeenCalledWith("Saved. The lesson is ready to teach.")
+  await expectToast("Saved. The lesson is ready to teach.")
 })
 
 test("Enter in a field saves a new lesson as a draft", async () => {
