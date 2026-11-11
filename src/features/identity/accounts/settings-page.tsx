@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 
-import { Topbar } from "@/components/app-shell/topbar"
+import { Topbar } from "@/features/portals/staff/topbar"
 import { PageBody, PageHeader } from "@/components/page-header"
 import { RequirePermission } from "@/features/identity/auth/guards"
 import { useCan } from "@/features/identity/auth/session"

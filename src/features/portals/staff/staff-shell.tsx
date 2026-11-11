@@ -14,9 +14,10 @@ import {
 import { useDirection } from "@/i18n/direction"
 
 import { MobileTabBar } from "./mobile-tab-bar"
-import { SidebarBrand, SidebarNav } from "./sidebar-parts"
+import { SidebarBrand } from "./sidebar-brand"
+import { SidebarNav } from "./sidebar-nav"
 
-export function AppShell({ children, footer }: { children: ReactNode; footer?: ReactNode }) {
+export function StaffShell({ children, footer }: { children: ReactNode; footer?: ReactNode }) {
   const dir = useDirection()
 
   return (

@@ -4,7 +4,7 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import { NavUser } from "@/components/app-shell/account-menu"
+import { NavUser } from "@/features/portals/staff/staff-account-menu"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"

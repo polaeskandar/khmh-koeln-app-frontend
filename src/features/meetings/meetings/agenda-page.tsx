@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl"
 import { type ReactNode, Suspense } from "react"
 import { useQuery } from "@tanstack/react-query"
 
-import { Topbar } from "@/components/app-shell/topbar"
+import { Topbar } from "@/features/portals/staff/topbar"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
 import { NotAssigned } from "@/components/not-assigned"
 import { QueryState } from "@/components/page-states"

@@ -2,7 +2,7 @@
 
 import type { ComponentProps, ReactNode, RefObject } from "react"
 
-import { Topbar } from "@/components/app-shell/topbar"
+import { Topbar } from "@/features/portals/staff/topbar"
 import { PageBody, PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"

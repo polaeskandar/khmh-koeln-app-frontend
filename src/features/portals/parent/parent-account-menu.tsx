@@ -6,12 +6,14 @@ import { useTranslations } from "next-intl"
 import { PortalAccountMenu } from "@/components/portal/portal-account-menu"
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { useSession } from "@/features/identity/auth/session"
+import { useSwitchLocale } from "@/features/identity/auth/use-switch-locale"
 import { Link } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 
 export function ParentAccountMenu() {
   const t = useTranslations()
-  const { session } = useSession()
+  const { session, signOut, signingOut } = useSession()
+  const switchLocale = useSwitchLocale()
 
   if (session.status !== "authenticated") {
     return null
@@ -21,7 +23,11 @@ export function ParentAccountMenu() {
 
   return (
     <PortalAccountMenu
-      label={(name) => t("parent.menu.accountOf", { name })}
+      account={me.account}
+      label={t("parent.menu.accountOf", { name: me.account.displayName })}
+      signingOut={signingOut}
+      onSignOut={() => void signOut()}
+      onSwitchLocale={switchLocale}
       links={
         <>
           {areas.staff ? (

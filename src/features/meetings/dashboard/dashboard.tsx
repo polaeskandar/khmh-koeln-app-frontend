@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
 
-import { Topbar } from "@/components/app-shell/topbar"
+import { Topbar } from "@/features/portals/staff/topbar"
 import { NotAssigned } from "@/components/not-assigned"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"

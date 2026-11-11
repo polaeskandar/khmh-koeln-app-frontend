@@ -5,7 +5,7 @@ import { Search, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Suspense } from "react"
 
-import { Topbar } from "@/components/app-shell/topbar"
+import { Topbar } from "@/features/portals/staff/topbar"
 import { NoAccess } from "@/components/no-access"
 import { PageBody, PageHeader } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"

@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
 
-import { RecordNotFound } from "@/components/app-shell/record-not-found"
+import { RecordNotFound } from "@/features/portals/staff/record-not-found"
 import { NoAccess } from "@/components/no-access"
 import { QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
