@@ -1,11 +1,11 @@
 "use client"
 
-import { useQueryClient } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
-import { useCallback, useReducer } from "react"
+import { useReducer } from "react"
 import { toast } from "sonner"
 
 import { ApiError } from "@/lib/api/problem"
+import { isStale, useRefetch } from "@/lib/api/refetch"
 import type { PersonRef, Uuid } from "@/lib/api/types/common"
 import { translateProblem } from "@/lib/api/translate-problem"
 import { useProblemTranslator } from "@/lib/api/use-problem-translator"
@@ -147,12 +147,12 @@ const ATTEMPTS = 3
 const TIMEOUT_MS = 10_000
 const BACKOFF_MS = 500
 
-const REFETCH_CODES = new Set([
+const CHANGED_MEANWHILE = [
   "attendance.closedReopen",
   "attendance.openFirst",
   "meetings.sessionCanceled",
   "notFound.person",
-])
+]
 
 const retryable = (error: unknown) =>
   !(error instanceof ApiError) || error.status === 0 || error.status >= 500
@@ -174,22 +174,8 @@ async function withRetries<T>(write: (signal: AbortSignal) => Promise<T>): Promi
 export function useMarkWrites(sessionId: Uuid) {
   const t = useTranslations()
   const translate = useProblemTranslator()
-  const queryClient = useQueryClient()
+  const refetch = useRefetch()
   const [writes, dispatch] = useReducer(writesReducer, {})
-
-  const refetchBoard = useCallback(
-    () => Promise.all(MARK_QUERIES.map((queryKey) => queryClient.invalidateQueries({ queryKey }))),
-    [queryClient]
-  )
-
-  const refetchSession = useCallback(
-    () =>
-      Promise.all([
-        refetchBoard(),
-        queryClient.invalidateQueries({ queryKey: meetingSessionQuery(sessionId).queryKey }),
-      ]),
-    [queryClient, refetchBoard, sessionId]
-  )
 
   async function send(person: PersonRef, present: boolean, visitor?: Visitor) {
     dispatch({ type: "start", personId: person.id, present, visitor })
@@ -208,7 +194,7 @@ export function useMarkWrites(sessionId: Uuid) {
         at: Date.now(),
       })
 
-      void refetchBoard()
+      void refetch(MARK_QUERIES)
     } catch (error) {
       dispatch({ type: "fail", personId: person.id })
 
@@ -223,8 +209,8 @@ export function useMarkWrites(sessionId: Uuid) {
       const problem = error as ApiError
       toast.error(translateProblem(problem, translate))
 
-      if (problem.code && REFETCH_CODES.has(problem.code)) {
-        void refetchSession()
+      if (isStale(problem, CHANGED_MEANWHILE)) {
+        void refetch([...MARK_QUERIES, meetingSessionQuery(sessionId).queryKey])
       }
     }
   }

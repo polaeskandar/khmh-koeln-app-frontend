@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { Ellipsis, PencilLine, Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
+import { useRefetch } from "@/lib/api/refetch"
 import type { LessonStatus } from "@/lib/api/types/learning"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
@@ -62,7 +63,7 @@ function useLessonChange<A extends unknown[], T>(
   successMessage: string,
   onSuccess?: () => void
 ) {
-  const queryClient = useQueryClient()
+  const refetch = useRefetch()
 
   const mutation = useApiMutation(fn, {
     successMessage,
@@ -76,7 +77,7 @@ function useLessonChange<A extends unknown[], T>(
       const result = await mutation.execute(...args)
 
       if (!result.ok) {
-        LESSON_QUERIES.forEach((queryKey) => void queryClient.invalidateQueries({ queryKey }))
+        void refetch(LESSON_QUERIES)
       }
 
       return result.ok

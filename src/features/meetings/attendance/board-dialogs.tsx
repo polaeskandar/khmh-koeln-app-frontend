@@ -1,6 +1,5 @@
 "use client"
 
-import { useQueryClient } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
@@ -10,6 +9,7 @@ import { useFormat } from "@/i18n/format"
 import { useRouter } from "@/i18n/navigation"
 import type { PersonRef } from "@/lib/api/types/common"
 import { groupOf } from "@/lib/api/types/meetings"
+import { isStale, useRefetch } from "@/lib/api/refetch"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { preferredName } from "@/lib/domain/names"
 import { routes } from "@/lib/routes"
@@ -35,7 +35,7 @@ export function CloseDialog({
 }) {
   const t = useTranslations()
   const router = useRouter()
-  const queryClient = useQueryClient()
+  const refetch = useRefetch()
   const { session, counts } = board
   const expected = session.rosterMode === "expected"
   const rosterSize = board.roster.length
@@ -71,8 +71,8 @@ export function CloseDialog({
       onConfirm={async () => {
         const result = await close.execute(session.id)
 
-        if (!result.ok && result.problem.code === "meetings.onlyActiveCanClose") {
-          ATTENDANCE_QUERIES.forEach((queryKey) => void queryClient.invalidateQueries({ queryKey }))
+        if (!result.ok && isStale(result.problem, ["meetings.onlyActiveCanClose"])) {
+          void refetch(ATTENDANCE_QUERIES)
         }
 
         return result.ok
@@ -98,7 +98,7 @@ export function CorrectionDialog({
 }) {
   const t = useTranslations("attendance.board")
   const f = useFormat()
-  const queryClient = useQueryClient()
+  const refetch = useRefetch()
   const marks = marksOf(board)
   const [chosen, setChosen] = useState<string | null>(null)
 
@@ -107,7 +107,11 @@ export function CorrectionDialog({
   }
 
   const personId = chosen ?? marks[0]?.person.id ?? ""
-  const remove = useApiMutation(removeMarkRequest, { toastOnError: false })
+
+  const remove = useApiMutation(removeMarkRequest, {
+    toastOnError: false,
+    invalidate: ATTENDANCE_QUERIES,
+  })
 
   return (
     <ReasonDialog
@@ -129,8 +133,8 @@ export function CorrectionDialog({
       onConfirm={async (reason) => {
         const result = await remove.execute(board.session.id, personId, reason)
 
-        if (result.ok || result.problem.code === "attendance.closedReopen") {
-          ATTENDANCE_QUERIES.forEach((queryKey) => void queryClient.invalidateQueries({ queryKey }))
+        if (!result.ok && isStale(result.problem, ["attendance.closedReopen"])) {
+          void refetch(ATTENDANCE_QUERIES)
         }
 
         return result.ok

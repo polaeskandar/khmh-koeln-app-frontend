@@ -1,6 +1,5 @@
 "use client"
 
-import { useQueryClient } from "@tanstack/react-query"
 import { CircleAlert, Info } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { type ReactNode, useEffect, useState } from "react"
@@ -22,6 +21,7 @@ import { Link, useRouter } from "@/i18n/navigation"
 import { isolate } from "@/lib/bidi"
 import type { Instant, PersonRef } from "@/lib/api/types/common"
 import { groupOf } from "@/lib/api/types/meetings"
+import { isStale, useRefetch } from "@/lib/api/refetch"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { initials, preferredName } from "@/lib/domain/names"
 import { meetingGroup } from "@/lib/permissions"
@@ -62,7 +62,7 @@ function People({ people }: { people: { person: PersonRef; at?: Instant }[] }) {
 function ReopenButton({ board }: { board: Board }) {
   const t = useTranslations("attendance.reopen")
   const router = useRouter()
-  const queryClient = useQueryClient()
+  const refetch = useRefetch()
   const [open, setOpen] = useState(false)
   const id = board.session.id
 
@@ -91,8 +91,8 @@ function ReopenButton({ board }: { board: Board }) {
       onConfirm={async (reason) => {
         const result = await reopen.execute(id, reason)
 
-        if (!result.ok && result.problem.code === "meetings.onlyCompletedCanReopen") {
-          ATTENDANCE_QUERIES.forEach((queryKey) => void queryClient.invalidateQueries({ queryKey }))
+        if (!result.ok && isStale(result.problem, ["meetings.onlyCompletedCanReopen"])) {
+          void refetch(ATTENDANCE_QUERIES)
         }
 
         return result.ok

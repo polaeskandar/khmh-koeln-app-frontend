@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { Unlink } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { initialsOf } from "@/features/identity/auth/role-summary"
 import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
+import { isStale, useRefetch } from "@/lib/api/refetch"
 import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
@@ -54,7 +55,7 @@ function AccountRow({
 }) {
   const t = useTranslations()
   const f = useFormat()
-  const queryClient = useQueryClient()
+  const refetch = useRefetch()
   const [removing, setRemoving] = useState(false)
 
   const unlink = useApiMutation(unlinkMemberRequest, {
@@ -133,10 +134,8 @@ function AccountRow({
         onConfirm={async () => {
           const result = await unlink.execute(account.id)
 
-          if (!result.ok && result.problem.status === 409) {
-            for (const queryKey of MEMBER_ACCOUNT_QUERIES) {
-              void queryClient.invalidateQueries({ queryKey })
-            }
+          if (!result.ok && isStale(result.problem, [409])) {
+            void refetch(MEMBER_ACCOUNT_QUERIES)
 
             return true
           }

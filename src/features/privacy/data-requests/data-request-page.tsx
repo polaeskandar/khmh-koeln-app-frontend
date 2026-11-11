@@ -21,6 +21,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { useCan, useSession } from "@/features/identity/auth/session"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { useFormat } from "@/i18n/format"
+import { isStale, useRefetch } from "@/lib/api/refetch"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { preferredName } from "@/lib/domain/names"
@@ -42,7 +43,6 @@ import {
   DATA_REQUEST_QUERIES,
 } from "./api"
 import { DueLabel, RequestStatusBadge, useSubjectLabel } from "./request-bits"
-import { DATA_REQUESTS_KEY } from "@/lib/api/query-keys"
 
 const ERASE_KEYS = [
   "person",
@@ -88,6 +88,7 @@ function EraseAction({
 }) {
   const t = useTranslations()
   const queryClient = useQueryClient()
+  const refetch = useRefetch()
   const eraseLines = useEraseLines()
   const [open, setOpen] = useState(false)
   const mentions = review?.mentions.length ?? 0
@@ -125,8 +126,8 @@ function EraseAction({
         onConfirm={async () => {
           const result = await erase.execute(mentions > 0 && clearNotes)
 
-          if (!result.ok && result.problem.status === 409) {
-            void queryClient.invalidateQueries({ queryKey: DATA_REQUESTS_KEY })
+          if (!result.ok && isStale(result.problem, [409])) {
+            void refetch(DATA_REQUEST_QUERIES)
 
             return true
           }
@@ -317,7 +318,7 @@ function LinkStatus({
 
 function CopyLinkSection({ data }: { data: DataRequestDetail }) {
   const t = useTranslations()
-  const queryClient = useQueryClient()
+  const refetch = useRefetch()
   const [created, setCreated] = useState<CopyLink | null>(null)
   const { request } = data
   const open = request.status === "open"
@@ -339,11 +340,11 @@ function CopyLinkSection({ data }: { data: DataRequestDetail }) {
       return true
     }
 
-    if (result.problem.status !== 409) {
+    if (!isStale(result.problem, [409])) {
       return false
     }
 
-    void queryClient.invalidateQueries({ queryKey: DATA_REQUESTS_KEY })
+    void refetch(DATA_REQUEST_QUERIES)
 
     return true
   })

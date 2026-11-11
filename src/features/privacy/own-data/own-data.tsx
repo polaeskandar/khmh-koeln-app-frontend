@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { Download, Hourglass, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useEffect, useState } from "react"
@@ -26,11 +26,17 @@ import { useSession } from "@/features/identity/auth/session"
 import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { useFormat } from "@/i18n/format"
+import { isStale, useRefetch } from "@/lib/api/refetch"
 import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { routes } from "@/lib/routes"
 
-import { downloadOwnDataRequest, erasureRequestQuery, requestErasureRequest } from "./api"
+import {
+  downloadOwnDataRequest,
+  ERASURE_REQUEST_QUERIES,
+  erasureRequestQuery,
+  requestErasureRequest,
+} from "./api"
 
 function DeleteAccountForm({
   parent,
@@ -64,7 +70,7 @@ function DeleteAccountForm({
 
     const result = await erase.execute(trimmed === "" ? { password } : { password, note: trimmed })
 
-    if (!result.ok && result.problem.code === "privacy.alreadyRequested") {
+    if (!result.ok && isStale(result.problem, ["privacy.alreadyRequested"])) {
       onAlreadyRequested()
     }
   })
@@ -112,7 +118,7 @@ function DeleteAccountForm({
 
 function DeleteAccountDialog() {
   const t = useTranslations("privacy.own")
-  const queryClient = useQueryClient()
+  const refetch = useRefetch()
   const { session } = useSession()
   const areas = session.status === "authenticated" ? session.areas : null
   const [open, setOpen] = useState(false)
@@ -146,7 +152,7 @@ function DeleteAccountDialog() {
           onPendingChange={setPending}
           onAlreadyRequested={() => {
             setOpen(false)
-            void queryClient.invalidateQueries({ queryKey: erasureRequestQuery.queryKey })
+            void refetch(ERASURE_REQUEST_QUERIES)
           }}
         />
       </AlertDialogContent>

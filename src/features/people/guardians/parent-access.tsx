@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
@@ -23,6 +23,7 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
 import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
+import { isStale, useRefetch } from "@/lib/api/refetch"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { preferredName } from "@/lib/domain/names"
@@ -37,7 +38,6 @@ import {
   GUARDIAN_LINK_QUERIES,
 } from "./api"
 import { PersonSearch } from "@/features/people/members/person-search"
-import { GUARDIAN_LINKS_KEY } from "@/lib/api/query-keys"
 
 function GiveAccessDialog({
   accounts,
@@ -139,7 +139,7 @@ function GiveAccessDialog({
 function LinkRow({ link, today, manage }: { link: GuardianLink; today: string; manage: boolean }) {
   const t = useTranslations()
   const f = useFormat()
-  const queryClient = useQueryClient()
+  const refetch = useRefetch()
   const [removing, setRemoving] = useState(false)
 
   const revoke = useApiMutation(revokeAccessRequest, {
@@ -193,8 +193,8 @@ function LinkRow({ link, today, manage }: { link: GuardianLink; today: string; m
           onConfirm={async () => {
             const result = await revoke.execute(link.id)
 
-            if (!result.ok && result.problem.status === 404) {
-              void queryClient.invalidateQueries({ queryKey: GUARDIAN_LINKS_KEY })
+            if (!result.ok && isStale(result.problem, [404])) {
+              void refetch(GUARDIAN_LINK_QUERIES)
 
               return true
             }

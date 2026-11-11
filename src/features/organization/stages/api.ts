@@ -29,3 +29,5 @@ export const reorderStagesRequest = (service: Uuid, stageIds: Uuid[]) =>
   )
 
 export const STAGE_QUERIES = [STAGES_KEY, SERVICES_KEY]
+
+export const STAGE_ORDER_QUERIES = [SERVICES_KEY]

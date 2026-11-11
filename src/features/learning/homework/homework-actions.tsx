@@ -1,6 +1,5 @@
 "use client"
 
-import { useQueryClient } from "@tanstack/react-query"
 import { Ellipsis } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
@@ -18,6 +17,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { useCanIn } from "@/features/identity/auth/session"
 import { Link } from "@/i18n/navigation"
 import { isolate } from "@/lib/bidi"
+import { useRefetch } from "@/lib/api/refetch"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import type { Group } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
@@ -78,7 +78,7 @@ function ChangeDialog({
 }) {
   const t = useTranslations()
   const mutation = useChangeHomework(homework, onDeleted)
-  const queryClient = useQueryClient()
+  const refetch = useRefetch()
   const title = isolate(homework.title)
   const reported = homework.counts?.completed ?? 0
 
@@ -124,7 +124,7 @@ function ChangeDialog({
         const result = await mutation.execute(change)
 
         if (!result.ok) {
-          HOMEWORK_QUERIES.forEach((queryKey) => void queryClient.invalidateQueries({ queryKey }))
+          void refetch(HOMEWORK_QUERIES)
         }
 
         return result.ok
