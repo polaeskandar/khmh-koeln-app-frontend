@@ -4,7 +4,7 @@ export const CHURCH_TIME_ZONE = "Europe/Berlin"
 
 const DAY_MS = 86_400_000
 
-function parseDate(date: LocalDate): [number, number, number] {
+export function parseDate(date: LocalDate): [number, number, number] {
   const [y, m, d] = date.split("-").map(Number)
 
   return [y, m, d]

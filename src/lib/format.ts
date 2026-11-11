@@ -1,5 +1,5 @@
 import type { Locale } from "@/i18n/config"
-import { daysBetween, isoWeekday, localDateOf, localTimeOf } from "@/lib/domain/time"
+import { daysBetween, isoWeekday, localDateOf, localTimeOf, parseDate } from "@/lib/domain/time"
 import type {
   Instant,
   IsoWeekday,
@@ -15,7 +15,7 @@ import { WORDS } from "./format-words"
 type Parts = { year: number; month: number; day: number; weekday: IsoWeekday }
 
 const partsOf = (date: LocalDate): Parts => {
-  const [year, month, d] = date.split("-").map(Number)
+  const [year, month, d] = parseDate(date)
 
   return { year, month, day: d, weekday: isoWeekday(date) }
 }
@@ -23,7 +23,7 @@ const partsOf = (date: LocalDate): Parts => {
 const COPTIC_EPOCH = 1825030
 
 function julianDay(date: LocalDate): number {
-  const [y, m, d] = date.split("-").map(Number)
+  const [y, m, d] = parseDate(date)
   const a = Math.floor((14 - m) / 12)
   const yy = y + 4800 - a
   const mm = m + 12 * a - 3
@@ -91,15 +91,11 @@ function create(locale: Locale) {
     return `${p.day}${locale === "de" ? "." : ""} ${t.monthsShort[p.month - 1]}`
   }
 
-  const relativeWord = (date: LocalDate, today: LocalDate): string | null => {
+  const todayOrYesterday = (date: LocalDate, today: LocalDate): string | null => {
     const diff = daysBetween(today, date)
 
     if (diff === 0) {
       return w.today
-    }
-
-    if (diff === 1) {
-      return w.tomorrow
     }
 
     if (diff === -1) {
@@ -108,6 +104,9 @@ function create(locale: Locale) {
 
     return null
   }
+
+  const relativeWord = (date: LocalDate, today: LocalDate): string | null =>
+    todayOrYesterday(date, today) ?? (daysBetween(today, date) === 1 ? w.tomorrow : null)
 
   return {
     locale,
@@ -139,24 +138,19 @@ function create(locale: Locale) {
     instantLabel(instant: Instant, today: LocalDate): string {
       const date = localDateOf(instant)
       const time = localTimeOf(instant)
-      const diff = daysBetween(today, date)
+      const recent = todayOrYesterday(date, today)
 
-      if (diff === 0 || diff === -1) {
-        return `${relativeWord(date, today)} ${time}`
+      if (recent) {
+        return `${recent} ${time}`
       }
 
       return `${dayMonth(date)}${locale === "ar" ? "،" : ","} ${time}`
     },
     atLabel(instant: Instant, today: LocalDate): string {
       const date = localDateOf(instant)
-      const diff = daysBetween(today, date)
-      const relative = diff === 0 || diff === -1
+      const recent = todayOrYesterday(date, today)
 
-      return w.at(
-        relative ? relativeWord(date, today)! : dayMonth(date),
-        localTimeOf(instant),
-        relative
-      )
+      return w.at(recent ?? dayMonth(date), localTimeOf(instant), recent !== null)
     },
     copticDate(date: LocalDate): string {
       const c = copticParts(date)
