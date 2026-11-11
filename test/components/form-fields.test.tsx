@@ -76,6 +76,18 @@ describe("FormField", () => {
     expect(control).toHaveAccessibleDescription("Pick a day.")
   })
 
+  test("with hideLabel, the label names the control for screen readers only", () => {
+    renderWithProviders(
+      <FormField label="Due date" hideLabel description="Optional">
+        {(control) => <input type="date" {...control} />}
+      </FormField>
+    )
+
+    const control = screen.getByLabelText("Due date")
+    expect(screen.getByText("Due date")).toHaveClass("sr-only")
+    expect(control).toHaveAccessibleDescription("Optional")
+  })
+
   test("shows what sits next to the label", () => {
     renderWithProviders(
       <FormField label="Password" labelExtra={<a href="#forgot">Forgot it?</a>}>

@@ -1,12 +1,12 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { useId, useState } from "react"
+import { useState } from "react"
 
 import { FormPanel } from "@/components/form-panel"
-import { SelectField, TextAreaField, TextField } from "@/components/form-fields"
+import { FormField, SelectField, TextAreaField, TextField } from "@/components/form-fields"
 import { Button } from "@/components/ui/button"
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { FieldGroup } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { NativeSelectOption } from "@/components/ui/native-select"
 import { useCanIn } from "@/features/identity/auth/session"
@@ -53,49 +53,42 @@ function DueDatePanel({
 }) {
   const t = useTranslations("homework.editor")
   const f = useFormat()
-  const id = useId()
 
   return (
     <FormPanel title={t("dueDate")} optional>
-      <Field data-invalid={error ? true : undefined}>
-        <FieldLabel htmlFor={id} className="sr-only">
-          {t("dueDate")}
-        </FieldLabel>
-        <Input
-          id={id}
-          type="date"
-          min={min}
-          value={value}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={`${id}-${error ? "error" : "hint"}`}
-          onChange={(event) => onChange(event.target.value)}
-        />
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className={QUICK_PICK}
-            onClick={() => onChange(weekAfterLesson)}
-          >
-            {t("weekAfter", { date: f.dayMonth(weekAfterLesson) })}
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className={QUICK_PICK}
-            onClick={() => onChange("")}
-          >
-            {t("clearDue")}
-          </Button>
-        </div>
-        {error ? (
-          <FieldError id={`${id}-error`}>{error}</FieldError>
-        ) : (
-          <FieldDescription id={`${id}-hint`}>{t("dueHint")}</FieldDescription>
+      <FormField label={t("dueDate")} hideLabel description={t("dueHint")} error={error}>
+        {(control) => (
+          <>
+            <Input
+              {...control}
+              type="date"
+              min={min}
+              value={value}
+              onChange={(event) => onChange(event.target.value)}
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className={QUICK_PICK}
+                onClick={() => onChange(weekAfterLesson)}
+              >
+                {t("weekAfter", { date: f.dayMonth(weekAfterLesson) })}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className={QUICK_PICK}
+                onClick={() => onChange("")}
+              >
+                {t("clearDue")}
+              </Button>
+            </div>
+          </>
         )}
-      </Field>
+      </FormField>
     </FormPanel>
   )
 }

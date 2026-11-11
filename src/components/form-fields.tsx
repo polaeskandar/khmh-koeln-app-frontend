@@ -34,6 +34,7 @@ type FieldTexts = {
 
 export function FormField({
   label,
+  hideLabel = false,
   description,
   error,
   optional,
@@ -42,6 +43,7 @@ export function FormField({
   id: suppliedId,
   children,
 }: FieldTexts & {
+  hideLabel?: boolean
   labelExtra?: ReactNode
   className?: string
   id?: string
@@ -53,7 +55,7 @@ export function FormField({
   const errorId = `${id}-error`
 
   const fieldLabel = (
-    <FieldLabel htmlFor={id}>
+    <FieldLabel htmlFor={id} className={hideLabel ? "sr-only" : undefined}>
       {label}
       {optional ? <OptionalNote /> : null}
     </FieldLabel>
