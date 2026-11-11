@@ -14,7 +14,7 @@ import { renderWithProviders } from "@test/support/providers"
 
 import type { Me } from "@/features/identity/auth/api"
 import type { ServiceFields } from "@/features/organization/services/api"
-import { ServicesOverview } from "@/features/organization/services/services-overview"
+import { ServicesOverviewPage } from "@/features/organization/services/services-overview-page"
 
 beforeEach(() => {
   vi.spyOn(toast, "error")
@@ -48,7 +48,7 @@ function open(viewer: Me = me.administrator, locale: Locale = "en") {
     })
   )
 
-  renderWithProviders(<ServicesOverview />, { locale, me: viewer, sidebar: true })
+  renderWithProviders(<ServicesOverviewPage />, { locale, me: viewer, sidebar: true })
 
   return {
     sent,

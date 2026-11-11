@@ -15,7 +15,7 @@ import { renderWithProviders } from "@test/support/providers"
 
 import type { DataRequestRow, DataRequests } from "@/features/privacy/data-requests/api"
 import { DataRequestsPage } from "@/features/privacy/data-requests/data-requests-page"
-import { DueLabel } from "@/features/privacy/data-requests/request-bits"
+import { DueLabel } from "@/features/privacy/data-requests/request-labels"
 
 const row = (id: string, extra: Partial<DataRequestRow>): DataRequestRow => ({
   id,

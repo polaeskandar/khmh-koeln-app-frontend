@@ -17,8 +17,8 @@ import {
   serviceInsightsQuery,
   type ServiceStages,
 } from "@/features/organization/services/api"
-import { ServiceDetails } from "@/features/organization/services/service-details"
-import { ServicesTable } from "@/features/organization/services/services-overview"
+import { ServiceDetailsPage } from "@/features/organization/services/service-details-page"
+import { ServicesTable } from "@/features/organization/services/services-overview-page"
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-11-08T11:08:00Z") })
@@ -125,7 +125,7 @@ test("details show the attendance stat and no leaders", async () => {
     http.get(apiUrl("/schedules"), () => HttpResponse.json({ today: "2026-11-08", items: [] }))
   )
 
-  renderWithProviders(<ServiceDetails />, { me: me.administrator, sidebar: true })
+  renderWithProviders(<ServiceDetailsPage />, { me: me.administrator, sidebar: true })
 
   const stat = (await screen.findByText("Attendance, last 4 weeks")).parentElement!
   await waitFor(() => expect(stat).toHaveTextContent("82%"))

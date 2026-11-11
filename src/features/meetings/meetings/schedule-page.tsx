@@ -260,7 +260,7 @@ function Facts({ schedule, today }: { schedule: ScheduleSummary; today: LocalDat
   const t = useTranslations("meetings")
   const f = useFormat()
 
-  const facts: [string, React.ReactNode][] = [
+  const facts: [string, ReactNode][] = [
     [t("schedule.repeats"), f.recurrence(recurrenceOf(schedule.recurrence))],
     [t("schedule.time"), f.timeRange(schedule.startTime, schedule.endTime)],
     [t("fields.place"), schedule.location ? <bdi>{schedule.location}</bdi> : t("schedule.notSet")],

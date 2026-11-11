@@ -15,7 +15,8 @@ import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { HomeworkDetail, StageHomework } from "@/features/learning/homework/api"
-import { EditHomeworkPage, NewHomeworkPage } from "@/features/learning/homework/homework-editor"
+import { EditHomeworkPage } from "@/features/learning/homework/edit-homework-page"
+import { NewHomeworkPage } from "@/features/learning/homework/new-homework-page"
 
 beforeEach(() => {
   vi.spyOn(toast, "success")

@@ -19,7 +19,9 @@ import {
   rememberOutcome,
   scheduledErasureOn,
 } from "@/features/identity/auth/auth-outcome"
-import { PendingPage, SignInPage, UnconfirmedPage } from "@/features/identity/auth/sign-in-page"
+import { PendingPage } from "@/features/identity/auth/pending-page"
+import { SignInPage } from "@/features/identity/auth/sign-in-page"
+import { UnconfirmedPage } from "@/features/identity/auth/unconfirmed-page"
 
 const PASSWORD = "correct horse battery"
 

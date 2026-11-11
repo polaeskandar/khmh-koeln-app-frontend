@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowRight, Hourglass, MailWarning } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,6 @@ import { routes } from "@/lib/routes"
 
 import { AuthFrame, AuthHeading, TodayDates } from "./auth-frame"
 import { RedirectIfSignedIn } from "./guards"
-import { OnlyAfter } from "./only-after"
 import { SignInForm } from "./sign-in-form"
 
 export function SignInPage() {
@@ -40,61 +39,5 @@ export function SignInPage() {
         <SignInForm />
       </AuthFrame>
     </RedirectIfSignedIn>
-  )
-}
-
-export function UnconfirmedPage() {
-  const t = useTranslations("auth.unconfirmed")
-
-  return (
-    <OnlyAfter outcome="unconfirmed">
-      <AuthFrame>
-        <span className="inline-flex size-11 items-center justify-center bg-warning-soft text-warning">
-          <MailWarning className="size-5" aria-hidden="true" />
-        </span>
-        <AuthHeading title={t("title")}>
-          <p className="max-w-prose">{t("text")}</p>
-        </AuthHeading>
-        <ul className="flex max-w-prose list-disc flex-col gap-2 ps-5 text-sm">
-          <li>{t("valid")}</li>
-          <li>{t("again")}</li>
-        </ul>
-        <div className="flex flex-wrap gap-3">
-          <Button variant="outline" asChild>
-            <Link href={routes.signIn()}>{t("back")}</Link>
-          </Button>
-          <Button variant="ghost" asChild>
-            <Link href={routes.register()}>{t("register")}</Link>
-          </Button>
-        </div>
-      </AuthFrame>
-    </OnlyAfter>
-  )
-}
-
-export function PendingPage() {
-  const t = useTranslations("auth.pending")
-
-  return (
-    <OnlyAfter outcome="pending">
-      <AuthFrame>
-        <span className="inline-flex size-11 items-center justify-center bg-warning-soft text-warning">
-          <Hourglass className="size-5" aria-hidden="true" />
-        </span>
-        <AuthHeading title={t("title")}>
-          <p className="max-w-prose">{t("text")}</p>
-        </AuthHeading>
-        <ul className="flex max-w-prose list-disc flex-col gap-2 ps-5 text-sm">
-          <li>{t("parents")}</li>
-          <li>{t("members")}</li>
-          <li>{t("servants")}</li>
-          <li>{t("email")}</li>
-        </ul>
-        <p className="max-w-prose text-sm text-muted-foreground">{t("slow")}</p>
-        <Button variant="outline" asChild className="self-start">
-          <Link href={routes.signIn()}>{t("back")}</Link>
-        </Button>
-      </AuthFrame>
-    </OnlyAfter>
   )
 }

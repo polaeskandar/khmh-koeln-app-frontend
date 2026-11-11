@@ -1,0 +1,38 @@
+"use client"
+
+import { Hourglass } from "lucide-react"
+import { useTranslations } from "next-intl"
+
+import { Button } from "@/components/ui/button"
+import { Link } from "@/i18n/navigation"
+import { routes } from "@/lib/routes"
+
+import { AuthFrame, AuthHeading } from "./auth-frame"
+import { OnlyAfter } from "./only-after"
+
+export function PendingPage() {
+  const t = useTranslations("auth.pending")
+
+  return (
+    <OnlyAfter outcome="pending">
+      <AuthFrame>
+        <span className="inline-flex size-11 items-center justify-center bg-warning-soft text-warning">
+          <Hourglass className="size-5" aria-hidden="true" />
+        </span>
+        <AuthHeading title={t("title")}>
+          <p className="max-w-prose">{t("text")}</p>
+        </AuthHeading>
+        <ul className="flex max-w-prose list-disc flex-col gap-2 ps-5 text-sm">
+          <li>{t("parents")}</li>
+          <li>{t("members")}</li>
+          <li>{t("servants")}</li>
+          <li>{t("email")}</li>
+        </ul>
+        <p className="max-w-prose text-sm text-muted-foreground">{t("slow")}</p>
+        <Button variant="outline" asChild className="self-start">
+          <Link href={routes.signIn()}>{t("back")}</Link>
+        </Button>
+      </AuthFrame>
+    </OnlyAfter>
+  )
+}

@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
-import { useState } from "react"
+import { type ReactNode, useState } from "react"
 
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { MemberAvatar } from "@/components/member-avatar"
@@ -35,7 +35,7 @@ function RequestRow({
 }: {
   request: AccountRequest
   today: LocalDate
-  actions?: React.ReactNode
+  actions?: ReactNode
 }) {
   const t = useTranslations("accountRequests")
   const f = useFormat()
@@ -113,7 +113,7 @@ export function AccountRequests({
   approve,
   decline = false,
 }: {
-  approve?: (request: AccountRequest, today: LocalDate) => React.ReactNode
+  approve?: (request: AccountRequest, today: LocalDate) => ReactNode
   decline?: boolean
 }) {
   const t = useTranslations("accountRequests")

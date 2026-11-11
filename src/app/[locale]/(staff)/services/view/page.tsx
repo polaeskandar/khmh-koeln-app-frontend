@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
-import { ServiceDetails } from "@/features/organization/services/service-details"
+import { ServiceDetailsPage } from "@/features/organization/services/service-details-page"
 import { pageLocale } from "@/i18n/page"
 
 export async function generateMetadata({
@@ -15,5 +15,5 @@ export async function generateMetadata({
 export default async function Page({ params }: PageProps<"/[locale]/services/view">) {
   await pageLocale(params)
 
-  return <ServiceDetails />
+  return <ServiceDetailsPage />
 }

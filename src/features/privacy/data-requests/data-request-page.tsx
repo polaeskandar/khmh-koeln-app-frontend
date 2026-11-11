@@ -19,7 +19,7 @@ import { type DataRequestDetail, dataRequestQuery, erasureReviewQuery } from "./
 import { CopyLinkSection } from "./copy-link-section"
 import { EraseAction, useEraseBlockReason } from "./erase-action"
 import { ErasureReviewSections } from "./erasure-review"
-import { RequestStatusBadge, useSubjectLabel } from "./request-bits"
+import { RequestStatusBadge, useSubjectLabel } from "./request-labels"
 import { RequestOutcome } from "./request-outcome"
 import { RequestFacts, SubjectRecords } from "./request-panels"
 

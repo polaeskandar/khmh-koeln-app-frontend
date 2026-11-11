@@ -14,7 +14,8 @@ import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { RoleDetail } from "@/features/identity/roles/api"
-import { NewRolePage, RolePage } from "@/features/identity/roles/role-editor"
+import { NewRolePage } from "@/features/identity/roles/new-role-page"
+import { RolePage } from "@/features/identity/roles/role-page"
 
 beforeEach(() => {
   vi.spyOn(toast, "success")

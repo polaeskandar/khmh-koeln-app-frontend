@@ -3,6 +3,7 @@
 import { cn } from "cn"
 import { CirclePause, MapPin, Repeat, UsersRound } from "lucide-react"
 import { useTranslations } from "next-intl"
+import type { ReactNode } from "react"
 
 import { ServiceSwatch } from "@/components/service-tag"
 import { StatusBadge } from "@/components/status"
@@ -41,7 +42,7 @@ export function ScheduleList({
   today: LocalDate
   showService?: boolean
   emptyText: string
-  trailing?: (schedule: ScheduleSummary) => React.ReactNode
+  trailing?: (schedule: ScheduleSummary) => ReactNode
 }) {
   const t = useTranslations("meetings")
   const f = useFormat()

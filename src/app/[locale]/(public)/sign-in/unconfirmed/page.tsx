@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
-import { UnconfirmedPage } from "@/features/identity/auth/sign-in-page"
+import { UnconfirmedPage } from "@/features/identity/auth/unconfirmed-page"
 import { pageLocale } from "@/i18n/page"
 
 export async function generateMetadata({

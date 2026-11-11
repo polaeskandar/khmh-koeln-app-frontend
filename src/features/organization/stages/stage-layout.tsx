@@ -17,7 +17,6 @@ import type { ServiceRef, StageRef } from "@/lib/api/types/common"
 import { routes } from "@/lib/routes"
 
 import { type Stage, stageQuery } from "./api"
-import { StageMembers } from "@/features/people/members/stage-members"
 
 export type StageTab = "overview" | "attendance" | "lessons" | "homework"
 
@@ -162,13 +161,5 @@ export function StageLayout({
         </LoadedStage>
       )}
     </RecordPage>
-  )
-}
-
-export function StageOverview() {
-  return (
-    <StageLayout tab="overview">
-      {(stage) => <StageMembers key={stage.id} stage={stage} />}
-    </StageLayout>
   )
 }

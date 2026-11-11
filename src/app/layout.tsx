@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import { Geist, Oxanium, Vazirmatn } from "next/font/google"
 import { ThemeProvider } from "next-themes"
+import type { CSSProperties } from "react"
 
 import { ThemeColor } from "@/components/theme-color"
 import { QueryProvider } from "@/lib/api/query-provider"
@@ -25,7 +26,7 @@ const fontArabic = Vazirmatn({
 const fontStacks = {
   "--font-sans": fontStack(fontText, fontArabic),
   "--font-heading": fontStack(fontHeading, fontArabic),
-} as React.CSSProperties
+} as CSSProperties
 
 apiBaseUrl()
 impressumUrl()

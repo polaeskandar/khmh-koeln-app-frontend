@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
-import { MemberAccount } from "@/features/portals/member/member-account"
+import { MemberAccountPage } from "@/features/portals/member/member-account-page"
 import { pageLocale } from "@/i18n/page"
 
 export async function generateMetadata({
@@ -15,5 +15,5 @@ export async function generateMetadata({
 export default async function Page({ params }: PageProps<"/[locale]/member/account">) {
   await pageLocale(params)
 
-  return <MemberAccount />
+  return <MemberAccountPage />
 }

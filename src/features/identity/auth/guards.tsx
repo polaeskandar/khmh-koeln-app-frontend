@@ -142,17 +142,17 @@ function AccountLanguage({ me, children }: { me: Me; children: ReactNode }) {
   return children
 }
 
-export const RequireStaff = ({ children }: { children: ReactNode }) => (
-  <Guard allows={(areas) => areas.staff}>{children}</Guard>
-)
+export function RequireStaff({ children }: { children: ReactNode }) {
+  return <Guard allows={(areas) => areas.staff}>{children}</Guard>
+}
 
-export const RequireParent = ({ children }: { children: ReactNode }) => (
-  <Guard allows={(areas) => areas.parent}>{children}</Guard>
-)
+export function RequireParent({ children }: { children: ReactNode }) {
+  return <Guard allows={(areas) => areas.parent}>{children}</Guard>
+}
 
-export const RequireMember = ({ children }: { children: ReactNode }) => (
-  <Guard allows={(areas) => areas.member}>{children}</Guard>
-)
+export function RequireMember({ children }: { children: ReactNode }) {
+  return <Guard allows={(areas) => areas.member}>{children}</Guard>
+}
 
 export function RequirePermission({
   action,

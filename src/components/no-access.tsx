@@ -1,4 +1,5 @@
 import { LockKeyhole } from "lucide-react"
+import type { ReactNode } from "react"
 
 import { Link } from "@/i18n/navigation"
 
@@ -18,7 +19,7 @@ export function NoAccess({
   back,
 }: {
   title: string
-  children: React.ReactNode
+  children: ReactNode
   back?: { href: string; label: string }
 }) {
   return (

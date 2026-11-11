@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
-import { NewRolePage } from "@/features/identity/roles/role-editor"
+import { NewRolePage } from "@/features/identity/roles/new-role-page"
 import { pageLocale } from "@/i18n/page"
 
 export async function generateMetadata({

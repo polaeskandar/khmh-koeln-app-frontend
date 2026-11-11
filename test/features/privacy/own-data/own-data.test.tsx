@@ -11,7 +11,7 @@ import {
   scheduledErasureOn,
 } from "@/features/identity/auth/auth-outcome"
 import { SessionProvider } from "@/features/identity/auth/session"
-import { ParentAccount } from "@/features/portals/parent/parent-account"
+import { ParentAccountPage } from "@/features/portals/parent/parent-account-page"
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
@@ -315,7 +315,7 @@ test("an open request shows on load without the button", async () => {
 
 test.each([
   ["a servant's account page", me.servant, () => <AccountPage />],
-  ["Hoda Farag's account page", me.parent, () => <ParentAccount />],
+  ["Hoda Farag's account page", me.parent, () => <ParentAccountPage />],
 ])("Your data is the last section of %s", async (_, account, page) => {
   server.use(
     http.get(apiUrl("/me"), () => HttpResponse.json(account)),

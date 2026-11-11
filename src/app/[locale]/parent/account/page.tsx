@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
-import { ParentAccount } from "@/features/portals/parent/parent-account"
+import { ParentAccountPage } from "@/features/portals/parent/parent-account-page"
 import { pageLocale } from "@/i18n/page"
 
 export async function generateMetadata({
@@ -15,5 +15,5 @@ export async function generateMetadata({
 export default async function Page({ params }: PageProps<"/[locale]/parent/account">) {
   await pageLocale(params)
 
-  return <ParentAccount />
+  return <ParentAccountPage />
 }

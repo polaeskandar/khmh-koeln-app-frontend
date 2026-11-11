@@ -13,7 +13,7 @@ import { server } from "@test/support/msw"
 import { navigation } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import { AttendanceOverview } from "@/features/meetings/attendance/attendance-overview"
+import { AttendanceOverviewPage } from "@/features/meetings/attendance/attendance-overview-page"
 
 beforeEach(() => {
   navigation.pathname = "/services/"
@@ -54,7 +54,7 @@ function open(
     <SessionProvider>
       <SidebarNav />
       <MobileTabBar />
-      {page ? <AttendanceOverview /> : null}
+      {page ? <AttendanceOverviewPage /> : null}
     </SessionProvider>,
     { locale, sidebar: true }
   )

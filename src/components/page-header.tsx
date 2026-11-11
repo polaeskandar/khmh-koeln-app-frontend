@@ -1,4 +1,5 @@
 import { cn } from "cn"
+import type { ReactNode } from "react"
 
 export function PageHeader({
   title,
@@ -9,13 +10,13 @@ export function PageHeader({
   actionsClassName,
   children,
 }: {
-  title: React.ReactNode
-  description?: React.ReactNode
-  actions?: React.ReactNode
-  meta?: React.ReactNode
+  title: ReactNode
+  description?: ReactNode
+  actions?: ReactNode
+  meta?: ReactNode
   className?: string
   actionsClassName?: string
-  children?: React.ReactNode
+  children?: ReactNode
 }) {
   return (
     <div
@@ -48,11 +49,11 @@ export function Section({
   children,
   id,
 }: {
-  title: React.ReactNode
-  description?: React.ReactNode
-  actions?: React.ReactNode
+  title: ReactNode
+  description?: ReactNode
+  actions?: ReactNode
   className?: string
-  children: React.ReactNode
+  children: ReactNode
   id?: string
 }) {
   return (
@@ -73,13 +74,7 @@ export function Section({
   )
 }
 
-export function PageBody({
-  children,
-  className,
-}: {
-  children: React.ReactNode
-  className?: string
-}) {
+export function PageBody({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div
       className={cn(

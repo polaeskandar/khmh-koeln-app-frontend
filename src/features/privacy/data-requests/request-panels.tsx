@@ -8,7 +8,7 @@ import { isolate } from "@/lib/bidi"
 import { preferredName } from "@/lib/domain/names"
 
 import { type DataRequestDetail, groupOfMembership, subjectGone } from "./api"
-import { DueLabel } from "./request-bits"
+import { DueLabel } from "./request-labels"
 
 export function RequestFacts({ detail }: { detail: DataRequestDetail }) {
   const t = useTranslations("privacy")
