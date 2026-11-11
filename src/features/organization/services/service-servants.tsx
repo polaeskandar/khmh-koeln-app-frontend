@@ -5,6 +5,7 @@ import { Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
+import { DialogMount } from "@/components/dialog-mount"
 import { FormDialog } from "@/components/form-dialog"
 import { SelectField } from "@/components/form-fields"
 import { MemberAvatar } from "@/components/member-avatar"
@@ -149,13 +150,15 @@ export function ServiceServants({
       <QueryState query={servants}>
         {(data) => <ServantRows service={service} servants={data.servants} />}
       </QueryState>
-      {assigning && assignable ? (
-        <AssignServantDialog
-          service={service}
-          accounts={assignable}
-          onClose={() => setAssigning(false)}
-        />
-      ) : null}
+      <DialogMount open={assigning && Boolean(assignable)}>
+        {assignable ? (
+          <AssignServantDialog
+            service={service}
+            accounts={assignable}
+            onClose={() => setAssigning(false)}
+          />
+        ) : null}
+      </DialogMount>
     </Section>
   )
 }

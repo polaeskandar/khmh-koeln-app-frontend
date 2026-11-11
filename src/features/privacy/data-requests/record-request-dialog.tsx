@@ -5,6 +5,7 @@ import { Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useId, useState } from "react"
 
+import { DialogMount } from "@/components/dialog-mount"
 import { FormDialog } from "@/components/form-dialog"
 import { SelectField, TextAreaField, TextField } from "@/components/form-fields"
 import { Button } from "@/components/ui/button"
@@ -288,7 +289,9 @@ export function RecordRequestButton({ today }: { today: LocalDate }) {
         <Plus data-icon="inline-start" />
         {t("open")}
       </Button>
-      {open ? <RecordRequestDialog today={today} onClose={() => setOpen(false)} /> : null}
+      <DialogMount open={open}>
+        <RecordRequestDialog today={today} onClose={() => setOpen(false)} />
+      </DialogMount>
     </>
   )
 }

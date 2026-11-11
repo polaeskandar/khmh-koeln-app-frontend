@@ -5,6 +5,7 @@ import { Layers, Plus, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
+import { DialogMount } from "@/components/dialog-mount"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -218,12 +219,13 @@ export function ApproveButton({ request }: { request: AccountRequest }) {
   return (
     <>
       <Button onClick={() => setOpen(true)}>{t("approveButton")}</Button>
-      {open && request.registeredAs === "member" ? (
-        <MemberApproval request={request} onClose={close} />
-      ) : null}
-      {open && request.registeredAs !== "member" ? (
-        <StaffApproval request={request} onClose={close} />
-      ) : null}
+      <DialogMount open={open}>
+        {request.registeredAs === "member" ? (
+          <MemberApproval request={request} onClose={close} />
+        ) : (
+          <StaffApproval request={request} onClose={close} />
+        )}
+      </DialogMount>
     </>
   )
 }

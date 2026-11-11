@@ -46,13 +46,15 @@ nothing; on failure it stays open with the problem shown, so nothing typed is lo
 `ConfirmDialog` with the destructive tone and say what happens; actions that need a reason use
 `ReasonDialog` (#10).
 
-A dialog with fields is a `FormDialog` (`src/components/form-dialog.tsx`): the title and description, the
-form, Cancel and the submit button with its spinner. It is rendered by the component that owns the change, and
-that component is mounted only while the dialog is open (`{open ? <ServiceDialog onClose={…} /> : null}`), so
-every opening starts from a fresh form and the dialog is locked by the pending state of its own change. Enter in
-a field submits it; Enter in a search box (`ignoreEnter`) doesn't. A consequential action takes
-`submitOnEnter={false}`, so only its button starts it: approving an account. `role="alertdialog"` makes it an
-alert dialog, as for deleting one's own account.
+A dialog with fields is a `FormDialog` (`src/components/form-dialog.tsx`): the title and description, the form,
+Cancel and the submit button with its spinner. It is rendered by the component that owns the change, and that
+component sits in a `DialogMount` (`src/components/dialog-mount.tsx`): `<DialogMount open={open}><ServiceDialog
+onClose={…} /></DialogMount>`. The mount renders it when the dialog opens, keeps it while the dialog fades out
+(Radix keeps the closing content until its animation ends, then calls `onCloseAutoFocus`) and unmounts it after
+that, so every opening starts from a fresh form, the dialog is locked by the pending state of its own change, and
+closing still fades. Enter in a field submits it; Enter in a search box (`ignoreEnter`) doesn't. A consequential
+action takes `submitOnEnter={false}`, so only its button starts it: approving an account. `role="alertdialog"`
+makes it an alert dialog, as for deleting one's own account.
 
 ## Text and direction
 

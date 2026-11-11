@@ -5,6 +5,7 @@ import { CalendarClock, Info, Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useMemo, useState } from "react"
 
+import { DialogMount } from "@/components/dialog-mount"
 import { FormDialog } from "@/components/form-dialog"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -164,13 +165,13 @@ export function NewScheduleButton({
         <Plus data-icon="inline-start" />
         {t("newButton")}
       </Button>
-      {open ? (
+      <DialogMount open={open}>
         <ScheduleDialog
           target={{ mode: "create", fixedServiceId }}
           today={today}
           onClose={() => setOpen(false)}
         />
-      ) : null}
+      </DialogMount>
     </>
   )
 }
@@ -190,13 +191,13 @@ export function EditScheduleButton({
       <Button variant="ghost" size="sm" onClick={() => setOpen(true)}>
         {t("edit")}
       </Button>
-      {open ? (
+      <DialogMount open={open}>
         <ScheduleDialog
           target={{ mode: "edit", schedule }}
           today={today}
           onClose={() => setOpen(false)}
         />
-      ) : null}
+      </DialogMount>
     </>
   )
 }

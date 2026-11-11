@@ -5,6 +5,7 @@ import { KeyRound, Plus, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
+import { DialogMount } from "@/components/dialog-mount"
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { Section } from "@/components/page-header"
 import { QueryErrorState, QueryState } from "@/components/page-states"
@@ -232,12 +233,12 @@ function AccountRow({
           {t("settings.users.passwordLink.action")}
         </Button>
       ) : null}
-      {dialog === "role" ? (
+      <DialogMount open={dialog === "role"}>
         <GiveRoleDialog account={account} roles={left} onClose={() => setDialog(null)} />
-      ) : null}
-      {dialog === "group" ? (
+      </DialogMount>
+      <DialogMount open={dialog === "group"}>
         <AssignGroupDialog account={account} services={groups} onClose={() => setDialog(null)} />
-      ) : null}
+      </DialogMount>
       {dialog === "link" ? (
         <PasswordLinkDialog
           account={account}
