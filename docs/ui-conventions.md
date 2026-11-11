@@ -50,8 +50,9 @@ A dialog with fields is a `FormDialog` (`src/components/form-dialog.tsx`): the t
 form, Cancel and the submit button with its spinner. It is rendered by the component that owns the change, and
 that component is mounted only while the dialog is open (`{open ? <ServiceDialog onClose={…} /> : null}`), so
 every opening starts from a fresh form and the dialog is locked by the pending state of its own change. Enter in
-a field submits it; Enter in a search box (`ignoreEnter`) doesn't. `role="alertdialog"` makes it an alert
-dialog, as for deleting one's own account.
+a field submits it; Enter in a search box (`ignoreEnter`) doesn't. A consequential action takes
+`submitOnEnter={false}`, so only its button starts it: approving an account. `role="alertdialog"` makes it an
+alert dialog, as for deleting one's own account.
 
 ## Text and direction
 

@@ -36,6 +36,7 @@ type FormDialogProps = {
   problem: unknown
   submitLabel: string
   submitDisabled?: boolean
+  submitOnEnter?: boolean
   tone?: "default" | "destructive"
   onSubmit: () => unknown
   onClose: () => void
@@ -72,6 +73,7 @@ function DialogForm({
   pending,
   submitLabel,
   submitDisabled,
+  submitOnEnter,
   tone,
   onSubmit,
   cancel,
@@ -83,12 +85,19 @@ function DialogForm({
   pending: boolean
   submitLabel: string
   submitDisabled: boolean
+  submitOnEnter: boolean
   tone: "default" | "destructive"
   onSubmit: () => unknown
   cancel: ReactNode
   children: ReactNode
 }) {
   const Footer = footer
+
+  function submitWhenReady() {
+    if (!pending && !submitDisabled) {
+      void onSubmit()
+    }
+  }
 
   return (
     <form
@@ -98,8 +107,8 @@ function DialogForm({
       onSubmit={(event) => {
         event.preventDefault()
 
-        if (!pending && !submitDisabled) {
-          void onSubmit()
+        if (submitOnEnter) {
+          submitWhenReady()
         }
       }}
     >
@@ -107,9 +116,10 @@ function DialogForm({
       <Footer className={layout.footer}>
         {cancel}
         <Button
-          type="submit"
+          type={submitOnEnter ? "submit" : "button"}
           variant={tone === "destructive" ? "destructive" : "default"}
           disabled={pending || submitDisabled}
+          onClick={submitOnEnter ? undefined : submitWhenReady}
         >
           {pending ? <Spinner data-icon="inline-start" /> : null}
           {submitLabel}
@@ -129,6 +139,7 @@ export function FormDialog({
   problem,
   submitLabel,
   submitDisabled = false,
+  submitOnEnter = true,
   tone = "default",
   onSubmit,
   onClose,
@@ -150,6 +161,7 @@ export function FormDialog({
     pending,
     submitLabel,
     submitDisabled,
+    submitOnEnter,
     tone,
     onSubmit,
     children,
