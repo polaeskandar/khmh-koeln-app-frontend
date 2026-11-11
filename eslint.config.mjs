@@ -110,6 +110,16 @@ const eslintConfig = defineConfig([
     },
   },
   {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/components/ui/**"],
+    rules: { "max-lines": ["error", { max: 400 }] },
+  },
+  {
+    files: ["src/**/*.tsx"],
+    ignores: ["src/components/ui/**"],
+    rules: { "max-lines-per-function": ["error", { max: 150 }] },
+  },
+  {
     files: ["src/lib/domain/time.ts", "test/**/*.test.{ts,tsx}"],
     rules: { "no-restricted-syntax": "off" },
   },

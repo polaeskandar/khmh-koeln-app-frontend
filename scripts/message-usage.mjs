@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url"
 
 import ts from "typescript"
 
-const ROOT = fileURLToPath(new URL("..", import.meta.url))
+const repositoryRoot = () => fileURLToPath(new URL("..", import.meta.url))
 
 const DYNAMIC_KEYS = [
   "accountRequests.approve.ageCheck.*",
@@ -115,7 +115,7 @@ function usedIn(key, literals) {
   return false
 }
 
-export async function unusedMessageKeys(root = ROOT) {
+export async function unusedMessageKeys(root = repositoryRoot()) {
   const messages = JSON.parse(await readFile(join(root, "messages/en.json"), "utf8"))
   const codes = JSON.parse(await readFile(join(root, "src/i18n/api-codes.json"), "utf8"))
   const dynamic = DYNAMIC_KEYS.map(patternOf)
