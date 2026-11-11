@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 
-import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
+import { FormField } from "@/components/form-fields"
 import { Input } from "@/components/ui/input"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { useFormat } from "@/i18n/format"
@@ -72,36 +72,37 @@ export function MeetingSelect({
   }
 
   return (
-    <Field data-invalid={error ? true : undefined}>
-      <FieldLabel htmlFor="lesson-meeting">{t("editor.meeting")}</FieldLabel>
-      <NativeSelect
-        id="lesson-meeting"
-        className="w-full"
-        value={value}
-        aria-invalid={error ? true : undefined}
-        onChange={(event) => onChange(event.target.value)}
-      >
-        {options.map((o) => (
-          <NativeSelectOption
-            key={optionValue(o)}
-            value={optionValue(o)}
-            disabled={(!!o.takenBy || o.state === "canceled") && optionValue(o) !== saved}
+    <FormField label={t("editor.meeting")} description={hint()} error={error}>
+      {(control) => (
+        <>
+          <NativeSelect
+            {...control}
+            className="w-full"
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
           >
-            {label(o)}
-          </NativeSelectOption>
-        ))}
-        <NativeSelectOption value={OTHER_DATE}>{t("editor.otherDate")}</NativeSelectOption>
-      </NativeSelect>
-      {value === OTHER_DATE ? (
-        <Input
-          type="date"
-          aria-label={t("fields.teachingDate")}
-          value={otherDate}
-          onChange={(event) => onOtherDateChange(event.target.value)}
-          className="mt-2"
-        />
-      ) : null}
-      {error ? <FieldError>{error}</FieldError> : <FieldDescription>{hint()}</FieldDescription>}
-    </Field>
+            {options.map((o) => (
+              <NativeSelectOption
+                key={optionValue(o)}
+                value={optionValue(o)}
+                disabled={(!!o.takenBy || o.state === "canceled") && optionValue(o) !== saved}
+              >
+                {label(o)}
+              </NativeSelectOption>
+            ))}
+            <NativeSelectOption value={OTHER_DATE}>{t("editor.otherDate")}</NativeSelectOption>
+          </NativeSelect>
+          {value === OTHER_DATE ? (
+            <Input
+              type="date"
+              aria-label={t("fields.teachingDate")}
+              value={otherDate}
+              onChange={(event) => onOtherDateChange(event.target.value)}
+              className="mt-2"
+            />
+          ) : null}
+        </>
+      )}
+    </FormField>
   )
 }

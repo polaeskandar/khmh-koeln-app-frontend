@@ -8,7 +8,7 @@ import { toast } from "sonner"
 
 import { Topbar } from "@/components/app-shell/topbar"
 import { FormPanel } from "@/components/form-panel"
-import { TextAreaField, TextField } from "@/components/form-fields"
+import { SelectField, TextAreaField, TextField } from "@/components/form-fields"
 import { NoAccess } from "@/components/no-access"
 import { PageBody, PageHeader } from "@/components/page-header"
 import { NotFoundState, QueryState } from "@/components/page-states"
@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/empty"
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
 import { useCan, useCanIn } from "@/features/identity/auth/session"
 import { HomeworkStatusBadge } from "@/features/learning/lessons/lesson-bits"
@@ -78,7 +78,6 @@ function HomeworkForm(props: FormProps) {
   const router = useRouter()
   const can = useCanIn(group)
   const dueId = useId()
-  const lessonSelectId = useId()
   const [lessonId, setLessonId] = useState(homework ? homework.lesson.id : props.lessonId)
   const lesson = lessons.find((l) => l.id === lessonId) ?? lessons[0]!
   const [title, setTitle] = useState(homework?.title ?? "")
@@ -224,23 +223,19 @@ function HomeworkForm(props: FormProps) {
               <p className="text-xs text-muted-foreground">{t("homework.editor.lessonNote")}</p>
             </div>
           ) : (
-            <Field>
-              <FieldLabel htmlFor={lessonSelectId}>{t("homework.editor.givenWith")}</FieldLabel>
-              <NativeSelect
-                id={lessonSelectId}
-                className="w-full"
-                value={lessonId}
-                disabled={savedId !== null}
-                onChange={(event) => chooseLesson(event.target.value)}
-              >
-                {lessons.map((l) => (
-                  <NativeSelectOption key={l.id} value={l.id}>
-                    {lessonLabel(l)}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
-              <FieldDescription>{t("homework.editor.lessonNote")}</FieldDescription>
-            </Field>
+            <SelectField
+              label={t("homework.editor.givenWith")}
+              description={t("homework.editor.lessonNote")}
+              value={lessonId}
+              disabled={savedId !== null}
+              onChange={(event) => chooseLesson(event.target.value)}
+            >
+              {lessons.map((l) => (
+                <NativeSelectOption key={l.id} value={l.id}>
+                  {lessonLabel(l)}
+                </NativeSelectOption>
+              ))}
+            </SelectField>
           )}
         </FormPanel>
         <FormPanel title={t("homework.editor.homework")}>

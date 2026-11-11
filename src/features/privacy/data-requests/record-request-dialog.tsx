@@ -5,7 +5,7 @@ import { Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useId, useState } from "react"
 
-import { TextAreaField, TextField } from "@/components/form-fields"
+import { SelectField, TextAreaField, TextField } from "@/components/form-fields"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -20,12 +20,11 @@ import {
   FieldDescription,
   FieldError,
   FieldGroup,
-  FieldLabel,
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { NativeSelectOption } from "@/components/ui/native-select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Spinner } from "@/components/ui/spinner"
 import { guardianLinksQuery } from "@/features/people/guardians/api"
@@ -249,21 +248,17 @@ function RecordForm({ today, onDone }: { today: LocalDate; onDone: () => void })
           error={errors["receipt.requestedBy"]}
         />
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field>
-            <FieldLabel htmlFor={`${id}-channel`}>{t("privacy.record.channel")}</FieldLabel>
-            <NativeSelect
-              id={`${id}-channel`}
-              className="w-full"
-              value={channel}
-              onChange={(event) => setChannel(oneOf(CHANNELS, event.target.value) ?? channel)}
-            >
-              {CHANNELS.map((value) => (
-                <NativeSelectOption key={value} value={value}>
-                  {t(`privacy.channel.${value}`)}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-          </Field>
+          <SelectField
+            label={t("privacy.record.channel")}
+            value={channel}
+            onChange={(event) => setChannel(oneOf(CHANNELS, event.target.value) ?? channel)}
+          >
+            {CHANNELS.map((value) => (
+              <NativeSelectOption key={value} value={value}>
+                {t(`privacy.channel.${value}`)}
+              </NativeSelectOption>
+            ))}
+          </SelectField>
           <TextField
             label={t("privacy.record.receivedOn")}
             type="date"

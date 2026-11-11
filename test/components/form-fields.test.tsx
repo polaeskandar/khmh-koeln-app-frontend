@@ -4,7 +4,7 @@ import { describe, expect, test } from "vitest"
 import { renderWithProviders } from "@test/support/providers"
 
 import { focusFirstInvalid } from "@/components/focus-first-invalid"
-import { TextAreaField, TextField } from "@/components/form-fields"
+import { FormField, SelectField, TextAreaField, TextField } from "@/components/form-fields"
 import { FormPanel } from "@/components/form-panel"
 
 describe.each([
@@ -36,6 +36,57 @@ describe.each([
     const control = screen.getByRole("textbox", { name: "Name" })
     expect(control).toHaveAttribute("id", "person-name")
     expect(control).toHaveAccessibleDescription("As people say it")
+  })
+})
+
+describe("SelectField", () => {
+  function ServiceSelect({ error }: { error?: string }) {
+    return (
+      <SelectField label="Service" description="Where they serve" error={error} defaultValue="">
+        <option value="">Choose a service</option>
+        <option value="choir">Choir</option>
+      </SelectField>
+    )
+  }
+
+  test("is named by its label and described by its hint", () => {
+    renderWithProviders(<ServiceSelect />)
+    const select = screen.getByRole("combobox", { name: "Service" })
+    expect(select).not.toHaveAttribute("aria-invalid")
+    expect(select).toHaveAccessibleDescription("Where they serve")
+  })
+
+  test("a serviceId error is the select's description, in place of its hint", () => {
+    renderWithProviders(<ServiceSelect error="Choose a service." />)
+    const select = screen.getByRole("combobox", { name: "Service" })
+    expect(select).toHaveAttribute("aria-invalid", "true")
+    expect(select).toHaveAccessibleDescription("Choose a service.")
+    expect(screen.queryByText("Where they serve")).toBeNull()
+  })
+})
+
+describe("FormField", () => {
+  test("links its label, hint and error to the control it renders", () => {
+    renderWithProviders(
+      <FormField label="Due" description="The day before the next meeting" error="Pick a day.">
+        {(control) => <input type="date" {...control} />}
+      </FormField>
+    )
+
+    const control = screen.getByLabelText("Due")
+    expect(control).toHaveAttribute("aria-invalid", "true")
+    expect(control).toHaveAccessibleDescription("Pick a day.")
+  })
+
+  test("shows what sits next to the label", () => {
+    renderWithProviders(
+      <FormField label="Password" labelExtra={<a href="#forgot">Forgot it?</a>}>
+        {(control) => <input type="password" {...control} />}
+      </FormField>
+    )
+
+    expect(screen.getByLabelText("Password")).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Forgot it?" })).toBeInTheDocument()
   })
 })
 

@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { useState } from "react"
 
 import { ConfirmDialog } from "@/components/confirm-dialog"
+import { SelectField } from "@/components/form-fields"
 import { Section } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -18,8 +19,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { Field, FieldError, FieldGroup } from "@/components/ui/field"
+import { NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
 import { useCan } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
@@ -89,24 +90,20 @@ function GiveAccessDialog({
             </Alert>
           ) : null}
           <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="parent-account">{t("parentAccount")}</FieldLabel>
-              <NativeSelect
-                id="parent-account"
-                className="w-full"
-                value={userId}
-                onChange={(event) => setUserId(event.target.value)}
-              >
-                <NativeSelectOption value="" disabled>
-                  {t("parentAccount")}
+            <SelectField
+              label={t("parentAccount")}
+              value={userId}
+              onChange={(event) => setUserId(event.target.value)}
+            >
+              <NativeSelectOption value="" disabled>
+                {t("parentAccount")}
+              </NativeSelectOption>
+              {accounts.map((account) => (
+                <NativeSelectOption key={account.id} value={account.id}>
+                  {`${account.name} · ${account.email}`}
                 </NativeSelectOption>
-                {accounts.map((account) => (
-                  <NativeSelectOption key={account.id} value={account.id}>
-                    {`${account.name} · ${account.email}`}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
-            </Field>
+              ))}
+            </SelectField>
             <Field data-invalid={childError ? true : undefined}>
               <PersonSearch
                 label={t("child")}

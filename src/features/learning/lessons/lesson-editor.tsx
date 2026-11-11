@@ -8,7 +8,7 @@ import { useState } from "react"
 
 import { type Crumb, Topbar } from "@/components/app-shell/topbar"
 import { FormPanel } from "@/components/form-panel"
-import { TextAreaField, TextField } from "@/components/form-fields"
+import { SelectField, TextAreaField, TextField } from "@/components/form-fields"
 import { NoAccess } from "@/components/no-access"
 import { PageBody, PageHeader } from "@/components/page-header"
 import { NotFoundState, QueryState } from "@/components/page-states"
@@ -24,7 +24,7 @@ import {
   FieldSet,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
 import { useCan, useSession } from "@/features/identity/auth/session"
 import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
@@ -440,23 +440,18 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
           />
         </FormPanel>
         <FormPanel title={t("lessons.fields.servants")}>
-          <Field data-invalid={errors.responsibleId ? true : undefined}>
-            <FieldLabel htmlFor="lesson-responsible">{t("lessons.fields.responsible")}</FieldLabel>
-            <NativeSelect
-              id="lesson-responsible"
-              className="w-full"
-              value={responsibleId}
-              aria-invalid={errors.responsibleId ? true : undefined}
-              onChange={(event) => chooseResponsible(event.target.value)}
-            >
-              {responsibles.map((servant) => (
-                <NativeSelectOption key={servant.id} value={servant.id}>
-                  {servant.name}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-            {errors.responsibleId ? <FieldError>{errors.responsibleId}</FieldError> : null}
-          </Field>
+          <SelectField
+            label={t("lessons.fields.responsible")}
+            value={responsibleId}
+            error={errors.responsibleId}
+            onChange={(event) => chooseResponsible(event.target.value)}
+          >
+            {responsibles.map((servant) => (
+              <NativeSelectOption key={servant.id} value={servant.id}>
+                {servant.name}
+              </NativeSelectOption>
+            ))}
+          </SelectField>
           {helpers.length > 0 ? (
             <FieldSet data-invalid={errors["details.collaboratorIds"] ? true : undefined}>
               <FieldLegend variant="label">{t("lessons.editor.helping")}</FieldLegend>

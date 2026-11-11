@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { useState } from "react"
 
 import { ConfirmDialog } from "@/components/confirm-dialog"
+import { SelectField } from "@/components/form-fields"
 import { Section } from "@/components/page-header"
 import { QueryErrorState, QueryState } from "@/components/page-states"
 import { StatusBadge } from "@/components/status"
@@ -19,8 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
 import { useCan, useCanAssign } from "@/features/identity/auth/session"
 import type { GroupOption } from "@/features/organization/assignments/api"
@@ -97,41 +97,28 @@ function GiveRoleDialog({
             }
           }}
         >
-          <Field data-invalid={give.fieldErrors.roleId ? true : undefined}>
-            <FieldLabel htmlFor="give-role">{t("settings.users.assign.role")}</FieldLabel>
-            <NativeSelect
-              id="give-role"
-              className="w-full"
-              value={roleId}
-              aria-invalid={give.fieldErrors.roleId ? true : undefined}
-              onChange={(event) => setRoleId(event.target.value)}
-            >
-              <NativeSelectOption value="" disabled>
-                {t("settings.users.assign.choose")}
+          <SelectField
+            label={t("settings.users.assign.role")}
+            value={roleId}
+            error={give.fieldErrors.roleId}
+            description={t.rich("settings.users.assign.roleHint", {
+              link: (chunks) => (
+                <Link href={`${routes.settings()}#roles`} className="underline underline-offset-4">
+                  {chunks}
+                </Link>
+              ),
+            })}
+            onChange={(event) => setRoleId(event.target.value)}
+          >
+            <NativeSelectOption value="" disabled>
+              {t("settings.users.assign.choose")}
+            </NativeSelectOption>
+            {roles.map((role) => (
+              <NativeSelectOption key={role.id} value={role.id}>
+                {role.name}
               </NativeSelectOption>
-              {roles.map((role) => (
-                <NativeSelectOption key={role.id} value={role.id}>
-                  {role.name}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-            {give.fieldErrors.roleId ? (
-              <FieldError>{give.fieldErrors.roleId}</FieldError>
-            ) : (
-              <FieldDescription>
-                {t.rich("settings.users.assign.roleHint", {
-                  link: (chunks) => (
-                    <Link
-                      href={`${routes.settings()}#roles`}
-                      className="underline underline-offset-4"
-                    >
-                      {chunks}
-                    </Link>
-                  ),
-                })}
-              </FieldDescription>
-            )}
-          </Field>
+            ))}
+          </SelectField>
           <DialogFooter>
             <Button
               type="button"

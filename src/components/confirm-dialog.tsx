@@ -1,6 +1,6 @@
 "use client"
 
-import { useId, useState } from "react"
+import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { cn } from "cn"
 
@@ -14,9 +14,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { OptionalNote } from "@/components/form-fields"
+import { FormField } from "@/components/form-fields"
 import { Button } from "@/components/ui/button"
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -130,7 +129,6 @@ export function ReasonDialog({
   children?: React.ReactNode
 }) {
   const t = useTranslations("common")
-  const id = useId()
   const [innerOpen, setInnerOpen] = useState(false)
   const [pending, setPending] = useState(false)
   const [reason, setReason] = useState("")
@@ -157,21 +155,18 @@ export function ReasonDialog({
           {description ? <AlertDialogDescription>{description}</AlertDialogDescription> : null}
         </AlertDialogHeader>
         {children}
-        <Field>
-          <FieldLabel htmlFor={id}>
-            {reasonLabel ?? t("reason")}
-            <OptionalNote />
-          </FieldLabel>
-          <Textarea
-            id={id}
-            value={reason}
-            maxLength={200}
-            placeholder={placeholder}
-            onChange={(e) => setReason(e.target.value)}
-            className="min-h-20"
-          />
-          {reasonHint ? <FieldDescription>{reasonHint}</FieldDescription> : null}
-        </Field>
+        <FormField label={reasonLabel ?? t("reason")} description={reasonHint} optional>
+          {(control) => (
+            <Textarea
+              {...control}
+              value={reason}
+              maxLength={200}
+              placeholder={placeholder}
+              onChange={(e) => setReason(e.target.value)}
+              className="min-h-20"
+            />
+          )}
+        </FormField>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={pending}>{dismissLabel ?? t("cancel")}</AlertDialogCancel>
           <Button

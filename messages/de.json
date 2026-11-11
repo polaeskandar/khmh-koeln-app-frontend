@@ -1714,7 +1714,8 @@
       "groupsHint": "Wo die Person dient. Rollen, die nur in zugeordneten Gruppen gelten, gelten hier. Der angegebene Dienst ist schon gewählt.",
       "noGroups": "Noch keine Gruppe. Ein Diener ohne Gruppe sieht keinen Dienst.",
       "addGroup": "Gruppe hinzufügen",
-      "removeGroup": "{group} entfernen"
+      "removeGroup": "{group} entfernen",
+      "removePerson": "{name} entfernen"
     },
     "decline": {
       "title": "Registrierung von {name} ablehnen?",

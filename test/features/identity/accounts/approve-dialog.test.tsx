@@ -177,6 +177,16 @@ test("children are found from two letters and kept across searches; both are sen
   expect(toast.success).toHaveBeenCalledWith("Sandra Samuel can sign in now.")
 })
 
+test("a chosen child is taken off with its named remove button", async () => {
+  open()
+  const dialog = await openApprove()
+  await userEvent.type(dialog.getByRole("textbox"), "demi")
+  await userEvent.click(await dialog.findByRole("button", { name: /Demiana Fanous/ }))
+  expect(dialog.getByText("1 child chosen")).toBeInTheDocument()
+  await userEvent.click(dialog.getByRole("button", { name: "Remove Demiana Fanous" }))
+  expect(dialog.getByText("No child chosen yet")).toBeInTheDocument()
+})
+
 test("roles that fail to load say so and can be retried", async () => {
   open()
   let rolesFail = true

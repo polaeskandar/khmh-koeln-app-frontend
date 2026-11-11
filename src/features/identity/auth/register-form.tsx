@@ -6,7 +6,7 @@ import { CircleAlert } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 import { useId, useState } from "react"
 
-import { TextAreaField, TextField } from "@/components/form-fields"
+import { SelectField, TextAreaField, TextField } from "@/components/form-fields"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -21,7 +21,7 @@ import {
   FieldSet,
   FieldTitle,
 } from "@/components/ui/field"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { NativeSelectOption } from "@/components/ui/native-select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Spinner } from "@/components/ui/spinner"
 import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
@@ -70,7 +70,6 @@ function ServiceSelect({
   error?: string
 }) {
   const t = useTranslations()
-  const id = useId()
   const services = useQuery(registrationServicesQuery)
 
   if (services.isError) {
@@ -88,27 +87,22 @@ function ServiceSelect({
   }
 
   return (
-    <Field data-invalid={error ? true : undefined}>
-      <FieldLabel htmlFor={id}>{t("auth.register.service")}</FieldLabel>
-      <NativeSelect
-        id={id}
-        className="w-full"
-        value={value}
-        disabled={!services.data}
-        onChange={(event) => onChange(event.target.value)}
-        aria-invalid={error ? true : undefined}
-      >
-        <NativeSelectOption value="">
-          {services.data ? t("auth.register.chooseService") : t("common.loadingEllipsis")}
+    <SelectField
+      label={t("auth.register.service")}
+      value={value}
+      error={error}
+      disabled={!services.data}
+      onChange={(event) => onChange(event.target.value)}
+    >
+      <NativeSelectOption value="">
+        {services.data ? t("auth.register.chooseService") : t("common.loadingEllipsis")}
+      </NativeSelectOption>
+      {services.data?.items.map((service) => (
+        <NativeSelectOption key={service.id} value={service.id}>
+          {service.name}
         </NativeSelectOption>
-        {services.data?.items.map((service) => (
-          <NativeSelectOption key={service.id} value={service.id}>
-            {service.name}
-          </NativeSelectOption>
-        ))}
-      </NativeSelect>
-      {error ? <FieldError>{error}</FieldError> : null}
-    </Field>
+      ))}
+    </SelectField>
   )
 }
 

@@ -63,7 +63,7 @@ export function PersonSearch({
                 type="button"
                 variant="ghost"
                 size="icon"
-                aria-label={`${preferredName(person)} ×`}
+                aria-label={t("removePerson", { name: preferredName(person) })}
                 onClick={() => onChange(chosen.filter((p) => p.id !== person.id))}
               >
                 <X />
