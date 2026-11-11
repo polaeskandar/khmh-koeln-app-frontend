@@ -12,7 +12,7 @@ import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { LessonRow, LessonList } from "@/features/learning/lessons/api"
+import type { LessonRow, LessonListResponse } from "@/features/learning/lessons/api"
 import { StageLessonsPage } from "@/features/learning/lessons/stage-lessons-page"
 
 beforeEach(() => {
@@ -74,7 +74,7 @@ const builders = row({
   },
 })
 
-function open(list: LessonList, account: Me = me.servant) {
+function open(list: LessonListResponse, account: Me = me.servant) {
   const queries: string[] = []
 
   server.use(

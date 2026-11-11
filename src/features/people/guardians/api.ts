@@ -13,9 +13,9 @@ export const guardianLinksQuery = queryOptions({
   queryFn: ({ signal }) => dataOf(api.GET("/guardian-links", { signal })),
 })
 
-export type ParentAccess = Schemas["ParentAccessRequest"]
+export type ParentAccessRequest = Schemas["ParentAccessRequest"]
 
-export const giveAccessRequest = (link: ParentAccess) =>
+export const giveAccessRequest = (link: ParentAccessRequest) =>
   dataOf(api.POST("/guardian-links", { body: link }))
 
 export const revokeAccessRequest = (link: Uuid) =>

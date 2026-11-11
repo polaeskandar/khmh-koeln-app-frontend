@@ -14,7 +14,7 @@ import { useFormat } from "@/i18n/format"
 import { useRouter } from "@/i18n/navigation"
 import type { LocalDate, Uuid } from "@/lib/api/types/common"
 import { groupOf } from "./session-lines"
-import type { Schedule } from "./api"
+import type { ScheduleResponse } from "./api"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { recurrenceOf } from "@/lib/domain/recurrence"
 import { routes } from "@/lib/routes"
@@ -177,7 +177,13 @@ export function NewScheduleButton({
   )
 }
 
-export function EditScheduleButton({ schedule, today }: { schedule: Schedule; today: LocalDate }) {
+export function EditScheduleButton({
+  schedule,
+  today,
+}: {
+  schedule: ScheduleResponse
+  today: LocalDate
+}) {
   const t = useTranslations("meetings.actions")
   const [open, setOpen] = useState(false)
 

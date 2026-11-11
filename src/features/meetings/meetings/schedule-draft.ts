@@ -1,7 +1,7 @@
 import type { Service } from "@/features/organization/services/api"
 import type { Frequency } from "./api"
 import type { IsoWeekday, LocalDate, MonthWeek, Recurrence, Uuid } from "@/lib/api/types/common"
-import type { RosterMode, Schedule } from "./api"
+import type { RosterMode, ScheduleResponse } from "./api"
 import {
   normalizeWeekdays,
   occurrencesBetween,
@@ -39,7 +39,7 @@ export type DraftFieldsProps = {
 }
 
 export type ScheduleTarget =
-  { mode: "create"; fixedServiceId?: Uuid } | { mode: "edit"; schedule: Schedule }
+  { mode: "create"; fixedServiceId?: Uuid } | { mode: "edit"; schedule: ScheduleResponse }
 
 export type Preview =
   | { error: RecurrenceProblem; dates: LocalDate[]; recurrence: null }
@@ -54,7 +54,7 @@ const PREVIEW_DATES = 4
 const PREVIEW_HORIZON_DAYS = 400
 const LOCAL_DATE = /^\d{4}-\d{2}-\d{2}$/
 
-function draftOf(schedule: Schedule): Draft {
+function draftOf(schedule: ScheduleResponse): Draft {
   const recurrence = recurrenceOf(schedule.recurrence)
 
   return {

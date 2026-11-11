@@ -11,7 +11,7 @@ import {
 import type { Uuid } from "@/lib/api/types/common"
 import type { CountedSession, SessionView } from "@/features/meetings/meetings/api"
 
-import type { SessionDetail } from "../meetings/api"
+import type { SessionDetailResponse } from "../meetings/api"
 
 export type AttendanceCounts = Schemas["AttendanceCounts"]
 
@@ -75,7 +75,7 @@ export type PersonGroup = Schemas["PersonGroup"]
 
 export type Correction = Schemas["Correction"]
 
-export type AttendanceBoard = Schemas["AttendanceBoardResponse"]
+export type AttendanceBoardResponse = Schemas["AttendanceBoardResponse"]
 
 export const attendanceBoardQuery = (session: Uuid) =>
   queryOptions({
@@ -101,12 +101,15 @@ export type SessionStateResponse = Schemas["SessionStateResponse"]
 export type BoardSession = SessionView &
   Pick<SessionStateResponse, "openedAt" | "closedAt" | "closedBy">
 
-export type AttendanceSheet = AttendanceBoard &
-  Pick<SessionDetail, "today" | "history"> & { session: BoardSession; corrections: Correction[] }
+export type AttendanceSheet = AttendanceBoardResponse &
+  Pick<SessionDetailResponse, "today" | "history"> & {
+    session: BoardSession
+    corrections: Correction[]
+  }
 
 export const sheetOf = (
-  detail: SessionDetail,
-  board: AttendanceBoard,
+  detail: SessionDetailResponse,
+  board: AttendanceBoardResponse,
   corrections: Correction[]
 ): AttendanceSheet => ({
   ...board,

@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
-import type { AgendaItem, PlannedSession, Schedule } from "@/features/meetings/meetings/api"
+import type { AgendaItem, PlannedSession, ScheduleResponse } from "@/features/meetings/meetings/api"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { schedule } from "@test/support/fixtures/schedules"
@@ -42,7 +42,11 @@ const planned = (date: string, scheduleId: string): PlannedSession => ({
 
 const asItem = (s: ReturnType<typeof session>): AgendaItem => ({ ...s, kind: "session" })
 
-function open(data: Schedule | (() => Schedule), who: Me = me.leader, client?: QueryClient) {
+function open(
+  data: ScheduleResponse | (() => ScheduleResponse),
+  who: Me = me.leader,
+  client?: QueryClient
+) {
   const current = typeof data === "function" ? data : () => data
   const id = current().id
   address.set(`id=${id}`)

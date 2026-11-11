@@ -18,7 +18,7 @@ import { servicesQuery } from "@/features/organization/services/api"
 import { Link } from "@/i18n/navigation"
 import type { ServiceReference } from "@/features/organization/services/api"
 import { orderOf } from "./agenda-order"
-import type { Schedule } from "./api"
+import type { ScheduleResponse } from "./api"
 import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
@@ -29,7 +29,7 @@ import { ScheduleList } from "./schedule-list"
 
 type Status = "active" | "inactive" | "all"
 
-const STATUSES: Record<Status, (schedule: Schedule) => boolean> = {
+const STATUSES: Record<Status, (schedule: ScheduleResponse) => boolean> = {
   active: (s) => s.active,
   inactive: (s) => !s.active,
   all: () => true,
@@ -38,7 +38,7 @@ const STATUSES: Record<Status, (schedule: Schedule) => boolean> = {
 const statusOf = (value: string | null): Status =>
   value === "inactive" || value === "all" ? value : "active"
 
-function compareSchedules(a: Schedule, b: Schedule) {
+function compareSchedules(a: ScheduleResponse, b: ScheduleResponse) {
   return (
     orderOf(a) - orderOf(b) ||
     (a.stage?.name ?? "").localeCompare(b.stage?.name ?? "", "de") ||
@@ -46,8 +46,11 @@ function compareSchedules(a: Schedule, b: Schedule) {
   )
 }
 
-function groupByService(schedules: Schedule[]) {
-  const groups = new Map<string, { service: ServiceReference | null; schedules: Schedule[] }>()
+function groupByService(schedules: ScheduleResponse[]) {
+  const groups = new Map<
+    string,
+    { service: ServiceReference | null; schedules: ScheduleResponse[] }
+  >()
 
   for (const schedule of schedules) {
     const key = schedule.service?.id ?? ""

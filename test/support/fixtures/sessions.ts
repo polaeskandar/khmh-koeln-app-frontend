@@ -5,7 +5,7 @@ import type {
   OverviewCard,
   SessionStateResponse,
 } from "@/features/meetings/attendance/api"
-import type { SessionDetail } from "@/features/meetings/meetings/api"
+import type { SessionDetailResponse } from "@/features/meetings/meetings/api"
 import type { Schemas } from "@/lib/api/client"
 import type { StageReference } from "@/features/organization/stages/api"
 import type { CountedSession, SessionView } from "@/features/meetings/meetings/api"
@@ -94,8 +94,8 @@ export const card = (
 
 export const sessionDetail = (
   view: SessionView,
-  extra: Partial<SessionDetail> = {}
-): SessionDetail => ({
+  extra: Partial<SessionDetailResponse> = {}
+): SessionDetailResponse => ({
   today: "2026-11-08",
   session: sessionResponse(view),
   state: sessionState(view),

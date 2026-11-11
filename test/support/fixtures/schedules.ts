@@ -1,10 +1,10 @@
-import type { Schedule } from "@/features/meetings/meetings/api"
+import type { ScheduleResponse } from "@/features/meetings/meetings/api"
 
 import { stageRef, sundaySchool } from "@test/support/fixtures/sessions"
 
 let n = 0
 
-export function schedule(overrides: Partial<Schedule> = {}): Schedule {
+export function schedule(overrides: Partial<ScheduleResponse> = {}): ScheduleResponse {
   n++
 
   return {

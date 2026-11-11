@@ -1,12 +1,12 @@
 import { http, HttpResponse } from "msw"
 
 import type {
-  AttendanceBoard,
+  AttendanceBoardResponse,
   AttendanceSheet,
   BoardSession,
   MarkReference,
 } from "@/features/meetings/attendance/api"
-import type { SessionDetail } from "@/features/meetings/meetings/api"
+import type { SessionDetailResponse } from "@/features/meetings/meetings/api"
 import type { PersonReference } from "@/features/people/members/api"
 import type { SessionView } from "@/features/meetings/meetings/api"
 import { apiUrl } from "@test/support/api"
@@ -165,7 +165,7 @@ export const closedFirstNovember = (): AttendanceSheet => {
   }
 }
 
-export const detailOf = (sheet: AttendanceSheet): SessionDetail => ({
+export const detailOf = (sheet: AttendanceSheet): SessionDetailResponse => ({
   today: sheet.today,
   session: sessionResponse(sheet.session),
   state: {
@@ -179,7 +179,7 @@ export const detailOf = (sheet: AttendanceSheet): SessionDetail => ({
   history: sheet.history,
 })
 
-export const boardOf = (sheet: AttendanceSheet): AttendanceBoard => ({
+export const boardOf = (sheet: AttendanceSheet): AttendanceBoardResponse => ({
   counts: sheet.counts,
   roster: sheet.roster,
   notOnRoster: sheet.notOnRoster,

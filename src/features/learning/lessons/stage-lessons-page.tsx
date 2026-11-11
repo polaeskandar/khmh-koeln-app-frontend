@@ -29,7 +29,7 @@ import { oneOf } from "@/lib/one-of"
 import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import { type LessonRow, type LessonTab, type LessonList, stageLessonsQuery } from "./api"
+import { type LessonRow, type LessonTab, type LessonListResponse, stageLessonsQuery } from "./api"
 import { LessonStatusBadge } from "./lesson-status-badge"
 import { MeetingLine } from "./meeting-line"
 
@@ -107,7 +107,7 @@ function LessonList({
   filtered,
   onClear,
 }: {
-  data: LessonList
+  data: LessonListResponse
   tab: LessonTab
   status: string
   servant: string

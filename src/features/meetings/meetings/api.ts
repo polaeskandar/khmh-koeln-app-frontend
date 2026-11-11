@@ -29,7 +29,7 @@ export type PlannedSession = Schemas["PlannedSessionResponse"]
 
 export type AgendaItem = Schemas["AgendaResponse"]["items"][number]
 
-export type Schedule = Schemas["ScheduleResponse"]
+export type ScheduleResponse = Schemas["ScheduleResponse"]
 
 export type HistoryEntry = Schemas["HistoryEntry"]
 
@@ -57,7 +57,7 @@ export const agendaQuery = (filter: AgendaFilter) =>
     queryFn: ({ signal }) => dataOf(api.GET("/agenda", { params: { query: filter }, signal })),
   })
 
-export type SessionDetail = Schemas["SessionDetailResponse"]
+export type SessionDetailResponse = Schemas["SessionDetailResponse"]
 
 export const meetingSessionQuery = (id: Uuid) =>
   queryOptions({
