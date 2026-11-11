@@ -5,7 +5,6 @@ import type { Recurrence } from "@/lib/api/types/common"
 import cases from "@/lib/domain/recurrence-cases.json"
 import {
   occurrencesBetween,
-  RecurrenceError,
   type RecurrenceProblem,
   validateRecurrence,
 } from "@/lib/domain/recurrence"
@@ -28,16 +27,11 @@ describe(`the backend's golden vectors, from ${FIXTURE_COMMIT}`, () => {
   })
 
   test.each(cases.errors)("$name", ({ recurrence, error }) => {
-    let thrown: unknown = null
+    expect(`recurrence.${validateRecurrence(recurrence as Recurrence)}`).toBe(error.code)
+  })
 
-    try {
-      validateRecurrence(recurrence as Recurrence)
-    } catch (caught) {
-      thrown = caught
-    }
-
-    expect(thrown).toBeInstanceOf(RecurrenceError)
-    expect(`recurrence.${(thrown as RecurrenceError).code}`).toBe(error.code)
+  test.each(cases.occurrences)("$name has no problem", ({ recurrence }) => {
+    expect(validateRecurrence(recurrence as Recurrence)).toBeNull()
   })
 
   test("every problem has a case", () => {

@@ -21,6 +21,10 @@ const byMonthWeek = (names: string[]) =>
 
 const day = (t: Table, d: IsoWeekday) => t.weekdays[d - 1]
 
+const GERMAN_ORDINALS = byMonthWeek(["ersten", "zweiten", "dritten", "vierten", "letzten"])
+
+const ARABIC_ORDINALS = byMonthWeek(["أول", "ثاني", "ثالث", "رابع", "آخر"])
+
 export const WORDS: Record<Locale, Words> = {
   en: {
     today: "Today",
@@ -77,9 +81,7 @@ export const WORDS: Record<Locale, Words> = {
         return `Alle ${r.interval} Wochen am ${days}`
       }
 
-      const ordinal =
-        ["ersten", "zweiten", "dritten", "vierten"][(r.monthWeek ?? 1) - 1] ?? "letzten"
-
+      const ordinal = GERMAN_ORDINALS[r.monthWeek ?? 1]
       const weekday = day(t, r.weekdays[0])
 
       return r.interval === 1
@@ -115,7 +117,7 @@ export const WORDS: Record<Locale, Words> = {
         return `${days} كل ${r.interval} أسابيع`
       }
 
-      const ordinal = ["أول", "ثاني", "ثالث", "رابع"][(r.monthWeek ?? 1) - 1] ?? "آخر"
+      const ordinal = ARABIC_ORDINALS[r.monthWeek ?? 1]
       const which = `${ordinal} ${indefinite(r.weekdays[0])}`
 
       if (r.interval === 1) {

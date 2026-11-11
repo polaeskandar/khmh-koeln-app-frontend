@@ -1,7 +1,7 @@
 import type { Schemas } from "@/lib/api/client"
 import type { IsoWeekday, LocalDate, MonthWeek, Recurrence } from "@/lib/api/types/common"
 
-import { addDays, daysBetween, daysInMonth, isoWeekday, mondayOf } from "./time"
+import { addDays, daysBetween, daysInMonth, isoWeekday, mondayOf, parseDate } from "./time"
 
 export const ISO_WEEKDAYS: IsoWeekday[] = [1, 2, 3, 4, 5, 6, 7]
 
@@ -17,40 +17,46 @@ export type RecurrenceProblem =
   | "endBeforeStart"
   | "startsOn"
 
-export class RecurrenceError extends Error {
-  constructor(readonly code: RecurrenceProblem) {
-    super(code)
+function monthlyProblem(r: Recurrence): RecurrenceProblem | null {
+  if (r.weekdays.length !== 1) {
+    return "monthlyOneDay"
   }
+
+  if (r.monthWeek === null || !MONTH_WEEKS.includes(r.monthWeek)) {
+    return "monthWeek"
+  }
+
+  return null
 }
 
-export function validateRecurrence(r: Recurrence): void {
+export function validateRecurrence(r: Recurrence): RecurrenceProblem | null {
   if (!Number.isInteger(r.interval) || r.interval < 1 || r.interval > 52) {
-    throw new RecurrenceError("interval")
+    return "interval"
   }
 
   if (r.weekdays.length === 0) {
-    throw new RecurrenceError("weekdays")
+    return "weekdays"
   }
 
   if (r.weekdays.some((d) => d < 1 || d > 7)) {
-    throw new RecurrenceError("weekdayRange")
+    return "weekdayRange"
   }
 
   if (r.frequency === "monthly") {
-    if (r.weekdays.length !== 1) {
-      throw new RecurrenceError("monthlyOneDay")
-    }
+    const problem = monthlyProblem(r)
 
-    if (r.monthWeek === null || ![1, 2, 3, 4, -1].includes(r.monthWeek)) {
-      throw new RecurrenceError("monthWeek")
+    if (problem) {
+      return problem
     }
   } else if (r.monthWeek !== null) {
-    throw new RecurrenceError("monthWeekOnlyMonthly")
+    return "monthWeekOnlyMonthly"
   }
 
   if (r.span.endsOn !== null && r.span.endsOn < r.span.startsOn) {
-    throw new RecurrenceError("endBeforeStart")
+    return "endBeforeStart"
   }
+
+  return null
 }
 
 export function normalizeWeekdays(days: number[]): IsoWeekday[] {
@@ -58,8 +64,8 @@ export function normalizeWeekdays(days: number[]): IsoWeekday[] {
 }
 
 function monthsBetween(from: LocalDate, to: LocalDate): number {
-  const [fy, fm] = from.split("-").map(Number)
-  const [ty, tm] = to.split("-").map(Number)
+  const [fy, fm] = parseDate(from)
+  const [ty, tm] = parseDate(to)
 
   return ty * 12 + tm - (fy * 12 + fm)
 }

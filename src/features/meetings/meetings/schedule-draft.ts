@@ -5,7 +5,6 @@ import type { RosterMode, ScheduleResponse } from "./api"
 import {
   normalizeWeekdays,
   occurrencesBetween,
-  RecurrenceError,
   type RecurrenceProblem,
   recurrenceOf,
   validateRecurrence,
@@ -125,14 +124,10 @@ export function previewOf(draft: Draft, today: LocalDate): Preview {
 
   const recurrence = toRecurrence(draft)
 
-  try {
-    validateRecurrence(recurrence)
-  } catch (error) {
-    if (error instanceof RecurrenceError) {
-      return { error: error.code, dates: [], recurrence: null }
-    }
+  const problem = validateRecurrence(recurrence)
 
-    throw error
+  if (problem) {
+    return { error: problem, dates: [], recurrence: null }
   }
 
   const from = draft.startsOn > today ? draft.startsOn : today
