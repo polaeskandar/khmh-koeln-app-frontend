@@ -34,10 +34,88 @@ const blockingGroupOf = (candidate: DirectoryPerson, placement: PlacementInput) 
     blocksPlacement({ serviceId: group.service.id, stageId: group.stage?.id ?? null }, placement)
   )
 
-function AddPersonDialog({ preset, onClose }: { preset?: PlacementInput; onClose: () => void }) {
+function DuplicateCandidatesAlert({
+  message,
+  candidates,
+  placement,
+  busy,
+  addError,
+  onAdd,
+  onAddAnyway,
+}: {
+  message: string
+  candidates: DirectoryPerson[]
+  placement: PlacementInput | null
+  busy: boolean
+  addError: string | undefined
+  onAdd: (candidate: DirectoryPerson) => void
+  onAddAnyway: () => void
+}) {
   const t = useTranslations()
   const f = useFormat()
   const can = useCan()
+
+  return (
+    <Alert>
+      <CircleAlert />
+      <AlertDescription className="flex flex-col gap-3">
+        <span>{message}</span>
+        {candidates.length > 0 ? (
+          <ul className="flex flex-col divide-y border-y">
+            {candidates.map((candidate) => {
+              const there = placement ? blockingGroupOf(candidate, placement) : undefined
+
+              return (
+                <li key={candidate.id} className="flex items-center justify-between gap-3 py-2">
+                  <span className="flex min-w-0 flex-col">
+                    <span className="truncate font-medium">{preferredName(candidate)}</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {groupsText(candidate, f.separator, t("members.addMember.notInAnyService"))}
+                    </span>
+                  </span>
+                  {there ? (
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {t("members.newPerson.alreadyIn", {
+                        where: isolate(there.stage?.name ?? there.service.name),
+                      })}
+                    </span>
+                  ) : placement && can("update", "members", placement) ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={busy}
+                      onClick={() => onAdd(candidate)}
+                    >
+                      {t("members.addMember.add")}
+                    </Button>
+                  ) : null}
+                </li>
+              )
+            })}
+          </ul>
+        ) : null}
+        {addError !== undefined ? (
+          <span role="alert" className="text-destructive">
+            {addError}
+          </span>
+        ) : null}
+        <Button
+          type="button"
+          variant="outline"
+          className="self-start"
+          disabled={busy}
+          onClick={onAddAnyway}
+        >
+          {t("members.newPerson.addAnyway")}
+        </Button>
+      </AlertDescription>
+    </Alert>
+  )
+}
+
+function AddPersonDialog({ preset, onClose }: { preset?: PlacementInput; onClose: () => void }) {
+  const t = useTranslations()
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [displayName, setDisplayName] = useState("")
@@ -61,8 +139,6 @@ function AddPersonDialog({ preset, onClose }: { preset?: PlacementInput; onClose
 
   const problem = create.problem
   const duplicate = problem?.code === "people.duplicate"
-
-  const candidates = duplicateCandidatesOf(problem)
 
   const errors = create.fieldErrors
   const shownInFields = Object.keys(errors).length > 0
@@ -113,65 +189,15 @@ function AddPersonDialog({ preset, onClose }: { preset?: PlacementInput; onClose
       onClose={onClose}
     >
       {duplicate ? (
-        <Alert>
-          <CircleAlert />
-          <AlertDescription className="flex flex-col gap-3">
-            <span>{problem.message}</span>
-            {candidates.length > 0 ? (
-              <ul className="flex flex-col divide-y border-y">
-                {candidates.map((candidate) => {
-                  const there = placement ? blockingGroupOf(candidate, placement) : undefined
-
-                  return (
-                    <li key={candidate.id} className="flex items-center justify-between gap-3 py-2">
-                      <span className="flex min-w-0 flex-col">
-                        <span className="truncate font-medium">{preferredName(candidate)}</span>
-                        <span className="truncate text-xs text-muted-foreground">
-                          {groupsText(
-                            candidate,
-                            f.separator,
-                            t("members.addMember.notInAnyService")
-                          )}
-                        </span>
-                      </span>
-                      {there ? (
-                        <span className="shrink-0 text-xs text-muted-foreground">
-                          {t("members.newPerson.alreadyIn", {
-                            where: isolate(there.stage?.name ?? there.service.name),
-                          })}
-                        </span>
-                      ) : placement && can("update", "members", placement) ? (
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          disabled={busy}
-                          onClick={() => void addExisting(candidate)}
-                        >
-                          {t("members.addMember.add")}
-                        </Button>
-                      ) : null}
-                    </li>
-                  )
-                })}
-              </ul>
-            ) : null}
-            {join.problem ? (
-              <span role="alert" className="text-destructive">
-                {join.problem.message}
-              </span>
-            ) : null}
-            <Button
-              type="button"
-              variant="outline"
-              className="self-start"
-              disabled={busy}
-              onClick={() => void submitAnyway()}
-            >
-              {t("members.newPerson.addAnyway")}
-            </Button>
-          </AlertDescription>
-        </Alert>
+        <DuplicateCandidatesAlert
+          message={problem.message}
+          candidates={duplicateCandidatesOf(problem)}
+          placement={placement}
+          busy={busy}
+          addError={join.problem?.message}
+          onAdd={(candidate) => void addExisting(candidate)}
+          onAddAnyway={() => void submitAnyway()}
+        />
       ) : problem && !shownInFields && problem.status !== 403 ? (
         <Alert variant="destructive" role="alert">
           <CircleAlert />
