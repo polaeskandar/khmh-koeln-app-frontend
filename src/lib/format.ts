@@ -128,7 +128,11 @@ function create(locale: Locale) {
     relativeDayInline(date: LocalDate, today: LocalDate): string {
       const word = relativeWord(date, today)
 
-      return word ? (locale === "ar" ? word : word.toLowerCase()) : dayMonth(date)
+      if (!word) {
+        return dayMonth(date)
+      }
+
+      return locale === "ar" ? word : word.toLowerCase()
     },
     todayOrWeekday: (date: LocalDate, today: LocalDate) =>
       date === today ? w.today : weekdayShort(date),

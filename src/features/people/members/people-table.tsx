@@ -83,13 +83,19 @@ function EmptyPeople({
   const f = useFormat()
   const named = filters.map(isolate).join(f.separator)
 
-  const hint = searchText
-    ? filters.length > 0
-      ? t("members.empty.noMatchFilteredHint", { filters: named })
-      : t("members.empty.noMatchHint")
-    : filters.length > 0
+  const hintOf = () => {
+    if (searchText) {
+      return filters.length > 0
+        ? t("members.empty.noMatchFilteredHint", { filters: named })
+        : t("members.empty.noMatchHint")
+    }
+
+    return filters.length > 0
       ? t("members.empty.filteredHint", { filters: named })
       : t("members.empty.hint")
+  }
+
+  const hint = hintOf()
 
   return (
     <Empty className="py-6">

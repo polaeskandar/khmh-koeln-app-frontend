@@ -40,18 +40,51 @@ function Tab({ item, active }: { item: NavItem; active: boolean }) {
   )
 }
 
+function AttendanceTab({ active }: { active: boolean }) {
+  const t = useTranslations("nav")
+  const can = useCan()
+  const openId = useId()
+
+  if (TAKE_ATTENDANCE.allowed(can)) {
+    return (
+      <div className="flex flex-1 flex-col items-center">
+        <Link
+          href={TAKE_ATTENDANCE.href}
+          aria-label={t("takeAttendance")}
+          aria-describedby={openId}
+          aria-current={active ? "page" : undefined}
+          className="relative -mt-5 flex size-14 items-center justify-center bg-primary text-primary-foreground shadow-lg ring-4 ring-background"
+        >
+          <TAKE_ATTENDANCE.icon className="size-6" aria-hidden="true" />
+          <OpenSessionsBubble id={openId} />
+        </Link>
+        <span
+          className={cn(
+            "mt-0.5 text-[11px] font-medium text-muted-foreground",
+            active && "text-foreground"
+          )}
+          aria-hidden="true"
+        >
+          {t("attendance")}
+        </span>
+      </div>
+    )
+  }
+
+  return NAV.attendance.allowed(can) ? <Tab item={NAV.attendance} active={active} /> : null
+}
+
 export function MobileTabBar() {
   const t = useTranslations("nav")
   const pathname = usePathname()
   const can = useCan()
-  const openId = useId()
 
   if (isActive(TAKE_SCREEN, pathname)) {
     return null
   }
 
   const settings = SETTINGS.allowed(can)
-  const { dashboard, meetings, attendance: attendanceItem, members, services } = NAV
+  const { dashboard, meetings, members, services } = NAV
   const attendance = isActive(TAKE_ATTENDANCE.href, pathname)
 
   return (
@@ -61,31 +94,7 @@ export function MobileTabBar() {
     >
       <Tab item={dashboard} active={isActive(dashboard.href, pathname)} />
       <Tab item={meetings} active={isActive(meetings.href, pathname)} />
-      {TAKE_ATTENDANCE.allowed(can) ? (
-        <div className="flex flex-1 flex-col items-center">
-          <Link
-            href={TAKE_ATTENDANCE.href}
-            aria-label={t("takeAttendance")}
-            aria-describedby={openId}
-            aria-current={attendance ? "page" : undefined}
-            className="relative -mt-5 flex size-14 items-center justify-center bg-primary text-primary-foreground shadow-lg ring-4 ring-background"
-          >
-            <TAKE_ATTENDANCE.icon className="size-6" aria-hidden="true" />
-            <OpenSessionsBubble id={openId} />
-          </Link>
-          <span
-            className={cn(
-              "mt-0.5 text-[11px] font-medium text-muted-foreground",
-              attendance && "text-foreground"
-            )}
-            aria-hidden="true"
-          >
-            {t("attendance")}
-          </span>
-        </div>
-      ) : attendanceItem.allowed(can) ? (
-        <Tab item={attendanceItem} active={attendance} />
-      ) : null}
+      <AttendanceTab active={attendance} />
       {members.allowed(can) ? (
         <Tab item={members} active={isActive(members.href, pathname)} />
       ) : null}

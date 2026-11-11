@@ -71,6 +71,62 @@ export function MemberRecordChoice({
   const id = useId()
   const { q, candidates, items } = record
 
+  function candidateList() {
+    if (q.length < 2) {
+      return (
+        <p className="text-xs text-muted-foreground">{t("accountRequests.approve.searchMember")}</p>
+      )
+    }
+
+    if (candidates.isError) {
+      return <QueryErrorState error={candidates.error} onRetry={() => candidates.refetch()} />
+    }
+
+    if (candidates.data && items.length === 0) {
+      return (
+        <p className="text-xs text-muted-foreground">
+          {t("accountRequests.approve.noMemberMatches")}
+        </p>
+      )
+    }
+
+    return (
+      <RadioGroup
+        value={record.personId ?? ""}
+        onValueChange={record.pick}
+        className="flex flex-col gap-0 divide-y border-y"
+      >
+        {items.map((person) => (
+          <label
+            key={person.id}
+            htmlFor={`${id}-${person.id}`}
+            className={cn(
+              "flex items-start gap-3 py-2.5 text-sm",
+              person.hasAccount ? "cursor-not-allowed opacity-60" : "cursor-pointer"
+            )}
+          >
+            <RadioGroupItem
+              id={`${id}-${person.id}`}
+              value={person.id}
+              disabled={person.hasAccount}
+              className="mt-0.5"
+            />
+            <span className="flex min-w-0 flex-col gap-0.5">
+              <span className="font-medium">
+                <bdi>{preferredName(person)}</bdi>
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {person.hasAccount
+                  ? t("accountRequests.approve.hasAccount")
+                  : groupsText(person, f.separator, t("accountRequests.approve.noGroup"))}
+              </span>
+            </span>
+          </label>
+        ))}
+      </RadioGroup>
+    )
+  }
+
   return (
     <FieldSet data-invalid={error ? true : undefined}>
       <FieldLegend variant="label">{t("accountRequests.approve.memberRecord")}</FieldLegend>
@@ -97,49 +153,7 @@ export function MemberRecordChoice({
           })}
         </p>
       ) : null}
-      {q.length < 2 ? (
-        <p className="text-xs text-muted-foreground">{t("accountRequests.approve.searchMember")}</p>
-      ) : candidates.isError ? (
-        <QueryErrorState error={candidates.error} onRetry={() => candidates.refetch()} />
-      ) : candidates.data && items.length === 0 ? (
-        <p className="text-xs text-muted-foreground">
-          {t("accountRequests.approve.noMemberMatches")}
-        </p>
-      ) : (
-        <RadioGroup
-          value={record.personId ?? ""}
-          onValueChange={record.pick}
-          className="flex flex-col gap-0 divide-y border-y"
-        >
-          {items.map((person) => (
-            <label
-              key={person.id}
-              htmlFor={`${id}-${person.id}`}
-              className={cn(
-                "flex items-start gap-3 py-2.5 text-sm",
-                person.hasAccount ? "cursor-not-allowed opacity-60" : "cursor-pointer"
-              )}
-            >
-              <RadioGroupItem
-                id={`${id}-${person.id}`}
-                value={person.id}
-                disabled={person.hasAccount}
-                className="mt-0.5"
-              />
-              <span className="flex min-w-0 flex-col gap-0.5">
-                <span className="font-medium">
-                  <bdi>{preferredName(person)}</bdi>
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {person.hasAccount
-                    ? t("accountRequests.approve.hasAccount")
-                    : groupsText(person, f.separator, t("accountRequests.approve.noGroup"))}
-                </span>
-              </span>
-            </label>
-          ))}
-        </RadioGroup>
-      )}
+      {candidateList()}
       <Button type="button" variant="link" className="h-auto self-start p-0" onClick={onAddNew}>
         {t("accountRequests.approve.addNew", { name: isolate(name) })}
       </Button>

@@ -97,6 +97,18 @@ export function useDataTable<TData extends RowData>(options: UseDataTableOptions
   return { table }
 }
 
+function SortIcon({ sorted }: { sorted: false | "asc" | "desc" }) {
+  if (sorted === "desc") {
+    return <ArrowDown className="size-3.5" />
+  }
+
+  if (sorted === "asc") {
+    return <ArrowUp className="size-3.5" />
+  }
+
+  return <ChevronsUpDown className="size-3.5 opacity-50" />
+}
+
 export function DataTableColumnHeader<TData extends RowData, TValue>({
   column,
   title,
@@ -125,13 +137,7 @@ export function DataTableColumnHeader<TData extends RowData, TValue>({
       aria-label={t("sortBy", { column: title })}
     >
       {title}
-      {sorted === "desc" ? (
-        <ArrowDown className="size-3.5" />
-      ) : sorted === "asc" ? (
-        <ArrowUp className="size-3.5" />
-      ) : (
-        <ChevronsUpDown className="size-3.5 opacity-50" />
-      )}
+      <SortIcon sorted={sorted} />
     </button>
   )
 }

@@ -54,6 +54,14 @@ export function FormField({
   const hintId = `${id}-hint`
   const errorId = `${id}-error`
 
+  const describedBy = () => {
+    if (error) {
+      return errorId
+    }
+
+    return description ? hintId : undefined
+  }
+
   const fieldLabel = (
     <FieldLabel htmlFor={id} className={hideLabel ? "sr-only" : undefined}>
       {label}
@@ -74,7 +82,7 @@ export function FormField({
       {children({
         id,
         "aria-invalid": error ? true : undefined,
-        "aria-describedby": error ? errorId : description ? hintId : undefined,
+        "aria-describedby": describedBy(),
       })}
       {description && !error ? (
         <FieldDescription id={hintId}>{description}</FieldDescription>

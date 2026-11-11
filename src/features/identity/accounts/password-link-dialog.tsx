@@ -36,6 +36,34 @@ export function PasswordLinkDialog({
   const t = useTranslations()
   const f = useFormat()
 
+  function outcome() {
+    if (problem) {
+      return (
+        <Alert variant="destructive">
+          <AlertDescription>{problem.message}</AlertDescription>
+        </Alert>
+      )
+    }
+
+    if (link) {
+      return (
+        <p className="text-sm text-muted-foreground" role="status">
+          {t("settings.users.passwordLink.sent", { email: account.email })}{" "}
+          {t("settings.users.passwordLink.expires", {
+            when: f.atLabel(link.expiresAt, today),
+          })}
+        </p>
+      )
+    }
+
+    return (
+      <p className="flex items-center gap-2 text-sm text-muted-foreground" role="status">
+        <Spinner />
+        {t("settings.users.passwordLink.creating")}
+      </p>
+    )
+  }
+
   return (
     <Dialog open onOpenChange={(open) => !open && !pending && onClose()}>
       <DialogContent>
@@ -49,23 +77,7 @@ export function PasswordLinkDialog({
             })}
           </DialogDescription>
         </DialogHeader>
-        {problem ? (
-          <Alert variant="destructive">
-            <AlertDescription>{problem.message}</AlertDescription>
-          </Alert>
-        ) : link ? (
-          <p className="text-sm text-muted-foreground" role="status">
-            {t("settings.users.passwordLink.sent", { email: account.email })}{" "}
-            {t("settings.users.passwordLink.expires", {
-              when: f.atLabel(link.expiresAt, today),
-            })}
-          </p>
-        ) : (
-          <p className="flex items-center gap-2 text-sm text-muted-foreground" role="status">
-            <Spinner />
-            {t("settings.users.passwordLink.creating")}
-          </p>
-        )}
+        {outcome()}
       </DialogContent>
     </Dialog>
   )

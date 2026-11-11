@@ -315,7 +315,8 @@ CI runs `task setup`, then `task lint`, `format:check`, `api:types:check`, `type
 
 - **ESLint** (`eslint.config.mjs`): Next.js's rules, no comments (`local/no-comments`), braces and blank lines,
   the static-export import bans, `fetch` only in `src/lib/api`, dates only through `useFormat()`, `cn` only from
-  `@/lib/utils`, no import of `src/features` from shared code, and the size caps above.
+  `@/lib/utils`, no import of `src/features` from shared code, no nested ternaries in `src` (the vendored
+  `src/components/ui` aside), and the size caps above.
 - **Tests** (`pnpm test`), the conventions in `test/conventions/` among them, unused message keys included;
   `pnpm messages:unused` lists those keys.
 - **knip** (`knip.json`, in `task unused`): no unused file, export or dependency. Its Next.js and Vitest plugins

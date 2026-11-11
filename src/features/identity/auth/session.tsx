@@ -42,6 +42,25 @@ type SessionContext = {
 
 const Context = createContext<SessionContext | null>(null)
 
+function sessionOf(
+  closed: boolean,
+  query: { data: Me | undefined; error: unknown; isError: boolean }
+): Session {
+  if (closed) {
+    return { status: "ended" }
+  }
+
+  if (query.error instanceof ApiError && query.error.status === 401) {
+    return { status: "anonymous" }
+  }
+
+  if (query.data) {
+    return { status: "authenticated", me: query.data, areas: areasOf(query.data) }
+  }
+
+  return query.isError ? { status: "failed", error: query.error } : { status: "unknown" }
+}
+
 const currentPath = () => `${window.location.pathname}${window.location.search}`
 
 export function SessionProvider({ children }: { children: ReactNode }) {
@@ -51,15 +70,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [closed, setClosed] = useState(false)
   const query = useQuery({ ...meQuery, enabled: !closed })
 
-  const session: Session = closed
-    ? { status: "ended" }
-    : query.error instanceof ApiError && query.error.status === 401
-      ? { status: "anonymous" }
-      : query.data
-        ? { status: "authenticated", me: query.data, areas: areasOf(query.data) }
-        : query.isError
-          ? { status: "failed", error: query.error }
-          : { status: "unknown" }
+  const session = sessionOf(closed, query)
 
   const signedIn = useRef(false)
   const ended = useRef(false)

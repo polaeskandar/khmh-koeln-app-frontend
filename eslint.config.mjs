@@ -112,7 +112,7 @@ const eslintConfig = defineConfig([
   {
     files: ["src/**/*.{ts,tsx}"],
     ignores: ["src/components/ui/**"],
-    rules: { "max-lines": ["error", { max: 400 }] },
+    rules: { "max-lines": ["error", { max: 400 }], "no-nested-ternary": "error" },
   },
   {
     files: ["src/**/*.tsx"],

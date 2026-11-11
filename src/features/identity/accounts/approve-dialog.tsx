@@ -181,7 +181,8 @@ function StaffApproval({ request, onClose }: { request: AccountRequest; onClose:
     >
       {parent ? (
         <ChildrenChoice chosen={children} error={errors.childIds} onChange={setChildren} />
-      ) : request.services.length > 0 ? (
+      ) : null}
+      {!parent && request.services.length > 0 ? (
         <p className="text-sm">
           {t("servesIn", {
             service: request.services.map((service) => service.name).join(f.separator),
