@@ -37,9 +37,9 @@ tasks:
       - pnpm api:types:check
 
   unused:
-    desc: Report unused files, exports, dependencies (knip) and message keys; not blocking yet
+    desc: Fail on unused files, exports and dependencies (knip); list unused message keys, which the tests reject
     cmds:
-      - pnpm knip --no-exit-code
+      - pnpm knip
       - pnpm messages:unused
 
   typecheck:
@@ -63,11 +63,12 @@ tasks:
       - pnpm cap:sync
 
   check:
-    desc: Run CI's checks (lint, formatting, API types, types, tests, build)
+    desc: Run CI's checks (lint, formatting, API types, types, tests, unused code, build)
     cmds:
       - task: lint
       - task: format:check
       - task: api:types:check
       - task: typecheck
       - task: test
+      - task: unused
       - task: build
