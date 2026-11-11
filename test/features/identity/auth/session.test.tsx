@@ -1,8 +1,7 @@
 import { act, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { afterEach, describe, expect, test } from "vitest"
 
 import { api, dataOf } from "@/lib/api/client"
 import { apiUrl, problem } from "@test/support/api"
@@ -10,12 +9,11 @@ import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectNoToast, expectOnlyToast, expectToast } from "@test/support/toasts"
 
 import { RequireStaff } from "@/features/identity/auth/guards"
 import { safeNext } from "@/features/identity/auth/safe-next"
 import { SessionProvider, useSession } from "@/features/identity/auth/session"
-
-beforeEach(() => vi.spyOn(toast, "error"))
 
 afterEach(() => {
   window.history.replaceState(null, "", "/")
@@ -58,9 +56,7 @@ describe("when the session ends while working", () => {
       ])
     )
 
-    expect(toast.error).toHaveBeenCalledExactlyOnceWith(
-      "You were signed out. Sign in again to continue."
-    )
+    await expectOnlyToast("You were signed out. Sign in again to continue.")
 
     expect(router.replace).toHaveBeenCalledExactlyOnceWith(
       "/sign-in/?next=%2Fen%2Fmembers%2F%3Fq%3DMina"
@@ -98,7 +94,7 @@ describe("when the session ends while working", () => {
     )
 
     await waitFor(() => expect(router.replace).toHaveBeenCalledOnce())
-    expect(toast.error).not.toHaveBeenCalled()
+    expectNoToast()
   })
 
   test("a 403 doesn't sign out", async () => {
@@ -136,7 +132,7 @@ describe("signing out", () => {
 
     await userEvent.click(await screen.findByRole("button", { name: "Sign out" }))
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/sign-in/"))
-    expect(toast.error).not.toHaveBeenCalled()
+    expectNoToast()
     expect(client.getQueryCache().find({ queryKey: ["people"] })).toBeUndefined()
     expect(screen.queryByText("Members")).toBeNull()
   })
@@ -146,11 +142,7 @@ describe("signing out", () => {
     server.use(http.post(apiUrl("/auth/sign-out"), () => HttpResponse.error()))
     await userEvent.click(screen.getByRole("button", { name: "Sign out" }))
 
-    await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith(
-        "No connection. Check your internet connection and try again."
-      )
-    )
+    await expectToast("No connection. Check your internet connection and try again.")
 
     expect(router.replace).not.toHaveBeenCalled()
     expect(screen.getByText("Members")).toBeInTheDocument()

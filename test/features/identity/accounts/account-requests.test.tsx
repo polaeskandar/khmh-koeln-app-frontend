@@ -1,8 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -13,14 +12,10 @@ import { services } from "@test/support/fixtures/services"
 import { answerSettingsLists } from "@test/support/fixtures/settings"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { AccountRequest } from "@/features/identity/accounts/api"
 import { SettingsPage } from "@/features/identity/accounts/settings-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
-})
 
 const sundaySchool = { id: services.items[0].id, name: "Sunday School", tone: 1, archived: false }
 
@@ -114,7 +109,7 @@ test("Decline asks first, sends one POST with {}, and the row goes", async () =>
   expect(dialog.getByText("Decline Mariam Hanna’s registration?")).toBeInTheDocument()
   await userEvent.click(dialog.getByRole("button", { name: "Decline and delete" }))
   await waitFor(() => expect(calls.decline).toEqual([{}]))
-  expect(toast.success).toHaveBeenCalledWith("Declined. Mariam Hanna’s registration was deleted.")
+  await expectToast("Declined. Mariam Hanna’s registration was deleted.")
   expect(await screen.findByRole("heading", { name: "Account requests (2)" })).toBeInTheDocument()
 })
 
@@ -127,7 +122,7 @@ test("a 409 alreadyApproved toasts and refetches", async () => {
     within(screen.getByRole("alertdialog")).getByRole("button", { name: "Decline and delete" })
   )
 
-  await waitFor(() => expect(toast.error).toHaveBeenCalled())
+  await expectToast("This account has already been approved.")
   await waitFor(() => expect(calls.list).toBe(2))
 })
 
@@ -139,7 +134,7 @@ test("a network error keeps the dialog open without refetching", async () => {
 
   await userEvent.click(dialog.getByRole("button", { name: "Decline and delete" }))
 
-  await waitFor(() => expect(toast.error).toHaveBeenCalled())
+  await expectToast("No connection. Check your internet connection and try again.")
   expect(dialog.getByRole("button", { name: "Decline and delete" })).toBeEnabled()
   expect(screen.getByRole("alertdialog")).toBeInTheDocument()
   expect(calls.list).toBe(1)

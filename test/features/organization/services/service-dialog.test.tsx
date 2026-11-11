@@ -1,8 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
@@ -11,15 +10,11 @@ import { insightsOf, services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { Me } from "@/features/identity/auth/api"
 import type { ServiceRequest } from "@/features/organization/services/api"
 import { ServicesOverviewPage } from "@/features/organization/services/services-overview-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "error")
-  vi.spyOn(toast, "success")
-})
 
 const sundaySchool = services.items[0]
 
@@ -77,7 +72,7 @@ test("creating sends the typed values and opens the new service", async () => {
     { method: "POST", body: { name: "Choir", description: "Hymns on Saturdays" } },
   ])
 
-  expect(toast.success).toHaveBeenCalledWith("Created Choir.")
+  await expectToast("Created Choir.")
 })
 
 test("Escape doesn't close the dialog while it saves", async () => {
@@ -131,7 +126,7 @@ test("name errors show under Name with the dialog open; 403 toasts", async () =>
 
   answerCreate(() => problem(403, "services.adminOnlyCreate"))
   await userEvent.click(dialog().getByRole("button", { name: "Create service" }))
-  await waitFor(() => expect(toast.error).toHaveBeenCalledWith("You can’t create services."))
+  await expectToast("You can’t create services.")
 })
 
 test("edit pre-fills and sends the whole service; Cancel sends nothing", async () => {
@@ -155,7 +150,7 @@ test("edit pre-fills and sends the whole service; Cancel sends nothing", async (
     ])
   )
 
-  expect(toast.success).toHaveBeenCalledWith("Saved.")
+  await expectToast("Saved.")
 })
 
 test("saving without a change sends nothing and closes", async () => {

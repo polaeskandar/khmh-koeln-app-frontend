@@ -1,8 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test, vi } from "vitest"
 
 import type { Locale } from "@/i18n/config"
 import { isolate } from "@/lib/bidi"
@@ -12,15 +11,11 @@ import { expectTouchTarget } from "@test/support/layout"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectNoToast, expectToast } from "@test/support/toasts"
 
 import type { ChildSummary } from "@/features/people/children/api"
 import type { ParentHomeworkItem } from "@/features/learning/homework/api"
 import { ParentHomeworkPage } from "@/features/learning/homework/parent-homework-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
-})
 
 type Lists = Record<
   string,
@@ -199,7 +194,7 @@ test("tapping a card's square reports the task done once, in place, and refreshe
   await vi.waitFor(() => expect(card).toHaveTextContent("Done · reported by you today at 12:08"))
   expect(puts).toEqual([{}])
   await vi.waitFor(() => expect(requested.length).toBe(reads + 2))
-  expect(toast.error).not.toHaveBeenCalled()
+  expectNoToast()
 })
 
 test("tapping a done card's square takes the report back and says so", async () => {
@@ -218,7 +213,7 @@ test("tapping a done card's square takes the report back and says so", async () 
   const tick = await square(reading.title)
   expect(tick).toHaveAttribute("aria-pressed", "true")
   await userEvent.dblClick(tick)
-  await vi.waitFor(() => expect(toast.success).toHaveBeenCalledWith("Marked as not done for Mina."))
+  await expectToast("Marked as not done for Mina.")
   expect(tick).toHaveAttribute("aria-pressed", "false")
   expect(deletes).toEqual([{}])
 })
@@ -230,9 +225,7 @@ test("a refused report empties the square again and says why", async () => {
   const tick = await square(drawing.title)
   await userEvent.click(tick)
 
-  await vi.waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith("This homework is not available.")
-  )
+  await expectToast("This homework is not available.")
 
   await vi.waitFor(() => expect(tick).toHaveAttribute("aria-pressed", "false"))
   expect(tick).not.toHaveAttribute("aria-disabled")

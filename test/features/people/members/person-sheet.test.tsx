@@ -1,8 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import type { Locale } from "@/i18n/config"
@@ -13,13 +12,10 @@ import { peopleList, person } from "@test/support/fixtures/people"
 import { services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { PersonRow } from "@/features/people/members/api"
 import { MembersScreen } from "@/features/people/members/members-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-})
 
 function open(initial: PersonRow, locale: Locale = "en", viewer: Me = me.administrator) {
   let current = initial
@@ -102,7 +98,7 @@ test("a corrected name toasts Saved. and appears in the row", async () => {
   await userEvent.clear(sheet.getByLabelText("Last name"))
   await userEvent.type(sheet.getByLabelText("Last name"), "Hanna")
   await userEvent.click(sheet.getByRole("button", { name: "Save name" }))
-  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Saved."))
+  await expectToast("Saved.")
 
   expect(sent).toEqual([
     { path: "put", body: { firstName: "Mina", lastName: "Hanna", displayName: null } },
@@ -159,9 +155,7 @@ test("Remove ends the membership once after confirming and moves it under Earlie
   const confirm = within(screen.getByRole("alertdialog"))
   await userEvent.click(confirm.getByRole("button", { name: "Remove" }))
 
-  await waitFor(() =>
-    expect(toast.success).toHaveBeenCalledWith("Removed. Past attendance is kept.")
-  )
+  await expectToast("Removed. Past attendance is kept.")
 
   expect(sent).toEqual([{ path: `end ${mina.placements[0].membershipId}`, body: null }])
   const refreshed = within(await screen.findByRole("dialog"))
@@ -201,7 +195,7 @@ test("Add to offers the active groups the person lacks, but not their stage's se
   expect(offered).toContain("Sunday School · 1st Class")
   await userEvent.selectOptions(select, "Sunday School · 1st Class")
   await userEvent.click(sheet.getByRole("button", { name: "Add" }))
-  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Added."))
+  await expectToast("Added.")
   const firstClass = services.items[0].stages.find((stage) => stage.name === "1st Class")!
 
   expect(sent).toEqual([
@@ -252,7 +246,7 @@ test("renamed, then removed from the filtered stage, the sheet stays on the new 
   await userEvent.clear(sheet.getByLabelText("Last name"))
   await userEvent.type(sheet.getByLabelText("Last name"), "Hanna")
   await userEvent.click(sheet.getByRole("button", { name: "Save name" }))
-  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Saved."))
+  await expectToast("Saved.")
 
   await userEvent.click(
     sheet.getByRole("button", { name: "Actions for 3rd Class (Sunday School)" })
@@ -266,9 +260,7 @@ test("renamed, then removed from the filtered stage, the sheet stays on the new 
     within(screen.getByRole("alertdialog")).getByRole("button", { name: "Remove" })
   )
 
-  await waitFor(() =>
-    expect(toast.success).toHaveBeenCalledWith("Removed. Past attendance is kept.")
-  )
+  await expectToast("Removed. Past attendance is kept.")
 
   expect(await sheet.findByText("No service at the moment.")).toBeInTheDocument()
   expect(sheet.getByRole("heading", { name: "Mina Hanna" })).toBeInTheDocument()
@@ -304,7 +296,7 @@ describe("pending", () => {
     expect(within(add).getByRole("status", { name: "Loading" })).toBeInTheDocument()
     await userEvent.click(add)
     request.release()
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Added."))
+    await expectToast("Added.")
     expect(joins).toBe(1)
   })
 
@@ -324,7 +316,7 @@ describe("pending", () => {
 
     const add = sheet.getByRole("button", { name: "Add" })
     await userEvent.click(add)
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Added."))
+    await expectToast("Added.")
     expect(add).toBeDisabled()
     expect(within(add).getByRole("status", { name: "Loading" })).toBeInTheDocument()
     await userEvent.click(add)
@@ -353,6 +345,6 @@ describe("pending", () => {
     await waitFor(() => expect(save).toBeDisabled())
     expect(within(save).getByRole("status", { name: "Loading" })).toBeInTheDocument()
     request.release()
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Saved."))
+    await expectToast("Saved.")
   })
 })

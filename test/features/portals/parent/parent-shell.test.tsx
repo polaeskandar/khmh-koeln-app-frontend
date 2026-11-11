@@ -7,6 +7,7 @@ import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
 import { apiUrl } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
+import { expectOnlyBelowMd, expectOnlyFromMd } from "@test/support/layout"
 import { server } from "@test/support/msw"
 import { navigation } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
@@ -32,8 +33,8 @@ describe("the parent navigation", () => {
     portal()
     await screen.findByText("Page")
     const [top, bar] = screen.getAllByRole("navigation", { name: "Parent portal" })
-    expect(top).toHaveClass("hidden", "md:flex")
-    expect(bar).toHaveClass("md:hidden")
+    expectOnlyFromMd(top)
+    expectOnlyBelowMd(bar)
 
     for (const nav of [top, bar]) {
       expect(within(nav).getByRole("link", { name: /Homework/ })).toHaveAttribute(

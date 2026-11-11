@@ -1,8 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
@@ -12,14 +11,10 @@ import { me } from "@test/support/fixtures/me"
 import { answerSettingsLists } from "@test/support/fixtures/settings"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { AccountRequest, MemberAccountItem } from "@/features/identity/accounts/api"
 import { SettingsPage } from "@/features/identity/accounts/settings-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
-})
 
 const mariam = { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f01", name: "Mariam Fahmy" }
 
@@ -156,7 +151,7 @@ test("removing Nevine's link posts once, toasts, and her request comes back", as
 
   expect(dialog.getByText(/goes back to the account requests/)).toBeInTheDocument()
   await userEvent.click(dialog.getByRole("button", { name: "Remove link" }))
-  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Link removed for Nevine Boulos."))
+  await expectToast("Link removed for Nevine Boulos.")
   await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument())
   expect(posts).toEqual([`${nevine.id} {}`])
   await waitFor(() => expect(list.queryByText("Nevine Boulos")).not.toBeInTheDocument())
@@ -175,9 +170,7 @@ test("a link already removed toasts and refetches", async () => {
     within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Remove link" })
   )
 
-  await waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith("This account isn’t linked to a member record.")
-  )
+  await expectToast("This account isn’t linked to a member record.")
 
   await waitFor(() => expect(page.reads()).toBe(2))
 })

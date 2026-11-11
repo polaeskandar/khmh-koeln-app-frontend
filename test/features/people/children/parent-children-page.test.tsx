@@ -1,7 +1,6 @@
 import { screen } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test } from "vitest"
 
 import type { Locale } from "@/i18n/config"
 import { apiUrl } from "@test/support/api"
@@ -12,10 +11,6 @@ import { renderWithProviders } from "@test/support/providers"
 
 import type { ChildSummary } from "@/features/people/children/api"
 import { ParentChildrenPage } from "@/features/people/children/parent-children-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-})
 
 const mariam = { ...mimi, fullName: "Mariam Hanna", name: "Mariam" }
 

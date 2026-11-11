@@ -1,8 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test, vi } from "vitest"
 
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Locale } from "@/i18n/config"
@@ -29,10 +28,6 @@ import { StageLessonsPage } from "@/features/learning/lessons/stage-lessons-page
 const daniel = { id: me.administrator.account.id, name: "Daniel Michael" }
 const christine = { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f03", name: "Christine Adel" }
 const bishoy = { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f02", name: "Bishoy Tadros" }
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-})
 
 function editor(page: React.ReactNode, servants = [daniel, christine], write?: () => Response) {
   const sent: Record<string, unknown>[] = []

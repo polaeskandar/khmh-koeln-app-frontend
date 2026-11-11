@@ -1,6 +1,5 @@
 import { act, screen, waitFor, within } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import { MobileTabBar } from "@/features/portals/staff/mobile-tab-bar"
@@ -12,12 +11,12 @@ import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { navigation } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectNoToast } from "@test/support/toasts"
 
 import { AttendanceOverviewPage } from "@/features/meetings/attendance/attendance-overview-page"
 
 beforeEach(() => {
   navigation.pathname = "/services/"
-  vi.spyOn(toast, "error")
 })
 
 afterEach(() => {
@@ -86,14 +85,14 @@ test.each([
   open(answer, { page: true })
   expect(await screen.findByText(pageShows)).toBeInTheDocument()
   expect(screen.queryByText(/open$/)).not.toBeInTheDocument()
-  expect(toast.error).not.toHaveBeenCalled()
+  expectNoToast()
 })
 
 test("a pending request shows no badge and no toast", async () => {
   const page = open(() => new Promise<Response>(() => {}))
   await waitFor(() => expect(page.reads()).toBe(1))
   expect(screen.queryByText(/open$/)).not.toBeInTheDocument()
-  expect(toast.error).not.toHaveBeenCalled()
+  expectNoToast()
 })
 
 test("the badge refreshes every minute", async () => {

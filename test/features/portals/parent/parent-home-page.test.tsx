@@ -10,6 +10,7 @@ import { isolate } from "@/lib/bidi"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { homeworkOf, MIMI_ID, MINA_ID, mimi, mina } from "@test/support/fixtures/parent"
+import { expectMirroredInRtl, expectScrollsSideways } from "@test/support/layout"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
@@ -180,13 +181,12 @@ test("the square on a card ticks the task off for the selected child", async () 
   expect(list.getByRole("button", { name })).toHaveAttribute("aria-pressed", "true")
 })
 
-test("in Arabic the switcher scrolls sideways and chevrons turn", async () => {
+test("in Arabic the switcher scrolls sideways and the chevron turns", async () => {
   open([mimi, mina], "ar")
   const nav = await screen.findByRole("navigation", { name: "الأطفال" })
-  expect(nav).toHaveClass("overflow-x-auto")
+  expectScrollsSideways(nav)
   await screen.findAllByText("Colour the ark")
-
-  for (const chevron of document.querySelectorAll("svg.lucide-chevron-right")) {
-    expect(chevron).toHaveClass("rtl:rotate-180")
-  }
+  const chevrons = document.querySelectorAll("svg.lucide-chevron-right")
+  expect(chevrons).toHaveLength(1)
+  expectMirroredInRtl(chevrons[0]!)
 })

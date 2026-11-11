@@ -1,8 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { beforeEach, describe, expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { apiUrl, problem } from "@test/support/api"
@@ -12,14 +11,13 @@ import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { LessonDetail } from "@/features/learning/lessons/api"
 import { LessonPage } from "@/features/learning/lessons/lesson-page"
 
 beforeEach(() => {
   address.set(`id=${goodSamaritan.id}`)
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
 })
 
 const ready = (overrides: Partial<LessonDetail["lesson"]> = {}) =>
@@ -117,7 +115,7 @@ describe("status actions", () => {
     const sent = open(ready({ teachingDate: "2026-11-08" }))
     await userEvent.click(await screen.findByRole("button", { name: "Mark as taught" }))
     await waitFor(() => expect(sent).toEqual([{ status: "completed" }]))
-    expect(toast.success).toHaveBeenCalledWith("Marked as taught.")
+    await expectToast("Marked as taught.")
   })
 
   test("a completed lesson offers Not taught yet", async () => {
@@ -156,6 +154,6 @@ describe("status actions", () => {
     open(ready({ teachingDate: "2026-11-08" }), () => problem(409, "lessons.taughtAfterDate"))
 
     await userEvent.click(await screen.findByRole("button", { name: "Mark as taught" }))
-    await waitFor(() => expect(toast.error).toHaveBeenCalled())
+    await expectToast("A lesson is marked as taught on or after its teaching date.")
   })
 })

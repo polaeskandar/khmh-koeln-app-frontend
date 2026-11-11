@@ -1,7 +1,6 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
 import type { Locale } from "@/i18n/config"
@@ -12,6 +11,7 @@ import { expectFullWidthOnPhones } from "@test/support/layout"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { MemberHomeworkDetail } from "@/features/learning/homework/api"
 import { MemberHomeworkPage } from "@/features/learning/homework/member-homework-page"
@@ -22,8 +22,6 @@ const path = `/member/homework/${task.id}`
 
 beforeEach(() => {
   address.set(`id=${task.id}`)
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
 })
 
 const detail = (extra: Partial<MemberHomeworkDetail["task"]> = {}): MemberHomeworkDetail => ({
@@ -119,7 +117,7 @@ test("a member ticks their own task off in the list and takes it back", async ()
   expect(tick).toHaveAttribute("aria-pressed", "true")
   expect(puts).toEqual([{}])
   await userEvent.click(tick)
-  await vi.waitFor(() => expect(toast.success).toHaveBeenCalledWith("Marked as not done."))
+  await expectToast("Marked as not done.")
   expect(tick).toHaveAttribute("aria-pressed", "false")
   expect(deletes).toEqual([{}])
 })
@@ -200,9 +198,7 @@ test("a 404 on Mark as done reverts and toasts", async () => {
   server.use(http.put(apiUrl(`${path}/completion`), () => problem(404, "homework.notAvailable")))
   await userEvent.click(await markDone())
 
-  await vi.waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith("This homework is not available.")
-  )
+  await expectToast("This homework is not available.")
 
   expect(await markDone()).toBeEnabled()
 })
@@ -224,7 +220,7 @@ test("Undo sends one DELETE, toasts and refetches", async () => {
 
   await userEvent.dblClick(await screen.findByRole("button", { name: "Undo" }))
   expect(await markDone()).toBeInTheDocument()
-  await vi.waitFor(() => expect(toast.success).toHaveBeenCalledWith("Marked as not done."))
+  await expectToast("Marked as not done.")
   expect(deletes).toEqual([{}])
   await vi.waitFor(() => expect(page.reads()).toBe(2))
 })

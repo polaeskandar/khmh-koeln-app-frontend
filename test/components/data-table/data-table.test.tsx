@@ -81,15 +81,16 @@ test("a column keeps the width it names, also 150; others take their content's w
 })
 
 describe("sorting", () => {
-  test("a sortable header toggles ascending and descending with the matching arrow", async () => {
-    const { container } = renderWithProviders(<List data={rows(3)} />)
-    const sort = screen.getByRole("button", { name: "Sort by Name" })
-    await userEvent.click(sort)
+  test("a sortable header toggles ascending and descending and says which", async () => {
+    renderWithProviders(<List data={rows(3)} />)
+    const header = screen.getByRole("columnheader", { name: "Name" })
+    expect(header).not.toHaveAttribute("aria-sort")
+    await userEvent.click(within(header).getByRole("button", { name: "Sort by Name" }))
     expect(names()).toEqual(["Person 001", "Person 002", "Person 003"])
-    expect(container.querySelector(".lucide-arrow-up")).not.toBeNull()
-    await userEvent.click(sort)
+    expect(header).toHaveAttribute("aria-sort", "ascending")
+    await userEvent.click(within(header).getByRole("button", { name: "Sort by Name" }))
     expect(names()).toEqual(["Person 003", "Person 002", "Person 001"])
-    expect(container.querySelector(".lucide-arrow-down")).not.toBeNull()
+    expect(header).toHaveAttribute("aria-sort", "descending")
   })
 })
 

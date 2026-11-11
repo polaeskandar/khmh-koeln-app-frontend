@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query"
 import { act, renderHook, waitFor } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test, vi } from "vitest"
 
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
 import { server } from "@test/support/msw"
 import { testProviders } from "@test/support/providers"
+import { expectNoToast, expectOnlyToast } from "@test/support/toasts"
 
 import { servicesQuery } from "@/features/organization/services/api"
 import { api, dataOf } from "@/lib/api/client"
@@ -40,11 +40,6 @@ const answer = (response: () => Response) => {
   return () => calls
 }
 
-beforeEach(() => {
-  vi.spyOn(toast, "error")
-  vi.spyOn(toast, "success")
-})
-
 describe("problems in the person's language", () => {
   test.each([
     ["en", "Choir has meeting history (12 sessions). Archive it instead of deleting it."],
@@ -62,7 +57,7 @@ describe("problems in the person's language", () => {
     })
 
     expect(result).toMatchObject({ ok: false, problem: { status: 409, message: text } })
-    expect(toast.error).toHaveBeenCalledExactlyOnceWith(text)
+    await expectOnlyToast(text)
     expect(hook.result.current.problem?.message).toBe(text)
   })
 
@@ -80,7 +75,7 @@ describe("problems in the person's language", () => {
       name: "A service called “Choir” already exists.",
     })
 
-    expect(toast.error).not.toHaveBeenCalled()
+    expectNoToast()
   })
 
   test.each([
@@ -99,7 +94,7 @@ describe("problems in the person's language", () => {
     answer(response)
     const { hook } = setup()
     await act(() => hook.result.current.execute("Choir"))
-    expect(toast.error).toHaveBeenCalledExactlyOnceWith(text)
+    await expectOnlyToast(text)
   })
 
   test("a 401 auth.unauthenticated toasts nothing; the session provider takes over", async () => {
@@ -107,7 +102,7 @@ describe("problems in the person's language", () => {
     const { hook } = setup()
     await act(() => hook.result.current.execute("Choir"))
     expect(hook.result.current.problem?.status).toBe(401)
-    expect(toast.error).not.toHaveBeenCalled()
+    expectNoToast()
   })
 
   test("toastOnError: false leaves the problem to the screen", async () => {
@@ -115,7 +110,7 @@ describe("problems in the person's language", () => {
     const { hook } = setup({ toastOnError: false })
     await act(() => hook.result.current.execute("Choir"))
     expect(hook.result.current.problem?.message).toBe("A service called “Choir” already exists.")
-    expect(toast.error).not.toHaveBeenCalled()
+    expectNoToast()
   })
 })
 
@@ -136,7 +131,7 @@ describe("success", () => {
       expect(await hook.result.current.execute("Choir")).toEqual({ ok: true, data: { id: "s1" } })
     })
 
-    expect(toast.success).toHaveBeenCalledExactlyOnceWith("Created s1.")
+    await expectOnlyToast("Created s1.")
     expect(invalidate).toHaveBeenCalledExactlyOnceWith({ queryKey: ["services"] })
     expect(onSuccess).toHaveBeenCalledWith({ id: "s1" })
   })

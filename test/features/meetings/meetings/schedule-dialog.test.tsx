@@ -2,8 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { attendanceOverviewQuery } from "@/features/meetings/attendance/api"
@@ -15,13 +14,9 @@ import { schedule } from "@test/support/fixtures/schedules"
 import { services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import { SchedulesPage } from "@/features/meetings/meetings/schedules-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
-})
 
 const sundaySchool = services.items[0]
 
@@ -200,11 +195,7 @@ describe("saving", () => {
       times: { startTime: "18:00", endTime: "19:30" },
     })
 
-    await waitFor(() =>
-      expect(toast.success).toHaveBeenCalledWith(
-        "Schedule created. 1 session was created for today and tomorrow."
-      )
-    )
+    await expectToast("Schedule created. 1 session was created for today and tomorrow.")
   })
 
   test("the last Friday monthly sends weekdays [5] and monthWeek -1", async () => {
@@ -248,9 +239,7 @@ describe("saving", () => {
 
     await userEvent.click(dialog.getByRole("button", { name: "Create schedule" }))
 
-    await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith("Sunday School is archived. Restore it first.")
-    )
+    await expectToast("Sunday School is archived. Restore it first.")
 
     expect(screen.getByRole("dialog")).toBeInTheDocument()
   })

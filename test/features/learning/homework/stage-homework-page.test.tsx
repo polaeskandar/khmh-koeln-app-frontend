@@ -1,7 +1,6 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
@@ -11,6 +10,7 @@ import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { HomeworkItem, HomeworkList } from "@/features/learning/homework/api"
 import { StageHomeworkPage } from "@/features/learning/homework/stage-homework-page"
@@ -155,7 +155,6 @@ const publishToast = (title: string) =>
   `Published “${title}”. Parents and members of the class can see it now.`
 
 test("publishes a draft row once, even on a double click, and it moves to Published", async () => {
-  vi.spyOn(toast, "success")
   let current = data([drawing])
   const posts: unknown[] = []
   open(() => current)
@@ -177,7 +176,7 @@ test("publishes a draft row once, even on a double click, and it moves to Publis
 
   const draftRow = (await table()).getAllByRole("row")[1]!
   await userEvent.dblClick(within(draftRow).getByRole("button", { name: "Publish" }))
-  await vi.waitFor(() => expect(toast.success).toHaveBeenCalledWith(publishToast("Draw the inn")))
+  await expectToast(publishToast("Draw the inn"))
 
   expect(
     await screen.findByRole("tab", { name: "Published (1)", selected: true })
@@ -235,7 +234,6 @@ test("the draft menu offers Edit and Publish and works from the keyboard", async
 })
 
 test("a refused publish toasts and refetches the list", async () => {
-  vi.spyOn(toast, "error")
   let reads = 0
 
   open(() => {
@@ -254,9 +252,7 @@ test("a refused publish toasts and refetches the list", async () => {
   await userEvent.click(within(draftRow).getByRole("button", { name: "Actions for Draw the inn" }))
   await userEvent.click(await screen.findByRole("menuitem", { name: "Publish" }))
 
-  await vi.waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith("The lesson is archived. Restore the lesson first.")
-  )
+  await expectToast("The lesson is archived. Restore the lesson first.")
 
   await vi.waitFor(() => expect(reads).toBe(2))
 })

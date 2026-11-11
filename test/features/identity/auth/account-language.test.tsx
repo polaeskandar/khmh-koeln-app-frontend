@@ -1,8 +1,7 @@
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { afterEach, describe, expect, test } from "vitest"
 
 import { LanguageMenu } from "@/components/language-switch"
 import { useSwitchLocale } from "@/features/identity/auth/use-switch-locale"
@@ -13,13 +12,12 @@ import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { navigation, router } from "@test/support/navigation"
 import { makeTestQueryClient, renderWithProviders } from "@test/support/providers"
+import { expectOnlyToast } from "@test/support/toasts"
 
 import { LANGUAGE_APPLIED_KEY } from "@/features/identity/auth/account-language"
 import type { Me } from "@/features/identity/auth/api"
 import { RequireStaff } from "@/features/identity/auth/guards"
 import { SessionProvider } from "@/features/identity/auth/session"
-
-beforeEach(() => vi.spyOn(toast, "error"))
 
 afterEach(() => {
   localStorage.clear()
@@ -148,7 +146,7 @@ describe("choosing a language while signed in", () => {
     await chooseGerman()
     english.unmount()
     menu(client, "de")
-    await waitFor(() => expect(toast.error).toHaveBeenCalledExactlyOnceWith(text))
+    await expectOnlyToast(text)
     expect(localStorage.getItem("khmk.locale")).toBe("de")
   })
 })

@@ -1,7 +1,6 @@
 import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
 import type { Locale } from "@/i18n/config"
@@ -11,6 +10,7 @@ import { expectFullWidthOnPhones } from "@test/support/layout"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { testProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import { type ChildSummary, parentChildrenQuery } from "@/features/people/children/api"
 import type { ChildHomeworkDetail } from "@/features/learning/homework/api"
@@ -21,8 +21,6 @@ const path = `/parent/children/${MINA_ID}/homework/${TASK_ID}`
 
 beforeEach(() => {
   address.set(`id=${TASK_ID}&child=${MINA_ID}`)
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
 })
 
 const detail = (
@@ -202,7 +200,7 @@ test.each([
   open(detail())
   server.use(http.put(apiUrl(`${path}/completion`), respond))
   await userEvent.click(await markDone())
-  await vi.waitFor(() => expect(toast.error).toHaveBeenCalledWith(message))
+  await expectToast(message)
   expect(await markDone()).toBeEnabled()
   expect(screen.queryByRole("status")).not.toBeInTheDocument()
 })
@@ -225,7 +223,7 @@ test("Undo sends one DELETE, brings Mark as done back and refetches", async () =
   expect(await screen.findByText("You reported it today at 12:08.")).toBeInTheDocument()
   await userEvent.dblClick(screen.getByRole("button", { name: "Undo" }))
   expect(await markDone()).toBeInTheDocument()
-  await vi.waitFor(() => expect(toast.success).toHaveBeenCalledWith("Marked as not done for Mina."))
+  await expectToast("Marked as not done for Mina.")
   expect(deletes).toEqual([{}])
   await vi.waitFor(() => expect(page.reads()).toBe(2))
 })

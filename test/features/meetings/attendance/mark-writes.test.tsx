@@ -2,8 +2,7 @@ import type { QueryClient } from "@tanstack/react-query"
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test } from "vitest"
 
 import { apiUrl, problem } from "@test/support/api"
 import type { Schemas } from "@/lib/api/client"
@@ -13,6 +12,7 @@ import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { THIRD_CLASS_ID } from "@test/support/fixtures/stages"
 import { makeTestQueryClient, renderWithProviders } from "@test/support/providers"
+import { clickToastAction, expectNoToast, expectToast } from "@test/support/toasts"
 
 import {
   type AttendanceSheet,
@@ -21,10 +21,6 @@ import {
 } from "@/features/meetings/attendance/api"
 import { applyWrites, type Writes, writesReducer } from "@/features/meetings/attendance/mark-writes"
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "error")
-})
 
 const ramy = rosterPeople[1]
 
@@ -138,6 +134,8 @@ function open(
 const markRamy = async () =>
   userEvent.click(await screen.findByRole("button", { name: "Mark Ramy Fanous present" }))
 
+const notSaved = "Not saved. Check your connection and try again."
+
 const ramyRow = () =>
   within(screen.getByRole("region", { name: "Roster" })).getAllByRole("listitem")[1]
 
@@ -185,7 +183,7 @@ describe("marking on the board", () => {
     await markRamy()
     await waitFor(() => expect(ramyRow()).toHaveTextContent("Present · 12:31"))
     expect(calls.put).toBe(2)
-    expect(toast.error).not.toHaveBeenCalled()
+    expectNoToast()
   })
 
   test(
@@ -199,21 +197,15 @@ describe("marking on the board", () => {
       )
 
       await markRamy()
-      await waitFor(() => expect(toast.error).toHaveBeenCalled(), { timeout: 5000 })
+      await expectToast(notSaved, { timeout: 5000 })
       expect(calls.put).toBe(3)
 
       expect(
         within(ramyRow()).getByRole("button", { name: "Mark Ramy Fanous present" })
       ).toBeInTheDocument()
 
-      const [message, options] = vi.mocked(toast.error).mock.calls[0] as unknown as [
-        string,
-        { action: { onClick: () => void } },
-      ]
-
-      expect(message).toBe("Not saved. Check your connection and try again.")
       failing = false
-      options.action.onClick()
+      clickToastAction(notSaved, "Try again")
       await waitFor(() => expect(calls.put).toBe(4))
       await waitFor(() => expect(ramyRow()).toHaveTextContent("Present · 12:31"))
     }
@@ -234,7 +226,7 @@ describe("marking on the board", () => {
   test("a 403 is never retried", async () => {
     const calls = open(() => problem(403, "forbidden"))
     await markRamy()
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Your roles don’t allow this."))
+    await expectToast("Your roles don’t allow this.")
     expect(calls.put).toBe(1)
 
     expect(
@@ -245,7 +237,7 @@ describe("marking on the board", () => {
   test("a 409 closedReopen rolls back, says why and refetches the board", async () => {
     const calls = open(() => problem(409, "attendance.closedReopen"))
     await markRamy()
-    await waitFor(() => expect(toast.error).toHaveBeenCalled())
+    await expectToast("Attendance is closed. Reopen the session to correct it.")
     await waitFor(() => expect(calls.get).toBe(2))
 
     expect(
@@ -263,6 +255,6 @@ describe("marking on the board", () => {
 
     await markRamy()
     await waitFor(() => expect(ramyRow()).toHaveTextContent("Present · 12:05"))
-    expect(toast.error).not.toHaveBeenCalled()
+    expectNoToast()
   })
 })

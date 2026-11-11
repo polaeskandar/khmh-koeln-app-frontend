@@ -1,8 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test, vi } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { apiUrl, problem } from "@test/support/api"
@@ -11,6 +10,7 @@ import { THIRD_CLASS_ID, thirdClass } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type {
   AudienceCounts,
@@ -21,11 +21,6 @@ import type {
 } from "@/features/learning/homework/api"
 import { HomeworkProgressPage } from "@/features/learning/homework/homework-progress-page"
 import { StageHomeworkPage } from "@/features/learning/homework/stage-homework-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
-})
 
 const ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea001"
 const stage = { id: THIRD_CLASS_ID, name: "3rd Class", position: 2 }
@@ -189,11 +184,7 @@ test("archiving says reported completions are kept, and posts {}", async () => {
   expect(dialog).toHaveTextContent("The 1 reported completion is kept in the history.")
   await userEvent.click(within(dialog).getByRole("button", { name: "Archive" }))
 
-  await vi.waitFor(() =>
-    expect(toast.success).toHaveBeenCalledWith(
-      "Archived “Learn the memory verse”. Reported completions are kept."
-    )
-  )
+  await expectToast("Archived “Learn the memory verse”. Reported completions are kept.")
 
   expect(bodies).toEqual([{}])
   await vi.waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument())
@@ -240,11 +231,7 @@ test("a refused Back to draft toasts, keeps the dialog, and the refetched row dr
   const dialog = await screen.findByRole("alertdialog")
   await userEvent.click(within(dialog).getByRole("button", { name: "Back to draft" }))
 
-  await vi.waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith(
-      "Parents have already reported it as completed. Archive it instead."
-    )
-  )
+  await expectToast("Parents have already reported it as completed. Archive it instead.")
 
   expect(screen.getByRole("alertdialog")).toBeInTheDocument()
   await userEvent.click(within(dialog).getByRole("button", { name: "Cancel" }))
@@ -324,7 +311,7 @@ test("deleting from the progress page opens the stage's homework list", async ()
   )
 
   expect(deletes).toBe(1)
-  expect(toast.success).toHaveBeenCalledWith("Deleted “Learn the memory verse”.")
+  await expectToast("Deleted “Learn the memory verse”.")
 })
 
 test("homework taken back to draft can be published again from the same row", async () => {

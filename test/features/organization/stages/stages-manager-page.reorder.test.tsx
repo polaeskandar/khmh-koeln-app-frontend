@@ -1,7 +1,6 @@
 import { act, fireEvent, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
@@ -13,6 +12,7 @@ import { SUNDAY_SCHOOL_ID } from "@test/support/fixtures/stages"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import { StagesManagerPage } from "@/features/organization/stages/stages-manager-page"
 
@@ -20,7 +20,6 @@ const ROW = 48
 
 beforeEach(() => {
   address.set(`id=${SUNDAY_SCHOOL_ID}`)
-  vi.spyOn(toast, "error")
 
   vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
     this: HTMLElement
@@ -152,10 +151,8 @@ test("a stale order rolls back and says why", async () => {
   await userEvent.click(await screen.findByRole("button", { name: "Actions for Kindergarten" }))
   await userEvent.click(await screen.findByRole("menuitem", { name: "Move down" }))
 
-  await vi.waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith(
-      "The stages changed while you were sorting them. Reload the page and try again."
-    )
+  await expectToast(
+    "The stages changed while you were sorting them. Reload the page and try again."
   )
 
   expect(names()).toEqual(["Kindergarten", "1st Class", "3rd Class"])

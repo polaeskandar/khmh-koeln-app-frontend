@@ -1,8 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import type { Schemas } from "@/lib/api/client"
@@ -11,15 +10,11 @@ import { me } from "@test/support/fixtures/me"
 import { stageRef } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
+import { expectNoToast, expectToast } from "@test/support/toasts"
 
 import type { DirectoryEntry } from "@/features/people/members/api"
 import type { ParentAccessItem, ParentAccessList } from "@/features/people/guardians/api"
 import { ParentAccess } from "@/features/people/guardians/parent-access"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
-})
 
 const sundaySchool = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f10",
@@ -177,11 +172,7 @@ test("giving access sends both ids, closes, toasts and shows the row", async () 
   expect(submit).toBeEnabled()
   await userEvent.click(submit)
 
-  await waitFor(() =>
-    expect(toast.success).toHaveBeenCalledWith(
-      "Access given. The parent sees this child’s published homework."
-    )
-  )
+  await expectToast("Access given. The parent sees this child’s published homework.")
 
   await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
   expect(sent).toEqual([{ path: "give", body: { userId: hoda.id, personId: kiro.id } }])
@@ -204,7 +195,7 @@ test.each([
   await userEvent.click(await dialog.findByRole("button", { name: /Kiro Iskander/ }))
   await userEvent.click(dialog.getByRole("button", { name: "Give access" }))
   expect(await dialog.findByRole("alert")).toHaveTextContent(text)
-  expect(toast.error).not.toHaveBeenCalled()
+  expectNoToast()
 })
 
 test("Escape doesn't close the dialog while access is being given", async () => {
@@ -241,7 +232,7 @@ test("removing asks with both names and sends one revoke", async () => {
   )
 
   await userEvent.dblClick(dialog.getByRole("button", { name: "Remove access" }))
-  await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Access removed."))
+  await expectToast("Access removed.")
   expect(sent).toEqual([{ path: `revoke ${id}`, body: {} }])
   expect(await screen.findByText(/0 links between/)).toBeInTheDocument()
 })
@@ -255,9 +246,7 @@ test("a link removed meanwhile toasts and refetches", async () => {
   const dialog = within(await screen.findByRole("alertdialog"))
   await userEvent.click(dialog.getByRole("button", { name: "Remove access" }))
 
-  await waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith("This parent link does not exist or was removed.")
-  )
+  await expectToast("This parent link does not exist or was removed.")
 
   await waitFor(() => expect(page.reads()).toBe(2))
 })

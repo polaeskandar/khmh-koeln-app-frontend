@@ -87,6 +87,12 @@ production; off unless set, the page says to ask the church office.
   or Radix warning, or a request MSW doesn't answer, is fixed rather than silenced. Checks over the whole code
   base sit in `test/conventions/`: the catalogs agree, no component uses physical sides or raw colours, and no
   message key is unused. A test that expects an error stubs `console.error` itself.
+  Tests assert what a person perceives (roles, names, visible text), not classes or markup. The setup
+  watches the toasts, and a test checks one with `expectToast(text)`, `expectOnlyToast(text)` or
+  `expectNoToast()` (`test/support/toasts.ts`). Layout that jsdom can't measure (a touch target, a scroll axis,
+  what shows only below or from `md`) is checked through one named helper each in `test/support/layout.ts`,
+  the only class assertions in `test/`. A negative check waits for something visible, a request or fake timers,
+  never a fixed time.
   React warns when a client render creates a `<script>`, and next-themes' `ThemeProvider` renders its
   pre-paint script, which only the static HTML runs; the tests that render the provider give it
   `scriptProps={{ type: "text/plain" }}`.

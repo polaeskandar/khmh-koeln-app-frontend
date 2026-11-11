@@ -1,13 +1,13 @@
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
+import { expectNoToast } from "@test/support/toasts"
 
 import { DataCopyPage } from "@/features/privacy/data-copy/data-copy-page"
 
@@ -15,7 +15,6 @@ let clicks: { href: string; download: string }[] = []
 
 beforeEach(() => {
   clicks = []
-  vi.spyOn(toast, "error")
   URL.createObjectURL = vi.fn(() => "blob:khmk-my-data")
   URL.revokeObjectURL = vi.fn()
 
@@ -101,7 +100,7 @@ test("a used, expired or unknown link says so and saves nothing", async () => {
 
   expect(clicks).toEqual([])
   expect(screen.queryByRole("button", { name: "Download your data" })).not.toBeInTheDocument()
-  expect(toast.error).not.toHaveBeenCalled()
+  expectNoToast()
 })
 
 test.each([

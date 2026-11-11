@@ -1,8 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test } from "vitest"
 
 import type { Locale } from "@/i18n/config"
 import { apiUrl, problem } from "@test/support/api"
@@ -15,10 +14,6 @@ import { renderWithProviders } from "@test/support/providers"
 import type { AttendanceSheet } from "@/features/meetings/attendance/api"
 import { CorrectionDialog } from "@/features/meetings/attendance/correction-dialog"
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "error")
-})
 
 const rita = {
   id: "0192f3a4-7b1c-7d2e-8f40-000000000077",

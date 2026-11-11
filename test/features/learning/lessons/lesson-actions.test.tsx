@@ -1,7 +1,6 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
@@ -12,6 +11,7 @@ import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import type { HomeworkItem } from "@/features/learning/homework/api"
 import type { LessonDetail } from "@/features/learning/lessons/api"
@@ -22,8 +22,6 @@ const path = `/lessons/${ID}`
 
 beforeEach(() => {
   address.set(`id=${ID}`)
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
 })
 
 type Options = { account?: Me; tasks?: HomeworkItem[] }
@@ -146,7 +144,7 @@ test("archiving lists the homework consequences, posts once and shows Archived",
   await userEvent.dblClick(dialog.getByRole("button", { name: "Archive" }))
   expect(await screen.findByRole("button", { name: "Restore" })).toBeInTheDocument()
   expect(posts).toEqual([{}])
-  expect(toast.success).toHaveBeenCalledWith("Archived “The Good Samaritan”.")
+  await expectToast("Archived “The Good Samaritan”.")
 })
 
 test("archiving without published homework lists no consequences", async () => {
@@ -169,10 +167,8 @@ test("a refused restore toasts the meeting's lesson", async () => {
 
   await userEvent.click(await screen.findByRole("button", { name: "Restore" }))
 
-  await vi.waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith(
-      "This meeting already has a lesson: “Zacchaeus Meets Jesus”. Edit that one, or pick another date."
-    )
+  await expectToast(
+    "This meeting already has a lesson: “Zacchaeus Meets Jesus”. Edit that one, or pick another date."
   )
 })
 
@@ -198,7 +194,7 @@ test("deleting a draft toasts and opens the stage's lessons", async () => {
   )
 
   expect(deletes).toBe(1)
-  expect(toast.success).toHaveBeenCalledWith("Deleted “The Good Samaritan”.")
+  await expectToast("Deleted “The Good Samaritan”.")
 })
 
 test("a refused delete toasts and keeps the dialog open", async () => {
@@ -209,11 +205,7 @@ test("a refused delete toasts and keeps the dialog open", async () => {
   const dialog = within(await screen.findByRole("alertdialog"))
   await userEvent.click(dialog.getByRole("button", { name: "Delete draft" }))
 
-  await vi.waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith(
-      "Homework of this lesson was published to parents. Archive the lesson instead."
-    )
-  )
+  await expectToast("Homework of this lesson was published to parents. Archive the lesson instead.")
 
   expect(screen.getByRole("alertdialog")).toBeInTheDocument()
   expect(router.push).not.toHaveBeenCalled()

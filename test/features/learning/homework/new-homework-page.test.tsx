@@ -2,8 +2,7 @@ import { QueryClient } from "@tanstack/react-query"
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test, vi } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import type { Locale } from "@/i18n/config"
@@ -14,14 +13,10 @@ import { expectWrapsInsideItsColumn } from "@test/support/layout"
 import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
+import { expectNoToast, expectOnlyToast, expectToast } from "@test/support/toasts"
 
 import type { HomeworkList } from "@/features/learning/homework/api"
 import { NewHomeworkPage } from "@/features/learning/homework/new-homework-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
-})
 
 const HOMEWORK_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea001"
 
@@ -132,11 +127,7 @@ test("new homework preselects the default lesson and saves a draft a week after 
     },
   })
 
-  await vi.waitFor(() =>
-    expect(toast.success).toHaveBeenCalledWith(
-      "Saved as a draft. Parents and members can’t see it yet."
-    )
-  )
+  await expectToast("Saved as a draft. Parents and members can’t see it yet.")
 
   expect(router.push).toHaveBeenCalledWith(`/stages/homework/?id=${THIRD_CLASS_ID}&status=draft`)
 })
@@ -240,7 +231,7 @@ test("shows a 422 under each field, maps resources past blank rows, and focuses 
   )
 
   expect(screen.getByText("Enter a web address starting with https://")).toBeInTheDocument()
-  expect(toast.error).not.toHaveBeenCalled()
+  expectNoToast()
 })
 
 test("removing a resource keeps a 422 on the resource it belongs to", async () => {
@@ -292,7 +283,7 @@ test("a 409 on save is a toast", async () => {
   await lessonSelect()
   await fill("Learn the verse", "Say it.")
   await userEvent.click(screen.getByRole("button", { name: "Save draft" }))
-  await vi.waitFor(() => expect(toast.error).toHaveBeenCalledWith("This lesson is archived."))
+  await expectToast("This lesson is archived.")
   expect(router.push).not.toHaveBeenCalled()
 })
 
@@ -355,9 +346,7 @@ test("Publish on new homework saves it, publishes it and opens the Published tab
   expect(posted).toHaveLength(1)
   expect(published).toEqual([{}])
 
-  expect(toast.success).toHaveBeenCalledExactlyOnceWith(
-    "Published. Parents and members of the class can see it now."
-  )
+  await expectOnlyToast("Published. Parents and members of the class can see it now.")
 })
 
 test("a refused publish keeps the saved draft, and a retry creates no second task", async () => {
@@ -383,9 +372,7 @@ test("a refused publish keeps the saved draft, and a retry creates no second tas
   await fill("Learn the verse", "Say it.")
   await userEvent.click(screen.getByRole("button", { name: "Publish" }))
 
-  await vi.waitFor(() =>
-    expect(toast.error).toHaveBeenCalledWith("The lesson is archived. Restore the lesson first.")
-  )
+  await expectToast("The lesson is archived. Restore the lesson first.")
 
   await vi.waitFor(() =>
     expect(router.replace).toHaveBeenCalledWith(`/homework/edit/?id=${HOMEWORK_ID}`)

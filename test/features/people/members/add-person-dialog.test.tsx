@@ -1,8 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
-import { toast } from "sonner"
-import { beforeEach, describe, expect, test, vi } from "vitest"
+import { describe, expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import type { Locale } from "@/i18n/config"
@@ -13,13 +12,9 @@ import { peopleList } from "@test/support/fixtures/people"
 import { services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
+import { expectToast } from "@test/support/toasts"
 
 import { MembersScreen } from "@/features/people/members/members-page"
-
-beforeEach(() => {
-  vi.spyOn(toast, "success")
-  vi.spyOn(toast, "error")
-})
 
 const sundaySchool = services.items[0]
 
@@ -176,7 +171,7 @@ describe("duplicates", () => {
 
     expect(dialog.getByText("Youth Meeting", { selector: "li span" })).toBeInTheDocument()
     await userEvent.click(dialog.getByRole("button", { name: "Add" }))
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Added Mina Hanna."))
+    await expectToast("Added Mina Hanna.")
 
     expect(sent.at(-1)).toEqual({
       path: `/people/${mina.id}/memberships`,
@@ -391,6 +386,6 @@ test("a double click on Add person sends one request", async () => {
   await userEvent.dblClick(dialog.getByRole("button", { name: "Add person" }))
   await waitFor(() => expect(sent).toHaveLength(1))
   release()
-  await waitFor(() => expect(toast.success).toHaveBeenCalled())
+  await expectToast("Added A B.")
   expect(sent).toHaveLength(1)
 })

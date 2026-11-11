@@ -1,6 +1,7 @@
 import { screen } from "@testing-library/react"
 import { expect, test } from "vitest"
 
+import { expectClearOfCloseButton } from "@test/support/layout"
 import { renderWithProviders } from "@test/support/providers"
 
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog"
@@ -29,7 +30,7 @@ test("a dialog's title keeps clear of the close button", () => {
     </Dialog>
   )
 
-  expect(screen.getByRole("heading", { name: "Record a data protection request" })).toHaveClass(
-    "pe-8"
+  expectClearOfCloseButton(
+    screen.getByRole("heading", { name: "Record a data protection request" })
   )
 })
