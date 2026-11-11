@@ -1,3 +1,4 @@
+import type { QueryClient } from "@tanstack/react-query"
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
@@ -10,9 +11,14 @@ import { boardOf, detailOf, rosterPeople, thirdClassBoard } from "@test/support/
 import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
-import { renderWithProviders } from "@test/support/providers"
+import { THIRD_CLASS_ID } from "@test/support/fixtures/stages"
+import { makeTestQueryClient, renderWithProviders } from "@test/support/providers"
 
-import type { AttendanceSheet, Mark } from "@/features/meetings/attendance/api"
+import {
+  type AttendanceSheet,
+  type Mark,
+  stageAttendanceHistoryQuery,
+} from "@/features/meetings/attendance/api"
 import { applyWrites, type Writes, writesReducer } from "@/features/meetings/attendance/mark-writes"
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
 
@@ -89,7 +95,8 @@ describe("the write reducer", () => {
 
 function open(
   write: () => Response | Promise<Response>,
-  board: AttendanceSheet = thirdClassBoard()
+  board: AttendanceSheet = thirdClassBoard(),
+  client: QueryClient = makeTestQueryClient()
 ) {
   address.set(`session=${board.session.id}`)
   const calls = { put: 0, get: 0 }
@@ -123,7 +130,7 @@ function open(
     })
   )
 
-  renderWithProviders(<TakeAttendancePage />, { me: me.servant, sidebar: true })
+  renderWithProviders(<TakeAttendancePage />, { client, me: me.servant, sidebar: true })
 
   return calls
 }
@@ -211,6 +218,18 @@ describe("marking on the board", () => {
       await waitFor(() => expect(ramyRow()).toHaveTextContent("Present · 12:31"))
     }
   )
+
+  test("a mark makes the stage's attendance history refetch when it shows next", async () => {
+    const client = makeTestQueryClient()
+    const history = stageAttendanceHistoryQuery(THIRD_CLASS_ID)
+    client.setQueryData(history.queryKey, { today: "2026-11-08", sessions: [], rows: [] })
+
+    open(() => HttpResponse.json(markResponse(savedMark), { status: 201 }), undefined, client)
+
+    await markRamy()
+    await waitFor(() => expect(ramyRow()).toHaveTextContent("Present · 12:31"))
+    expect(client.getQueryState(history.queryKey)?.isInvalidated).toBe(true)
+  })
 
   test("a 403 is never retried", async () => {
     const calls = open(() => problem(403, "forbidden"))

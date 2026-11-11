@@ -3,6 +3,7 @@ import { queryOptions } from "@tanstack/react-query"
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import {
   AGENDA_KEY,
+  ATTENDANCE_HISTORY_KEY,
   ATTENDANCE_KEY,
   DASHBOARD_KEY,
   MEMBER_KEY,
@@ -93,6 +94,7 @@ export const SCHEDULE_QUERIES = [
   AGENDA_KEY,
   SESSIONS_KEY,
   ATTENDANCE_KEY,
+  ATTENDANCE_HISTORY_KEY,
   DASHBOARD_KEY,
 ]
 
@@ -100,5 +102,6 @@ export const SCHEDULE_DELETION_QUERIES = [
   [...SCHEDULES_KEY, "list"],
   AGENDA_KEY,
   ATTENDANCE_KEY,
+  ATTENDANCE_HISTORY_KEY,
   DASHBOARD_KEY,
 ]

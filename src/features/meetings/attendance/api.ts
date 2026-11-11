@@ -3,10 +3,10 @@ import { queryOptions, useQueries, type UseQueryResult } from "@tanstack/react-q
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import {
   AGENDA_KEY,
+  ATTENDANCE_HISTORY_KEY,
   ATTENDANCE_KEY,
   DASHBOARD_KEY,
   SESSIONS_KEY,
-  STAGES_KEY,
 } from "@/lib/api/query-keys"
 import type { Counts, Uuid } from "@/lib/api/types/common"
 import type { CountedSession, SessionView } from "@/lib/api/types/meetings"
@@ -151,13 +151,19 @@ export type StageAttendanceHistory = Schemas["AttendanceHistory"]
 
 export const stageAttendanceHistoryQuery = (id: Uuid) =>
   queryOptions({
-    queryKey: [...STAGES_KEY, "attendance-history", id],
+    queryKey: [...ATTENDANCE_HISTORY_KEY, id],
     queryFn: ({ signal }) =>
       dataOf(api.GET("/stages/{id}/attendance-history", { params: { path: { id } }, signal })),
   })
 
-export const MARK_QUERIES = [ATTENDANCE_KEY]
+export const MARK_QUERIES = [ATTENDANCE_KEY, ATTENDANCE_HISTORY_KEY]
 
-export const ATTENDANCE_QUERIES = [ATTENDANCE_KEY, SESSIONS_KEY]
+export const ATTENDANCE_QUERIES = [ATTENDANCE_KEY, ATTENDANCE_HISTORY_KEY, SESSIONS_KEY]
 
-export const SESSION_STATUS_QUERIES = [ATTENDANCE_KEY, SESSIONS_KEY, AGENDA_KEY, DASHBOARD_KEY]
+export const SESSION_STATUS_QUERIES = [
+  ATTENDANCE_KEY,
+  ATTENDANCE_HISTORY_KEY,
+  SESSIONS_KEY,
+  AGENDA_KEY,
+  DASHBOARD_KEY,
+]
