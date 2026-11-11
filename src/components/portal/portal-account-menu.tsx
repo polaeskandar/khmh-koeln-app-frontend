@@ -1,8 +1,7 @@
 "use client"
 
-import { LogOut, ShieldCheck } from "lucide-react"
+import { LogOut, type LucideIcon, ShieldCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
-import type { ReactNode } from "react"
 
 import { LanguageSubmenu } from "@/components/language-switch"
 import { MemberAvatar } from "@/components/member-avatar"
@@ -27,6 +26,8 @@ const initialsOf = (name: string) => {
   return `${words[0]?.charAt(0) ?? ""}${words.length > 1 ? (words.at(-1)?.charAt(0) ?? "") : ""}`.toUpperCase()
 }
 
+type MenuLink = { href: string; icon: LucideIcon; label: string; shown: boolean }
+
 export function PortalAccountMenu({
   account,
   label,
@@ -40,7 +41,7 @@ export function PortalAccountMenu({
   signingOut: boolean
   onSignOut: () => void
   onSwitchLocale: (locale: Locale) => void
-  links: ReactNode
+  links: MenuLink[]
 }) {
   const t = useTranslations()
 
@@ -70,7 +71,16 @@ export function PortalAccountMenu({
         <LanguageSubmenu onSwitch={onSwitchLocale} />
         <AppearanceSubmenu />
         <DropdownMenuSeparator />
-        {links}
+        {links
+          .filter((link) => link.shown)
+          .map(({ href, icon: Icon, label: linkLabel }) => (
+            <DropdownMenuItem key={href} asChild>
+              <Link href={href}>
+                <Icon />
+                {linkLabel}
+              </Link>
+            </DropdownMenuItem>
+          ))}
         <DropdownMenuItem asChild>
           <Link href={routes.privacy()}>
             <ShieldCheck />
