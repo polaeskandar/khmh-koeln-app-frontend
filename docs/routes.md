@@ -10,37 +10,37 @@ stage by its own id, which already names its service.
 
 ## Staff app (`app/[locale]/(staff)`)
 
-| Screen                    | Prototype route                    | Product route                         | Builder                       |
-| ------------------------- | ---------------------------------- | ------------------------------------- | ----------------------------- |
-| Home (entry point)        | `/`                                | `/`                                   | `home()`                      |
-| 01 Dashboard              | `/`                                | `/` (#65)                             | `home()`                      |
-| 02 Services overview      | `/services`                        | `/services/`                          | `services()`                  |
-| 03 Service details        | `/services/:service`               | `/services/view/?id=`                 | `service(id)`                 |
-| 04 Stage management       | `/services/:service/stages`        | `/services/stages/?id=` (the service) | `serviceStages(service)`      |
-| Stage page                | `…/stages/:stage`                  | `/stages/view/?id=`                   | `stage(id)`                   |
-| 05 Meeting schedules      | `/meetings/schedules`              | `/meetings/schedules/`                | `schedules()`                 |
-| A schedule                | –                                  | `/meetings/schedules/view/?id=`       | `schedule(id)`                |
-| 06 Meeting sessions       | `/meetings`                        | `/meetings/`                          | `meetings()`                  |
-| A session                 | `/meetings/sessions/:session`      | `/meetings/sessions/view/?id=`        | `session(id)`                 |
-| Attendance overview       | –                                  | `/attendance/`                        | `attendance()`                |
-| 07, 10 Manual attendance  | `/attendance/:session`             | `/attendance/take/?session=`          | `takeAttendance(session)`     |
-| 08 Attendance summary     | `/attendance/:session/summary`     | `/attendance/summary/?session=`       | `attendanceSummary(session)`  |
-| 09 Members                | `/members`                         | `/members/?q=&group=&status=`         | `members(view?)`              |
-| Settings (all sections)   | `/settings`                        | `/settings/`                          | `settings()`                  |
-| A new role                | `/settings/roles/new`              | `/settings/roles/new/`                | `newRole()`                   |
-| A role                    | `/settings/roles/:role`            | `/settings/roles/view/?id=`           | `role(id)`                    |
-| Data protection requests  | `/settings/data-requests`          | `/settings/data-requests/`            | `dataRequests()`              |
-| A data protection request | `/settings/data-requests/:request` | `/settings/data-requests/view/?id=`   | `dataRequest(id)`             |
-| Your account              | `/account`                         | `/account/`                           | `account()`                   |
-| S01 Lessons               | `…/stages/:stage/lessons`          | `/stages/lessons/?id=` (the stage)    | `stageLessons(stage)`         |
-| S02 Lesson editor, new    | `…/lessons/new`                    | `/lessons/new/?stage=`                | `newLesson(stage)`            |
-| S02 Lesson editor, edit   | `…/lessons/:lesson/edit`           | `/lessons/edit/?id=`                  | `editLesson(id)`              |
-| S03 Lesson                | `…/lessons/:lesson`                | `/lessons/view/?id=`                  | `lesson(id)`                  |
-| S04 Homework              | `…/stages/:stage/homework`         | `/stages/homework/?id=` (the stage)   | `stageHomework(stage)`        |
-| Stage attendance          | `…/stages/:stage/attendance`       | `/stages/attendance/?id=` (the stage) | `stageAttendance(stage)`      |
-| S05 Homework editor, new  | `…/homework/new?lesson=`           | `/homework/new/?stage=&lesson=`       | `newHomework(stage, lesson?)` |
-| S05 Homework editor, edit | `…/homework/:homework/edit`        | `/homework/edit/?id=`                 | `editHomework(id)`            |
-| S06 Homework progress     | `…/homework/:homework`             | `/homework/view/?id=`                 | `homework(id)`                |
+| Screen                    | Prototype route                    | Product route                               | Builder                         |
+| ------------------------- | ---------------------------------- | ------------------------------------------- | ------------------------------- |
+| Home (entry point)        | `/`                                | `/`                                         | `home()`                        |
+| 01 Dashboard              | `/`                                | `/` (#65)                                   | `home()`                        |
+| 02 Services overview      | `/services`                        | `/services/`                                | `services()`                    |
+| 03 Service details        | `/services/:service`               | `/services/view/?id=`                       | `service(id)`                   |
+| 04 Stage management       | `/services/:service/stages`        | `/services/stages/?id=` (the service)       | `serviceStages(service)`        |
+| Stage page                | `…/stages/:stage`                  | `/stages/view/?id=`                         | `stage(id)`                     |
+| 05 Meeting schedules      | `/meetings/schedules`              | `/meetings/schedules/?status=&service=`     | `schedules(view?)`              |
+| A schedule                | –                                  | `/meetings/schedules/view/?id=`             | `schedule(id)`                  |
+| 06 Meeting sessions       | `/meetings`                        | `/meetings/?from=&date=&service=`           | `meetings(view?)`               |
+| A session                 | `/meetings/sessions/:session`      | `/meetings/sessions/view/?id=`              | `session(id)`                   |
+| Attendance overview       | –                                  | `/attendance/`                              | `attendance()`                  |
+| 07, 10 Manual attendance  | `/attendance/:session`             | `/attendance/take/?session=`                | `takeAttendance(session)`       |
+| 08 Attendance summary     | `/attendance/:session/summary`     | `/attendance/summary/?session=`             | `attendanceSummary(session)`    |
+| 09 Members                | `/members`                         | `/members/?q=&group=&status=`               | `members(view?)`                |
+| Settings (all sections)   | `/settings`                        | `/settings/`, `/settings/#roles`            | `settings(section?)`            |
+| A new role                | `/settings/roles/new`              | `/settings/roles/new/`                      | `newRole()`                     |
+| A role                    | `/settings/roles/:role`            | `/settings/roles/view/?id=`                 | `role(id)`                      |
+| Data protection requests  | `/settings/data-requests`          | `/settings/data-requests/`                  | `dataRequests()`                |
+| A data protection request | `/settings/data-requests/:request` | `/settings/data-requests/view/?id=`         | `dataRequest(id)`               |
+| Your account              | `/account`                         | `/account/`                                 | `account()`                     |
+| S01 Lessons               | `…/stages/:stage/lessons`          | `/stages/lessons/?id=` (the stage)          | `stageLessons(stage)`           |
+| S02 Lesson editor, new    | `…/lessons/new`                    | `/lessons/new/?stage=`                      | `newLesson(stage)`              |
+| S02 Lesson editor, edit   | `…/lessons/:lesson/edit`           | `/lessons/edit/?id=`                        | `editLesson(id)`                |
+| S03 Lesson                | `…/lessons/:lesson`                | `/lessons/view/?id=`                        | `lesson(id)`                    |
+| S04 Homework              | `…/stages/:stage/homework`         | `/stages/homework/?id=&status=` (the stage) | `stageHomework(stage, status?)` |
+| Stage attendance          | `…/stages/:stage/attendance`       | `/stages/attendance/?id=` (the stage)       | `stageAttendance(stage)`        |
+| S05 Homework editor, new  | `…/homework/new?lesson=`           | `/homework/new/?stage=&lesson=`             | `newHomework(stage, lesson?)`   |
+| S05 Homework editor, edit | `…/homework/:homework/edit`        | `/homework/edit/?id=`                       | `editHomework(id)`              |
+| S06 Homework progress     | `…/homework/:homework`             | `/homework/view/?id=`                       | `homework(id)`                  |
 
 The members list keeps its search (`q`), group filter (`group`, `service:<id>` or `stage:<id>`) and tab
 (`status`, `inactive` or `all`) in the address, as the schedules list keeps its tab, so a refresh, Back and a
@@ -51,7 +51,7 @@ instead of adding a history entry per letter.
 
 | Screen                 | Prototype route                     | Product route                       | Builder                          |
 | ---------------------- | ----------------------------------- | ----------------------------------- | -------------------------------- |
-| P01, P06 Home          | `/parent`                           | `/parent/`                          | `parentHome()`                   |
+| P01, P06 Home          | `/parent`                           | `/parent/?child=`                   | `parentHome(child?)`             |
 | P02 My children        | `/parent/children`                  | `/parent/children/`                 | `parentChildren()`               |
 | P03 Homework           | `/parent/homework?child=`           | `/parent/homework/?child=`          | `parentHomework(child?)`         |
 | P04, P05 Homework task | `/parent/homework/:homework?child=` | `/parent/homework/view/?id=&child=` | `parentHomeworkTask(id, child?)` |

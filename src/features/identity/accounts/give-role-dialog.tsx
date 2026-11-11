@@ -60,7 +60,7 @@ export function GiveRoleDialog({
         error={give.fieldErrors.roleId}
         description={t.rich("settings.users.assign.roleHint", {
           link: (chunks) => (
-            <Link href={`${routes.settings()}#roles`} className="underline underline-offset-4">
+            <Link href={routes.settings("roles")} className="underline underline-offset-4">
               {chunks}
             </Link>
           ),

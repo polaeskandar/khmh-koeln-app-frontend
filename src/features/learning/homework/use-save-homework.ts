@@ -14,6 +14,7 @@ import {
   createHomeworkRequest,
   type HomeworkDetail,
   type HomeworkRequest,
+  type HomeworkStatus,
   HOMEWORK_SAVE_QUERIES,
   updateHomeworkRequest,
 } from "./api"
@@ -50,8 +51,7 @@ export function useSaveHomework({
     { invalidate: HOMEWORK_SAVE_QUERIES }
   )
 
-  const afterSave = (status: string) =>
-    lessonPage ?? `${routes.stageHomework(stageId)}&status=${status}`
+  const afterSave = (status: HomeworkStatus) => lessonPage ?? routes.stageHomework(stageId, status)
 
   const submit = useSubmitOnce(async (next: SaveStep, fieldsOf: () => HomeworkFields) => {
     setStep(next)

@@ -26,7 +26,7 @@ import { routes } from "@/lib/routes"
 
 import { type Agenda, agendaQuery } from "./api"
 import { DayStrip } from "./day-strip"
-import { MeetingsTabs, ServiceFilter, withQuery } from "./meetings-nav"
+import { MeetingsTabs, ServiceFilter } from "./meetings-nav"
 import { OccurrenceMenu } from "./occurrence-menu"
 
 const WINDOW_DAYS = 14
@@ -85,14 +85,14 @@ function AgendaView({
       : agenda.from
 
   const dayHref = (date: LocalDate) =>
-    withQuery(routes.meetings(), {
+    routes.meetings({
       from: windowStart,
       date: date === agenda.today ? null : date,
       service: serviceId,
     })
 
   const shiftHref = (days: number) =>
-    withQuery(routes.meetings(), {
+    routes.meetings({
       from: addDays(agenda.from, days),
       date: requestedDate ? addDays(requestedDate, days) : null,
       service: serviceId,
@@ -211,8 +211,9 @@ function AgendaScreen({ actions }: { actions?: ReactNode }) {
               <ServiceFilter
                 services={active}
                 value={serviceId}
-                path={routes.meetings()}
-                query={{ from: windowStart, date: requestedDate }}
+                hrefFor={(serviceId) =>
+                  routes.meetings({ from: windowStart, date: requestedDate, service: serviceId })
+                }
               />
             </div>
             <QueryState query={agenda}>

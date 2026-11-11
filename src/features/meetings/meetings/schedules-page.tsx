@@ -23,7 +23,7 @@ import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import { type ScheduleListResponse, schedulesQuery } from "./api"
-import { MeetingsTabs, ServiceFilter, withQuery } from "./meetings-nav"
+import { MeetingsTabs, ServiceFilter } from "./meetings-nav"
 import { EditScheduleButton, NewScheduleButton } from "./schedule-dialog"
 import { ScheduleList } from "./schedule-list"
 
@@ -97,7 +97,7 @@ function Schedules({
         {tabs.map((tab) => (
           <Link
             key={tab.key}
-            href={withQuery(routes.schedules(), {
+            href={routes.schedules({
               status: tab.key === "active" ? null : tab.key,
               service: serviceId,
             })}
@@ -193,8 +193,12 @@ function SchedulesScreen() {
               <ServiceFilter
                 services={active}
                 value={serviceId}
-                path={routes.schedules()}
-                query={{ status: status === "active" ? null : status }}
+                hrefFor={(serviceId) =>
+                  routes.schedules({
+                    status: status === "active" ? null : status,
+                    service: serviceId,
+                  })
+                }
               />
             </div>
             <QueryState query={schedules}>

@@ -98,7 +98,7 @@ function Children({ data }: { data: ChildList }) {
       <ChildSwitcher
         items={data.items}
         selectedId={selected.id}
-        href={(child) => `${routes.parentHome()}?child=${child}`}
+        href={(child) => routes.parentHome(child)}
       />
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,300px)]">
         <ChildTasks key={selected.id} child={selected} />
