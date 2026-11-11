@@ -11,10 +11,10 @@ import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { SessionDetail } from "@/features/meetings/meetings/api"
+import type { SessionDetailResponse } from "@/features/meetings/meetings/api"
 import { SessionPage } from "@/features/meetings/meetings/session-page"
 
-const schedule: SessionDetail["schedule"] = {
+const schedule: SessionDetailResponse["schedule"] = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f90",
   name: "Sunday class",
   recurrence: {
@@ -29,7 +29,7 @@ const schedule: SessionDetail["schedule"] = {
 
 function open(
   view: Parameters<typeof session>[0] = {},
-  extra: Partial<SessionDetail> = {},
+  extra: Partial<SessionDetailResponse> = {},
   who: Me = me.leader
 ) {
   const base = session(view)

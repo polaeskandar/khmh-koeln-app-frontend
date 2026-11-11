@@ -28,7 +28,7 @@ import { routes } from "@/lib/routes"
 
 import { OpenAttendanceButton } from "@/features/meetings/attendance/open-attendance-button"
 
-import { type SessionDetail, meetingSessionQuery } from "./api"
+import { type SessionDetailResponse, meetingSessionQuery } from "./api"
 import { SessionManageMenu } from "./session-manage-menu"
 
 function AttendanceAction({ session, today }: { session: SessionView; today: LocalDate }) {
@@ -70,7 +70,7 @@ function AttendanceAction({ session, today }: { session: SessionView; today: Loc
   return null
 }
 
-function SessionDetail({ data, actions }: { data: SessionDetail; actions?: ReactNode }) {
+function SessionDetail({ data, actions }: { data: SessionDetailResponse; actions?: ReactNode }) {
   const t = useTranslations()
   const f = useFormat()
   const { session, schedule, today } = data

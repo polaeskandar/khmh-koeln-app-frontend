@@ -13,13 +13,15 @@ import { preferredName } from "@/lib/domain/names"
 
 import {
   ATTENDANCE_QUERIES,
-  type AttendanceBoard,
+  type AttendanceBoardResponse,
   type AttendanceSheet,
   type MarkReference,
   removeMarkRequest,
 } from "./api"
 
-function marksOf(board: AttendanceBoard): { person: PersonReference; mark: MarkReference }[] {
+function marksOf(
+  board: AttendanceBoardResponse
+): { person: PersonReference; mark: MarkReference }[] {
   return [...board.roster, ...board.notOnRoster]
     .flatMap((row) => (row.mark?.id ? [{ person: row.person, mark: row.mark }] : []))
     .sort((a, b) => b.mark.recordedAt.localeCompare(a.mark.recordedAt))

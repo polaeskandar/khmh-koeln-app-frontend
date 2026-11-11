@@ -13,7 +13,7 @@ import { useProblemTranslator } from "@/lib/api/use-problem-translator"
 
 import { meetingSessionQuery } from "../meetings/api"
 import {
-  type AttendanceBoard,
+  type AttendanceBoardResponse,
   MARK_QUERIES,
   type MarkReference,
   type PersonGroup,
@@ -85,7 +85,7 @@ export function writesReducer(writes: Writes, action: WriteAction): Writes {
 
 const PENDING_MARK: MarkReference = { id: "", recordedAt: "" }
 
-export function applyWrites<Board extends AttendanceBoard>(
+export function applyWrites<Board extends AttendanceBoardResponse>(
   board: Board,
   writes: Writes,
   boardAt: number

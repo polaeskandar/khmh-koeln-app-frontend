@@ -21,7 +21,7 @@ export type LessonStage = LessonDetail["stage"]
 
 export type LessonTab = NonNullable<QueryParams<"/stages/{stageId}/lessons">["tab"]>
 
-export type LessonList = Schemas["LessonListResponse"]
+export type LessonListResponse = Schemas["LessonListResponse"]
 
 export const lessonQuery = (id: Uuid) =>
   queryOptions({
