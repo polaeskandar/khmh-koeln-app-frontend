@@ -20,13 +20,14 @@ import {
   withCounts,
 } from "@/features/meetings/attendance/api"
 import { CardAction } from "@/features/meetings/attendance/attendance-overview-page"
+import { useGreeting } from "@/hooks/use-greeting"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
 import type { ServiceReference } from "@/features/organization/services/api"
 import { groupOf } from "@/features/meetings/meetings/session-lines"
 import type { SessionView } from "@/features/meetings/meetings/api"
-import { addDays, localTimeOf } from "@/lib/domain/time"
+import { addDays } from "@/lib/domain/time"
 import { routes } from "@/lib/routes"
 import { isDue } from "@/features/meetings/attendance/next-step"
 
@@ -34,12 +35,6 @@ import { type Upcoming, upcomingQuery } from "./api"
 import { groupUpcoming, type UpcomingEntry } from "./group-upcoming"
 
 const LIVE = { refetchInterval: 60_000, refetchOnWindowFocus: true }
-
-function partOfDay(): "morning" | "afternoon" | "evening" {
-  const hour = Number(localTimeOf(Date.now()).slice(0, 2))
-
-  return hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening"
-}
 
 const meetingsOn = (date: LocalDate, service: ServiceReference | null) =>
   routes.meetings({ date, service: service?.id })
@@ -223,13 +218,14 @@ function DashboardView({ upcoming }: { upcoming: Upcoming }) {
   const todaySessions = useTodaySessions()
   const unassigned = useUnassigned()
 
-  const firstName =
-    session.status === "authenticated" ? session.me.account.displayName.split(" ")[0] : ""
+  const greeting = useGreeting(
+    session.status === "authenticated" ? session.me.account.displayName : ""
+  )
 
   return (
     <PageBody>
       <PageHeader
-        title={t(`dashboard.greeting.${partOfDay()}`, { name: firstName })}
+        title={greeting}
         description={
           <span className="flex flex-col gap-0.5">
             <span>
