@@ -24,8 +24,6 @@ export type Resource = HomeworkDetail["resources"][number]
 
 export type HomeworkInput = Schemas["HomeworkRequest"]
 
-export type SavedHomework = Schemas["WrittenHomeworkResponse"]
-
 export const homeworkQuery = (id: Uuid) => ({
   queryKey: ["homework", "detail", id] as const,
   queryFn: ({ signal }: { signal: AbortSignal }) =>
@@ -42,8 +40,6 @@ export const createHomeworkRequest = (lesson: Uuid, input: HomeworkInput) =>
 
 export const updateHomeworkRequest = (id: Uuid, version: number, input: HomeworkInput) =>
   dataOf(api.PUT("/homework/{id}", { params: { path: { id }, query: { version } }, body: input }))
-
-export type PublishedHomework = Schemas["ChangedHomeworkResponse"]
 
 export const publishHomeworkRequest = (id: Uuid) =>
   dataOf(api.POST("/homework/{id}/publish", { params: { path: { id } }, body: {} }))
@@ -87,8 +83,6 @@ export function homeworkFlagsFor(
   }
 }
 
-export type HomeworkLifecycle = Schemas["ChangedHomeworkResponse"]
-
 export const transitionHomeworkRequest = (id: Uuid, transition: HomeworkTransition) => {
   const params = { path: { id } }
 
@@ -109,8 +103,6 @@ export const deleteHomeworkRequest = (id: Uuid) =>
 export type TaskState = "todo" | "done"
 
 export type ParentTask = Schemas["ParentHomeworkItemResponse"]
-
-export type ChildHomework = Schemas["ChildHomeworkListResponse"]
 
 export const childHomeworkQuery = (child: Uuid, state: TaskState) => ({
   queryKey: ["parent", "homework", child, state] as const,

@@ -86,7 +86,7 @@ describe("ConfirmDialog", () => {
 })
 
 describe("ReasonDialog", () => {
-  test("a required reason keeps confirm disabled until one is typed; it is passed trimmed", async () => {
+  test("a typed reason is passed trimmed, and the dismiss button takes its own label", async () => {
     const onConfirm = vi.fn(async () => true)
 
     renderWithProviders(
@@ -95,18 +95,19 @@ describe("ReasonDialog", () => {
         title="Cancel this session?"
         confirmLabel="Cancel session"
         dismissLabel="Keep it"
-        requireReason
         onConfirm={onConfirm}
       />
     )
 
     await userEvent.click(screen.getByRole("button", { name: "Cancel session…" }))
-    const confirm = screen.getByRole("button", { name: "Cancel session" })
-    expect(confirm).toBeDisabled()
-    await userEvent.type(screen.getByRole("textbox", { name: "Reason" }), "   ")
-    expect(confirm).toBeDisabled()
-    await userEvent.type(screen.getByRole("textbox", { name: "Reason" }), "Bishop's visit  ")
-    await userEvent.click(confirm)
+    expect(screen.getByRole("button", { name: "Keep it" })).toBeInTheDocument()
+
+    await userEvent.type(
+      screen.getByRole("textbox", { name: "Reason (optional)" }),
+      "Bishop's visit  "
+    )
+
+    await userEvent.click(screen.getByRole("button", { name: "Cancel session" }))
     expect(onConfirm).toHaveBeenCalledExactlyOnceWith("Bishop's visit")
   })
 

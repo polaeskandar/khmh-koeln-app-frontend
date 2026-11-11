@@ -1,11 +1,5 @@
 import type { Locale } from "@/i18n/config"
-import {
-  CHURCH_TIME_ZONE,
-  daysBetween,
-  isoWeekday,
-  localDateOf,
-  localTimeOf,
-} from "@/lib/domain/time"
+import { daysBetween, isoWeekday, localDateOf, localTimeOf } from "@/lib/domain/time"
 import type {
   Instant,
   IsoWeekday,
@@ -327,7 +321,7 @@ function julianDay(date: LocalDate): number {
   )
 }
 
-export function copticParts(date: LocalDate) {
+function copticParts(date: LocalDate) {
   const jd = julianDay(date)
   const year = Math.floor((4 * (jd - COPTIC_EPOCH) + 1463) / 1461)
   const startOfYear = COPTIC_EPOCH + 365 * (year - 1) + Math.floor(year / 4)
@@ -471,5 +465,3 @@ export function formatFor(locale: Locale): Format {
 
   return f
 }
-
-export const TIME_ZONE_LABEL = CHURCH_TIME_ZONE

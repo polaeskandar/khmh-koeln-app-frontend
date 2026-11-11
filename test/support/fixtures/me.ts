@@ -12,12 +12,12 @@ const crud = (...resources: Resource[]): Grant[] =>
 const read = (...resources: Resource[]): Grant[] =>
   resources.map((resource) => ({ action: "read", resource }))
 
-export const scoped = (scope: RoleScope, grants: Grant[]): AccountPermission[] =>
+const scoped = (scope: RoleScope, grants: Grant[]): AccountPermission[] =>
   grants.map((grant) => ({ ...grant, scope }))
 
 export const church = (...grants: Grant[]) => scoped("church", grants)
 
-export const inGroups = (...grants: Grant[]) => scoped("assignedGroups", grants)
+const inGroups = (...grants: Grant[]) => scoped("assignedGroups", grants)
 
 const role = (n: number, name: string) => ({ id: `019a3f00-0000-7000-8000-00000000000${n}`, name })
 
@@ -37,13 +37,13 @@ const serviceRef = (n: number, name: string, tone: number) => ({
   archived: false,
 })
 
-export const SUNDAY_SCHOOL = serviceRef(0, "Sunday School", 1)
+const SUNDAY_SCHOOL = serviceRef(0, "Sunday School", 1)
 
 const serving = (service: Assigned["service"]): Assigned => ({ service, stage: null })
 
-export const sundaySchoolAssignment = serving(SUNDAY_SCHOOL)
+const sundaySchoolAssignment = serving(SUNDAY_SCHOOL)
 
-export const testedGroups: Assigned[] = [
+const testedGroups: Assigned[] = [
   sundaySchoolAssignment,
   serving(serviceRef(1, "Youth Meeting", 2)),
   serving(serviceRef(2, "Choir", 3)),

@@ -2,7 +2,7 @@
   "name": "khmk-koeln-frontend",
   "version": "0.1.0",
   "private": true,
-  "description": "KHMK Köln web app and its iOS and Android apps (Next.js static export with Capacitor). Initialized only; features are added through tickets.",
+  "description": "KHMK Köln web app and its iOS and Android apps (Next.js static export with Capacitor).",
   "engines": {
     "node": ">=22"
   },

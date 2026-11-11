@@ -55,8 +55,6 @@ export type ScheduleRequest = Schemas["CreateScheduleRequest"]
 
 export type ScheduleChanges = Schemas["ScheduleChangesRequest"]
 
-export type ScheduleSaved = Schemas["WrittenScheduleResponse"]
-
 export const createScheduleRequest = (request: ScheduleRequest) =>
   dataOf(api.POST("/schedules", { body: request }))
 

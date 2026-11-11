@@ -10,7 +10,7 @@ import { attendanceOverviewQuery } from "./api"
 
 const REFRESH_MS = 60_000
 
-export function useOpenCount(): number {
+function useOpenCount(): number {
   const query = useQuery({
     ...attendanceOverviewQuery,
     refetchInterval: REFRESH_MS,

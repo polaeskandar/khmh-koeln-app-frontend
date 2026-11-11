@@ -191,7 +191,7 @@ test("in Arabic nothing uses a physical side", () => {
   const { container } = renderWithProviders(
     <>
       <AgendaRow item={session({ status: "canceled", cancelReason: "سبب" })} today={TODAY} />
-      <AgendaRow item={planned("2026-11-15")} today={TODAY} compact />
+      <AgendaRow item={planned("2026-11-15")} today={TODAY} />
       <SessionCardView
         session={session({
           status: "active",

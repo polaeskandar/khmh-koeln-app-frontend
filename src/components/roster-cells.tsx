@@ -5,18 +5,14 @@ export function RosterCells({
   filled,
   total,
   extra = 0,
-  highlight,
   size = "md",
   className,
-  label,
 }: {
   filled: number
   total: number
   extra?: number
-  highlight?: number
   size?: "sm" | "md" | "lg"
   className?: string
-  label?: string
 }) {
   const t = useTranslations("roster")
   const cells = total + extra
@@ -33,10 +29,9 @@ export function RosterCells({
       }}
       role="img"
       aria-label={
-        label ??
-        (extra
+        extra
           ? t("cellsExtra", { present: filled, total, extra })
-          : t("cells", { present: filled, total }))
+          : t("cells", { present: filled, total })
       }
     >
       {Array.from({ length: cells }).map((_, i) => (
@@ -48,8 +43,7 @@ export function RosterCells({
               ? "bg-primary"
               : i >= total
                 ? "bg-primary/35"
-                : "bg-muted ring-1 ring-foreground/10 ring-inset",
-            highlight !== undefined && i === highlight && "bg-[oklch(0.765_0.177_163.223)]"
+                : "bg-muted ring-1 ring-foreground/10 ring-inset"
           )}
         />
       ))}

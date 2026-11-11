@@ -8,7 +8,6 @@ export type SessionItem = Schemas["AgendaSessionResponse"]
 export type CountedSession = Omit<SessionItem, "kind">
 export type PlannedItem = Schemas["PlannedSessionResponse"]
 export type AgendaItem = Schemas["AgendaResponse"]["items"][number]
-export type NextDate = Schemas["UpcomingDate"]
 export type ScheduleSummary = Schemas["ScheduleResponse"]
 export type HistoryEntry = Schemas["HistoryEntry"]
 

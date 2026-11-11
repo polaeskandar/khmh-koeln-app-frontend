@@ -7,7 +7,7 @@ import type {
 
 import { thirdClass } from "@test/support/fixtures/stages"
 
-export const lessonService = thirdClass.service
+const lessonService = thirdClass.service
 
 export const lessonStage: LessonDetail["stage"] = {
   id: thirdClass.id,
@@ -63,7 +63,7 @@ export const stageLessons = (overrides: Partial<StageLessons> = {}): StageLesson
 
 const SCHEDULE_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f90"
 
-export const daniel = { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f01", name: "Mariam Fahmy" }
+const daniel = { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f01", name: "Mariam Fahmy" }
 
 export const lessonOptions = (overrides: Partial<LessonOptions> = {}): LessonOptions => ({
   today: "2026-11-08",

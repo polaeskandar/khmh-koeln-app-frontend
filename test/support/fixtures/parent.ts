@@ -28,7 +28,7 @@ export const mina: ChildSummary = {
 
 let seq = 0
 
-export const task = (title: string, extra: Partial<ParentTask> = {}): ParentTask => ({
+const task = (title: string, extra: Partial<ParentTask> = {}): ParentTask => ({
   id: `0192f3a4-7b1c-7d2e-8f3a-${String(0xd000 + ++seq).padStart(12, "0")}`,
   title,
   lessonTitle: "The Good Shepherd",

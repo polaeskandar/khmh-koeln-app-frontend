@@ -5,13 +5,14 @@ import { describe, expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
+import { isPortalActive } from "@/components/portal/portal-nav"
+import { routes } from "@/lib/routes"
 import { apiUrl } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { navigation } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import { isParentActive } from "@/features/portals/parent/parent-nav"
 import { ParentNotAvailable, ParentShell } from "@/features/portals/parent/parent-shell"
 
 function portal(account: Me = me.parent) {
@@ -34,7 +35,7 @@ describe("the parent navigation", () => {
     ["/parent/homework/", "/parent/homework/view/?id=x", true],
     ["/parent/homework/", "/parent/", false],
   ])("%s on %s: %s", (href, pathname, active) => {
-    expect(isParentActive(href, pathname)).toBe(active)
+    expect(isPortalActive(href, routes.parentHome(), pathname)).toBe(active)
   })
 
   test("both navs are labelled 'Parent portal'; the tab bar is for phones, the top nav from md", async () => {

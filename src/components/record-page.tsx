@@ -8,13 +8,12 @@ import type { Uuid } from "@/lib/api/types/common"
 type Props = {
   param?: string
   notFound: ReactNode
-  fallback?: ReactNode
   children: (id: Uuid) => ReactNode
 }
 
-export function RecordPage({ param = "id", notFound, fallback = null, children }: Props) {
+export function RecordPage({ param = "id", notFound, children }: Props) {
   return (
-    <Suspense fallback={fallback}>
+    <Suspense>
       <Record param={param} notFound={notFound}>
         {children}
       </Record>
@@ -22,7 +21,7 @@ export function RecordPage({ param = "id", notFound, fallback = null, children }
   )
 }
 
-function Record({ param, notFound, children }: Omit<Props, "fallback"> & { param: string }) {
+function Record({ param, notFound, children }: Props & { param: string }) {
   const id = useSearchParamId(param)
 
   return id === null ? notFound : children(id)

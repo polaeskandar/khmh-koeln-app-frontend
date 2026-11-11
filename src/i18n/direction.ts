@@ -9,7 +9,3 @@ export function useDirection(): "ltr" | "rtl" {
 export function useInlineEnd(): "left" | "right" {
   return useDirection() === "rtl" ? "left" : "right"
 }
-
-export function useInlineStart(): "left" | "right" {
-  return useDirection() === "rtl" ? "right" : "left"
-}

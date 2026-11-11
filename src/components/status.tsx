@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react"
-import { Ban, CalendarClock, CheckCheck, CircleDashed, MoveRight, Sparkle } from "lucide-react"
+import { Ban, CalendarClock, CheckCheck, CircleDashed, Sparkle } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { cn } from "cn"
 
@@ -17,20 +17,10 @@ const toneText: Record<Tone, string> = {
   muted: "text-muted-foreground",
 }
 
-const toneSoft: Record<Tone, string> = {
-  success: "bg-success-soft",
-  info: "bg-info-soft",
-  warning: "bg-warning-soft",
-  danger: "bg-danger-soft",
-  neutral: "bg-muted",
-  muted: "bg-muted",
-}
-
 export function StatusBadge({
   tone,
   icon: Icon,
   live,
-  soft,
   dashed,
   children,
   className,
@@ -39,7 +29,6 @@ export function StatusBadge({
   tone: Tone
   icon?: LucideIcon
   live?: boolean
-  soft?: boolean
   dashed?: boolean
   children: React.ReactNode
   className?: string
@@ -49,12 +38,7 @@ export function StatusBadge({
     <Badge
       variant="outline"
       title={title}
-      className={cn(
-        toneText[tone],
-        soft && ["h-6 px-2", toneSoft[tone]],
-        dashed && "border-dashed",
-        className
-      )}
+      className={cn(toneText[tone], dashed && "border-dashed", className)}
     >
       {live ? <LiveDot /> : Icon ? <Icon data-icon="inline-start" /> : null}
       {children}
@@ -73,17 +57,15 @@ export function LiveDot({ className }: { className?: string }) {
 
 export function SessionStatusBadge({
   status,
-  soft,
   className,
   title,
 }: {
   status: SessionStatus | "planned"
-  soft?: boolean
   className?: string
   title?: string
 }) {
   const t = useTranslations("status")
-  const props = { soft, className, title }
+  const props = { className, title }
 
   switch (status) {
     case "active":
@@ -117,16 +99,6 @@ export function SessionStatusBadge({
         </StatusBadge>
       )
   }
-}
-
-export function MovedBadge({ className }: { className?: string }) {
-  const t = useTranslations("status")
-
-  return (
-    <StatusBadge tone="info" icon={MoveRight} className={className}>
-      {t("moved")}
-    </StatusBadge>
-  )
 }
 
 export function OneOffBadge({ className }: { className?: string }) {

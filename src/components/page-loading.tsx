@@ -26,21 +26,3 @@ export function PageLoading() {
     </div>
   )
 }
-
-export function ParentPageLoading() {
-  const t = useTranslations("common")
-
-  return (
-    <div aria-busy="true" aria-live="polite" className="flex flex-col gap-6">
-      <Skeleton className="h-8 w-60" />
-      <Skeleton className="h-4 w-72 max-w-full" />
-      <div className="flex gap-3">
-        <Skeleton className="h-14 w-44" />
-        <Skeleton className="h-14 w-44" />
-      </div>
-      <Skeleton className="h-28" />
-      <Skeleton className="h-28" />
-      <span className="sr-only">{t("loadingEllipsis")}</span>
-    </div>
-  )
-}

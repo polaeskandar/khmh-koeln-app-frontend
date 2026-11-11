@@ -5,10 +5,7 @@ import { describe, expect, test } from "vitest"
 
 import { rawColours } from "@test/support/raw-colours"
 
-const ALLOWED = [
-  join("src", "components", "member-avatar.tsx"),
-  join("src", "components", "roster-cells.tsx"),
-]
+const ALLOWED = [join("src", "components", "member-avatar.tsx")]
 
 function sourceFiles(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {

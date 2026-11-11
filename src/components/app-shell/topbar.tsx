@@ -2,7 +2,7 @@
 
 import { ArrowLeft } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { Fragment, type ReactNode } from "react"
+import { Fragment } from "react"
 
 import { KhmkMark } from "@/components/brand/logo"
 import {
@@ -39,7 +39,7 @@ export function TodayStamp() {
   )
 }
 
-export function Topbar({ crumbs, actions }: { crumbs: Crumb[]; actions?: ReactNode }) {
+export function Topbar({ crumbs }: { crumbs: Crumb[] }) {
   const t = useTranslations("nav")
   const current = crumbs.at(-1)
   const parent = crumbs.length > 1 ? crumbs.at(-2) : undefined
@@ -84,7 +84,6 @@ export function Topbar({ crumbs, actions }: { crumbs: Crumb[]; actions?: ReactNo
         </BreadcrumbList>
       </Breadcrumb>
       <div className="ms-auto flex shrink-0 items-center gap-3">
-        {actions}
         <TodayStamp />
       </div>
     </header>

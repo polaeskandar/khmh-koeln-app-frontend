@@ -41,7 +41,6 @@ export function ConfirmDialog({
   consequences,
   note,
   confirmLabel,
-  dismissLabel,
   tone = "default",
   onConfirm,
   open: controlledOpen,
@@ -53,7 +52,6 @@ export function ConfirmDialog({
   consequences?: React.ReactNode[]
   note?: React.ReactNode
   confirmLabel: string
-  dismissLabel?: string
   tone?: "default" | "destructive"
   onConfirm: () => Promise<boolean>
 }) {
@@ -85,7 +83,7 @@ export function ConfirmDialog({
         ) : null}
         {note ? <p className="text-sm text-muted-foreground">{note}</p> : null}
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={pending}>{dismissLabel ?? t("cancel")}</AlertDialogCancel>
+          <AlertDialogCancel disabled={pending}>{t("cancel")}</AlertDialogCancel>
           <Button
             variant={tone === "destructive" ? "destructive" : "default"}
             disabled={pending}
@@ -114,7 +112,6 @@ export function ReasonDialog({
   confirmLabel,
   dismissLabel,
   tone = "default",
-  requireReason = false,
   onConfirm,
   open: controlledOpen,
   onOpenChange,
@@ -129,7 +126,6 @@ export function ReasonDialog({
   confirmLabel: string
   dismissLabel?: string
   tone?: "default" | "destructive"
-  requireReason?: boolean
   onConfirm: (reason: string | null) => Promise<boolean>
   children?: React.ReactNode
 }) {
@@ -152,8 +148,6 @@ export function ReasonDialog({
     ;(onOpenChange ?? setInnerOpen)(next)
   }
 
-  const blocked = requireReason && reason.trim() === ""
-
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       {trigger ? <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger> : null}
@@ -166,7 +160,7 @@ export function ReasonDialog({
         <Field>
           <FieldLabel htmlFor={id}>
             {reasonLabel ?? t("reason")}
-            {requireReason ? null : <OptionalNote />}
+            <OptionalNote />
           </FieldLabel>
           <Textarea
             id={id}
@@ -182,7 +176,7 @@ export function ReasonDialog({
           <AlertDialogCancel disabled={pending}>{dismissLabel ?? t("cancel")}</AlertDialogCancel>
           <Button
             variant={tone === "destructive" ? "destructive" : "default"}
-            disabled={pending || blocked}
+            disabled={pending}
             onClick={async () => {
               const close = await whilePending(setPending, () =>
                 onConfirm(reason.trim() === "" ? null : reason.trim())

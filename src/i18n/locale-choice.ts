@@ -1,6 +1,6 @@
 import { DEFAULT_LOCALE, isLocale, type Locale, negotiateLocale } from "./config"
 
-export const LOCALE_STORAGE_KEY = "khmk.locale"
+const LOCALE_STORAGE_KEY = "khmk.locale"
 
 export function storedLocale(): Locale | null {
   try {

@@ -101,7 +101,7 @@ export const sessionDetail = (
   ...extra,
 })
 
-export const countsOf = (views: SessionView[]): AttendanceCounts => ({
+const countsOf = (views: SessionView[]): AttendanceCounts => ({
   items: views.flatMap((view) =>
     view.counts ? [{ sessionId: view.id, counts: view.counts }] : []
   ),
