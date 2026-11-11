@@ -22,6 +22,9 @@ after it; except where the statement opens or closes its block. No `else` after 
 this (`curly`, `no-else-return`, `@stylistic/padding-line-between-statements`), and `pnpm format` adds the
 blank lines (`eslint --fix`, then Prettier).
 
+Imports come in three groups with a blank line between them: packages, then `@/…` and `@test/…`, then relative
+imports. ESLint's `import/order` enforces it, and `pnpm format` fixes it.
+
 A choice between more than two outcomes is a function with early returns, a `switch` or a lookup table, named
 for what it decides, never a nested ternary. ESLint's `no-nested-ternary` rejects one in `src`, the vendored
 `src/components/ui` aside.
