@@ -16,7 +16,7 @@ import { type Me, MIN_PASSWORD_LENGTH } from "@/features/identity/auth/api"
 import { PasswordField } from "@/features/identity/auth/password-field"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { isLocale, LOCALE_NAMES, LOCALES } from "@/i18n/config"
-import { useSwitchLocale } from "@/i18n/use-switch-locale"
+import { useSwitchLocale } from "@/features/identity/auth/use-switch-locale"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
 import { changePasswordRequest } from "./api"

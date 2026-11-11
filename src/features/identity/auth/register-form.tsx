@@ -29,7 +29,7 @@ import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { Link, useRouter } from "@/i18n/navigation"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { oneOf } from "@/lib/one-of"
-import { PRIVACY_NOTICE_VERSION } from "@/lib/privacy"
+import { PRIVACY_NOTICE_VERSION } from "@/features/privacy/notice/privacy-notice"
 import { routes } from "@/lib/routes"
 
 import {

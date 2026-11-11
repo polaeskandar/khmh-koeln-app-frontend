@@ -13,7 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useFormat } from "@/i18n/format"
-import { groupOf, type PlannedItem } from "@/lib/api/types/meetings"
+import { groupOf } from "./session-lines"
+import type { PlannedItem } from "@/lib/api/types/meetings"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
 import { cancelOccurrenceRequest, SCHEDULE_QUERIES } from "./api"

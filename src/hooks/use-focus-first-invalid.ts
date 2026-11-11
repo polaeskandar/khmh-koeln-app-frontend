@@ -2,7 +2,9 @@
 
 import { useEffect, useRef } from "react"
 
-import { focusFirstInvalid } from "@/components/focus-first-invalid"
+export function focusFirstInvalid(container: HTMLElement | null) {
+  container?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()
+}
 
 export function useFocusFirstInvalid(problem: unknown) {
   const formRef = useRef<HTMLFormElement>(null)

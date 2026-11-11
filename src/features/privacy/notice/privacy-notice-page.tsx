@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 
 import { AuthFrame } from "@/features/identity/auth/auth-frame"
 import { Link, useRouter } from "@/i18n/navigation"
-import type { PrivacyBlock, PrivacyNotice } from "@/lib/privacy"
+import type { PrivacyBlock, PrivacyNotice } from "./privacy-notice"
 import { routes } from "@/lib/routes"
 
 function BackLink() {

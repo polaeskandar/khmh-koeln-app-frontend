@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl"
 
 import { KhmkMark } from "@/components/brand/logo"
 import { LanguageMenu } from "@/components/language-switch"
+import { useSwitchLocale } from "./use-switch-locale"
 import { AppearanceMenu } from "@/components/theme-switch"
 import { useToday } from "@/hooks/use-today"
 import { useFormat } from "@/i18n/format"
@@ -22,6 +23,7 @@ export function AuthFrame({
   className?: string
 }) {
   const t = useTranslations("brand")
+  const switchLocale = useSwitchLocale()
 
   return (
     <div className="flex min-h-svh flex-col bg-background">
@@ -38,7 +40,7 @@ export function AuthFrame({
         </Link>
         <span className="flex items-center gap-1">
           <AppearanceMenu />
-          <LanguageMenu />
+          <LanguageMenu onSwitch={switchLocale} />
         </span>
       </header>
       <main

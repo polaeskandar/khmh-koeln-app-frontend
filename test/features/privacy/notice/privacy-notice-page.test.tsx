@@ -4,8 +4,6 @@ import { http, HttpResponse } from "msw"
 import { afterEach, describe, expect, test, vi } from "vitest"
 
 import { SessionProvider } from "@/features/identity/auth/session"
-import { LOCALES } from "@/i18n/config"
-import { PRIVACY_NOTICE_VERSION, parsePrivacyNotice } from "@/lib/privacy"
 import { apiUrl } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
@@ -13,6 +11,10 @@ import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import { readPrivacyNotice } from "@/features/privacy/notice/notice"
+import {
+  PRIVACY_NOTICE_VERSION,
+  parsePrivacyNotice,
+} from "@/features/privacy/notice/privacy-notice"
 import { PrivacyNoticePage } from "@/features/privacy/notice/privacy-notice-page"
 
 afterEach(() => {
@@ -21,48 +23,6 @@ afterEach(() => {
 
 const notice = (status: string, body = "## Who is responsible\n\nThe church office.") =>
   `---\nversion: ${PRIVACY_NOTICE_VERSION}\nstatus: ${status}\n---\n\n${body}\n`
-
-describe("the notice files", () => {
-  test.each(LOCALES)("%s has the version the app sends", (locale) => {
-    expect(readPrivacyNotice(locale).version).toBe(PRIVACY_NOTICE_VERSION)
-  })
-
-  test("rights go through the church office, with no Your data in the app", () => {
-    const text = JSON.stringify(readPrivacyNotice("en").blocks)
-    expect(text).toContain("To use these rights, ask the church office")
-    expect(text).toContain("Administrators in the church office see all data")
-    expect(text).not.toContain("Your data")
-  })
-})
-
-describe("parsePrivacyNotice", () => {
-  test("reads headings, lists and paragraphs", () => {
-    expect(
-      parsePrivacyNotice(notice("draft", "## Why\n\n- One\n- Two\n  lines\n\nText.")).blocks
-    ).toEqual([
-      { kind: "heading", text: "Why" },
-      { kind: "list", items: ["One", "Two lines"] },
-      { kind: "paragraph", text: "Text." },
-    ])
-  })
-
-  test("a final notice can't keep a bracketed placeholder", () => {
-    expect(() => parsePrivacyNotice(notice("final", "Ask [the church office]."))).toThrow(
-      /placeholder \[the church office\]/
-    )
-
-    expect(parsePrivacyNotice(notice("draft", "Ask [the church office].")).status).toBe("draft")
-    expect(parsePrivacyNotice(notice("final")).status).toBe("final")
-  })
-
-  test("rejects another version or status", () => {
-    expect(() =>
-      parsePrivacyNotice(notice("draft").replace(PRIVACY_NOTICE_VERSION, "2025-01"))
-    ).toThrow(/version 2025-01/)
-
-    expect(() => parsePrivacyNotice(notice("published"))).toThrow(/draft or final/)
-  })
-})
 
 describe("the page", () => {
   test("shows the title, the version and the draft banner", () => {

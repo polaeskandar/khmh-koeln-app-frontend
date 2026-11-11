@@ -37,10 +37,11 @@ import {
   serviceStagesQuery,
   useServiceInsight,
 } from "./api"
-import { AddStageButton } from "@/features/organization/stages/stage-dialogs"
+import { AddStageButton } from "@/features/organization/stages/stage-dialog"
 
 import { trendText } from "./service-bits"
-import { ServiceActionsMenu, ServiceDialog } from "./service-dialogs"
+import { ServiceActionsMenu } from "./service-actions"
+import { ServiceDialog } from "./service-dialog"
 import { ServiceServants } from "./service-servants"
 
 function EditButton({ service }: { service: ServiceRow }) {

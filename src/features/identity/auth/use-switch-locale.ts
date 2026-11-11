@@ -2,11 +2,11 @@
 
 import { useQueryClient } from "@tanstack/react-query"
 
-import { saveAccountLanguage } from "@/features/identity/auth/account-language"
+import type { Locale } from "@/i18n/config"
+import { storeLocale } from "@/i18n/locale-choice"
+import { usePathname, useRouter } from "@/i18n/navigation"
 
-import type { Locale } from "./config"
-import { storeLocale } from "./locale-choice"
-import { usePathname, useRouter } from "./navigation"
+import { saveAccountLanguage } from "./account-language"
 
 let carriedFragment: string | null = null
 

@@ -72,22 +72,14 @@ export const serviceServantsQuery = (id: Uuid) =>
       dataOf(api.GET("/services/{id}/servants", { params: { path: { id } }, signal })),
   })
 
-type Structure = "services" | "stages"
+export const archiveServiceRequest = (serviceId: Uuid) =>
+  dataOf(api.POST("/services/{id}/archive", { params: { path: { id: serviceId } }, body: {} }))
 
-export const archiveRequest = (kind: Structure, id: Uuid) =>
-  kind === "services"
-    ? dataOf(api.POST("/services/{id}/archive", { params: { path: { id } }, body: {} }))
-    : dataOf(api.POST("/stages/{id}/archive", { params: { path: { id } }, body: {} }))
+export const restoreServiceRequest = (serviceId: Uuid) =>
+  dataOf(api.POST("/services/{id}/restore", { params: { path: { id: serviceId } }, body: {} }))
 
-export const restoreRequest = (kind: Structure, id: Uuid) =>
-  kind === "services"
-    ? dataOf(api.POST("/services/{id}/restore", { params: { path: { id } }, body: {} }))
-    : dataOf(api.POST("/stages/{id}/restore", { params: { path: { id } }, body: {} }))
-
-export const deleteRequest = (kind: Structure, id: Uuid) =>
-  kind === "services"
-    ? dataOf(api.DELETE("/services/{id}", { params: { path: { id } } }))
-    : dataOf(api.DELETE("/stages/{id}", { params: { path: { id } } }))
+export const deleteServiceRequest = (serviceId: Uuid) =>
+  dataOf(api.DELETE("/services/{id}", { params: { path: { id: serviceId } } }))
 
 export const SERVICE_QUERIES = [SERVICES_KEY]
 

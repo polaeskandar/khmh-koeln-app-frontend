@@ -12,7 +12,7 @@ import { preferredName } from "@/lib/domain/names"
 import { routes } from "@/lib/routes"
 
 import { type HistoryCell, stageAttendanceHistoryQuery } from "./api"
-import { type Stage } from "@/features/organization/stages/api"
+import type { Stage } from "@/features/organization/stages/api"
 import { StageLayout } from "@/features/organization/stages/stage-layout"
 
 const CELL_TEXT = {

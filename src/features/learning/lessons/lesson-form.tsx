@@ -25,7 +25,7 @@ import {
   toMeeting,
   updateLessonRequest,
 } from "./api"
-import { LessonStatusBadge } from "./lesson-bits"
+import { LessonStatusBadge } from "./lesson-status-badge"
 import { LessonFields, type LessonTexts, lessonTextsOf } from "./lesson-fields"
 import { ServantsPanel, useLessonServants } from "./lesson-servants"
 import { MeetingSelect } from "./meeting-select"

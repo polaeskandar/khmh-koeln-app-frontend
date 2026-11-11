@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import { LanguageMenu } from "@/components/language-switch"
+import { useSwitchLocale } from "@/features/identity/auth/use-switch-locale"
 import type { Locale } from "@/i18n/config"
 import type { Schemas } from "@/lib/api/client"
 import { apiUrl, problem } from "@test/support/api"
@@ -49,10 +50,16 @@ function backend(
   return calls
 }
 
+function SwitchingMenu() {
+  const switchLocale = useSwitchLocale()
+
+  return <LanguageMenu onSwitch={switchLocale} />
+}
+
 function menu(client = makeTestQueryClient(), locale: Locale = "en") {
   return renderWithProviders(
     <SessionProvider>
-      <LanguageMenu />
+      <SwitchingMenu />
     </SessionProvider>,
     { client, locale }
   )

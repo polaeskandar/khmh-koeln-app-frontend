@@ -11,6 +11,13 @@ import { navigation, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import { LanguageMenu, LanguageSubmenu } from "@/components/language-switch"
+import { useSwitchLocale } from "@/features/identity/auth/use-switch-locale"
+
+function SwitchingMenu() {
+  const switchLocale = useSwitchLocale()
+
+  return <LanguageMenu onSwitch={switchLocale} />
+}
 
 beforeEach(() => {
   navigation.pathname = "/services/view/"
@@ -23,7 +30,7 @@ afterEach(() => {
 
 describe("LanguageMenu", () => {
   test("names each language in itself and checks the current one", async () => {
-    renderWithProviders(<LanguageMenu />, { locale: "de" })
+    renderWithProviders(<LanguageMenu onSwitch={() => {}} />, { locale: "de" })
     await userEvent.click(screen.getByRole("button", { name: "Sprache" }))
     expect(screen.getByRole("menuitemradio", { name: "Deutsch" })).toBeChecked()
     expect(screen.getByRole("menuitemradio", { name: "العربية" })).toHaveAttribute("lang", "ar")
@@ -33,7 +40,7 @@ describe("LanguageMenu", () => {
   test("switching keeps the page and its query, stores the choice and never reloads", async () => {
     window.history.replaceState(null, "", "/de/services/view/?id=X")
     const href = window.location.href
-    renderWithProviders(<LanguageMenu />, { locale: "de" })
+    renderWithProviders(<SwitchingMenu />, { locale: "de" })
     await userEvent.click(screen.getByRole("button", { name: "Sprache" }))
     await userEvent.click(screen.getByRole("menuitemradio", { name: "العربية" }))
 
@@ -46,7 +53,7 @@ describe("LanguageMenu", () => {
   })
 
   test("choosing the current language does nothing", async () => {
-    renderWithProviders(<LanguageMenu />, { locale: "en" })
+    renderWithProviders(<SwitchingMenu />, { locale: "en" })
     await userEvent.click(screen.getByRole("button", { name: "Language" }))
     await userEvent.click(screen.getByRole("menuitemradio", { name: "English" }))
     expect(router.replace).not.toHaveBeenCalled()
@@ -58,7 +65,7 @@ test("LanguageSubmenu checks the current language inside an account menu", async
     <DropdownMenu>
       <DropdownMenuTrigger>Konto</DropdownMenuTrigger>
       <DropdownMenuContent>
-        <LanguageSubmenu />
+        <LanguageSubmenu onSwitch={() => {}} />
       </DropdownMenuContent>
     </DropdownMenu>,
     { locale: "de" }

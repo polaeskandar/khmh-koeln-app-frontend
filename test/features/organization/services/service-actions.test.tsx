@@ -22,7 +22,7 @@ import {
   type ServiceStages,
 } from "@/features/organization/services/api"
 import { ServiceDetails } from "@/features/organization/services/service-details"
-import { ServiceActionsMenu } from "@/features/organization/services/service-dialogs"
+import { ServiceActionsMenu } from "@/features/organization/services/service-actions"
 import type { Stage } from "@/features/organization/stages/api"
 
 beforeEach(() => {
@@ -157,6 +157,28 @@ test("a service with history can't be deleted, and says so in the dialog", async
   ).toBeInTheDocument()
 
   expect(router.push).not.toHaveBeenCalled()
+})
+
+test("reopening the dialog after a refusal shows no old problem", async () => {
+  server.use(
+    http.delete(apiUrl(`/services/${choir.id}`), () =>
+      problem(409, "services.hasHistory", { params: { name: "Choir", count: 4 } })
+    )
+  )
+
+  menu(choir)
+  await items("Choir")
+  await userEvent.click(screen.getByRole("menuitem", { name: "Delete" }))
+  let dialog = within(await screen.findByRole("alertdialog"))
+  await userEvent.click(dialog.getByRole("button", { name: "Delete" }))
+  await dialog.findByRole("alert")
+  await userEvent.click(dialog.getByRole("button", { name: "Cancel" }))
+  expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument()
+
+  await items("Choir")
+  await userEvent.click(screen.getByRole("menuitem", { name: "Delete" }))
+  dialog = within(await screen.findByRole("alertdialog"))
+  expect(dialog.queryByRole("alert")).not.toBeInTheDocument()
 })
 
 test("an archived service's details show when and why", async () => {

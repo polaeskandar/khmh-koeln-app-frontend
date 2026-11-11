@@ -14,19 +14,28 @@ export const stageQuery = (id: Uuid) =>
 
 export type StageFields = Schemas["StageRequest"]
 
-export const addStageRequest = (service: Uuid, fields: StageFields) =>
-  dataOf(api.POST("/services/{id}/stages", { params: { path: { id: service } }, body: fields }))
+export const addStageRequest = (serviceId: Uuid, fields: StageFields) =>
+  dataOf(api.POST("/services/{id}/stages", { params: { path: { id: serviceId } }, body: fields }))
 
-export const updateStageRequest = (stage: Uuid, fields: StageFields) =>
-  dataOf(api.PUT("/stages/{id}", { params: { path: { id: stage } }, body: fields }))
+export const updateStageRequest = (stageId: Uuid, fields: StageFields) =>
+  dataOf(api.PUT("/stages/{id}", { params: { path: { id: stageId } }, body: fields }))
 
-export const reorderStagesRequest = (service: Uuid, stageIds: Uuid[]) =>
+export const reorderStagesRequest = (serviceId: Uuid, stageIds: Uuid[]) =>
   dataOf(
     api.PUT("/services/{id}/stages/order", {
-      params: { path: { id: service } },
+      params: { path: { id: serviceId } },
       body: { stageIds },
     })
   )
+
+export const archiveStageRequest = (stageId: Uuid) =>
+  dataOf(api.POST("/stages/{id}/archive", { params: { path: { id: stageId } }, body: {} }))
+
+export const restoreStageRequest = (stageId: Uuid) =>
+  dataOf(api.POST("/stages/{id}/restore", { params: { path: { id: stageId } }, body: {} }))
+
+export const deleteStageRequest = (stageId: Uuid) =>
+  dataOf(api.DELETE("/stages/{id}", { params: { path: { id: stageId } } }))
 
 export const STAGE_QUERIES = [STAGES_KEY, SERVICES_KEY]
 

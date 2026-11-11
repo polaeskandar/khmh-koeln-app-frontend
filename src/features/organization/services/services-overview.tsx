@@ -39,7 +39,8 @@ import { routes } from "@/lib/routes"
 import { type ServiceRow, servicesQuery } from "./api"
 import { useNextAt } from "./service-bits"
 import { ArchivedBadge, useServiceColumns } from "./service-columns"
-import { NewServiceButton, ServiceActionsMenu } from "./service-dialogs"
+import { NewServiceButton } from "./service-dialog"
+import { ServiceActionsMenu } from "./service-actions"
 
 type Tab = "active" | "archived" | "all"
 

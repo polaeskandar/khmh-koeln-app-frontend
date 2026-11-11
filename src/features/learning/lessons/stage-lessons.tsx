@@ -30,7 +30,8 @@ import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import { type LessonRow, type LessonTab, type StageLessons, stageLessonsQuery } from "./api"
-import { LessonStatusBadge, MeetingLine } from "./lesson-bits"
+import { LessonStatusBadge } from "./lesson-status-badge"
+import { MeetingLine } from "./meeting-line"
 
 const SEARCH_DELAY_MS = 300
 const STATUSES: LessonStatus[] = ["draft", "ready", "completed"]

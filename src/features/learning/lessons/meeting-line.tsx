@@ -2,112 +2,18 @@
 
 import { cn } from "cn"
 import {
-  Archive,
   CalendarCheck2,
   CalendarClock,
   CalendarX2,
-  CheckCheck,
-  CircleCheck,
   CircleDashed,
-  Eye,
-  EyeOff,
-  PencilLine,
   TriangleAlert,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
 
-import { StatusBadge } from "@/components/status"
 import { useFormat } from "@/i18n/format"
 import type { LocalDate } from "@/lib/api/types/common"
-import type { HomeworkStatus, LessonStatus, MeetingView } from "@/lib/api/types/learning"
+import type { MeetingView } from "@/lib/api/types/learning"
 import { isolate } from "@/lib/bidi"
-
-export function LessonStatusBadge({
-  status,
-  archived,
-  className,
-}: {
-  status: LessonStatus
-  archived?: boolean
-  className?: string
-}) {
-  const t = useTranslations()
-
-  if (archived) {
-    return (
-      <StatusBadge tone="muted" icon={Archive} className={className}>
-        {t("common.archived")}
-      </StatusBadge>
-    )
-  }
-
-  switch (status) {
-    case "draft":
-      return (
-        <StatusBadge tone="muted" icon={PencilLine} className={className}>
-          {t("lessons.status.draft")}
-        </StatusBadge>
-      )
-    case "ready":
-      return (
-        <StatusBadge tone="info" icon={CircleCheck} className={className}>
-          {t("lessons.status.ready")}
-        </StatusBadge>
-      )
-    case "completed":
-      return (
-        <StatusBadge
-          tone="neutral"
-          icon={CheckCheck}
-          className={className}
-          title={t("lessons.status.taught")}
-        >
-          {t("lessons.status.completed")}
-        </StatusBadge>
-      )
-  }
-}
-
-export function HomeworkStatusBadge({
-  status,
-  className,
-}: {
-  status: HomeworkStatus
-  className?: string
-}) {
-  const t = useTranslations()
-
-  switch (status) {
-    case "draft":
-      return (
-        <StatusBadge
-          tone="muted"
-          icon={EyeOff}
-          className={className}
-          title={t("lessons.status.draftHidden")}
-        >
-          {t("lessons.status.draft")}
-        </StatusBadge>
-      )
-    case "published":
-      return (
-        <StatusBadge
-          tone="success"
-          icon={Eye}
-          className={className}
-          title={t("lessons.status.publishedVisible")}
-        >
-          {t("lessons.status.published")}
-        </StatusBadge>
-      )
-    case "archived":
-      return (
-        <StatusBadge tone="muted" icon={Archive} className={className}>
-          {t("common.archived")}
-        </StatusBadge>
-      )
-  }
-}
 
 export function MeetingLine({
   meeting,
@@ -195,35 +101,4 @@ export function MeetingLine({
         </span>
       )
   }
-}
-
-export function CompletionMeter({
-  completed,
-  assigned,
-  className,
-}: {
-  completed: number
-  assigned: number
-  className?: string
-}) {
-  const t = useTranslations("lessons")
-  const ratio = assigned > 0 ? completed / assigned : 0
-
-  return (
-    <div className={cn("flex flex-col gap-1", className)}>
-      <span className="text-sm tabular-nums">
-        {t.rich("completion", {
-          completed,
-          assigned,
-          strong: (chunks) => <span className="font-medium">{chunks}</span>,
-        })}
-      </span>
-      <span className="h-1 w-full bg-muted" aria-hidden="true">
-        <span
-          className="block h-full bg-primary"
-          style={{ width: `${Math.round(ratio * 100)}%` }}
-        />
-      </span>
-    </div>
-  )
 }

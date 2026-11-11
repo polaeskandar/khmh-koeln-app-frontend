@@ -26,7 +26,7 @@ import { useInBrowser } from "@/hooks/use-in-browser"
 import { Link } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 
-import { StageActionsMenu } from "./stage-dialogs"
+import { StageActionsMenu } from "./stage-actions"
 import { useStageAnnouncements } from "./use-stage-announcements"
 import type { StageItem, StageOrder } from "./use-stage-order"
 

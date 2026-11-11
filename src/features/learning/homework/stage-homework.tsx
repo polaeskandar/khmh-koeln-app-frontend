@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button"
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useCanIn } from "@/features/identity/auth/session"
-import { CompletionMeter, HomeworkStatusBadge } from "@/features/learning/lessons/lesson-bits"
+import { CompletionMeter } from "./completion-meter"
+import { HomeworkStatusBadge } from "./homework-status-badge"
 import type { Stage } from "@/features/organization/stages/api"
 import { StageLayout } from "@/features/organization/stages/stage-layout"
 import { useFormat } from "@/i18n/format"
@@ -22,7 +23,7 @@ import { routes } from "@/lib/routes"
 
 import { type StageHomework, stageHomeworkQuery } from "./api"
 import { HomeworkActions } from "./homework-actions"
-import { DueLine } from "./homework-bits"
+import { DueLine } from "./due-line"
 
 type Tab = "published" | "draft" | "archived"
 const TABS: Tab[] = ["published", "draft", "archived"]

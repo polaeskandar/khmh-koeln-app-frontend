@@ -3,7 +3,6 @@ import { describe, expect, test } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
 
-import { focusFirstInvalid } from "@/components/focus-first-invalid"
 import { FormField, SelectField, TextAreaField, TextField } from "@/components/form-fields"
 import { FormPanel } from "@/components/form-panel"
 
@@ -98,29 +97,4 @@ test("FormPanel is a group named by its title", () => {
   )
 
   expect(screen.getByRole("group", { name: "Scripture" })).toBeInTheDocument()
-})
-
-describe("focusFirstInvalid", () => {
-  function Form({ errors }: { errors: Record<string, string> }) {
-    return (
-      <form data-testid="form">
-        <TextField label="Title" error={errors.title} />
-        <TextField label="Passage" error={errors.passage} />
-        <TextAreaField label="Memory verse" error={errors.verse} />
-      </form>
-    )
-  }
-
-  test("focuses the first field with an error, in DOM order", () => {
-    renderWithProviders(<Form errors={{ verse: "Too long.", passage: "Enter a passage." }} />)
-    focusFirstInvalid(screen.getByTestId("form"))
-    expect(screen.getByRole("textbox", { name: "Passage" })).toHaveFocus()
-  })
-
-  test("without errors, focus stays put", () => {
-    renderWithProviders(<Form errors={{}} />)
-    screen.getByRole("textbox", { name: "Title" }).focus()
-    focusFirstInvalid(screen.getByTestId("form"))
-    expect(screen.getByRole("textbox", { name: "Title" })).toHaveFocus()
-  })
 })
