@@ -16,10 +16,18 @@ export function preferredName(p: Pick<Person, "firstName" | "lastName" | "displa
   return p.displayName ? `${p.displayName} ${p.lastName}` : fullName(p)
 }
 
-export function initials(p: Pick<Person, "firstName" | "lastName" | "displayName">): string {
-  const first = (p.displayName ?? p.firstName).trim()
+function initialsFrom(first: string, last: string): string {
+  return `${first.charAt(0)}${last.charAt(0)}`.toLocaleUpperCase("de-DE")
+}
 
-  return `${first.charAt(0)}${p.lastName.trim().charAt(0)}`.toLocaleUpperCase("de-DE")
+export function initials(p: Pick<Person, "firstName" | "lastName" | "displayName">): string {
+  return initialsFrom((p.displayName ?? p.firstName).trim(), p.lastName.trim())
+}
+
+export function initialsOf(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean)
+
+  return initialsFrom(words[0] ?? "", words.length > 1 ? (words.at(-1) ?? "") : "")
 }
 
 export function matchesQuery(

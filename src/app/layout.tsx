@@ -7,6 +7,7 @@ import { ThemeColor } from "@/components/theme-color"
 import { QueryProvider } from "@/lib/api/query-provider"
 import { prePaintScript } from "@/i18n/locale-choice"
 import { apiBaseUrl, impressumUrl } from "@/lib/env"
+import { APP_NAME } from "@/lib/app-name"
 import { THEME_COLORS } from "@/lib/theme-colors"
 
 import { fontStack } from "@/lib/font-stack"
@@ -32,7 +33,7 @@ apiBaseUrl()
 impressumUrl()
 
 export const metadata: Metadata = {
-  title: "KHMK Köln",
+  title: APP_NAME,
   robots: { index: false, follow: false },
 }
 

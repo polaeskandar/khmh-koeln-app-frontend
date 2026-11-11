@@ -12,6 +12,7 @@ import { AppearanceMenu } from "@/components/theme-switch"
 import { useToday } from "@/hooks/use-today"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
+import { APP_NAME } from "@/lib/app-name"
 import { impressumUrl } from "@/lib/env"
 import { routes } from "@/lib/routes"
 
@@ -38,7 +39,7 @@ export function AuthFrame({
         >
           <KhmkMark className="size-9" />
           <span className="flex flex-col leading-tight">
-            <span className="font-heading text-lg font-semibold tracking-tight">KHMK Köln</span>
+            <span className="font-heading text-lg font-semibold tracking-tight">{APP_NAME}</span>
             <span className="text-xs text-muted-foreground">{t("church")}</span>
           </span>
         </Link>

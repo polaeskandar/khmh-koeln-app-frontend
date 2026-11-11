@@ -18,13 +18,8 @@ import {
 import type { Locale } from "@/i18n/config"
 import { Link } from "@/i18n/navigation"
 import type { Schemas } from "@/lib/api/client"
+import { initialsOf } from "@/lib/domain/names"
 import { routes } from "@/lib/routes"
-
-const initialsOf = (name: string) => {
-  const words = name.trim().split(/\s+/)
-
-  return `${words[0]?.charAt(0) ?? ""}${words.length > 1 ? (words.at(-1)?.charAt(0) ?? "") : ""}`.toUpperCase()
-}
 
 type MenuLink = { href: string; icon: LucideIcon; label: string; shown: boolean }
 

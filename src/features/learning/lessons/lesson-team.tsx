@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl"
 
 import { MemberAvatar } from "@/components/member-avatar"
 import { Button } from "@/components/ui/button"
-import { initialsOf } from "@/features/identity/auth/role-summary"
+import { initialsOf } from "@/lib/domain/names"
 import { Link } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 

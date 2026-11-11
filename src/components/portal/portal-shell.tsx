@@ -5,6 +5,7 @@ import type { ReactNode } from "react"
 import { KhmkMark } from "@/components/brand/logo"
 import { NotFoundState } from "@/components/page-states"
 import { Link } from "@/i18n/navigation"
+import { APP_NAME } from "@/lib/app-name"
 
 import { PortalDesktopNav, type PortalNavItem, PortalTabBar } from "./portal-nav"
 
@@ -31,7 +32,7 @@ export function PortalShell({
             <KhmkMark className="size-7" />
             <span className="flex flex-col leading-none whitespace-nowrap">
               <span className="font-heading text-[15px] font-semibold tracking-tight">
-                KHMK Köln
+                {APP_NAME}
               </span>
               <span className="text-[11px] text-muted-foreground">{audience}</span>
             </span>

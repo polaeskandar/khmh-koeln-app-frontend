@@ -9,6 +9,7 @@ import { SessionProvider } from "@/features/identity/auth/session"
 import { directionOf } from "@/i18n/config"
 import { HtmlLangDir } from "@/i18n/html-lang-dir"
 import { routing } from "@/i18n/routing"
+import { APP_NAME } from "@/lib/app-name"
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }))
@@ -26,7 +27,7 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
   const t = await getTranslations({ locale, namespace: "meta" })
 
   return {
-    title: { default: "KHMK Köln", template: "%s · KHMK Köln" },
+    title: { default: APP_NAME, template: `%s · ${APP_NAME}` },
     description: t("description"),
     robots: { index: false, follow: false },
   }
