@@ -2,18 +2,17 @@
 
 import { CircleAlert } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useId, useState } from "react"
+import { useState } from "react"
 
+import { ChoiceCards } from "@/components/choice-cards"
 import { TextAreaField, TextField } from "@/components/form-fields"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { FieldDescription, FieldError, FieldLegend, FieldSet } from "@/components/ui/field"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { createPersonRequest, MEMBERSHIP_QUERIES } from "@/features/people/members/api"
 import { PlacementFields, usePlacement } from "@/features/people/members/placement-fields"
 import type { Uuid } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
-import { oneOf } from "@/lib/one-of"
 
 import { type AccountRequest, type AgeCheck, MEMBER_ACCOUNT_QUERIES } from "./api"
 import { ApprovalDialog, useApproval } from "./approval-dialog"
@@ -151,34 +150,16 @@ function AgeCheckField({
   onChange: (value: AgeCheck) => void
 }) {
   const t = useTranslations("accountRequests.approve")
-  const id = useId()
 
   return (
     <FieldSet data-invalid={error ? true : undefined}>
       <FieldLegend variant="label">{t("age")}</FieldLegend>
       <FieldDescription>{t("ageHint")}</FieldDescription>
-      <RadioGroup
-        value={value ?? ""}
-        onValueChange={(next) => {
-          const ageCheck = oneOf(AGE_CHECKS, next)
-
-          if (ageCheck) {
-            onChange(ageCheck)
-          }
-        }}
-        className="flex flex-col gap-2"
-      >
-        {AGE_CHECKS.map((check) => (
-          <label
-            key={check}
-            htmlFor={`${id}-${check}`}
-            className="flex w-full cursor-pointer items-center gap-3 border p-3 text-sm"
-          >
-            <RadioGroupItem id={`${id}-${check}`} value={check} />
-            {t(`ageCheck.${check}`)}
-          </label>
-        ))}
-      </RadioGroup>
+      <ChoiceCards
+        value={value}
+        choices={AGE_CHECKS.map((check) => ({ value: check, label: t(`ageCheck.${check}`) }))}
+        onChange={onChange}
+      />
       {error ? <FieldError>{error}</FieldError> : null}
     </FieldSet>
   )

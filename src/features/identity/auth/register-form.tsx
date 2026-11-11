@@ -1,11 +1,11 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { cn } from "@/lib/utils"
 import { CircleAlert } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 import { useId, useState } from "react"
 
+import { ChoiceCards } from "@/components/choice-cards"
 import { SelectField, TextAreaField, TextField } from "@/components/form-fields"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -22,13 +22,11 @@ import {
   FieldTitle,
 } from "@/components/ui/field"
 import { NativeSelectOption } from "@/components/ui/native-select"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Spinner } from "@/components/ui/spinner"
 import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { Link, useRouter } from "@/i18n/navigation"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
-import { oneOf } from "@/lib/one-of"
 import { PRIVACY_NOTICE_VERSION } from "@/features/privacy/notice/privacy-notice"
 import { routes } from "@/lib/routes"
 
@@ -51,8 +49,6 @@ const SHOWN_FIELDS = [
   "registration.note",
   "privacy.accepted",
 ]
-
-const KIND_VALUES: RegisteredAs[] = ["parent", "member", "servant"]
 
 const NOTE = {
   parent: { label: "children", hint: "childrenHint" },
@@ -117,36 +113,19 @@ function RegisteredAsField({
 }) {
   const t = useTranslations("auth.register")
 
-  const kinds = [
-    { value: "parent", title: t("asParent"), description: t("asParentHint") },
-    { value: "member", title: t("asMember"), description: t("asMemberHint") },
-    { value: "servant", title: t("asServant"), description: t("asServantHint") },
-  ] as const
-
   return (
     <FieldSet data-invalid={error ? true : undefined}>
       <FieldLegend>{t("as")}</FieldLegend>
-      <RadioGroup
+      <ChoiceCards
         value={value}
-        onValueChange={(next) => onChange(oneOf(KIND_VALUES, next) ?? value)}
+        choices={[
+          { value: "parent", label: t("asParent"), hint: t("asParentHint") },
+          { value: "member", label: t("asMember"), hint: t("asMemberHint") },
+          { value: "servant", label: t("asServant"), hint: t("asServantHint") },
+        ]}
+        onChange={onChange}
         className="grid gap-3"
-      >
-        {kinds.map((kind) => (
-          <FieldLabel
-            key={kind.value}
-            className={cn(
-              "flex w-full cursor-pointer items-start gap-3 border p-4 text-sm font-normal tracking-normal normal-case transition-colors hover:bg-muted/50",
-              value === kind.value && "border-primary bg-primary/5"
-            )}
-          >
-            <RadioGroupItem value={kind.value} className="mt-0.5" />
-            <span className="flex flex-col gap-1">
-              <span className="font-medium">{kind.title}</span>
-              <span className="text-xs text-muted-foreground">{kind.description}</span>
-            </span>
-          </FieldLabel>
-        ))}
-      </RadioGroup>
+      />
       {error ? <FieldError>{error}</FieldError> : null}
     </FieldSet>
   )

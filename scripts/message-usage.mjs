@@ -28,7 +28,6 @@ const DYNAMIC_KEYS = [
   "privacy.kind.*",
   "privacy.mention.*",
   "privacy.status.*",
-  "roles.editor.*Hint",
   "services.table.tabs.*",
   "roles.list.scope.*",
   "status.(scheduled|active|planned)",
