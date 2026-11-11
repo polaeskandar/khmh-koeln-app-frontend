@@ -22,6 +22,7 @@ import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { groupAt } from "@/lib/permissions"
+import { type RoleRow, rolesQuery, ROLE_QUERIES } from "@/features/identity/roles/api"
 
 import {
   passwordLinkRequest,
@@ -31,7 +32,6 @@ import {
 } from "./api"
 import { GiveRoleDialog } from "./give-role-dialog"
 import { PasswordLinkDialog } from "./password-link-dialog"
-import { type RoleRow, rolesQuery, ROLE_QUERIES } from "@/features/identity/roles/api"
 
 function RoleChip({
   account,

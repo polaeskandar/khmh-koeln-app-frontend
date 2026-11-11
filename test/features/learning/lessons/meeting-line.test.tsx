@@ -3,7 +3,6 @@ import { describe, expect, test } from "vitest"
 
 import type { MeetingView } from "@/features/learning/lessons/api"
 import { renderWithProviders } from "@test/support/providers"
-
 import { MeetingLine } from "@/features/learning/lessons/meeting-line"
 
 const TODAY = "2026-11-08"

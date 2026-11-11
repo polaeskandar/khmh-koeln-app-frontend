@@ -10,7 +10,6 @@ import type { SessionDetailResponse } from "@/features/meetings/meetings/api"
 import type { PersonReference } from "@/features/people/members/api"
 import type { SessionView } from "@/features/meetings/meetings/api"
 import { apiUrl } from "@test/support/api"
-
 import { session, sessionResponse, stageRef, sundaySchool } from "@test/support/fixtures/sessions"
 
 const person = (

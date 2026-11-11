@@ -5,9 +5,7 @@ import { describe, expect, test } from "vitest"
 import { me } from "@test/support/fixtures/me"
 import { expectOnlyBelowMd } from "@test/support/layout"
 import { navigation } from "@test/support/navigation"
-
 import { NavUser } from "@/features/portals/staff/staff-account-menu"
-
 import { renderStaffShell } from "@test/support/staff-shell"
 
 describe("the phone's tab bar", () => {

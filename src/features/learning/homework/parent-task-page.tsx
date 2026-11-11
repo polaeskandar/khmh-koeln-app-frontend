@@ -6,15 +6,16 @@ import { useTranslations } from "next-intl"
 import { type ReactNode, Suspense } from "react"
 
 import { QueryState } from "@/components/page-states"
-import { DueLine } from "./due-line"
 import { useSearchParamId } from "@/hooks/use-search-param-id"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import type { Uuid } from "@/lib/api/types/common"
 import { isolate } from "@/lib/bidi"
 import { routes } from "@/lib/routes"
-
 import { parentChildrenQuery } from "@/features/people/children/api"
+import { ListSkeleton } from "@/components/list-skeleton"
+import { ParentNotAvailable } from "@/features/portals/parent/parent-shell"
+
 import {
   CHILD_REPORT_QUERIES,
   type ChildHomeworkDetail,
@@ -23,8 +24,7 @@ import {
   undoReportRequest,
 } from "./api"
 import { CompletionControl, reportOf } from "./completion-control"
-import { ListSkeleton } from "@/components/list-skeleton"
-import { ParentNotAvailable } from "@/features/portals/parent/parent-shell"
+import { DueLine } from "./due-line"
 
 const isWebLink = (url: string) => /^https?:\/\//i.test(url)
 

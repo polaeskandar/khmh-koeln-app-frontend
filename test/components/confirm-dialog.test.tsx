@@ -4,7 +4,6 @@ import type { ComponentProps } from "react"
 import { describe, expect, test, vi } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
-
 import { ConfirmDialog, ReasonDialog } from "@/components/confirm-dialog"
 
 function deferred<T>() {

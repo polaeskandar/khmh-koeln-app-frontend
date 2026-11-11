@@ -13,7 +13,6 @@ import { groupAt } from "@/lib/permissions"
 
 import { stageLessonsQuery } from "./api"
 import { LessonForm } from "./lesson-form"
-
 import { WithOptions } from "./lesson-options"
 
 function NewLesson({ stageId }: { stageId: string }) {

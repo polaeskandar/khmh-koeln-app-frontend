@@ -1,5 +1,4 @@
 import { format } from "node:util"
-
 import { vi } from "vitest"
 
 let logged: string[] = []

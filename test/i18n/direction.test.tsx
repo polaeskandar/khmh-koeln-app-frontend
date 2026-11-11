@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { isolate } from "@/lib/bidi"
 import { renderWithProviders, testProviders } from "@test/support/providers"
-
 import { useInlineEnd } from "@/i18n/direction"
 
 describe("physical sides follow the language", () => {

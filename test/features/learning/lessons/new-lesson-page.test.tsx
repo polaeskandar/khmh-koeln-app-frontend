@@ -17,7 +17,6 @@ import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 import { expectToast } from "@test/support/toasts"
-
 import { NewLessonPage } from "@/features/learning/lessons/new-lesson-page"
 
 const SCHEDULE_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f90"

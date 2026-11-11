@@ -11,7 +11,6 @@ import { stageRef } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import { type Service, type StageList } from "@/features/organization/services/api"
 import { ServiceDetailsPage } from "@/features/organization/services/service-details-page"
 import { ServicesTable } from "@/features/organization/services/services-overview-page"

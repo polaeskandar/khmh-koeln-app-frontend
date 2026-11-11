@@ -4,7 +4,6 @@ import { describe, expect, test } from "vitest"
 import type { Locale } from "@/i18n/config"
 import { addDays } from "@/lib/domain/time"
 import { testProviders } from "@test/support/providers"
-
 import { useDueLabel } from "@/features/learning/homework/due-line"
 
 const TODAY = "2026-11-08"

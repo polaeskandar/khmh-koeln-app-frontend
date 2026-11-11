@@ -4,7 +4,6 @@ import { afterEach, describe, expect, test, vi } from "vitest"
 
 import { navigation } from "@test/support/navigation"
 import { renderWithProviders, testProviders } from "@test/support/providers"
-
 import { TodayStamp, Topbar } from "@/features/portals/staff/topbar"
 
 afterEach(() => {

@@ -11,7 +11,6 @@ import { expectKeepsLineBreaks } from "@test/support/layout"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import type {
   HomeworkDetail,
   HomeworkProgress,

@@ -12,7 +12,6 @@ import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 import { expectToast } from "@test/support/toasts"
-
 import { SessionPage } from "@/features/meetings/meetings/session-page"
 
 function open(

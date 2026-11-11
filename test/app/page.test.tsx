@@ -2,7 +2,6 @@ import { render } from "@testing-library/react"
 import { afterEach, expect, test } from "vitest"
 
 import { router } from "@test/support/navigation"
-
 import Root from "@/app/page"
 
 afterEach(() => {

@@ -18,7 +18,6 @@ import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 import { expectToast } from "@test/support/toasts"
-
 import type { LessonDetail } from "@/features/learning/lessons/api"
 import { EditLessonPage } from "@/features/learning/lessons/edit-lesson-page"
 

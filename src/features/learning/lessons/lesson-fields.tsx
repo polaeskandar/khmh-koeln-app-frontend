@@ -1,9 +1,9 @@
 "use client"
 
-import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 import type { ChangeEvent, ReactNode } from "react"
 
+import { cn } from "@/lib/utils"
 import { FormPanel } from "@/components/form-panel"
 import { TextAreaField, TextField } from "@/components/form-fields"
 import { FieldGroup } from "@/components/ui/field"

@@ -2,7 +2,6 @@ import { render, screen } from "@testing-library/react"
 import { describe, expect, test } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
-
 import { TextAreaField, TextField } from "@/components/form-fields"
 import { focusFirstInvalid, useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 

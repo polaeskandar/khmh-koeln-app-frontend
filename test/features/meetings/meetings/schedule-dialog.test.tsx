@@ -15,7 +15,6 @@ import { services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 import { expectToast } from "@test/support/toasts"
-
 import { SchedulesPage } from "@/features/meetings/meetings/schedules-page"
 
 const sundaySchool = services.items[0]

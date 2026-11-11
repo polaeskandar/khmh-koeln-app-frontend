@@ -7,7 +7,6 @@ import { apiUrl, problem } from "@test/support/api"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import type { RegisterAccount } from "@/features/identity/auth/api"
 import { forgetOutcome } from "@/features/identity/auth/auth-outcome"
 import { RegisterPage } from "@/features/identity/auth/register-page"

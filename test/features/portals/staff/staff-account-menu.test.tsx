@@ -6,9 +6,7 @@ import { describe, expect, test } from "vitest"
 import { apiUrl } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
-
 import { NavUser } from "@/features/portals/staff/staff-account-menu"
-
 import { renderStaffShell } from "@test/support/staff-shell"
 
 describe("the account menu", () => {

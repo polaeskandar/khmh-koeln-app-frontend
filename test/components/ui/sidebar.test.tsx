@@ -2,7 +2,6 @@ import { screen } from "@testing-library/react"
 import { expect, test } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
-
 import { SidebarTrigger } from "@/components/ui/sidebar"
 
 test("SidebarTrigger is labelled in German", () => {

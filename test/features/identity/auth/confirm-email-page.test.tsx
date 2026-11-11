@@ -6,7 +6,6 @@ import { afterEach, expect, test } from "vitest"
 import { apiUrl, problem } from "@test/support/api"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
-
 import { ConfirmEmailPage } from "@/features/identity/auth/confirm-email-page"
 
 afterEach(() => {

@@ -10,7 +10,6 @@ import { session, stageRef, sundaySchool } from "@test/support/fixtures/sessions
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import type { Agenda } from "@/features/meetings/meetings/api"
 import { AgendaPage } from "@/features/meetings/meetings/agenda-page"
 

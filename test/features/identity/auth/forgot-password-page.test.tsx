@@ -6,7 +6,6 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { apiUrl, problem } from "@test/support/api"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
-
 import { ForgotPasswordPage } from "@/features/identity/auth/forgot-password-page"
 
 afterEach(() => {

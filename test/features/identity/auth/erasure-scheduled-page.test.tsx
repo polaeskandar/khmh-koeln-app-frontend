@@ -8,7 +8,6 @@ import { apiUrl, problem } from "@test/support/api"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 import { expectNoToast } from "@test/support/toasts"
-
 import {
   forgetOutcome,
   rememberErasureScheduled,

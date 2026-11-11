@@ -1,5 +1,4 @@
 import { readFileSync } from "node:fs"
-
 import { describe, expect, test } from "vitest"
 
 const css = readFileSync("src/app/globals.css", "utf8").replace(/\/\*[\s\S]*?\*\//g, "")

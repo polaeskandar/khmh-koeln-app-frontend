@@ -3,7 +3,6 @@ import { expect, test } from "vitest"
 
 import { expectNeverScrollsVertically, expectScrollsSideways } from "@test/support/layout"
 import { renderWithProviders } from "@test/support/providers"
-
 import { LinkTabs } from "@/components/link-tabs"
 
 test("LinkTabs marks the current tab as the current page", () => {

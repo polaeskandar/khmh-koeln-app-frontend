@@ -17,10 +17,10 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { cn } from "@/lib/utils"
 import { GripVertical } from "lucide-react"
 import { useTranslations } from "next-intl"
 
+import { cn } from "@/lib/utils"
 import type { StageList } from "@/features/organization/services/api"
 import { useInBrowser } from "@/hooks/use-in-browser"
 import { Link } from "@/i18n/navigation"

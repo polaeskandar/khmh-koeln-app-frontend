@@ -11,7 +11,6 @@ import { server } from "@test/support/msw"
 import type { Locale } from "@/i18n/config"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import { StagePage } from "@/features/organization/stages/stage-page"
 import { useStageCrumbs } from "@/features/organization/stages/stage-layout"
 

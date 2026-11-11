@@ -12,7 +12,6 @@ import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 import { expectToast } from "@test/support/toasts"
-
 import type { LessonDetail } from "@/features/learning/lessons/api"
 import { LessonPage } from "@/features/learning/lessons/lesson-page"
 

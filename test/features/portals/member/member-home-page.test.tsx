@@ -18,7 +18,6 @@ import {
 } from "@test/support/fixtures/member"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
-
 import { MemberHomePage } from "@/features/portals/member/member-home-page"
 
 const member = (displayName: string): Me => ({

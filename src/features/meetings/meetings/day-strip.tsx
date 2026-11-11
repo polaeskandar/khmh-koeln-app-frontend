@@ -1,8 +1,8 @@
 "use client"
 
-import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 
+import { cn } from "@/lib/utils"
 import { toneOf } from "@/components/service-tag"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"

@@ -18,7 +18,6 @@ import {
 } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
-
 import type { AttendanceOverview } from "@/features/meetings/attendance/api"
 import type { Upcoming } from "@/features/meetings/dashboard/api"
 import { DashboardPage } from "@/features/meetings/dashboard/dashboard-page"

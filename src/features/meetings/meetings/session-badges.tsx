@@ -4,6 +4,7 @@ import { Ban, CalendarClock, CheckCheck, CircleDashed, Sparkle } from "lucide-re
 import { useTranslations } from "next-intl"
 
 import { StatusBadge } from "@/components/status"
+
 import type { PlannedSession, AgendaSession, SessionStatus } from "./api"
 
 type Badged = Pick<PlannedSession, "kind"> | Pick<AgendaSession, "kind" | "status" | "scheduleId">

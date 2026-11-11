@@ -8,7 +8,6 @@ import { api, dataOf } from "@/lib/api/client"
 import { apiUrl, problem } from "@test/support/api"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
-
 import { QueryState } from "@/components/page-states"
 
 function Service() {

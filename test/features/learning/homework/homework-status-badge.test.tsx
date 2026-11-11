@@ -2,7 +2,6 @@ import { screen } from "@testing-library/react"
 import { describe, expect, test } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
-
 import { HomeworkStatusBadge } from "@/features/learning/homework/homework-status-badge"
 
 describe("HomeworkStatusBadge", () => {

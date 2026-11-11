@@ -5,8 +5,9 @@ import { useId } from "react"
 
 import { StatusBadge } from "@/components/status"
 import { Checkbox } from "@/components/ui/checkbox"
-import type { Action, Permission, Resource } from "./api"
 import { ACTIONS, RESOURCES, SENSITIVE } from "@/lib/permissions"
+
+import type { Action, Permission, Resource } from "./api"
 
 export function permissionKey(resource: Resource, action: Action) {
   return `${resource}:${action}`

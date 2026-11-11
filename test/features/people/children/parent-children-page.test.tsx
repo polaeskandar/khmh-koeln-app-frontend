@@ -8,7 +8,6 @@ import { me } from "@test/support/fixtures/me"
 import { mimi, MIMI_ID, mina, MINA_ID } from "@test/support/fixtures/parent"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
-
 import type { ChildSummary } from "@/features/people/children/api"
 import { ParentChildrenPage } from "@/features/people/children/parent-children-page"
 

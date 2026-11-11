@@ -3,7 +3,6 @@ import { afterEach, describe, expect, test, vi } from "vitest"
 
 import { apiUrl, problem } from "@test/support/api"
 import { server } from "@test/support/msw"
-
 import { api, apiDownload, dataOf, onUnauthorized } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/problem"
 

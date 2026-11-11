@@ -18,7 +18,6 @@ import { sundaySchool } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
 
 afterEach(() => {

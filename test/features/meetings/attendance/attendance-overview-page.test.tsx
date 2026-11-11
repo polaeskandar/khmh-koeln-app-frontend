@@ -15,7 +15,6 @@ import {
 } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
-
 import type { AttendanceOverview as Overview } from "@/features/meetings/attendance/api"
 import { AttendanceOverviewPage } from "@/features/meetings/attendance/attendance-overview-page"
 

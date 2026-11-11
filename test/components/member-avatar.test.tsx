@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
-
 import { MemberAvatar } from "@/components/member-avatar"
 
 describe("MemberAvatar", () => {

@@ -2,7 +2,6 @@ import { screen } from "@testing-library/react"
 import { expect, test } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
-
 import { TextField } from "@/components/form-fields"
 import { FormPanel } from "@/components/form-panel"
 

@@ -11,7 +11,6 @@ import { services } from "@test/support/fixtures/services"
 import { session, stageRef } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
-
 import { AgendaPage } from "@/features/meetings/meetings/agenda-page"
 import { SchedulesPage } from "@/features/meetings/meetings/schedules-page"
 

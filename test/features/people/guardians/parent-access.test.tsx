@@ -11,7 +11,6 @@ import { stageRef } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 import { expectNoToast, expectToast } from "@test/support/toasts"
-
 import type { DirectoryEntry } from "@/features/people/members/api"
 import type { ParentAccessItem, ParentAccessList } from "@/features/people/guardians/api"
 import { ParentAccess } from "@/features/people/guardians/parent-access"

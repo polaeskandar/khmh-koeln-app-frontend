@@ -1,7 +1,6 @@
 import { readdir, readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
-
 import ts from "typescript"
 
 const repositoryRoot = () => fileURLToPath(new URL("..", import.meta.url))

@@ -21,12 +21,11 @@ import {
 } from "@tanstack/react-table"
 import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, ChevronsUpDown } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { cn } from "@/lib/utils"
 import type { ReactNode } from "react"
 
+import { cn } from "@/lib/utils"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { oneOf } from "@/lib/one-of"
-
 import { Button } from "@/components/ui/button"
 import {
   Table,

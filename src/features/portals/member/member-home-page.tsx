@@ -12,7 +12,6 @@ import { useSession } from "@/features/identity/auth/session"
 import { ListSkeleton } from "@/components/list-skeleton"
 import { TaskList, useOwnCompletion } from "@/features/learning/homework/task-list"
 import { routes } from "@/lib/routes"
-
 import { type ParentHomeworkItem, memberHomeworkQuery } from "@/features/learning/homework/api"
 import { memberGroupsQuery, useMemberGroups } from "@/features/people/groups/api"
 import { memberMeetingsQuery } from "@/features/meetings/meetings/api"

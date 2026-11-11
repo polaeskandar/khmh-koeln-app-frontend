@@ -9,11 +9,9 @@ import { HistoryTimeline } from "@/features/meetings/meetings/history-timeline"
 import { MemberAvatar } from "@/components/member-avatar"
 import { Section } from "@/components/page-header"
 import { RecordPage } from "@/components/record-page"
-import { RosterCells } from "./roster-cells"
 import { useSessionLines } from "@/features/meetings/meetings/session-lines"
 import { Button } from "@/components/ui/button"
 import { RecordNotFound } from "@/features/portals/staff/record-not-found"
-import { Redirect } from "./redirect"
 import { useCanIn } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
@@ -27,6 +25,8 @@ import { initials, preferredName } from "@/lib/domain/names"
 import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
+import { Redirect } from "./redirect"
+import { RosterCells } from "./roster-cells"
 import {
   ATTENDANCE_QUERIES,
   SESSION_STATUS_QUERIES,

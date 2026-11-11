@@ -8,7 +8,6 @@ import { beforeEach, expect, test, vi } from "vitest"
 import { Toaster } from "@/components/ui/sonner"
 import { expectTheme } from "@test/support/layout"
 import { renderWithProviders, testProviders } from "@test/support/providers"
-
 import { AppearanceFields, AppearanceMenu } from "@/components/theme-switch"
 
 const themed = (ui: React.ReactNode, defaultTheme = "system") => (

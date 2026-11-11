@@ -16,7 +16,6 @@ import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 import { expectToast } from "@test/support/toasts"
-
 import type { AttendanceSheet } from "@/features/meetings/attendance/api"
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
 

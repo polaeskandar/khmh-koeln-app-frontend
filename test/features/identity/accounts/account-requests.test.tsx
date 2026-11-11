@@ -13,7 +13,6 @@ import { answerSettingsLists } from "@test/support/fixtures/settings"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 import { expectToast } from "@test/support/toasts"
-
 import type { AccountRequest } from "@/features/identity/accounts/api"
 import { SettingsPage } from "@/features/identity/accounts/settings-page"
 

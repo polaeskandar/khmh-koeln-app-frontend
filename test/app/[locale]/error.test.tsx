@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event"
 import { expect, test, vi } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
-
 import LocaleError from "@/app/[locale]/error"
 
 vi.unmock("@/i18n/navigation")

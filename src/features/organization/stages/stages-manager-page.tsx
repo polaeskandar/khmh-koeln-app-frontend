@@ -1,9 +1,9 @@
 "use client"
 
-import { useCan } from "@/features/identity/auth/session"
 import { useQuery } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
 
+import { useCan } from "@/features/identity/auth/session"
 import { RecordNotFound } from "@/features/portals/staff/record-not-found"
 import { Topbar } from "@/features/portals/staff/topbar"
 import { PageBody, PageHeader, Section } from "@/components/page-header"

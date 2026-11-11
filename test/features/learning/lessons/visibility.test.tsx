@@ -2,7 +2,6 @@ import { screen } from "@testing-library/react"
 import { describe, expect, test } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
-
 import { VisibilityNote } from "@/features/learning/lessons/visibility"
 
 describe("VisibilityNote", () => {

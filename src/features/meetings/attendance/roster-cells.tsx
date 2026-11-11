@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl"
+
 import { cn } from "@/lib/utils"
 
 const CELL_HEIGHTS = { sm: "h-1.5", md: "h-2.5", lg: "h-4" } as const

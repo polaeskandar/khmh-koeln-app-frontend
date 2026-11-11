@@ -13,7 +13,6 @@ import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 import { expectNoToast, expectToast } from "@test/support/toasts"
-
 import type { Agenda } from "@/features/meetings/meetings/api"
 import { AgendaPage } from "@/features/meetings/meetings/agenda-page"
 

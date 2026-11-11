@@ -11,7 +11,6 @@ import { expectOnlyBelowMd, expectOnlyFromMd } from "@test/support/layout"
 import { server } from "@test/support/msw"
 import { navigation } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import type { ChildSummary } from "@/features/people/children/api"
 import { ParentNotAvailable, ParentShell } from "@/features/portals/parent/parent-shell"
 

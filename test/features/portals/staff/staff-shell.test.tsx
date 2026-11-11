@@ -3,7 +3,6 @@ import { afterEach, describe, expect, test, vi } from "vitest"
 
 import { me } from "@test/support/fixtures/me"
 import { navigation } from "@test/support/navigation"
-
 import { renderStaffShell } from "@test/support/staff-shell"
 
 afterEach(() => {

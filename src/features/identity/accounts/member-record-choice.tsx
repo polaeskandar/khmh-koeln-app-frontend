@@ -1,11 +1,11 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { cn } from "@/lib/utils"
 import { Search } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useId, useState } from "react"
 
+import { cn } from "@/lib/utils"
 import { QueryErrorState } from "@/components/page-states"
 import { Button } from "@/components/ui/button"
 import { FieldDescription, FieldError, FieldLegend, FieldSet } from "@/components/ui/field"

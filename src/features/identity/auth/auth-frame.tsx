@@ -1,13 +1,12 @@
 "use client"
 
-import { cn } from "@/lib/utils"
 import type { LucideIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { ReactNode } from "react"
 
+import { cn } from "@/lib/utils"
 import { KhmkMark } from "@/components/brand/logo"
 import { LanguageMenu } from "@/components/language-switch"
-import { useSwitchLocale } from "./use-switch-locale"
 import { AppearanceMenu } from "@/components/theme-switch"
 import { useToday } from "@/hooks/use-today"
 import { useFormat } from "@/i18n/format"
@@ -15,6 +14,8 @@ import { Link } from "@/i18n/navigation"
 import { APP_NAME } from "@/lib/app-name"
 import { impressumUrl } from "@/lib/env"
 import { routes } from "@/lib/routes"
+
+import { useSwitchLocale } from "./use-switch-locale"
 
 export function AuthFrame({
   children,

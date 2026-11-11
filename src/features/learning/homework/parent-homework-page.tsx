@@ -7,15 +7,15 @@ import { Suspense } from "react"
 import { QueryErrorState, QueryState } from "@/components/page-states"
 import { isolate } from "@/lib/bidi"
 import { routes } from "@/lib/routes"
-
 import {
   type ChildSummary,
   parentChildrenQuery,
   useSelectedChild,
 } from "@/features/people/children/api"
-import { type TaskState, useChildHomework } from "./api"
 import { ChildSwitcher } from "@/features/people/children/child-switcher"
 import { ListSkeleton } from "@/components/list-skeleton"
+
+import { type TaskState, useChildHomework } from "./api"
 import { TaskList, useChildCompletion } from "./task-list"
 
 function UnlinkedChild() {

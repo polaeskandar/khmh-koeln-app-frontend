@@ -8,9 +8,9 @@ import { MemberAvatar } from "@/components/member-avatar"
 import { QueryState } from "@/components/page-states"
 import { Link } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
+import { ListSkeleton } from "@/components/list-skeleton"
 
 import { type ChildSummary, parentChildrenQuery } from "./api"
-import { ListSkeleton } from "@/components/list-skeleton"
 
 function ChildCard({ child }: { child: ChildSummary }) {
   const t = useTranslations("parent.children")

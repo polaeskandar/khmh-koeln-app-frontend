@@ -4,7 +4,6 @@ import { describe, expect, test } from "vitest"
 import { AGENDA_TODAY, agendaSession, plannedDate } from "@test/support/fixtures/agenda"
 import { physicalClasses } from "@test/support/physical-classes"
 import { renderWithProviders } from "@test/support/providers"
-
 import { AgendaRow } from "@/features/meetings/meetings/agenda-row"
 import { SessionCardView } from "@/features/meetings/meetings/session-card"
 

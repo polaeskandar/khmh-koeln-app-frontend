@@ -16,11 +16,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import type { Service } from "@/features/organization/services/api"
 import { useFormat } from "@/i18n/format"
 import type { LocalDate } from "@/lib/api/types/common"
-import { groupOf } from "./session-lines"
-import type { RosterMode } from "./api"
 import { addDays } from "@/lib/domain/time"
 import { oneOf } from "@/lib/one-of"
 
+import { groupOf } from "./session-lines"
+import type { RosterMode } from "./api"
 import type { Draft, DraftFieldsProps, Preview, ScheduleTarget } from "./schedule-draft"
 
 const ROSTER_MODES: RosterMode[] = ["expected", "open"]

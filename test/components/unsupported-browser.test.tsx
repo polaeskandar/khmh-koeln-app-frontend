@@ -2,7 +2,6 @@ import { screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
-
 import { UnsupportedBrowser } from "@/components/unsupported-browser"
 
 afterEach(() => vi.unstubAllGlobals())

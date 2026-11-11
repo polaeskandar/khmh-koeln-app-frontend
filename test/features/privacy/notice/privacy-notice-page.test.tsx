@@ -9,7 +9,6 @@ import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
-
 import { readPrivacyNotice } from "@/features/privacy/notice/notice"
 import {
   PRIVACY_NOTICE_VERSION,

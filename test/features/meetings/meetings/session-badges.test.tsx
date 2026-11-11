@@ -2,7 +2,6 @@ import { screen } from "@testing-library/react"
 import { describe, expect, test } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
-
 import { OneOffBadge, SessionStatusBadge } from "@/features/meetings/meetings/session-badges"
 
 describe("SessionStatusBadge", () => {

@@ -6,7 +6,6 @@ import { vi } from "vitest"
 
 import { apiUrl, problem, renderWithQuery } from "@test/support/api"
 import { server } from "@test/support/msw"
-
 import { api, dataOf } from "@/lib/api/client"
 
 function Services() {

@@ -1,6 +1,5 @@
 "use client"
 
-import { cn } from "@/lib/utils"
 import {
   CalendarCheck2,
   CalendarClock,
@@ -10,10 +9,12 @@ import {
 } from "lucide-react"
 import { useTranslations } from "next-intl"
 
+import { cn } from "@/lib/utils"
 import { useFormat } from "@/i18n/format"
 import type { LocalDate } from "@/lib/api/types/common"
-import type { MeetingView } from "./api"
 import { isolate } from "@/lib/bidi"
+
+import type { MeetingView } from "./api"
 
 type SessionMeeting = Extract<NonNullable<MeetingView>, { kind: "session" }>
 

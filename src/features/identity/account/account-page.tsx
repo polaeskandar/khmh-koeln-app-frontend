@@ -7,11 +7,11 @@ import { FormPanel } from "@/components/form-panel"
 import { PageBody, PageHeader } from "@/components/page-header"
 import { PageLoading } from "@/components/page-loading"
 import { useSession } from "@/features/identity/auth/session"
+import { OwnData } from "@/features/privacy/own-data/own-data"
 
 import { AccountDetails } from "./account-details"
 import { PasswordSection } from "./password-section"
 import { PreferencesFields } from "./preferences-fields"
-import { OwnData } from "@/features/privacy/own-data/own-data"
 
 export function AccountPage() {
   const t = useTranslations("account")

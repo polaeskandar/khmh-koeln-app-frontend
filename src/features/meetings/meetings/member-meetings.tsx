@@ -1,9 +1,9 @@
 "use client"
 
-import { cn } from "@/lib/utils"
 import { CalendarX2, Clock, MapPin } from "lucide-react"
 import { useTranslations } from "next-intl"
 
+import { cn } from "@/lib/utils"
 import { ServiceTag } from "@/components/service-tag"
 import { useFormat } from "@/i18n/format"
 import type { LocalDate } from "@/lib/api/types/common"

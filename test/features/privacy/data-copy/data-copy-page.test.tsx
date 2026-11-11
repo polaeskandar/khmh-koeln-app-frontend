@@ -8,7 +8,6 @@ import { apiUrl, problem } from "@test/support/api"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 import { expectNoToast } from "@test/support/toasts"
-
 import { DataCopyPage } from "@/features/privacy/data-copy/data-copy-page"
 
 let clicks: { href: string; download: string }[] = []

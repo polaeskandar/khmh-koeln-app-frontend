@@ -7,7 +7,6 @@ import { ServiceTag } from "@/components/service-tag"
 import { useFormat } from "@/i18n/format"
 import type { LocalDate } from "@/lib/api/types/common"
 import { isolate } from "@/lib/bidi"
-
 import { recurrenceOf } from "@/lib/domain/recurrence"
 
 import { type GroupServant, type MemberGroup, useMemberServants } from "./api"
