@@ -16,7 +16,20 @@ import { type DataRequestRow, dataRequestsQuery } from "./api"
 import { RecordRequestButton } from "./record-request-dialog"
 import { DueLabel, RequestStatusBadge, useSubjectLabel } from "./request-bits"
 
-function Table({
+function ClosedCell({ row, today }: { row: DataRequestRow; today: string }) {
+  const t = useTranslations("privacy.list")
+  const f = useFormat()
+
+  if (!row.closedAt) {
+    return null
+  }
+
+  const when = f.atLabel(row.closedAt, today)
+
+  return row.closedBy ? t("closedBy", { when, name: row.closedBy.name }) : when
+}
+
+function RequestsTable({
   rows,
   today,
   closed,
@@ -78,16 +91,7 @@ function Table({
               </td>
               <td className="px-3 py-3">
                 {closed ? (
-                  row.closedAt ? (
-                    row.closedBy ? (
-                      t("list.closedBy", {
-                        when: f.atLabel(row.closedAt, today),
-                        name: row.closedBy.name,
-                      })
-                    ) : (
-                      f.atLabel(row.closedAt, today)
-                    )
-                  ) : null
+                  <ClosedCell row={row} today={today} />
                 ) : (
                   <DueLabel dueOn={row.dueOn} today={today} />
                 )}
@@ -109,18 +113,18 @@ function Requests() {
 
   return (
     <QueryState query={query}>
-      {(data) => (
+      {(list) => (
         <>
           <PageHeader
             title={t("privacy.list.title")}
             description={t("privacy.list.description")}
-            actions={<RecordRequestButton today={data.today} />}
+            actions={<RecordRequestButton today={list.today} />}
           />
-          <Section id="open" title={t("privacy.list.open", { count: data.open.length })}>
-            {data.open.length === 0 ? (
+          <Section id="open" title={t("privacy.list.open", { count: list.open.length })}>
+            {list.open.length === 0 ? (
               <p className="text-sm text-muted-foreground">{t("privacy.list.noneOpen")}</p>
             ) : (
-              <Table rows={data.open} today={data.today} closed={false} />
+              <RequestsTable rows={list.open} today={list.today} closed={false} />
             )}
           </Section>
           <Section
@@ -128,10 +132,10 @@ function Requests() {
             title={t("privacy.list.closed")}
             description={t("privacy.list.closedDescription")}
           >
-            {data.closed.length === 0 ? (
+            {list.closed.length === 0 ? (
               <p className="text-sm text-muted-foreground">{t("privacy.list.noneClosed")}</p>
             ) : (
-              <Table rows={data.closed} today={data.today} closed />
+              <RequestsTable rows={list.closed} today={list.today} closed />
             )}
           </Section>
           <p className="text-sm text-muted-foreground">
