@@ -16,8 +16,8 @@ import { useCan } from "@/features/identity/auth/session"
 import { OpenSessionsBubble } from "@/features/meetings/attendance/open-sessions-badge"
 import { Link, usePathname } from "@/i18n/navigation"
 
-import { AccountMenuItems } from "./account-menu"
-import { isActive, NAV, type NavItem, SETTINGS, TAKE_ATTENDANCE } from "./nav"
+import { AccountMenuItems } from "./staff-account-menu"
+import { isActive, NAV, type NavItem, SETTINGS, TAKE_ATTENDANCE } from "./staff-nav"
 
 const item = (key: NavItem["key"]) => NAV.find((i) => i.key === key)!
 

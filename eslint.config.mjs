@@ -95,7 +95,7 @@ const eslintConfig = defineConfig([
     files: ["src/components/**", "src/hooks/**", "src/i18n/**", "src/lib/**"],
     rules: {
       "@typescript-eslint/no-restricted-imports": [
-        "warn",
+        "error",
         {
           patterns: [
             {

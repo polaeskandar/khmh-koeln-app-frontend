@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
-import { SidebarNav } from "@/components/app-shell/sidebar-parts"
+import { SidebarNav } from "@/features/portals/staff/sidebar-nav"
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Locale } from "@/i18n/config"

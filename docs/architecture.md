@@ -98,26 +98,29 @@ production; off unless set, the page says to ask the church office.
 layout"), so the screens for an endpoint sit under the context of its controller. Each context has one folder
 per resource:
 
-| Context        | Folders                                            |
-| -------------- | -------------------------------------------------- |
-| `identity`     | `auth`, `account`, `accounts`, `roles`             |
-| `organization` | `services`, `stages`, `assignments`                |
-| `people`       | `members`, `guardians`, `children`, `groups`       |
-| `meetings`     | `meetings`, `attendance`, `dashboard`              |
-| `learning`     | `lessons`, `homework`                              |
-| `privacy`      | `data-requests`, `data-copy`, `notice`, `own-data` |
-| `portals`      | `parent`, `member` (no backend context, see below) |
+| Context        | Folders                                                     |
+| -------------- | ----------------------------------------------------------- |
+| `identity`     | `auth`, `account`, `accounts`, `roles`                      |
+| `organization` | `services`, `stages`, `assignments`                         |
+| `people`       | `members`, `guardians`, `children`, `groups`                |
+| `meetings`     | `meetings`, `attendance`, `dashboard`                       |
+| `learning`     | `lessons`, `homework`                                       |
+| `privacy`      | `data-requests`, `data-copy`, `notice`, `own-data`          |
+| `portals`      | `staff`, `parent`, `member` (no backend context, see below) |
 
 A file sits in the context whose endpoints it calls, as in the backend's `Interface/Api/<Area>`: the parent and
 member portals' homework is in `learning/homework`, a parent's children in `people/children`, a member's groups
 in `people/groups` and their meetings in `meetings/meetings`. A screen that combines several contexts sits with
-its main one (the Settings page in `identity/accounts`). `portals/parent` and `portals/member` hold only what
-has no backend counterpart: each portal's shell, navigation, home and account page. Tests in `test/features/`
+its main one (the Settings page in `identity/accounts`). `portals/staff`, `portals/parent` and `portals/member`
+hold only what has no backend counterpart: each area's shell and navigation, and the portals' home and account
+pages. The staff shell (sidebar, top bar, phone tab bar, account menu and `RecordNotFound`) is in `portals/staff`. Tests in `test/features/`
 use the same folders.
 
 Shared code in `src/components`, `src/hooks`, `src/i18n` and `src/lib` doesn't import from `src/features`: a
-feature builds on it, never the other way round. ESLint warns about the imports that still cross (the staff shell,
-the portal account menu and the language switch); the warning becomes an error once they have moved.
+feature builds on it, never the other way round, and ESLint rejects such an import (`no-restricted-imports` for
+those folders). Shared code that needs something a feature owns takes it from its caller: `PortalAccountMenu`
+gets the account and sign-out from the portal's menu, and `LanguageMenu` the switch (`useSwitchLocale` in
+`identity/auth`, which also saves the language on the account).
 
 ### Data access
 

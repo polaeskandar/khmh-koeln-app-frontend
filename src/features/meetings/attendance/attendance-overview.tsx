@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 import { CircleAlert, ClipboardCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
 
-import { Topbar } from "@/components/app-shell/topbar"
+import { Topbar } from "@/features/portals/staff/topbar"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
 import { NotAssigned } from "@/components/not-assigned"
 import { QueryState } from "@/components/page-states"

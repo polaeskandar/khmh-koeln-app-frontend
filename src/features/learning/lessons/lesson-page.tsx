@@ -3,8 +3,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
 
-import { RecordNotFound } from "@/components/app-shell/record-not-found"
-import { Topbar } from "@/components/app-shell/topbar"
+import { RecordNotFound } from "@/features/portals/staff/record-not-found"
+import { Topbar } from "@/features/portals/staff/topbar"
 import { PageBody, PageHeader } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"

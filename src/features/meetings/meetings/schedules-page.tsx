@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { Suspense } from "react"
 
-import { Topbar } from "@/components/app-shell/topbar"
+import { Topbar } from "@/features/portals/staff/topbar"
 import { PageBody, PageHeader } from "@/components/page-header"
 import { NotAssigned } from "@/components/not-assigned"
 import { QueryState } from "@/components/page-states"

@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 
-import { Topbar } from "@/components/app-shell/topbar"
+import { Topbar } from "@/features/portals/staff/topbar"
 import { FormPanel } from "@/components/form-panel"
 import { PageBody, PageHeader } from "@/components/page-header"
 import { PageLoading } from "@/components/page-loading"

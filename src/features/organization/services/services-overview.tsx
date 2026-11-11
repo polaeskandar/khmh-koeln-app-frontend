@@ -6,7 +6,7 @@ import { Search, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { type ReactNode, useMemo, useState } from "react"
 
-import { Topbar } from "@/components/app-shell/topbar"
+import { Topbar } from "@/features/portals/staff/topbar"
 import {
   countByTab,
   DataTablePagination,

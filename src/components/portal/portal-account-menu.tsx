@@ -2,9 +2,9 @@
 
 import { LogOut, ShieldCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
+import type { ReactNode } from "react"
 
 import { LanguageSubmenu } from "@/components/language-switch"
-import { useSwitchLocale } from "@/features/identity/auth/use-switch-locale"
 import { MemberAvatar } from "@/components/member-avatar"
 import { AppearanceSubmenu } from "@/components/theme-switch"
 import { Button } from "@/components/ui/button"
@@ -16,8 +16,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useSession } from "@/features/identity/auth/session"
+import type { Locale } from "@/i18n/config"
 import { Link } from "@/i18n/navigation"
+import type { Schemas } from "@/lib/api/client"
 import { routes } from "@/lib/routes"
 
 const initialsOf = (name: string) => {
@@ -27,50 +28,46 @@ const initialsOf = (name: string) => {
 }
 
 export function PortalAccountMenu({
+  account,
   label,
+  signingOut,
+  onSignOut,
+  onSwitchLocale,
   links,
 }: {
-  label: (name: string) => string
-  links: React.ReactNode
+  account: Schemas["MeResponse"]["account"]
+  label: string
+  signingOut: boolean
+  onSignOut: () => void
+  onSwitchLocale: (locale: Locale) => void
+  links: ReactNode
 }) {
   const t = useTranslations()
-  const switchLocale = useSwitchLocale()
-  const { session, signOut, signingOut } = useSession()
-
-  if (session.status !== "authenticated") {
-    return null
-  }
-
-  const { me } = session
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className="h-10 gap-2 px-2"
-          aria-label={label(me.account.displayName)}
-        >
+        <Button variant="ghost" className="h-10 gap-2 px-2" aria-label={label}>
           <MemberAvatar
-            name={me.account.displayName}
-            initials={initialsOf(me.account.displayName)}
-            seed={me.account.id}
+            name={account.displayName}
+            initials={initialsOf(account.displayName)}
+            seed={account.id}
             className="size-7"
           />
           <span className="hidden max-w-40 truncate text-sm font-medium tracking-normal normal-case sm:inline md:hidden lg:inline">
-            {me.account.displayName}
+            {account.displayName}
           </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-72">
         <DropdownMenuLabel className="grid leading-tight">
-          <span className="truncate">{me.account.displayName}</span>
+          <span className="truncate">{account.displayName}</span>
           <span dir="ltr" className="truncate text-start text-xs font-normal text-muted-foreground">
-            {me.account.email}
+            {account.email}
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <LanguageSubmenu onSwitch={switchLocale} />
+        <LanguageSubmenu onSwitch={onSwitchLocale} />
         <AppearanceSubmenu />
         <DropdownMenuSeparator />
         {links}
@@ -80,7 +77,7 @@ export function PortalAccountMenu({
             {t("auth.footer.privacy")}
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem disabled={signingOut} onSelect={() => void signOut()}>
+        <DropdownMenuItem disabled={signingOut} onSelect={onSignOut}>
           <LogOut />
           {t("shell.signOut")}
         </DropdownMenuItem>

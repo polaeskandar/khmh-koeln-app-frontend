@@ -3,9 +3,9 @@
 import { useTranslations } from "next-intl"
 import { type ReactNode, useState } from "react"
 
-import { RecordNotFound } from "@/components/app-shell/record-not-found"
+import { RecordNotFound } from "@/features/portals/staff/record-not-found"
 import { Redirect } from "./redirect"
-import { Topbar } from "@/components/app-shell/topbar"
+import { Topbar } from "@/features/portals/staff/topbar"
 import { PageBody, PageHeader } from "@/components/page-header"
 import { RecordPage } from "@/components/record-page"
 import { ServiceTag } from "@/components/service-tag"

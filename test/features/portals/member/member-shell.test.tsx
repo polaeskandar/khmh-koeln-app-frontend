@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { afterEach, describe, expect, test } from "vitest"
 
-import { NavUser } from "@/components/app-shell/account-menu"
+import { NavUser } from "@/features/portals/staff/staff-account-menu"
 import type { Me } from "@/features/identity/auth/api"
 import { RedirectIfSignedIn } from "@/features/identity/auth/guards"
 import { SessionProvider } from "@/features/identity/auth/session"
