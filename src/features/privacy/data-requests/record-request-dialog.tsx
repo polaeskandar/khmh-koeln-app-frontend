@@ -96,6 +96,35 @@ function SubjectSearch({
           )
           .map((account) => ({ id: account.id, label: `${account.name} · ${account.email}` }))
 
+  function matchList() {
+    if (q.length < 2) {
+      return <FieldDescription>{t("searchHint")}</FieldDescription>
+    }
+
+    if (matches.length === 0) {
+      return <FieldDescription>{t("noMatches")}</FieldDescription>
+    }
+
+    return (
+      <RadioGroup
+        value={chosenOf(subject) ?? ""}
+        onValueChange={(chosen) => onChange(subjectOf(about, chosen))}
+        className="flex flex-col gap-0 divide-y border-y"
+      >
+        {matches.map((match) => (
+          <label
+            key={match.id}
+            htmlFor={`${id}-${match.id}`}
+            className="flex cursor-pointer items-center gap-3 py-2 text-sm"
+          >
+            <RadioGroupItem id={`${id}-${match.id}`} value={match.id} />
+            <bdi>{match.label}</bdi>
+          </label>
+        ))}
+      </RadioGroup>
+    )
+  }
+
   return (
     <Field data-invalid={error ? true : undefined}>
       <Input
@@ -109,28 +138,7 @@ function SubjectSearch({
         }}
         onKeyDown={ignoreEnter}
       />
-      {q.length < 2 ? (
-        <FieldDescription>{t("searchHint")}</FieldDescription>
-      ) : matches.length === 0 ? (
-        <FieldDescription>{t("noMatches")}</FieldDescription>
-      ) : (
-        <RadioGroup
-          value={chosenOf(subject) ?? ""}
-          onValueChange={(chosen) => onChange(subjectOf(about, chosen))}
-          className="flex flex-col gap-0 divide-y border-y"
-        >
-          {matches.map((match) => (
-            <label
-              key={match.id}
-              htmlFor={`${id}-${match.id}`}
-              className="flex cursor-pointer items-center gap-3 py-2 text-sm"
-            >
-              <RadioGroupItem id={`${id}-${match.id}`} value={match.id} />
-              <bdi>{match.label}</bdi>
-            </label>
-          ))}
-        </RadioGroup>
-      )}
+      {matchList()}
       {error ? <FieldError>{error}</FieldError> : null}
     </Field>
   )

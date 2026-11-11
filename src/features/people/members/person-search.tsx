@@ -45,9 +45,44 @@ export function PersonSearch({
   const [text, setText] = useState("")
   const q = useDebounced(text.trim(), DEBOUNCE_MS)
   const ready = q.length >= MIN_LETTERS && text.trim().length >= MIN_LETTERS
-  const results = useQuery({ ...directoryQuery(q), enabled: ready })
+  const found = useQuery({ ...directoryQuery(q), enabled: ready })
   const chosenIds = new Set(chosen.map((person) => person.id))
   const none = t("noGroup")
+
+  function results() {
+    if (!ready) {
+      return <p className="text-xs text-muted-foreground">{t("searchToAdd")}</p>
+    }
+
+    if (!found.data) {
+      return null
+    }
+
+    const offered = found.data.items.filter((person) => !chosenIds.has(person.id))
+
+    if (offered.length === 0) {
+      return <p className="text-xs text-muted-foreground">{t("noChildMatches")}</p>
+    }
+
+    return (
+      <ul className="flex flex-col divide-y border-y">
+        {offered.map((person) => (
+          <li key={person.id}>
+            <button
+              type="button"
+              className="flex w-full min-w-0 flex-col py-2 text-start hover:bg-muted/60"
+              onClick={() => onChange([...chosen, person])}
+            >
+              <span className="truncate text-sm font-medium">{preferredName(person)}</span>
+              <span className="truncate text-xs text-muted-foreground">
+                {groupsText(person, f.separator, none)}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-3">
@@ -92,32 +127,7 @@ export function PersonSearch({
           onKeyDown={ignoreEnter}
         />
       </InputGroup>
-      {!ready ? (
-        <p className="text-xs text-muted-foreground">{t("searchToAdd")}</p>
-      ) : results.data ? (
-        results.data.items.filter((person) => !chosenIds.has(person.id)).length === 0 ? (
-          <p className="text-xs text-muted-foreground">{t("noChildMatches")}</p>
-        ) : (
-          <ul className="flex flex-col divide-y border-y">
-            {results.data.items
-              .filter((person) => !chosenIds.has(person.id))
-              .map((person) => (
-                <li key={person.id}>
-                  <button
-                    type="button"
-                    className="flex w-full min-w-0 flex-col py-2 text-start hover:bg-muted/60"
-                    onClick={() => onChange([...chosen, person])}
-                  >
-                    <span className="truncate text-sm font-medium">{preferredName(person)}</span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      {groupsText(person, f.separator, none)}
-                    </span>
-                  </button>
-                </li>
-              ))}
-          </ul>
-        )
-      ) : null}
+      {results()}
     </div>
   )
 }

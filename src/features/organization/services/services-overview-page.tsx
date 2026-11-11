@@ -139,16 +139,18 @@ function ServicesEmpty({
 }) {
   const t = useTranslations()
 
+  const emptyTitle = () => {
+    if (search) {
+      return t("services.table.noMatch", { query: search })
+    }
+
+    return tab === "archived" ? t("services.table.noArchived") : t("services.table.none")
+  }
+
   return (
     <Empty className="py-6">
       <EmptyHeader>
-        <EmptyTitle>
-          {search
-            ? t("services.table.noMatch", { query: search })
-            : tab === "archived"
-              ? t("services.table.noArchived")
-              : t("services.table.none")}
-        </EmptyTitle>
+        <EmptyTitle>{emptyTitle()}</EmptyTitle>
         <EmptyDescription>
           {search ? t("services.table.checkSpelling") : t("services.table.appearHere")}
         </EmptyDescription>

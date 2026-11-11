@@ -81,7 +81,8 @@ function DuplicateCandidatesAlert({
                         where: isolate(there.stage?.name ?? there.service.name),
                       })}
                     </span>
-                  ) : placement && can("update", "members", placement) ? (
+                  ) : null}
+                  {!there && placement && can("update", "members", placement) ? (
                     <Button
                       type="button"
                       size="sm"
@@ -200,9 +201,12 @@ function AddPersonDialog({ preset, onClose }: { preset?: PlacementInput; onClose
           onAdd={(candidate) => void addExisting(candidate)}
           onAddAnyway={() => void submitAnyway()}
         />
-      ) : problem && !shownInFields && problem.status !== 403 ? (
-        <FormAlert message={problem.message} />
       ) : null}
+      <FormAlert
+        message={
+          !duplicate && problem && !shownInFields && problem.status !== 403 ? problem.message : null
+        }
+      />
       <FieldGroup>
         <div className="grid gap-4 sm:grid-cols-2">
           <TextField

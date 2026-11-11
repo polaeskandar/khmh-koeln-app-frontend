@@ -31,34 +31,42 @@ export function useSubjectLabel() {
   }
 }
 
+const DUE_TONES = {
+  late: { className: "font-medium text-destructive", icon: CircleAlert },
+  soon: { className: "font-medium text-warning", icon: Clock },
+  quiet: { className: "", icon: null },
+} as const
+
+function dueToneOf(left: number): keyof typeof DUE_TONES {
+  if (left < 0) {
+    return "late"
+  }
+
+  return left <= SOON_DAYS ? "soon" : "quiet"
+}
+
 export function DueLabel({ dueOn, today }: { dueOn: LocalDate; today: LocalDate }) {
   const t = useTranslations("privacy.due")
   const f = useFormat()
   const left = daysBetween(today, dueOn)
-  const late = left < 0
-  const soon = !late && left <= SOON_DAYS
+  const tone = dueToneOf(left)
+  const { className, icon: Icon } = DUE_TONES[tone]
+
+  const leftText = () => {
+    if (tone === "late") {
+      return t("late", { count: -left })
+    }
+
+    return left === 0 ? t("today") : t("left", { count: left })
+  }
 
   return (
-    <span
-      data-tone={late ? "late" : soon ? "soon" : "quiet"}
-      className={cn(
-        "inline-flex items-center gap-1.5",
-        late ? "font-medium text-destructive" : soon ? "font-medium text-warning" : ""
-      )}
-    >
-      {late ? (
-        <CircleAlert className="size-3.5 shrink-0" aria-hidden="true" />
-      ) : soon ? (
-        <Clock className="size-3.5 shrink-0" aria-hidden="true" />
-      ) : null}
+    <span data-tone={tone} className={cn("inline-flex items-center gap-1.5", className)}>
+      {Icon ? <Icon className="size-3.5 shrink-0" aria-hidden="true" /> : null}
       <span>
         {f.dayMonth(dueOn)}
-        <span className={cn("ms-1.5", !late && !soon && "text-muted-foreground")}>
-          {late
-            ? t("late", { count: -left })
-            : left === 0
-              ? t("today")
-              : t("left", { count: left })}
+        <span className={cn("ms-1.5", tone === "quiet" && "text-muted-foreground")}>
+          {leftText()}
         </span>
       </span>
     </span>

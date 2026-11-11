@@ -36,8 +36,7 @@ export function langDirBeforePaint(pathname: string, stored: string | null) {
   const locales = ["en", "de", "ar"]
   const first = pathname.split("/")[1]
 
-  const locale =
-    locales.indexOf(first) >= 0 ? first : stored && locales.indexOf(stored) >= 0 ? stored : null
+  const locale = [first, stored].find((candidate) => candidate && locales.indexOf(candidate) >= 0)
 
   return locale ? { lang: locale, dir: locale === "ar" ? "rtl" : "ltr" } : null
 }

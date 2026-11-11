@@ -78,8 +78,13 @@ function Redirect({ to, locale }: { to: string; locale?: Locale }) {
   return <SessionSplash />
 }
 
-const homeOf = (areas: Areas) =>
-  areas.staff ? routes.home() : areas.parent ? routes.parentHome() : routes.memberHome()
+function homeOf(areas: Areas) {
+  if (areas.staff) {
+    return routes.home()
+  }
+
+  return areas.parent ? routes.parentHome() : routes.memberHome()
+}
 
 const hasArea = (areas: Areas) => areas.staff || areas.parent || areas.member
 

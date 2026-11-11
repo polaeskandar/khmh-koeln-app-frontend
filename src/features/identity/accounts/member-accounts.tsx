@@ -66,11 +66,17 @@ function AccountRow({
   const { member } = account
   const memberName = member.name ?? account.name
 
-  const groups = member.inactive
-    ? t("settings.members.inactive")
-    : member.groups.length > 0
+  const groupsLine = () => {
+    if (member.inactive) {
+      return t("settings.members.inactive")
+    }
+
+    return member.groups.length > 0
       ? member.groups.join(f.separator)
       : t("settings.members.noGroup")
+  }
+
+  const groups = groupsLine()
 
   return (
     <li className="flex flex-col gap-3 py-4 sm:flex-row sm:items-start sm:justify-between">

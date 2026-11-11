@@ -74,18 +74,22 @@ function LinkStatus({
   const [now] = useState(Date.now)
   const expired = !status.usedAt && Date.parse(status.expiresAt) <= now
 
+  const stateLine = () => {
+    if (status.usedAt) {
+      return t("used", { when: f.atLabel(status.usedAt, today) })
+    }
+
+    return expired
+      ? t("expired", { when: f.atLabel(status.expiresAt, today) })
+      : t("expires", {
+          date: f.dayMonth(f.instantDate(status.expiresAt)),
+          time: f.instantTime(status.expiresAt),
+        })
+  }
+
   return (
     <ul className="flex flex-col gap-1 text-sm">
-      <li>
-        {status.usedAt
-          ? t("used", { when: f.atLabel(status.usedAt, today) })
-          : expired
-            ? t("expired", { when: f.atLabel(status.expiresAt, today) })
-            : t("expires", {
-                date: f.dayMonth(f.instantDate(status.expiresAt)),
-                time: f.instantTime(status.expiresAt),
-              })}
-      </li>
+      <li>{stateLine()}</li>
       <li className="text-muted-foreground">
         {status.emailedTo
           ? t.rich("emailedTo", { email: () => <bdi dir="ltr">{status.emailedTo}</bdi> })
@@ -133,33 +137,42 @@ export function CopyLinkSection({ detail }: { detail: DataRequestDetail }) {
     return null
   }
 
-  const actions =
-    !requestOpen || gone ? null : shown ? (
-      <ConfirmDialog
-        trigger={
-          <Button variant="outline">
-            <RefreshCw data-icon="inline-start" />
-            {t("privacy.copyLink.createNew")}
-          </Button>
-        }
-        title={t("privacy.copyLink.newTitle")}
-        description={t("privacy.copyLink.newText")}
-        confirmLabel={t("privacy.copyLink.newConfirm")}
-        onConfirm={async () => (await createLink()) ?? false}
-      />
-    ) : (
+  const actionsOf = () => {
+    if (!requestOpen || gone) {
+      return null
+    }
+
+    if (shown) {
+      return (
+        <ConfirmDialog
+          trigger={
+            <Button variant="outline">
+              <RefreshCw data-icon="inline-start" />
+              {t("privacy.copyLink.createNew")}
+            </Button>
+          }
+          title={t("privacy.copyLink.newTitle")}
+          description={t("privacy.copyLink.newText")}
+          confirmLabel={t("privacy.copyLink.newConfirm")}
+          onConfirm={async () => (await createLink()) ?? false}
+        />
+      )
+    }
+
+    return (
       <Button disabled={create.pending} onClick={() => void createLink()}>
         {create.pending ? <Spinner data-icon="inline-start" /> : <Link2 data-icon="inline-start" />}
         {t("privacy.copyLink.create")}
       </Button>
     )
+  }
 
   return (
     <Section
       id="copy-link"
       title={t("privacy.copyLink.title")}
       description={requestOpen ? t("privacy.copyLink.description") : undefined}
-      actions={actions}
+      actions={actionsOf()}
     >
       {requestOpen && gone ? (
         <p className="border border-dashed p-4 text-sm text-muted-foreground">

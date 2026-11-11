@@ -16,6 +16,11 @@ import { signInRequest } from "./api"
 import { CredentialsFields } from "./credentials-fields"
 import { useSession } from "./session"
 
+const REFUSALS: Partial<Record<string, "auth.signIn.wrong" | "auth.signIn.disabled">> = {
+  "auth.invalidCredentials": "auth.signIn.wrong",
+  "auth.disabled": "auth.signIn.disabled",
+}
+
 export function SignInForm() {
   const t = useTranslations()
   const router = useRouter()
@@ -45,13 +50,8 @@ export function SignInForm() {
       rememberErasureScheduled(result.problem.params.erasesOn)
       router.push(routes.signInErasureScheduled())
     } else {
-      setError(
-        result.problem.code === "auth.invalidCredentials"
-          ? t("auth.signIn.wrong")
-          : result.problem.code === "auth.disabled"
-            ? t("auth.signIn.disabled")
-            : result.problem.message
-      )
+      const refusal = result.problem.code ? REFUSALS[result.problem.code] : undefined
+      setError(refusal ? t(refusal) : result.problem.message)
     }
   })
 
