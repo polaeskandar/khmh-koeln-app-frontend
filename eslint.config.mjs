@@ -69,6 +69,18 @@ const codeStyle = {
       { blankLine: "always", prev: "*", next: [...blocks, ...jumps, ...multiline] },
       { blankLine: "always", prev: [...blocks, ...multiline], next: "*" },
     ],
+    "import/order": [
+      "error",
+      {
+        groups: [["builtin", "external"], "internal", ["parent", "sibling", "index"]],
+        pathGroups: [
+          { pattern: "@/**", group: "internal" },
+          { pattern: "@test/**", group: "internal" },
+        ],
+        pathGroupsExcludedImportTypes: ["builtin"],
+        "newlines-between": "always",
+      },
+    ],
   },
 }
 

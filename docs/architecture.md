@@ -320,6 +320,7 @@ CI runs `task setup`, then `task lint`, `format:check`, `api:types:check`, `type
 `build`; `task check` runs the same locally. Every one fails the build:
 
 - **ESLint** (`eslint.config.mjs`): Next.js's rules, no comments (`local/no-comments`), braces and blank lines,
+  one import order (`import/order`: packages, then `@/…` and `@test/…`, then relative, a blank line between),
   the static-export import bans, `fetch` only in `src/lib/api`, dates only through `useFormat()`, `cn` only from
   `@/lib/utils`, no import of `src/features` from shared code, no nested ternaries in `src` (the vendored
   `src/components/ui` aside), and the size caps above.
