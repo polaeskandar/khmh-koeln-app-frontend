@@ -8,8 +8,6 @@ import type { Me } from "@/features/identity/auth/api"
 import { RedirectIfSignedIn } from "@/features/identity/auth/guards"
 import { SessionProvider } from "@/features/identity/auth/session"
 import { ParentAccountMenu } from "@/features/portals/parent/parent-account-menu"
-import { isPortalActive } from "@/components/portal/portal-nav"
-import { routes } from "@/lib/routes"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { server } from "@test/support/msw"
@@ -200,15 +198,6 @@ describe("My groups", () => {
 })
 
 describe("the member navigation", () => {
-  test.each([
-    ["/member/", "/member/", true],
-    ["/member/", "/member/homework/", false],
-    ["/member/homework/", "/member/homework/view/?id=x", true],
-    ["/member/homework/", "/member/", false],
-  ])("%s on %s: %s", (href, pathname, active) => {
-    expect(isPortalActive(href, routes.memberHome(), pathname)).toBe(active)
-  })
-
   test("both navigations are labelled Member portal", async () => {
     navigation.pathname = "/member/homework/view/"
     answerMe(nevine)

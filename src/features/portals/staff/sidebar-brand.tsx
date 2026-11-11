@@ -7,6 +7,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui
 import { useCan } from "@/features/identity/auth/session"
 import { useInlineEnd } from "@/i18n/direction"
 import { Link } from "@/i18n/navigation"
+import { APP_NAME } from "@/lib/app-name"
 import { routes } from "@/lib/routes"
 
 import { TAKE_ATTENDANCE } from "./staff-nav"
@@ -24,7 +25,7 @@ export function SidebarBrand() {
             <KhmkMark />
             <div className="grid flex-1 text-start leading-tight">
               <span className="truncate font-heading text-[15px] font-semibold tracking-tight">
-                KHMK Köln
+                {APP_NAME}
               </span>
               <span className="truncate text-xs text-muted-foreground">{t("brand.church")}</span>
             </div>

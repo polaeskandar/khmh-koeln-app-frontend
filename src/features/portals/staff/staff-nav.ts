@@ -11,34 +11,34 @@ import {
 import type { Can } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-type NavKey = "dashboard" | "services" | "meetings" | "attendance" | "members" | "settings"
+type NavKey = "dashboard" | "services" | "meetings" | "attendance" | "members"
 
 export type NavItem = {
   href: string
-  key: NavKey
+  key: NavKey | "settings"
   icon: LucideIcon
   allowed: (can: Can) => boolean
 }
 
 const always = () => true
 
-export const NAV: NavItem[] = [
-  { href: routes.home(), key: "dashboard", icon: LayoutDashboard, allowed: always },
-  { href: routes.services(), key: "services", icon: Layers, allowed: always },
-  { href: routes.meetings(), key: "meetings", icon: CalendarDays, allowed: always },
-  {
+export const NAV = {
+  dashboard: { href: routes.home(), key: "dashboard", icon: LayoutDashboard, allowed: always },
+  services: { href: routes.services(), key: "services", icon: Layers, allowed: always },
+  meetings: { href: routes.meetings(), key: "meetings", icon: CalendarDays, allowed: always },
+  attendance: {
     href: routes.attendance(),
     key: "attendance",
     icon: ClipboardCheck,
     allowed: (can) => can("read", "attendance") || can("create", "attendance"),
   },
-  {
+  members: {
     href: routes.members(),
     key: "members",
     icon: UsersRound,
     allowed: (can) => can("read", "members"),
   },
-]
+} satisfies { [K in NavKey]: NavItem & { key: K } }
 
 export const TAKE_ATTENDANCE = {
   href: routes.attendance(),
@@ -51,17 +51,4 @@ export const SETTINGS: NavItem = {
   key: "settings",
   icon: Settings,
   allowed: (can) => can("read", "users") || can("read", "roles") || can("delete", "users"),
-}
-
-const trimSlash = (path: string) => (path.length > 1 ? path.replace(/\/+$/, "") : path)
-
-export function isActive(href: string, pathname: string | null | undefined): boolean {
-  if (!pathname) {
-    return false
-  }
-
-  const item = trimSlash(href)
-  const path = trimSlash(pathname.split("?")[0])
-
-  return item === "/" ? path === "/" : path === item || path.startsWith(`${item}/`)
 }

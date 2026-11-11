@@ -13,8 +13,9 @@ import { useCan } from "@/features/identity/auth/session"
 import { useInlineEnd } from "@/i18n/direction"
 import { OpenSessionsBadge } from "@/features/meetings/attendance/open-sessions-badge"
 import { Link, usePathname } from "@/i18n/navigation"
+import { isActive } from "@/lib/active-path"
 
-import { isActive, NAV, SETTINGS } from "./staff-nav"
+import { NAV, SETTINGS } from "./staff-nav"
 
 export function SidebarNav() {
   const t = useTranslations("nav")
@@ -28,21 +29,23 @@ export function SidebarNav() {
       <SidebarGroup>
         <SidebarGroupContent>
           <SidebarMenu>
-            {NAV.filter((item) => item.allowed(can)).map((item) => (
-              <SidebarMenuItem key={item.key}>
-                <SidebarMenuButton
-                  asChild
-                  tooltip={{ children: t(item.key), side }}
-                  isActive={isActive(item.href, pathname)}
-                >
-                  <Link href={item.href}>
-                    <item.icon />
-                    <span>{t(item.key)}</span>
-                  </Link>
-                </SidebarMenuButton>
-                {item.key === "attendance" ? <OpenSessionsBadge /> : null}
-              </SidebarMenuItem>
-            ))}
+            {Object.values(NAV)
+              .filter((item) => item.allowed(can))
+              .map((item) => (
+                <SidebarMenuItem key={item.key}>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={{ children: t(item.key), side }}
+                    isActive={isActive(item.href, pathname)}
+                  >
+                    <Link href={item.href}>
+                      <item.icon />
+                      <span>{t(item.key)}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                  {item.key === "attendance" ? <OpenSessionsBadge /> : null}
+                </SidebarMenuItem>
+              ))}
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>

@@ -15,7 +15,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
-import { initialsOf, roleSummary } from "@/features/identity/auth/role-summary"
+import { roleSummary } from "@/features/identity/auth/role-summary"
+import { initialsOf } from "@/lib/domain/names"
 import { useSession } from "@/features/identity/auth/session"
 import { useInlineEnd } from "@/i18n/direction"
 import { Link } from "@/i18n/navigation"

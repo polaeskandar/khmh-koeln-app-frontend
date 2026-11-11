@@ -15,11 +15,10 @@ import {
 import { useCan } from "@/features/identity/auth/session"
 import { OpenSessionsBubble } from "@/features/meetings/attendance/open-sessions-badge"
 import { Link, usePathname } from "@/i18n/navigation"
+import { isActive } from "@/lib/active-path"
 
 import { AccountMenuItems } from "./staff-account-menu"
-import { isActive, NAV, type NavItem, SETTINGS, TAKE_ATTENDANCE } from "./staff-nav"
-
-const item = (key: NavItem["key"]) => NAV.find((i) => i.key === key)!
+import { NAV, type NavItem, SETTINGS, TAKE_ATTENDANCE } from "./staff-nav"
 
 const TAKE_SCREEN = "/attendance/take/"
 
@@ -52,8 +51,7 @@ export function MobileTabBar() {
   }
 
   const settings = SETTINGS.allowed(can)
-  const members = item("members")
-  const attendanceItem = item("attendance")
+  const { dashboard, meetings, attendance: attendanceItem, members, services } = NAV
   const attendance = isActive(TAKE_ATTENDANCE.href, pathname)
 
   return (
@@ -61,8 +59,8 @@ export function MobileTabBar() {
       aria-label={t("main")}
       className="fixed inset-x-0 bottom-0 z-30 flex h-[calc(4rem+env(safe-area-inset-bottom))] items-stretch border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
     >
-      <Tab item={item("dashboard")} active={isActive(item("dashboard").href, pathname)} />
-      <Tab item={item("meetings")} active={isActive(item("meetings").href, pathname)} />
+      <Tab item={dashboard} active={isActive(dashboard.href, pathname)} />
+      <Tab item={meetings} active={isActive(meetings.href, pathname)} />
       {TAKE_ATTENDANCE.allowed(can) ? (
         <div className="flex flex-1 flex-col items-center">
           <Link
@@ -96,7 +94,7 @@ export function MobileTabBar() {
           className={cn(
             "flex flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium text-muted-foreground outline-none",
             ((settings && isActive(SETTINGS.href, pathname)) ||
-              isActive(item("services").href, pathname)) &&
+              isActive(services.href, pathname)) &&
               "text-foreground"
           )}
         >
@@ -105,7 +103,7 @@ export function MobileTabBar() {
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-72" side="top" align="end">
           <DropdownMenuItem asChild>
-            <Link href={item("services").href}>
+            <Link href={services.href}>
               <Layers />
               {t("services")}
             </Link>

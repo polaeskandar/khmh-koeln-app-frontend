@@ -4,21 +4,9 @@ import { cn } from "@/lib/utils"
 import type { LucideIcon } from "lucide-react"
 
 import { Link, usePathname } from "@/i18n/navigation"
+import { isActive } from "@/lib/active-path"
 
 export type PortalNavItem = { href: string; label: string; icon: LucideIcon }
-
-const trimSlash = (path: string) => (path.length > 1 ? path.replace(/\/+$/, "") : path)
-
-export function isPortalActive(href: string, home: string, pathname: string | null | undefined) {
-  if (!pathname) {
-    return false
-  }
-
-  const item = trimSlash(href)
-  const path = trimSlash(pathname.split("?")[0])
-
-  return item === trimSlash(home) ? path === item : path === item || path.startsWith(`${item}/`)
-}
 
 type NavProps = { label: string; items: PortalNavItem[]; home: string }
 
@@ -28,7 +16,7 @@ export function PortalDesktopNav({ label, items, home }: NavProps) {
   return (
     <nav aria-label={label} className="hidden items-stretch gap-1 self-stretch md:flex">
       {items.map((item) => {
-        const active = isPortalActive(item.href, home, pathname)
+        const active = isActive(item.href, pathname, home)
 
         return (
           <Link
@@ -58,7 +46,7 @@ export function PortalTabBar({ label, items, home }: NavProps) {
       className="fixed inset-x-0 bottom-0 z-30 flex h-[calc(4rem+env(safe-area-inset-bottom))] items-stretch border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
     >
       {items.map((item) => {
-        const active = isPortalActive(item.href, home, pathname)
+        const active = isActive(item.href, pathname, home)
 
         return (
           <Link
