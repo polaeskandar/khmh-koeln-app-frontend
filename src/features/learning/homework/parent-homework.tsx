@@ -15,7 +15,8 @@ import {
 } from "@/features/people/children/api"
 import { type TaskState, useChildHomework } from "./api"
 import { ChildSwitcher } from "@/features/people/children/child-switcher"
-import { ListSkeleton, TaskList, useChildCompletion } from "./task-list"
+import { ListSkeleton } from "@/components/list-skeleton"
+import { TaskList, useChildCompletion } from "./task-list"
 
 function UnlinkedChild() {
   const children = useQuery(parentChildrenQuery)

@@ -6,12 +6,11 @@ import { useTranslations } from "next-intl"
 import { useId, useState } from "react"
 import { toast } from "sonner"
 
-import { Topbar } from "@/components/app-shell/topbar"
+import { RecordNotFound } from "@/components/app-shell/record-not-found"
 import { FormPanel } from "@/components/form-panel"
 import { SelectField, TextAreaField, TextField } from "@/components/form-fields"
 import { NoAccess } from "@/components/no-access"
-import { PageBody, PageHeader } from "@/components/page-header"
-import { NotFoundState, QueryState } from "@/components/page-states"
+import { QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { Button } from "@/components/ui/button"
 import {
@@ -28,13 +27,13 @@ import { Spinner } from "@/components/ui/spinner"
 import { useCan, useCanIn } from "@/features/identity/auth/session"
 import { HomeworkStatusBadge } from "@/features/learning/lessons/lesson-bits"
 import { stageQuery } from "@/features/organization/stages/api"
-import { useStageCrumbs } from "@/features/organization/stages/stage-layout"
+import { StageEditorPage } from "@/features/learning/editor-shell"
 import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useSearchParamId } from "@/hooks/use-search-param-id"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
-import type { LessonRef, LocalDate, ServiceRef, Uuid } from "@/lib/api/types/common"
+import type { LessonRef, LocalDate, Uuid } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { addDays } from "@/lib/domain/time"
 import { type Group, groupAt, within } from "@/lib/permissions"
@@ -421,45 +420,6 @@ function HomeworkForm(props: FormProps) {
   )
 }
 
-function EditorPage({
-  stage,
-  archived,
-  service,
-  title,
-  description,
-  children,
-}: {
-  stage: HomeworkStage
-  archived: boolean
-  service: ServiceRef
-  title: string
-  description?: string
-  children: React.ReactNode
-}) {
-  const crumbs = useStageCrumbs({ ...stage, archived, service }, "homework", [{ label: title }])
-
-  return (
-    <>
-      <Topbar crumbs={crumbs} />
-      <PageBody>
-        <PageHeader title={title} description={description} />
-        {children}
-      </PageBody>
-    </>
-  )
-}
-
-function NotFoundPage() {
-  const t = useTranslations("nav")
-
-  return (
-    <>
-      <Topbar crumbs={[{ label: t("services"), href: routes.services() }]} />
-      <NotFoundState home={routes.services()} />
-    </>
-  )
-}
-
 function LessonFirst({ stage }: { stage: Uuid }) {
   const t = useTranslations("homework.new")
 
@@ -497,12 +457,11 @@ function NewHomework({ stageId }: { stageId: Uuid }) {
   const list = useQuery(stageHomeworkQuery(stageId))
 
   return (
-    <QueryState query={stage} notFound={<NotFoundPage />}>
+    <QueryState query={stage} notFound={<RecordNotFound area="services" />}>
       {(s) => (
-        <EditorPage
+        <StageEditorPage
           stage={s}
-          archived={s.archived}
-          service={s.service}
+          tab="homework"
           title={t("newHomework")}
           description={t("new.description")}
         >
@@ -526,7 +485,7 @@ function NewHomework({ stageId }: { stageId: Uuid }) {
               )
             }
           </QueryState>
-        </EditorPage>
+        </StageEditorPage>
       )}
     </QueryState>
   )
@@ -539,12 +498,11 @@ function EditHomework({ id }: { id: Uuid }) {
   const query = useQuery(homeworkQuery(id))
 
   return (
-    <QueryState query={query} notFound={<NotFoundPage />}>
+    <QueryState query={query} notFound={<RecordNotFound area="services" />}>
       {(data) => (
-        <EditorPage
-          stage={data.stage}
-          archived={data.archived}
-          service={data.service}
+        <StageEditorPage
+          stage={{ ...data.stage, service: data.service }}
+          tab="homework"
           title={t("edit.title", { title: data.title })}
         >
           {data.status === "archived" ? (
@@ -568,7 +526,7 @@ function EditHomework({ id }: { id: Uuid }) {
               homework={data}
             />
           )}
-        </EditorPage>
+        </StageEditorPage>
       )}
     </QueryState>
   )
@@ -576,12 +534,16 @@ function EditHomework({ id }: { id: Uuid }) {
 
 export function NewHomeworkPage() {
   return (
-    <RecordPage param="stage" notFound={<NotFoundPage />}>
+    <RecordPage param="stage" notFound={<RecordNotFound area="services" />}>
       {(stageId) => <NewHomework stageId={stageId} />}
     </RecordPage>
   )
 }
 
 export function EditHomeworkPage() {
-  return <RecordPage notFound={<NotFoundPage />}>{(id) => <EditHomework id={id} />}</RecordPage>
+  return (
+    <RecordPage notFound={<RecordNotFound area="services" />}>
+      {(id) => <EditHomework id={id} />}
+    </RecordPage>
+  )
 }

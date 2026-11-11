@@ -5,7 +5,8 @@ import { useTranslations } from "next-intl"
 
 import { QueryState } from "@/components/page-states"
 import type { TaskState } from "./api"
-import { ListSkeleton, TaskList, useOwnCompletion } from "./task-list"
+import { ListSkeleton } from "@/components/list-skeleton"
+import { TaskList, useOwnCompletion } from "./task-list"
 import { ApiError } from "@/lib/api/problem"
 import { routes } from "@/lib/routes"
 

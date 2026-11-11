@@ -10,6 +10,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/in
 import { useDebounced } from "@/hooks/use-debounced"
 import { useFormat } from "@/i18n/format"
 import { preferredName } from "@/lib/domain/names"
+import { placeLabel } from "@/lib/domain/place"
 
 import { type DirectoryPerson, directoryQuery } from "./api"
 
@@ -21,9 +22,7 @@ export function groupsText(person: DirectoryPerson, separator: string, none: str
     return none
   }
 
-  return person.groups
-    .map((g) => (g.stage ? `${g.service.name} · ${g.stage.name}` : g.service.name))
-    .join(separator)
+  return person.groups.map(placeLabel).join(separator)
 }
 
 export function ignoreEnter(event: KeyboardEvent<HTMLInputElement>) {

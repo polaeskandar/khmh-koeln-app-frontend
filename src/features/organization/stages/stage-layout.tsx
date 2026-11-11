@@ -5,10 +5,11 @@ import { Archive, UsersRound } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { ReactNode } from "react"
 
+import { RecordNotFound } from "@/components/app-shell/record-not-found"
 import { type Crumb, Topbar } from "@/components/app-shell/topbar"
 import { LinkTabs } from "@/components/link-tabs"
 import { PageBody, PageHeader } from "@/components/page-header"
-import { NotFoundState, QueryState } from "@/components/page-states"
+import { QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { ServiceTag } from "@/components/service-tag"
 import { StatusBadge } from "@/components/status"
@@ -40,11 +41,9 @@ const TAB_ROUTES: Record<StageTab, (id: string) => string> = {
   homework: routes.stageHomework,
 }
 
-export function useStageCrumbs(
-  stage: StageRef & { service: ServiceRef },
-  tab: StageTab,
-  extra: Crumb[] = []
-): Crumb[] {
+export type StageCrumbsOf = Pick<StageRef, "id" | "name"> & { service: ServiceRef }
+
+export function useStageCrumbs(stage: StageCrumbsOf, tab: StageTab, extra: Crumb[] = []): Crumb[] {
   const t = useTranslations()
   const tabs = useTabLabels()
 
@@ -122,17 +121,6 @@ function StageFrame({
   )
 }
 
-function NotFoundPage() {
-  const t = useTranslations("nav")
-
-  return (
-    <>
-      <Topbar crumbs={[{ label: t("services"), href: routes.services() }]} />
-      <NotFoundState home={routes.services()} />
-    </>
-  )
-}
-
 function LoadedStage({
   id,
   tab,
@@ -147,7 +135,7 @@ function LoadedStage({
   const query = useQuery(stageQuery(id))
 
   return (
-    <QueryState query={query} notFound={<NotFoundPage />}>
+    <QueryState query={query} notFound={<RecordNotFound area="services" />}>
       {(stage) => (
         <StageFrame stage={stage} tab={tab} crumbs={crumbs}>
           {children(stage)}
@@ -167,7 +155,7 @@ export function StageLayout({
   children: (stage: Stage) => ReactNode
 }) {
   return (
-    <RecordPage notFound={<NotFoundPage />}>
+    <RecordPage notFound={<RecordNotFound area="services" />}>
       {(id) => (
         <LoadedStage id={id} tab={tab} crumbs={crumbs}>
           {children}

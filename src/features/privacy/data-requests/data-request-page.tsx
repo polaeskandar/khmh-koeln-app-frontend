@@ -6,12 +6,13 @@ import { useTranslations } from "next-intl"
 import { useId, useState } from "react"
 import { toast } from "sonner"
 
+import { RecordNotFound } from "@/components/app-shell/record-not-found"
 import { Topbar } from "@/components/app-shell/topbar"
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { FormPanel } from "@/components/form-panel"
 import { NoAccess } from "@/components/no-access"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
-import { NotFoundState, QueryErrorState, QueryState } from "@/components/page-states"
+import { QueryErrorState, QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -554,22 +555,14 @@ function Facts({ data }: { data: DataRequestDetail }) {
   )
 }
 
-function NotFoundPage() {
-  const t = useTranslations("nav")
-
-  return (
-    <>
-      <Topbar crumbs={[{ label: t("settings"), href: routes.settings() }]} />
-      <NotFoundState home={routes.dataRequests()} />
-    </>
-  )
-}
-
 function Request({ id }: { id: string }) {
   const query = useQuery(dataRequestQuery(id))
 
   return (
-    <QueryState query={query} notFound={<NotFoundPage />}>
+    <QueryState
+      query={query}
+      notFound={<RecordNotFound area="settings" home={routes.dataRequests()} />}
+    >
       {(data) => <RequestView data={data} />}
     </QueryState>
   )
@@ -587,5 +580,9 @@ export function DataRequestPage() {
     )
   }
 
-  return <RecordPage notFound={<NotFoundPage />}>{(id) => <Request id={id} />}</RecordPage>
+  return (
+    <RecordPage notFound={<RecordNotFound area="settings" home={routes.dataRequests()} />}>
+      {(id) => <Request id={id} />}
+    </RecordPage>
+  )
 }

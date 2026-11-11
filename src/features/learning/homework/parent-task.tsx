@@ -23,7 +23,7 @@ import {
   undoReportRequest,
 } from "./api"
 import { CompletionControl, reportOf } from "./completion-control"
-import { ListSkeleton } from "./task-list"
+import { ListSkeleton } from "@/components/list-skeleton"
 import { ParentNotAvailable } from "@/features/portals/parent/parent-shell"
 
 const isWebLink = (url: string) => /^https?:\/\//i.test(url)

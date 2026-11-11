@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 
 import { servicesQuery } from "@/features/organization/services/api"
 import type { Uuid } from "@/lib/api/types/common"
+import { placeLabel } from "@/lib/domain/place"
 
 export type GroupOption = {
   value: string
@@ -26,7 +27,7 @@ export function useGroupOptions(): GroupOption[] {
       },
       ...service.stages.map((stage) => ({
         value: `stage:${stage.id}`,
-        label: `${service.name} · ${stage.name}`,
+        label: placeLabel({ service, stage }),
         filter: { stageId: stage.id },
         placement: { serviceId: service.id, stageId: stage.id },
       })),

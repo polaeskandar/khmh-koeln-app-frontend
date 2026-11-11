@@ -5,10 +5,11 @@ import { Ellipsis, Repeat } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { type ReactNode, useState } from "react"
 
+import { RecordNotFound } from "@/components/app-shell/record-not-found"
 import { Topbar } from "@/components/app-shell/topbar"
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
-import { NotFoundState, QueryState } from "@/components/page-states"
+import { QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { ServiceTag } from "@/components/service-tag"
 import { AgendaRow } from "@/components/session-bits"
@@ -354,27 +355,23 @@ function ScheduleView({ schedule, today }: { schedule: ScheduleSummary; today: L
   )
 }
 
-function NotFoundPage() {
-  const t = useTranslations("nav")
-
-  return (
-    <>
-      <Topbar crumbs={[{ label: t("meetings"), href: routes.meetings() }]} />
-      <NotFoundState home={routes.schedules()} />
-    </>
-  )
-}
-
 function Schedule({ id }: { id: string }) {
   const query = useQuery(scheduleQuery(id))
 
   return (
-    <QueryState query={query} notFound={<NotFoundPage />}>
+    <QueryState
+      query={query}
+      notFound={<RecordNotFound area="meetings" home={routes.schedules()} />}
+    >
       {(data) => <ScheduleView schedule={data.schedule} today={data.today} />}
     </QueryState>
   )
 }
 
 export function SchedulePage() {
-  return <RecordPage notFound={<NotFoundPage />}>{(id) => <Schedule id={id} />}</RecordPage>
+  return (
+    <RecordPage notFound={<RecordNotFound area="meetings" home={routes.schedules()} />}>
+      {(id) => <Schedule id={id} />}
+    </RecordPage>
+  )
 }

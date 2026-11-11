@@ -20,7 +20,8 @@ import {
 } from "@/features/people/children/api"
 import { useChildHomework } from "@/features/learning/homework/api"
 import { ChildSwitcher } from "@/features/people/children/child-switcher"
-import { ListSkeleton, TaskList, useChildCompletion } from "@/features/learning/homework/task-list"
+import { ListSkeleton } from "@/components/list-skeleton"
+import { TaskList, useChildCompletion } from "@/features/learning/homework/task-list"
 
 const DONE_RECENTLY = 5
 

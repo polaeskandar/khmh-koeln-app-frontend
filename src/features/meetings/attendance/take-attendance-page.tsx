@@ -1,11 +1,12 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { type ReactNode, useEffect, useState } from "react"
+import { type ReactNode, useState } from "react"
 
+import { RecordNotFound } from "@/components/app-shell/record-not-found"
+import { Redirect } from "@/components/redirect"
 import { Topbar } from "@/components/app-shell/topbar"
 import { PageBody, PageHeader } from "@/components/page-header"
-import { NotFoundState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { ServiceTag } from "@/components/service-tag"
 import { SessionBadges, SessionWhen } from "@/components/session-bits"
@@ -13,7 +14,7 @@ import { Button } from "@/components/ui/button"
 import { useCanIn } from "@/features/identity/auth/session"
 import { useOnline } from "@/hooks/use-online"
 import { useFormat } from "@/i18n/format"
-import { Link, useRouter } from "@/i18n/navigation"
+import { Link } from "@/i18n/navigation"
 import { groupOf } from "@/lib/api/types/meetings"
 import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
@@ -64,17 +65,6 @@ export function BoardFrame({ board, children }: { board: Board; children: ReactN
         </PageHeader>
         {children}
       </PageBody>
-    </>
-  )
-}
-
-function NotFoundPage() {
-  const t = useTranslations("nav")
-
-  return (
-    <>
-      <Topbar crumbs={[{ label: t("attendance"), href: routes.attendance() }]} />
-      <NotFoundState home={routes.attendance()} />
     </>
   )
 }
@@ -163,16 +153,9 @@ function Canceled({ board }: { board: Board }) {
   )
 }
 
-function ToSummary({ session }: { session: string }) {
-  const router = useRouter()
-  useEffect(() => router.replace(routes.attendanceSummary(session)), [router, session])
-
-  return null
-}
-
 function LoadedBoard({ id }: { id: string }) {
   return (
-    <SheetState id={id} live notFound={<NotFoundPage />}>
+    <SheetState id={id} live notFound={<RecordNotFound area="attendance" />}>
       {(board, boardAt) => (
         <BoardFrame board={board}>
           {board.session.status === "active" ? (
@@ -182,7 +165,7 @@ function LoadedBoard({ id }: { id: string }) {
           ) : board.session.status === "canceled" ? (
             <Canceled board={board} />
           ) : (
-            <ToSummary session={board.session.id} />
+            <Redirect to={routes.attendanceSummary(board.session.id)} />
           )}
         </BoardFrame>
       )}
@@ -192,7 +175,7 @@ function LoadedBoard({ id }: { id: string }) {
 
 export function TakeAttendancePage() {
   return (
-    <RecordPage param="session" notFound={<NotFoundPage />}>
+    <RecordPage param="session" notFound={<RecordNotFound area="attendance" />}>
       {(id) => <LoadedBoard id={id} />}
     </RecordPage>
   )

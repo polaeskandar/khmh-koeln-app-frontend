@@ -26,6 +26,7 @@ import {
   type PlacementInput,
 } from "./api"
 import { blocksPlacement } from "./groups"
+import { groupsText } from "./person-search"
 import { PlacementFields, usePlacement } from "./placement-fields"
 
 const blockingGroupOf = (candidate: DirectoryPerson, placement: PlacementInput) =>
@@ -126,15 +127,11 @@ function AddPersonDialog({ preset, onClose }: { preset?: PlacementInput; onClose
                       <span className="flex min-w-0 flex-col">
                         <span className="truncate font-medium">{preferredName(candidate)}</span>
                         <span className="truncate text-xs text-muted-foreground">
-                          {candidate.groups.length === 0
-                            ? t("members.addMember.notInAnyService")
-                            : candidate.groups
-                                .map((group) =>
-                                  group.stage
-                                    ? `${group.service.name} · ${group.stage.name}`
-                                    : group.service.name
-                                )
-                                .join(f.separator)}
+                          {groupsText(
+                            candidate,
+                            f.separator,
+                            t("members.addMember.notInAnyService")
+                          )}
                         </span>
                       </span>
                       {there ? (

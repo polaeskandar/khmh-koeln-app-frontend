@@ -27,6 +27,7 @@ import { useFormat } from "@/i18n/format"
 import { isStale, useRefetch } from "@/lib/api/refetch"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
+import { placeLabel } from "@/lib/domain/place"
 import { fold, fullName, preferredName } from "@/lib/domain/names"
 import { oneOf } from "@/lib/one-of"
 
@@ -78,7 +79,7 @@ function GroupsChoice({
     const service = services.find((option) => option.id === group.serviceId)
     const stage = service?.stages.find((option) => option.id === group.stageId)
 
-    return stage ? `${service?.name} · ${stage.name}` : (service?.name ?? "")
+    return service ? placeLabel({ service, stage: stage ?? null }) : ""
   }
 
   function add() {
