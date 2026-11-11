@@ -28,7 +28,7 @@ import { routes } from "@/lib/routes"
 import { type HomeworkList, stageHomeworkQuery } from "./api"
 import { HomeworkForm } from "./homework-form"
 
-function LessonFirst({ stage }: { stage: Uuid }) {
+function LessonFirst({ stageId }: { stageId: Uuid }) {
   const t = useTranslations("homework.new")
 
   return (
@@ -39,7 +39,7 @@ function LessonFirst({ stage }: { stage: Uuid }) {
       </EmptyHeader>
       <EmptyContent>
         <Button size="sm" asChild>
-          <Link href={routes.newLesson(stage)}>
+          <Link href={routes.newLesson(stageId)}>
             <Plus data-icon="inline-start" />
             {t("newLesson")}
           </Link>
@@ -49,12 +49,12 @@ function LessonFirst({ stage }: { stage: Uuid }) {
   )
 }
 
-function lessonFrom(data: HomeworkList, wanted: Uuid | null): Uuid | null {
-  return wanted && data.lessons.some((l) => l.id === wanted) ? wanted : null
+function lessonFrom(list: HomeworkList, wanted: Uuid | null): Uuid | null {
+  return wanted && list.lessons.some((l) => l.id === wanted) ? wanted : null
 }
 
-function firstLesson(data: HomeworkList, wanted: Uuid | null): Uuid {
-  return lessonFrom(data, wanted) ?? data.defaultLessonId ?? data.lessons[0]!.id
+function firstLesson(list: HomeworkList, wanted: Uuid | null): Uuid {
+  return lessonFrom(list, wanted) ?? list.defaultLessonId ?? list.lessons[0]!.id
 }
 
 function NewHomework({ stageId }: { stageId: Uuid }) {
@@ -80,7 +80,7 @@ function NewHomework({ stageId }: { stageId: Uuid }) {
                   {t("new.noAccess", { stage: s.name })}
                 </NoAccess>
               ) : data.lessons.length === 0 ? (
-                <LessonFirst stage={s.id} />
+                <LessonFirst stageId={s.id} />
               ) : (
                 <HomeworkForm
                   stage={data.stage}

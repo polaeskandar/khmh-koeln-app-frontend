@@ -23,13 +23,13 @@ import {
 } from "./api"
 import { MemberNotAvailable } from "@/features/portals/member/member-shell"
 
-function TaskView({ data }: { data: MemberHomeworkDetail }) {
+function TaskView({ detail }: { detail: MemberHomeworkDetail }) {
   const t = useTranslations("member")
-  const { task, today } = data
+  const { task, today } = detail
 
   return (
     <HomeworkTaskView
-      data={data}
+      detail={detail}
       forText={t("homework.forYou")}
       back={
         <Link
@@ -59,7 +59,7 @@ function Task({ id }: { id: Uuid }) {
 
   return (
     <QueryState query={query} loading={<ListSkeleton />} notFound={<MemberNotAvailable />}>
-      {(data) => <TaskView data={data} />}
+      {(detail) => <TaskView detail={detail} />}
     </QueryState>
   )
 }

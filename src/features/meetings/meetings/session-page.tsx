@@ -51,7 +51,7 @@ function AttendanceAction({ session, today }: { session: SessionView; today: Loc
   if (session.status === "scheduled" && session.date <= today && records) {
     return (
       <OpenAttendanceButton
-        session={session.id}
+        sessionId={session.id}
         onOpened={() => router.push(routes.takeAttendance(session.id))}
       />
     )
@@ -70,10 +70,16 @@ function AttendanceAction({ session, today }: { session: SessionView; today: Loc
   return null
 }
 
-function SessionDetail({ data, actions }: { data: SessionDetailResponse; actions?: ReactNode }) {
+function SessionDetail({
+  detail,
+  actions,
+}: {
+  detail: SessionDetailResponse
+  actions?: ReactNode
+}) {
   const t = useTranslations()
   const f = useFormat()
-  const { session, schedule, today } = data
+  const { session, schedule, today } = detail
   const can = useCanIn(meetingGroup(session))
   const canceled = session.status === "canceled"
 
@@ -164,7 +170,7 @@ function SessionDetail({ data, actions }: { data: SessionDetailResponse; actions
             )}
           </div>
           <Section id="history" title={t("meetings.session.history")}>
-            <HistoryTimeline entries={data.history} today={today} oneOff={schedule === null} />
+            <HistoryTimeline entries={detail.history} today={today} oneOff={schedule === null} />
           </Section>
         </div>
       </PageBody>
@@ -177,7 +183,7 @@ function LoadedSession({ id, actions }: { id: string; actions?: ReactNode }) {
 
   return (
     <QueryState query={query} notFound={<RecordNotFound area="meetings" />}>
-      {(data) => <SessionDetail data={data} actions={actions} />}
+      {(detail) => <SessionDetail detail={detail} actions={actions} />}
     </QueryState>
   )
 }

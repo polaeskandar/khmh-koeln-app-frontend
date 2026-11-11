@@ -9,16 +9,16 @@ import { preferredName } from "@/lib/domain/names"
 import type { AttendanceSheet } from "./api"
 
 export function RecentlyMarked({
-  board,
+  sheet,
   onCorrect,
 }: {
-  board: AttendanceSheet
+  sheet: AttendanceSheet
   onCorrect?: () => void
 }) {
   const t = useTranslations("attendance.board")
   const f = useFormat()
 
-  if (board.recentlyMarked.length === 0) {
+  if (sheet.recentlyMarked.length === 0) {
     return null
   }
 
@@ -28,7 +28,7 @@ export function RecentlyMarked({
         {t("recent")}
       </h2>
       <ul className="flex flex-col gap-1.5 text-sm">
-        {board.recentlyMarked
+        {sheet.recentlyMarked
           .flatMap(({ person, mark }) => (mark ? [{ person, mark }] : []))
           .slice(0, 6)
           .map(({ person, mark }) => (
@@ -53,11 +53,11 @@ export function RecentlyMarked({
   )
 }
 
-export function Corrections({ board }: { board: AttendanceSheet }) {
+export function Corrections({ sheet }: { sheet: AttendanceSheet }) {
   const t = useTranslations("attendance.board")
   const f = useFormat()
 
-  if (board.corrections.length === 0) {
+  if (sheet.corrections.length === 0) {
     return null
   }
 
@@ -67,7 +67,7 @@ export function Corrections({ board }: { board: AttendanceSheet }) {
         {t("corrections")}
       </h2>
       <ul className="flex flex-col gap-1.5 text-sm text-muted-foreground">
-        {board.corrections
+        {sheet.corrections
           .slice(-4)
           .reverse()
           .map((correction) => {
@@ -77,7 +77,7 @@ export function Corrections({ board }: { board: AttendanceSheet }) {
 
             const removal = {
               name: preferredName(correction.person),
-              when: f.atLabel(correction.removed.at, board.today),
+              when: f.atLabel(correction.removed.at, sheet.today),
             }
 
             return (

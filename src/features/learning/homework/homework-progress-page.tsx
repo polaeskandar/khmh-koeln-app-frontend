@@ -70,30 +70,30 @@ function Figure({ label, value, note }: { label: string; value: number; note?: s
   )
 }
 
-function Figures({ data }: { data: HomeworkProgress }) {
+function Figures({ progress }: { progress: HomeworkProgress }) {
   const t = useTranslations("homework")
 
-  if (!data.counts) {
+  if (!progress.counts) {
     return <p className="border border-dashed p-4 text-sm">{t("progress.draftNote")}</p>
   }
 
-  const late = data.rows.filter((row) => row.done && row.completedAfterDueDate).length
+  const late = progress.rows.filter((row) => row.done && row.completedAfterDueDate).length
 
   return (
     <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <Figure
-        label={t("progress.childrenIn", { stage: data.stage.name })}
-        value={data.counts.assigned}
+        label={t("progress.childrenIn", { stage: progress.stage.name })}
+        value={progress.counts.assigned}
       />
       <Figure
         label={t("progress.reportedDone")}
-        value={data.counts.completed}
+        value={progress.counts.completed}
         note={late > 0 ? t("progress.afterDue", { count: late }) : undefined}
       />
-      <Figure label={t("notYet")} value={data.counts.notCompleted} />
+      <Figure label={t("notYet")} value={progress.counts.notCompleted} />
       <Figure
         label={t("progress.withoutAccount")}
-        value={data.counts.withoutAccount}
+        value={progress.counts.withoutAccount}
         note={t("progress.cantReportOnline")}
       />
     </dl>
@@ -137,11 +137,14 @@ function Accounts({ row }: { row: AudienceRow }) {
   return accounts.length > 0 ? accounts.join(" · ") : t("homework.completion.noAccount")
 }
 
-function Completion({ data }: { data: HomeworkProgress }) {
+function Completion({ progress }: { progress: HomeworkProgress }) {
   const t = useTranslations()
   const [tab, setTab] = useState<Tab>("all")
-  const [query, setQuery] = useState("")
-  const rows = data.rows.filter((row) => FILTERS[tab](row) && matchesQuery(row.person, query))
+  const [searchText, setSearchText] = useState("")
+
+  const rows = progress.rows.filter(
+    (row) => FILTERS[tab](row) && matchesQuery(row.person, searchText)
+  )
 
   return (
     <div className="flex min-w-0 flex-col gap-3">
@@ -151,7 +154,7 @@ function Completion({ data }: { data: HomeworkProgress }) {
             {TABS.map((key) => (
               <TabsTrigger key={key} value={key}>
                 {t(`homework.completion.${TAB_LABEL[key]}`, {
-                  count: data.rows.filter(FILTERS[key]).length,
+                  count: progress.rows.filter(FILTERS[key]).length,
                 })}
               </TabsTrigger>
             ))}
@@ -167,8 +170,8 @@ function Completion({ data }: { data: HomeworkProgress }) {
             className="ps-8"
             aria-label={t("homework.completion.searchLabel")}
             placeholder={t("homework.completion.searchPlaceholder")}
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            value={searchText}
+            onChange={(event) => setSearchText(event.target.value)}
           />
         </div>
       </div>
@@ -176,7 +179,9 @@ function Completion({ data }: { data: HomeworkProgress }) {
         <Empty className="border border-dashed">
           <EmptyHeader>
             <EmptyTitle>
-              {query.trim() ? t("homework.completion.noMatch") : t("homework.completion.empty")}
+              {searchText.trim()
+                ? t("homework.completion.noMatch")
+                : t("homework.completion.empty")}
             </EmptyTitle>
           </EmptyHeader>
         </Empty>
@@ -215,14 +220,14 @@ function Completion({ data }: { data: HomeworkProgress }) {
                           </span>
                           {row.inStage ? null : (
                             <span className="text-xs text-muted-foreground">
-                              {t("homework.completion.leftStage", { stage: data.stage.name })}
+                              {t("homework.completion.leftStage", { stage: progress.stage.name })}
                             </span>
                           )}
                         </span>
                       </span>
                     </td>
                     <td className="px-3 py-2.5">
-                      <Reported row={row} today={data.today} />
+                      <Reported row={row} today={progress.today} />
                     </td>
                     <td className="px-3 py-2.5 text-muted-foreground">
                       <Accounts row={row} />
@@ -238,7 +243,7 @@ function Completion({ data }: { data: HomeworkProgress }) {
   )
 }
 
-function WhatParentsRead({ data }: { data: HomeworkProgress }) {
+function WhatParentsRead({ progress }: { progress: HomeworkProgress }) {
   const t = useTranslations("homework")
 
   return (
@@ -247,11 +252,11 @@ function WhatParentsRead({ data }: { data: HomeworkProgress }) {
         {t("progress.whatParentsRead")}
       </h2>
       <p dir="auto" className="text-sm whitespace-pre-line">
-        {data.homework.instructions}
+        {progress.homework.instructions}
       </p>
-      {data.homework.resources.length > 0 ? (
+      {progress.homework.resources.length > 0 ? (
         <ul className="flex flex-col gap-1.5 text-sm">
-          {data.homework.resources.map((resource, index) => (
+          {progress.homework.resources.map((resource, index) => (
             <li key={index} dir="auto">
               {resource.url ? (
                 <a
@@ -269,25 +274,28 @@ function WhatParentsRead({ data }: { data: HomeworkProgress }) {
           ))}
         </ul>
       ) : null}
-      {data.counts ? (
-        <CompletionMeter completed={data.counts.completed} assigned={data.counts.assigned} />
+      {progress.counts ? (
+        <CompletionMeter
+          completed={progress.counts.completed}
+          assigned={progress.counts.assigned}
+        />
       ) : null}
     </aside>
   )
 }
 
-function ProgressView({ data }: { data: HomeworkProgress }) {
+function ProgressView({ progress }: { progress: HomeworkProgress }) {
   const t = useTranslations()
   const f = useFormat()
   const router = useRouter()
-  const group = groupAt(data.service, data.stage)
+  const group = groupAt(progress.service, progress.stage)
   const can = useCanIn(group)
-  const { homework, lesson } = data
+  const { homework, lesson } = progress
   const detail = useQuery(homeworkQuery(homework.id))
   const stageArchived = detail.data?.archived ?? true
   const flags = homeworkFlagsFor(can, homework, stageArchived)
 
-  const crumbs = useStageCrumbs({ ...data.stage, service: data.service }, "homework", [
+  const crumbs = useStageCrumbs({ ...progress.stage, service: progress.service }, "homework", [
     { label: homework.title },
   ])
 
@@ -299,7 +307,7 @@ function ProgressView({ data }: { data: HomeworkProgress }) {
           meta={
             <>
               <HomeworkStatusBadge status={homework.status} />
-              <DueLine dueDate={homework.dueDate} today={data.today} />
+              <DueLine dueDate={homework.dueDate} today={progress.today} />
             </>
           }
           title={homework.title}
@@ -327,16 +335,16 @@ function ProgressView({ data }: { data: HomeworkProgress }) {
                 group={group}
                 stageArchived={stageArchived}
                 place="page"
-                onDeleted={() => router.push(routes.stageHomework(data.stage.id))}
+                onDeleted={() => router.push(routes.stageHomework(progress.stage.id))}
               />
             </>
           }
         />
-        <Figures data={data} />
+        <Figures progress={progress} />
         <p className="max-w-[80ch] text-sm text-muted-foreground">{t("homework.progress.note")}</p>
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
-          <Completion data={data} />
-          <WhatParentsRead data={data} />
+          <Completion progress={progress} />
+          <WhatParentsRead progress={progress} />
         </div>
       </PageBody>
     </>
@@ -357,7 +365,7 @@ function Progress({ id }: { id: Uuid }) {
 
   return (
     <QueryState query={query} notFound={<RecordNotFound area="services" />}>
-      {(data) => <ProgressView data={data} />}
+      {(progress) => <ProgressView progress={progress} />}
     </QueryState>
   )
 }

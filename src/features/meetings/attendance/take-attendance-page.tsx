@@ -29,10 +29,10 @@ import { OpenAttendanceButton } from "./open-attendance-button"
 import { SheetState } from "./sheet-state"
 import { VisitorSearch } from "./visitor-search"
 
-export function BoardFrame({ board, children }: { board: AttendanceSheet; children: ReactNode }) {
+export function BoardFrame({ sheet, children }: { sheet: AttendanceSheet; children: ReactNode }) {
   const t = useTranslations()
   const f = useFormat()
-  const { session } = board
+  const { session } = sheet
 
   return (
     <>
@@ -71,12 +71,12 @@ export function BoardFrame({ board, children }: { board: AttendanceSheet; childr
   )
 }
 
-function ActiveBoard({ board, boardAt }: { board: AttendanceSheet; boardAt: number }) {
+function ActiveBoard({ sheet, boardAt }: { sheet: AttendanceSheet; boardAt: number }) {
   const t = useTranslations("attendance.board")
-  const can = useCanIn(meetingGroup(board.session))
+  const can = useCanIn(meetingGroup(sheet.session))
   const online = useOnline()
-  const writes = useMarkWrites(board.session.id)
-  const shown = applyWrites(board, writes.writes, boardAt)
+  const writes = useMarkWrites(sheet.session.id)
+  const shown = applyWrites(sheet, writes.writes, boardAt)
   const [dialog, setDialog] = useState<"close" | "correct" | null>(null)
 
   return (
@@ -87,7 +87,7 @@ function ActiveBoard({ board, boardAt }: { board: AttendanceSheet; boardAt: numb
         </p>
       )}
       <AttendanceBoard
-        board={shown}
+        sheet={shown}
         actions={{
           onMark: writes.mark,
           onUndo: writes.undo,
@@ -96,11 +96,11 @@ function ActiveBoard({ board, boardAt }: { board: AttendanceSheet; boardAt: numb
           pending: writes.pending,
           saving: writes.pending.size > 0,
         }}
-        below={(query) =>
+        below={(searchText) =>
           can("create", "attendance") ? (
             <VisitorSearch
-              board={shown}
-              query={query}
+              sheet={shown}
+              searchText={searchText}
               pending={writes.pending}
               onMark={writes.markVisitor}
             />
@@ -108,12 +108,12 @@ function ActiveBoard({ board, boardAt }: { board: AttendanceSheet; boardAt: numb
         }
       />
       <CloseDialog
-        board={shown}
+        sheet={shown}
         open={dialog === "close"}
         onOpenChange={(open) => setDialog(open ? "close" : null)}
       />
       <CorrectionDialog
-        board={shown}
+        sheet={shown}
         open={dialog === "correct"}
         onOpenChange={(open) => setDialog(open ? "correct" : null)}
       />
@@ -121,12 +121,12 @@ function ActiveBoard({ board, boardAt }: { board: AttendanceSheet; boardAt: numb
   )
 }
 
-function NotOpen({ board }: { board: AttendanceSheet }) {
+function NotOpen({ sheet }: { sheet: AttendanceSheet }) {
   const t = useTranslations("attendance.session")
   const f = useFormat()
-  const can = useCanIn(meetingGroup(board.session))
+  const can = useCanIn(meetingGroup(sheet.session))
   const records = can("create", "attendance")
-  const { session, today } = board
+  const { session, today } = sheet
   const due = session.date <= today
   const past = session.date < today
   const onTheDay = records ? t("openWhenStarts") : t("servantsOpen")
@@ -138,18 +138,18 @@ function NotOpen({ board }: { board: AttendanceSheet }) {
       <p className="max-w-prose text-sm text-muted-foreground">
         {!due ? t("opensOn", { date: f.longDate(session.date) }) : past ? afterTheDay : onTheDay}
       </p>
-      {due && records ? <OpenAttendanceButton session={session.id} /> : null}
+      {due && records ? <OpenAttendanceButton sessionId={session.id} /> : null}
     </div>
   )
 }
 
-function Canceled({ board }: { board: AttendanceSheet }) {
+function Canceled({ sheet }: { sheet: AttendanceSheet }) {
   const t = useTranslations("attendance.session")
 
   return (
     <div className="flex flex-col gap-2 border border-destructive/30 bg-destructive/5 p-4 text-sm">
       <p className="font-medium text-destructive">{t("canceled")}</p>
-      {board.session.cancelReason ? <p dir="auto">{board.session.cancelReason}</p> : null}
+      {sheet.session.cancelReason ? <p dir="auto">{sheet.session.cancelReason}</p> : null}
       <p className="text-muted-foreground">{t("noAttendance")}</p>
     </div>
   )
@@ -158,16 +158,16 @@ function Canceled({ board }: { board: AttendanceSheet }) {
 function LoadedBoard({ id }: { id: string }) {
   return (
     <SheetState id={id} live notFound={<RecordNotFound area="attendance" />}>
-      {(board, boardAt) => (
-        <BoardFrame board={board}>
-          {board.session.status === "active" ? (
-            <ActiveBoard key={board.session.id} board={board} boardAt={boardAt} />
-          ) : board.session.status === "scheduled" ? (
-            <NotOpen board={board} />
-          ) : board.session.status === "canceled" ? (
-            <Canceled board={board} />
+      {(sheet, boardAt) => (
+        <BoardFrame sheet={sheet}>
+          {sheet.session.status === "active" ? (
+            <ActiveBoard key={sheet.session.id} sheet={sheet} boardAt={boardAt} />
+          ) : sheet.session.status === "scheduled" ? (
+            <NotOpen sheet={sheet} />
+          ) : sheet.session.status === "canceled" ? (
+            <Canceled sheet={sheet} />
           ) : (
-            <Redirect to={routes.attendanceSummary(board.session.id)} />
+            <Redirect to={routes.attendanceSummary(sheet.session.id)} />
           )}
         </BoardFrame>
       )}

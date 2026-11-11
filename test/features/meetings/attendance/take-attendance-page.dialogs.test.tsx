@@ -246,7 +246,7 @@ describe("recently marked and corrections", () => {
     const board = boardWithRecent()
 
     const dialog = (shown: AttendanceSheet) => (
-      <CorrectionDialog board={shown} open onOpenChange={() => {}} />
+      <CorrectionDialog sheet={shown} open onOpenChange={() => {}} />
     )
 
     const view = renderWithProviders(dialog(board))

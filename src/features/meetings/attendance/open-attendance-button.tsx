@@ -18,10 +18,10 @@ const CHANGED_MEANWHILE = [
 ]
 
 export function OpenAttendanceButton({
-  session,
+  sessionId,
   onOpened,
 }: {
-  session: Uuid
+  sessionId: Uuid
   onOpened?: () => void
 }) {
   const t = useTranslations("attendance")
@@ -36,7 +36,7 @@ export function OpenAttendanceButton({
     <Button
       disabled={open.pending}
       onClick={async () => {
-        const result = await open.execute(session)
+        const result = await open.execute(sessionId)
 
         if (!result.ok && isStale(result.problem, CHANGED_MEANWHILE)) {
           void refetch(SESSION_STATUS_QUERIES)

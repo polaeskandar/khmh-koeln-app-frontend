@@ -47,19 +47,19 @@ function BackLink({ child }: { child: ChildHomeworkDetail["child"] }) {
 type TaskContent = Pick<ChildHomeworkDetail, "task" | "lesson" | "today">
 
 export function HomeworkTaskView({
-  data,
+  detail,
   back,
   forText,
   children,
 }: {
-  data: TaskContent
+  detail: TaskContent
   back: ReactNode
   forText: string
   children: ReactNode
 }) {
   const t = useTranslations("parent.view")
   const f = useFormat()
-  const { task, lesson, today } = data
+  const { task, lesson, today } = detail
   const { resources } = task
 
   return (
@@ -142,13 +142,13 @@ export function HomeworkTaskView({
   )
 }
 
-function TaskView({ data }: { data: ChildHomeworkDetail }) {
+function TaskView({ detail }: { detail: ChildHomeworkDetail }) {
   const t = useTranslations("parent")
-  const { task, today, child } = data
+  const { task, today, child } = detail
 
   return (
     <HomeworkTaskView
-      data={data}
+      detail={detail}
       back={<BackLink child={child} />}
       forText={t("view.forChild", { name: isolate(child.name) })}
     >
@@ -165,25 +165,25 @@ function TaskView({ data }: { data: ChildHomeworkDetail }) {
   )
 }
 
-function Task({ child, id }: { child: Uuid; id: Uuid }) {
-  const query = useQuery(parentTaskQuery(child, id))
+function Task({ childId, id }: { childId: Uuid; id: Uuid }) {
+  const query = useQuery(parentTaskQuery(childId, id))
 
   return (
     <QueryState query={query} loading={<ListSkeleton />} notFound={<ParentNotAvailable />}>
-      {(data) => <TaskView data={data} />}
+      {(detail) => <TaskView detail={detail} />}
     </QueryState>
   )
 }
 
 function TaskPage() {
   const id = useSearchParamId("id")
-  const child = useSearchParamId("child")
+  const childId = useSearchParamId("child")
 
-  if (!id || !child) {
+  if (!id || !childId) {
     return <ParentNotAvailable />
   }
 
-  return <Task key={`${child}-${id}`} child={child} id={id} />
+  return <Task key={`${childId}-${id}`} childId={childId} id={id} />
 }
 
 export function ParentTaskPage() {

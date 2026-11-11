@@ -28,6 +28,7 @@ import {
   archiveLessonRequest,
   changeLessonStatusRequest,
   deleteLessonRequest,
+  type EverPublished,
   LESSON_ARCHIVE_QUERIES,
   LESSON_QUERIES,
   type LessonDetail,
@@ -78,7 +79,7 @@ function useEverPublished({
   service,
   stage,
   homework,
-}: LessonDetail): boolean | null {
+}: LessonDetail): EverPublished {
   const can = useCanIn(groupAt(service, stage))
   const readable = can("read", "homework")
 
@@ -88,25 +89,29 @@ function useEverPublished({
   const tasks = useQuery({ ...stageHomeworkQuery(stage.id), enabled: readable && deletable })
 
   if (!readable) {
-    return homework.published > 0
+    return homework.published > 0 ? "yes" : "no"
   }
 
-  return tasks.data
-    ? tasks.data.items.some((task) => task.lesson.id === lesson.id && task.publishedAt !== null)
-    : null
+  if (!tasks.data) {
+    return "unknown"
+  }
+
+  return tasks.data.items.some((task) => task.lesson.id === lesson.id && task.publishedAt !== null)
+    ? "yes"
+    : "no"
 }
 
-export function useLessonFlags(data: LessonDetail): LessonFlags {
-  const can = useCanIn(groupAt(data.service, data.stage))
-  const everPublished = useEverPublished(data)
+export function useLessonFlags(detail: LessonDetail): LessonFlags {
+  const can = useCanIn(groupAt(detail.service, detail.stage))
+  const everPublished = useEverPublished(detail)
 
-  return lessonFlagsFor(can, data, everPublished)
+  return lessonFlagsFor(can, detail, everPublished)
 }
 
-export function LessonActions({ data, flags }: { data: LessonDetail; flags: LessonFlags }) {
+export function LessonActions({ detail, flags }: { detail: LessonDetail; flags: LessonFlags }) {
   const t = useTranslations()
   const router = useRouter()
-  const { lesson, stage, homework } = data
+  const { lesson, stage, homework } = detail
   const [dialog, setDialog] = useState<"archive" | "delete" | null>(null)
   const title = isolate(lesson.title)
 
@@ -146,7 +151,7 @@ export function LessonActions({ data, flags }: { data: LessonDetail; flags: Less
         ? { label: t("lessons.actions.notTaughtYet"), status: "ready" as const }
         : null
 
-  const set = (status: LessonStatus) => void change.execute(lesson.id, status)
+  const changeStatus = (status: LessonStatus) => void change.execute(lesson.id, status)
   const menu = back || flags.archive || flags.delete
 
   return (
@@ -160,12 +165,12 @@ export function LessonActions({ data, flags }: { data: LessonDetail; flags: Less
         </Button>
       ) : null}
       {flags.manage && lesson.status === "draft" ? (
-        <Button disabled={change.pending} onClick={() => set("ready")}>
+        <Button disabled={change.pending} onClick={() => changeStatus("ready")}>
           {t("lessons.actions.markReady")}
         </Button>
       ) : null}
       {flags.markCompleted ? (
-        <Button disabled={change.pending} onClick={() => set("completed")}>
+        <Button disabled={change.pending} onClick={() => changeStatus("completed")}>
           {t("lessons.actions.markTaught")}
         </Button>
       ) : null}
@@ -178,7 +183,9 @@ export function LessonActions({ data, flags }: { data: LessonDetail; flags: Less
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {back ? (
-              <DropdownMenuItem onSelect={() => set(back.status)}>{back.label}</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => changeStatus(back.status)}>
+                {back.label}
+              </DropdownMenuItem>
             ) : null}
             {back && (flags.archive || flags.delete) ? <DropdownMenuSeparator /> : null}
             {flags.archive ? (

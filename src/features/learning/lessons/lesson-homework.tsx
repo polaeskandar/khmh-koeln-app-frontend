@@ -10,9 +10,9 @@ import { routes } from "@/lib/routes"
 import type { LessonDetail } from "./api"
 import { LessonPanel } from "./visibility"
 
-export function LessonHomework({ data, canAdd }: { data: LessonDetail; canAdd: boolean }) {
+export function LessonHomework({ detail, canAdd }: { detail: LessonDetail; canAdd: boolean }) {
   const t = useTranslations()
-  const { lesson, stage, homework } = data
+  const { lesson, stage, homework } = detail
 
   return (
     <LessonPanel

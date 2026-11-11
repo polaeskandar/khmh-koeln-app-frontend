@@ -100,14 +100,14 @@ function Row({ lesson, today }: { lesson: LessonRow; today: string }) {
 }
 
 function LessonList({
-  data,
+  list,
   tab,
   status,
   servant,
   filtered,
   onClear,
 }: {
-  data: LessonListResponse
+  list: LessonListResponse
   tab: LessonTab
   status: string
   servant: string
@@ -116,7 +116,7 @@ function LessonList({
 }) {
   const t = useTranslations("lessons.list")
 
-  const rows = data.items.filter(
+  const rows = list.items.filter(
     (lesson) =>
       (!status || lesson.status === status) &&
       (!servant ||
@@ -161,7 +161,7 @@ function LessonList({
   return (
     <ul className="divide-y border-y">
       {rows.map((lesson) => (
-        <Row key={lesson.id} lesson={lesson} today={data.today} />
+        <Row key={lesson.id} lesson={lesson} today={list.today} />
       ))}
     </ul>
   )
@@ -189,11 +189,11 @@ function Lessons({ stage }: { stage: Stage }) {
     setServant("")
   }
 
-  const data = query.data
-  const creatable = data !== undefined && !data.archived && can("create", "lessons")
+  const list = query.data
+  const creatable = list !== undefined && !list.archived && can("create", "lessons")
 
   const tabs: LessonTab[] =
-    data && data.tabs.archived > 0 ? ["upcoming", "previous", "archived"] : ["upcoming", "previous"]
+    list && list.tabs.archived > 0 ? ["upcoming", "previous", "archived"] : ["upcoming", "previous"]
 
   return (
     <Section
@@ -211,7 +211,7 @@ function Lessons({ stage }: { stage: Stage }) {
         ) : null
       }
     >
-      {data && !creatable ? (
+      {list && !creatable ? (
         <p className="text-sm text-muted-foreground">{t("lessons.list.onlyServants")}</p>
       ) : null}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -219,7 +219,7 @@ function Lessons({ stage }: { stage: Stage }) {
           <TabsList>
             {tabs.map((key) => (
               <TabsTrigger key={key} value={key}>
-                {t(`lessons.list.${key}`, { count: data?.tabs[key] ?? 0 })}
+                {t(`lessons.list.${key}`, { count: list?.tabs[key] ?? 0 })}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -254,7 +254,7 @@ function Lessons({ stage }: { stage: Stage }) {
             onChange={(event) => setServant(event.target.value)}
           >
             <NativeSelectOption value="">{t("lessons.list.anyServant")}</NativeSelectOption>
-            {data?.servants.map((person) => (
+            {list?.servants.map((person) => (
               <NativeSelectOption key={person.id} value={person.id}>
                 {person.name}
               </NativeSelectOption>
@@ -265,7 +265,7 @@ function Lessons({ stage }: { stage: Stage }) {
       <QueryState query={query}>
         {(loaded) => (
           <LessonList
-            data={loaded}
+            list={loaded}
             tab={tab}
             status={status}
             servant={servant}

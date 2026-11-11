@@ -9,13 +9,13 @@ import { Button } from "@/components/ui/button"
 import type { AttendanceSheet } from "./api"
 import type { BoardActions } from "./person-row"
 
-export function tallyOf(board: AttendanceSheet) {
-  const rosterSize = board.roster.length
+export function tallyOf(sheet: AttendanceSheet) {
+  const rosterSize = sheet.roster.length
 
   return {
-    expected: board.session.rosterMode === "expected",
+    expected: sheet.session.rosterMode === "expected",
     rosterSize,
-    notMarked: rosterSize - board.counts.rosterPresent,
+    notMarked: rosterSize - sheet.counts.rosterPresent,
   }
 }
 
@@ -23,10 +23,10 @@ const num = (chunks: ReactNode) => (
   <span className="font-heading text-3xl font-semibold text-foreground tabular-nums">{chunks}</span>
 )
 
-function BoardCounter({ board }: { board: AttendanceSheet }) {
+function BoardCounter({ sheet }: { sheet: AttendanceSheet }) {
   const t = useTranslations("attendance.board")
-  const { counts } = board
-  const { expected, rosterSize } = tallyOf(board)
+  const { counts } = sheet
+  const { expected, rosterSize } = tallyOf(sheet)
 
   return (
     <span className="text-sm text-muted-foreground">
@@ -41,22 +41,22 @@ function BoardCounter({ board }: { board: AttendanceSheet }) {
 }
 
 export function CounterPanel({
-  board,
+  sheet,
   canRecord,
   actions,
 }: {
-  board: AttendanceSheet
+  sheet: AttendanceSheet
   canRecord: boolean
   actions: BoardActions
 }) {
   const t = useTranslations("attendance.board")
-  const { counts } = board
-  const { expected, rosterSize, notMarked } = tallyOf(board)
+  const { counts } = sheet
+  const { expected, rosterSize, notMarked } = tallyOf(sheet)
 
   return (
     <div className="flex flex-col gap-3 border p-5" data-testid="counter-panel">
       <p>
-        <BoardCounter board={board} />
+        <BoardCounter sheet={sheet} />
       </p>
       {expected && rosterSize > 0 ? (
         <RosterCells
@@ -90,11 +90,11 @@ export function CounterPanel({
 }
 
 export function MobileCounterBar({
-  board,
+  sheet,
   canRecord,
   actions,
 }: {
-  board: AttendanceSheet
+  sheet: AttendanceSheet
   canRecord: boolean
   actions: BoardActions
 }) {
@@ -103,7 +103,7 @@ export function MobileCounterBar({
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-3 border-t bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
       <p className="flex-1 leading-tight">
-        <BoardCounter board={board} />
+        <BoardCounter sheet={sheet} />
       </p>
       {canRecord ? (
         <Button onClick={actions.onClose} disabled={!actions.onClose || actions.saving}>

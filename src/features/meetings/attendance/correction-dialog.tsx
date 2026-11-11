@@ -28,18 +28,18 @@ function marksOf(
 }
 
 export function CorrectionDialog({
-  board,
+  sheet,
   open,
   onOpenChange,
 }: {
-  board: AttendanceSheet
+  sheet: AttendanceSheet
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
   const t = useTranslations("attendance.board")
   const f = useFormat()
   const refetch = useRefetch()
-  const marks = marksOf(board)
+  const marks = marksOf(sheet)
   const [chosen, setChosen] = useState<string | null>(null)
 
   if (open && chosen === null && marks[0]) {
@@ -71,7 +71,7 @@ export function CorrectionDialog({
       confirmLabel={t("correct.confirm")}
       tone="destructive"
       onConfirm={async (reason) => {
-        const result = await remove.execute(board.session.id, personId, reason)
+        const result = await remove.execute(sheet.session.id, personId, reason)
 
         if (!result.ok && isStale(result.problem, ["attendance.closedReopen"])) {
           void refetch(ATTENDANCE_QUERIES)
