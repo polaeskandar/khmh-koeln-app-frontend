@@ -3,8 +3,9 @@
 import { useQuery } from "@tanstack/react-query"
 import { Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useId, useState } from "react"
+import { useState } from "react"
 
+import { SelectField } from "@/components/form-fields"
 import { MemberAvatar } from "@/components/member-avatar"
 import { Section } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"
@@ -17,8 +18,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { FieldGroup } from "@/components/ui/field"
+import { NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
 import { initialsOf } from "@/features/identity/auth/role-summary"
 import {
@@ -58,7 +59,6 @@ function AssignServantDialog({
   onOpenChange: (open: boolean) => void
 }) {
   const t = useTranslations()
-  const id = useId()
   const [accountId, setAccountId] = useState("")
   const [stageId, setStageId] = useState<string | null>(null)
   const account = accounts.find((option) => option.id === accountId)
@@ -93,26 +93,20 @@ function AssignServantDialog({
           }}
         >
           <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor={`${id}-account`}>
-                {t("services.detail.servants.dialog.account")}
-              </FieldLabel>
-              <NativeSelect
-                id={`${id}-account`}
-                className="w-full"
-                value={accountId}
-                onChange={(event) => setAccountId(event.target.value)}
-              >
-                <NativeSelectOption value="" disabled>
-                  {t("services.detail.servants.dialog.chooseAccount")}
+            <SelectField
+              label={t("services.detail.servants.dialog.account")}
+              value={accountId}
+              onChange={(event) => setAccountId(event.target.value)}
+            >
+              <NativeSelectOption value="" disabled>
+                {t("services.detail.servants.dialog.chooseAccount")}
+              </NativeSelectOption>
+              {accounts.map((option) => (
+                <NativeSelectOption key={option.id} value={option.id}>
+                  {option.name}
                 </NativeSelectOption>
-                {accounts.map((option) => (
-                  <NativeSelectOption key={option.id} value={option.id}>
-                    {option.name}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
-            </Field>
+              ))}
+            </SelectField>
             <GroupFields
               services={[service]}
               value={{ serviceId: service.id, stageId }}

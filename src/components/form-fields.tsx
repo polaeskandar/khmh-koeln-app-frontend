@@ -1,10 +1,11 @@
 "use client"
 
-import { useId } from "react"
+import { type ComponentProps, type ReactNode, useId } from "react"
 import { useTranslations } from "next-intl"
 
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { NativeSelect } from "@/components/ui/native-select"
 import { Textarea } from "@/components/ui/textarea"
 
 export function OptionalNote() {
@@ -18,40 +19,89 @@ export function OptionalNote() {
   )
 }
 
+export type FieldControl = {
+  id: string
+  "aria-invalid": true | undefined
+  "aria-describedby": string | undefined
+}
+
+type FieldTexts = {
+  label: string
+  description?: ReactNode
+  error?: string
+  optional?: boolean
+}
+
+export function FormField({
+  label,
+  description,
+  error,
+  optional,
+  labelExtra,
+  className,
+  id: suppliedId,
+  children,
+}: FieldTexts & {
+  labelExtra?: ReactNode
+  className?: string
+  id?: string
+  children: (control: FieldControl) => ReactNode
+}) {
+  const generatedId = useId()
+  const id = suppliedId ?? generatedId
+  const hintId = `${id}-hint`
+  const errorId = `${id}-error`
+
+  const fieldLabel = (
+    <FieldLabel htmlFor={id}>
+      {label}
+      {optional ? <OptionalNote /> : null}
+    </FieldLabel>
+  )
+
+  return (
+    <Field data-invalid={error ? true : undefined} className={className}>
+      {labelExtra ? (
+        <div className="flex items-baseline justify-between gap-3">
+          {fieldLabel}
+          {labelExtra}
+        </div>
+      ) : (
+        fieldLabel
+      )}
+      {children({
+        id,
+        "aria-invalid": error ? true : undefined,
+        "aria-describedby": error ? errorId : description ? hintId : undefined,
+      })}
+      {description && !error ? (
+        <FieldDescription id={hintId}>{description}</FieldDescription>
+      ) : null}
+      {error ? <FieldError id={errorId}>{error}</FieldError> : null}
+    </Field>
+  )
+}
+
 export function TextField({
   label,
   description,
   error,
   optional,
   className,
-  id: suppliedId,
+  id,
   ...props
-}: React.ComponentProps<typeof Input> & {
-  label: string
-  description?: React.ReactNode
-  error?: string
-  optional?: boolean
-}) {
-  const generatedId = useId()
-  const id = suppliedId ?? generatedId
-
+}: ComponentProps<typeof Input> & FieldTexts) {
   return (
-    <Field data-invalid={error ? true : undefined} className={className}>
-      <FieldLabel htmlFor={id}>
-        {label}
-        {optional ? <OptionalNote /> : null}
-      </FieldLabel>
-      <Input
-        id={id}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${id}-error` : description ? `${id}-hint` : undefined}
-        {...props}
-      />
-      {description && !error ? (
-        <FieldDescription id={`${id}-hint`}>{description}</FieldDescription>
-      ) : null}
-      {error ? <FieldError id={`${id}-error`}>{error}</FieldError> : null}
-    </Field>
+    <FormField
+      label={label}
+      description={description}
+      error={error}
+      optional={optional}
+      className={className}
+      id={id}
+    >
+      {(control) => <Input {...control} {...props} />}
+    </FormField>
   )
 }
 
@@ -61,33 +111,47 @@ export function TextAreaField({
   error,
   optional,
   className,
-  id: suppliedId,
+  id,
   ...props
-}: React.ComponentProps<typeof Textarea> & {
-  label: string
-  description?: React.ReactNode
-  error?: string
-  optional?: boolean
-}) {
-  const generatedId = useId()
-  const id = suppliedId ?? generatedId
-
+}: ComponentProps<typeof Textarea> & FieldTexts) {
   return (
-    <Field data-invalid={error ? true : undefined} className={className}>
-      <FieldLabel htmlFor={id}>
-        {label}
-        {optional ? <OptionalNote /> : null}
-      </FieldLabel>
-      <Textarea
-        id={id}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${id}-error` : description ? `${id}-hint` : undefined}
-        {...props}
-      />
-      {description && !error ? (
-        <FieldDescription id={`${id}-hint`}>{description}</FieldDescription>
-      ) : null}
-      {error ? <FieldError id={`${id}-error`}>{error}</FieldError> : null}
-    </Field>
+    <FormField
+      label={label}
+      description={description}
+      error={error}
+      optional={optional}
+      className={className}
+      id={id}
+    >
+      {(control) => <Textarea {...control} {...props} />}
+    </FormField>
+  )
+}
+
+export function SelectField({
+  label,
+  description,
+  error,
+  optional,
+  className,
+  id,
+  children,
+  ...props
+}: ComponentProps<typeof NativeSelect> & FieldTexts) {
+  return (
+    <FormField
+      label={label}
+      description={description}
+      error={error}
+      optional={optional}
+      className={className}
+      id={id}
+    >
+      {(control) => (
+        <NativeSelect className="w-full" {...control} {...props}>
+          {children}
+        </NativeSelect>
+      )}
+    </FormField>
   )
 }

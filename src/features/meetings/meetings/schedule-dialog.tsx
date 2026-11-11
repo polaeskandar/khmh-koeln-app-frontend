@@ -6,7 +6,7 @@ import { CalendarClock, Info, Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useEffect, useMemo, useState } from "react"
 
-import { TextAreaField, TextField } from "@/components/form-fields"
+import { SelectField, TextAreaField, TextField } from "@/components/form-fields"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
@@ -338,61 +338,51 @@ function ScheduleForm({
         <div className="grid gap-y-8 md:grid-cols-2">
           <FieldGroup className="gap-6 md:pe-8">
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field data-invalid={errors[FIELDS.service] ? true : undefined}>
-                <FieldLabel htmlFor="schedule-service">{t("meetings.fields.service")}</FieldLabel>
-                <NativeSelect
-                  id="schedule-service"
-                  className="w-full"
-                  value={d.serviceId}
-                  disabled={!!schedule || !!fixedServiceId}
-                  aria-invalid={errors[FIELDS.service] ? true : undefined}
-                  onChange={(event) =>
-                    setD((prev) => ({ ...prev, serviceId: event.target.value, stageId: "" }))
-                  }
-                >
-                  {schedule?.service ? (
-                    <NativeSelectOption value={schedule.service.id}>
-                      {schedule.service.name}
-                    </NativeSelectOption>
-                  ) : null}
-                  {services
-                    .filter((s) => s.id !== schedule?.service?.id)
-                    .map((s) => (
-                      <NativeSelectOption key={s.id} value={s.id}>
-                        {s.name}
-                      </NativeSelectOption>
-                    ))}
-                </NativeSelect>
-                {errors[FIELDS.service] ? <FieldError>{errors[FIELDS.service]}</FieldError> : null}
-              </Field>
-              <Field data-invalid={errors[FIELDS.stage] ? true : undefined}>
-                <FieldLabel htmlFor="schedule-stage">{t("meetings.fields.stage")}</FieldLabel>
-                <NativeSelect
-                  id="schedule-stage"
-                  className="w-full"
-                  value={d.stageId}
-                  disabled={!!schedule}
-                  aria-invalid={errors[FIELDS.stage] ? true : undefined}
-                  onChange={(event) => set("stageId", event.target.value)}
-                >
-                  <NativeSelectOption value="">
-                    {t("meetings.fields.wholeService")}
+              <SelectField
+                label={t("meetings.fields.service")}
+                value={d.serviceId}
+                disabled={!!schedule || !!fixedServiceId}
+                error={errors[FIELDS.service]}
+                onChange={(event) =>
+                  setD((prev) => ({ ...prev, serviceId: event.target.value, stageId: "" }))
+                }
+              >
+                {schedule?.service ? (
+                  <NativeSelectOption value={schedule.service.id}>
+                    {schedule.service.name}
                   </NativeSelectOption>
-                  {schedule?.stage ? (
-                    <NativeSelectOption value={schedule.stage.id}>
-                      {schedule.stage.name}
+                ) : null}
+                {services
+                  .filter((s) => s.id !== schedule?.service?.id)
+                  .map((s) => (
+                    <NativeSelectOption key={s.id} value={s.id}>
+                      {s.name}
                     </NativeSelectOption>
-                  ) : null}
-                  {service?.stages
-                    .filter((s) => s.id !== schedule?.stage?.id)
-                    .map((s) => (
-                      <NativeSelectOption key={s.id} value={s.id}>
-                        {s.name}
-                      </NativeSelectOption>
-                    ))}
-                </NativeSelect>
-                {errors[FIELDS.stage] ? <FieldError>{errors[FIELDS.stage]}</FieldError> : null}
-              </Field>
+                  ))}
+              </SelectField>
+              <SelectField
+                label={t("meetings.fields.stage")}
+                value={d.stageId}
+                disabled={!!schedule}
+                error={errors[FIELDS.stage]}
+                onChange={(event) => set("stageId", event.target.value)}
+              >
+                <NativeSelectOption value="">
+                  {t("meetings.fields.wholeService")}
+                </NativeSelectOption>
+                {schedule?.stage ? (
+                  <NativeSelectOption value={schedule.stage.id}>
+                    {schedule.stage.name}
+                  </NativeSelectOption>
+                ) : null}
+                {service?.stages
+                  .filter((s) => s.id !== schedule?.stage?.id)
+                  .map((s) => (
+                    <NativeSelectOption key={s.id} value={s.id}>
+                      {s.name}
+                    </NativeSelectOption>
+                  ))}
+              </SelectField>
             </div>
             <TextField
               label={t("meetings.fields.name")}

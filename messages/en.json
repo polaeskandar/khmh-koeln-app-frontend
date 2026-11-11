@@ -1714,7 +1714,8 @@
       "groupsHint": "Where they serve. Roles that hold only in assigned groups hold here. The service they named is already chosen.",
       "noGroups": "No group yet. A servant without a group sees no service.",
       "addGroup": "Add group",
-      "removeGroup": "Remove {group}"
+      "removeGroup": "Remove {group}",
+      "removePerson": "Remove {name}"
     },
     "decline": {
       "title": "Decline {name}’s registration?",

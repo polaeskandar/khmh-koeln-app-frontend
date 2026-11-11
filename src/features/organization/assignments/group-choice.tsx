@@ -3,9 +3,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { Layers, X } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useId, useState } from "react"
+import { useState } from "react"
 
 import { ConfirmDialog } from "@/components/confirm-dialog"
+import { SelectField } from "@/components/form-fields"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -15,8 +16,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { FieldGroup } from "@/components/ui/field"
+import { NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
 import { useCanAssign } from "@/features/identity/auth/session"
 import { servicesQuery } from "@/features/organization/services/api"
@@ -66,56 +67,42 @@ export function GroupFields({
   fixedService?: boolean
 }) {
   const t = useTranslations("assignments")
-  const id = useId()
   const service = services.find((option) => option.id === value.serviceId)
 
   return (
     <>
       {fixedService ? null : (
-        <Field data-invalid={errors.serviceId ? true : undefined}>
-          <FieldLabel htmlFor={`${id}-service`}>{t("service")}</FieldLabel>
-          <NativeSelect
-            id={`${id}-service`}
-            className="w-full"
-            value={value.serviceId}
-            aria-invalid={errors.serviceId ? true : undefined}
-            onChange={(event) => onChange({ serviceId: event.target.value, stageId: null })}
-          >
-            <NativeSelectOption value="" disabled>
-              {t("chooseService")}
+        <SelectField
+          label={t("service")}
+          value={value.serviceId}
+          error={errors.serviceId}
+          onChange={(event) => onChange({ serviceId: event.target.value, stageId: null })}
+        >
+          <NativeSelectOption value="" disabled>
+            {t("chooseService")}
+          </NativeSelectOption>
+          {services.map((option) => (
+            <NativeSelectOption key={option.id} value={option.id}>
+              {option.name}
             </NativeSelectOption>
-            {services.map((option) => (
-              <NativeSelectOption key={option.id} value={option.id}>
-                {option.name}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
-          {errors.serviceId ? <FieldError>{errors.serviceId}</FieldError> : null}
-        </Field>
+          ))}
+        </SelectField>
       )}
       {service && service.stages.length > 0 ? (
-        <Field data-invalid={errors.stageId ? true : undefined}>
-          <FieldLabel htmlFor={`${id}-stage`}>{t("stage")}</FieldLabel>
-          <NativeSelect
-            id={`${id}-stage`}
-            className="w-full"
-            value={value.stageId ?? ""}
-            aria-invalid={errors.stageId ? true : undefined}
-            onChange={(event) => onChange({ ...value, stageId: event.target.value || null })}
-          >
-            <NativeSelectOption value="">{t("wholeService")}</NativeSelectOption>
-            {service.stages.map((stage) => (
-              <NativeSelectOption key={stage.id} value={stage.id}>
-                {stage.name}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
-          {errors.stageId ? (
-            <FieldError>{errors.stageId}</FieldError>
-          ) : (
-            <FieldDescription>{t("stageHint")}</FieldDescription>
-          )}
-        </Field>
+        <SelectField
+          label={t("stage")}
+          description={t("stageHint")}
+          value={value.stageId ?? ""}
+          error={errors.stageId}
+          onChange={(event) => onChange({ ...value, stageId: event.target.value || null })}
+        >
+          <NativeSelectOption value="">{t("wholeService")}</NativeSelectOption>
+          {service.stages.map((stage) => (
+            <NativeSelectOption key={stage.id} value={stage.id}>
+              {stage.name}
+            </NativeSelectOption>
+          ))}
+        </SelectField>
       ) : null}
     </>
   )

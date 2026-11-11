@@ -147,4 +147,20 @@ describe("ReasonDialog", () => {
 
     expect(screen.getByRole("textbox", { name: "Grund (optional)" })).toBeInTheDocument()
   })
+
+  test("the reason's hint describes the reason field", () => {
+    renderWithProviders(
+      <ReasonDialog
+        open
+        title="Cancel the meeting?"
+        reasonHint="Members see it on their agenda."
+        confirmLabel="Cancel meeting"
+        onConfirm={async () => true}
+      />
+    )
+
+    expect(screen.getByRole("textbox", { name: "Reason (optional)" })).toHaveAccessibleDescription(
+      "Members see it on their agenda."
+    )
+  })
 })
