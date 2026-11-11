@@ -20,6 +20,7 @@ import { AssignmentChip, GroupFields } from "@/features/organization/assignments
 import { useAssignGroup } from "@/features/organization/assignments/use-assign-group"
 import type { Uuid } from "@/lib/api/types/common"
 import { isolate } from "@/lib/bidi"
+import { groupAt } from "@/lib/permissions"
 
 import { type AccountReference, type ServiceServant, serviceServantsQuery } from "./api"
 
@@ -39,10 +40,12 @@ function rowsByAccount(servants: ServiceServant[]): ServantRow[] {
 function AssignServantDialog({
   service,
   accounts,
+  servants,
   onClose,
 }: {
   service: GroupOption
   accounts: AccountReference[]
+  servants: ServiceServant[]
   onClose: () => void
 }) {
   const t = useTranslations()
@@ -50,6 +53,13 @@ function AssignServantDialog({
   const [stageId, setStageId] = useState<string | null>(null)
   const account = accounts.find((option) => option.id === accountId)
   const assign = useAssignGroup(account?.name ?? "", onClose)
+
+  const held = servants
+    .filter((servant) => servant.account.id === accountId)
+    .map((servant) => groupAt(service, servant.stage))
+
+  const holdsWhole = held.some((other) => other.stageId === null)
+  const group = { serviceId: service.id, stageId: holdsWhole ? null : stageId }
 
   return (
     <FormDialog
@@ -59,7 +69,7 @@ function AssignServantDialog({
       problem={assign.problem}
       submitLabel={t("assignments.assign")}
       submitDisabled={!accountId}
-      onSubmit={() => assign.execute(accountId, { serviceId: service.id, stageId })}
+      onSubmit={() => assign.execute(accountId, group)}
       onClose={onClose}
     >
       <FieldGroup>
@@ -79,9 +89,10 @@ function AssignServantDialog({
         </SelectField>
         <GroupFields
           services={[service]}
-          value={{ serviceId: service.id, stageId }}
-          onChange={(group) => setStageId(group.stageId)}
+          value={group}
+          onChange={(chosen) => setStageId(chosen.stageId)}
           errors={assign.fieldErrors}
+          held={held}
           fixedService
         />
       </FieldGroup>
@@ -155,6 +166,7 @@ export function ServiceServants({
           <AssignServantDialog
             service={service}
             accounts={assignable}
+            servants={servants.data?.servants ?? []}
             onClose={() => setAssigning(false)}
           />
         ) : null}

@@ -2081,6 +2081,7 @@
     "stage": "Stage",
     "chooseService": "Choose a service",
     "stageHint": "The whole service covers its own roster and all its stages, as for a service leader; a stage covers that stage only.",
+    "replaces": "Replaces {stages}.",
     "assign": "Assign",
     "remove": "Take out",
     "removeLabel": "Take {name} out of {where}",

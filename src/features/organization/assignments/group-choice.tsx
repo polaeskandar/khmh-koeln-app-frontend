@@ -12,16 +12,23 @@ import { FieldGroup } from "@/components/ui/field"
 import { NativeSelectOption } from "@/components/ui/native-select"
 import { useCanAssign } from "@/features/identity/auth/session"
 import { servicesQuery } from "@/features/organization/services/api"
+import { useFormat } from "@/i18n/format"
 import type { Uuid } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
-import { type Group, groupAt } from "@/lib/permissions"
+import { type AssignedGroup, type Group, groupAt } from "@/lib/permissions"
 import { type Place, placeLabel } from "@/lib/domain/place"
 
 import { ASSIGNMENT_QUERIES, type GroupOption, removeAssignmentRequest } from "./api"
 import { useAssignGroup } from "./use-assign-group"
 
 export const NO_GROUP: Group = { serviceId: "", stageId: null }
+
+export const sameGroup = (a: Group, b: Group) =>
+  a.serviceId === b.serviceId && a.stageId === b.stageId
+
+export const isCoveredBy = (group: Group, whole: Group) =>
+  whole.stageId === null && group.stageId !== null && group.serviceId === whole.serviceId
 
 export function useAssignableGroups(): GroupOption[] {
   const canAssign = useCanAssign()
@@ -45,15 +52,24 @@ export function GroupFields({
   onChange,
   errors = {},
   fixedService = false,
+  held = [],
 }: {
   services: GroupOption[]
   value: Group
   onChange: (value: Group) => void
   errors?: Record<string, string | undefined>
   fixedService?: boolean
+  held?: Group[]
 }) {
   const t = useTranslations("assignments")
+  const f = useFormat()
   const service = services.find((option) => option.id === value.serviceId)
+  const holdsWhole = service ? held.some((group) => sameGroup(group, groupAt(service))) : false
+  const stages = service && !holdsWhole ? service.stages : []
+
+  const replaced = stages.filter((stage) =>
+    held.some((group) => isCoveredBy(group, value) && group.stageId === stage.id)
+  )
 
   return (
     <>
@@ -74,16 +90,29 @@ export function GroupFields({
           ))}
         </SelectField>
       )}
-      {service && service.stages.length > 0 ? (
+      {stages.length > 0 ? (
         <SelectField
           label={t("stage")}
-          description={t("stageHint")}
+          description={
+            replaced.length > 0 ? (
+              <>
+                {t("stageHint")}{" "}
+                <span className="block">
+                  {t("replaces", {
+                    stages: replaced.map((stage) => isolate(stage.name)).join(f.separator),
+                  })}
+                </span>
+              </>
+            ) : (
+              t("stageHint")
+            )
+          }
           value={value.stageId ?? ""}
           error={errors.stageId}
           onChange={(event) => onChange({ ...value, stageId: event.target.value || null })}
         >
           <NativeSelectOption value="">{t("wholeService")}</NativeSelectOption>
-          {service.stages.map((stage) => (
+          {stages.map((stage) => (
             <NativeSelectOption key={stage.id} value={stage.id}>
               {stage.name}
             </NativeSelectOption>
@@ -99,12 +128,17 @@ export function AssignGroupDialog({
   services,
   onClose,
 }: {
-  account: { id: Uuid; displayName: string }
+  account: { id: Uuid; displayName: string; assignments: AssignedGroup[] }
   services: GroupOption[]
   onClose: () => void
 }) {
   const t = useTranslations()
   const [group, setGroup] = useState<Group>(NO_GROUP)
+
+  const held = account.assignments.map((assignment) =>
+    groupAt(assignment.service, assignment.stage)
+  )
+
   const assign = useAssignGroup(account.displayName, onClose)
 
   return (
@@ -124,6 +158,7 @@ export function AssignGroupDialog({
           value={group}
           onChange={setGroup}
           errors={assign.fieldErrors}
+          held={held}
         />
       </FieldGroup>
     </FormDialog>

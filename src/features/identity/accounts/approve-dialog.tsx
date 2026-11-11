@@ -25,7 +25,9 @@ import { RolesChoice } from "@/features/identity/roles/roles-choice"
 import type { GroupOption } from "@/features/organization/assignments/api"
 import {
   GroupFields,
+  isCoveredBy,
   NO_GROUP,
+  sameGroup,
   useAssignableGroups,
 } from "@/features/organization/assignments/group-choice"
 import type { Group } from "@/lib/permissions"
@@ -33,8 +35,6 @@ import type { Group } from "@/lib/permissions"
 import { MemberApproval } from "./member-approval"
 import { ApprovalDialog, useApproval } from "./approval-dialog"
 import { type AccountRequest, STAFF_APPROVAL_QUERIES } from "./api"
-
-const sameGroup = (a: Group, b: Group) => a.serviceId === b.serviceId && a.stageId === b.stageId
 
 function GroupsChoice({
   services,
@@ -59,7 +59,7 @@ function GroupsChoice({
 
   function add() {
     if (!selected.some((group) => sameGroup(group, draft))) {
-      onChange([...selected, draft])
+      onChange([...selected.filter((group) => !isCoveredBy(group, draft)), draft])
     }
 
     setDraft(NO_GROUP)
@@ -93,7 +93,7 @@ function GroupsChoice({
         <p className="text-sm text-muted-foreground">{t("noGroups")}</p>
       )}
       <div className="flex flex-col gap-3 border p-3">
-        <GroupFields services={services} value={draft} onChange={setDraft} />
+        <GroupFields services={services} value={draft} onChange={setDraft} held={selected} />
         <Button
           type="button"
           variant="outline"

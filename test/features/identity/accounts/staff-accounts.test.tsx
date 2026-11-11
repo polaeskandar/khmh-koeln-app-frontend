@@ -37,6 +37,7 @@ const roleRows = roles.map((r) => ({
 const sundaySchool = services.items[0]!
 const thirdClass = sundaySchool.stages[2]!
 const youth = services.items[1]!
+const deaconsSchool = services.items[3]!
 
 const serviceRef = ({ id, name, tone, archived }: typeof sundaySchool) => ({
   id,
@@ -73,11 +74,18 @@ const account = (
   assignments,
 })
 
+const inSundaySchool: StaffAccount["assignments"][number] = {
+  id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea002",
+  service: serviceRef(sundaySchool),
+  stage: null,
+}
+
 const mariam = account(1, "Mariam Fahmy", [administrator])
 const rebecca = account(2, "Rebecca Girgis", [servant])
 const sara = account(3, "Sara Wissa", [office])
 const samuel = account(4, "Samuel Rizk", [servant], true)
 const daniel = account(5, "Daniel Mikhail", [servant], false, [inThirdClass])
+const john = account(6, "John Wassef", [servant], false, [inSundaySchool])
 
 function open({
   remove,
@@ -125,8 +133,13 @@ function open({
         stage: stage ? stageRef(stage) : null,
       }
 
+      const keeps = (held: StaffAccount["assignments"][number]) =>
+        stage !== undefined || held.service.id !== service.id
+
       items = items.map((item) =>
-        item.id === params.id ? { ...item, assignments: [...item.assignments, created] } : item
+        item.id === params.id
+          ? { ...item, assignments: [...item.assignments.filter(keeps), created] }
+          : item
       )
 
       return HttpResponse.json(created, { status: 201 })
@@ -451,6 +464,35 @@ test("a service without stages is assigned as a whole", async () => {
   expect(dialog.queryByRole("combobox", { name: "Stage" })).toBeNull()
   await userEvent.click(dialog.getByRole("button", { name: "Assign" }))
   await waitFor(() => expect(sent).toEqual([`assign ${sara.id} ${youth.id} null`]))
+})
+
+test("a service the account holds as a whole offers none of its stages", async () => {
+  open({ accounts: [john] })
+  const dialog = await openAssign("John Wassef")
+  const service = dialog.getByRole("combobox", { name: "Service" })
+  await userEvent.selectOptions(service, sundaySchool.id)
+  expect(dialog.queryByRole("combobox", { name: "Stage" })).toBeNull()
+  await userEvent.selectOptions(service, deaconsSchool.id)
+  expect(dialog.getByRole("combobox", { name: "Stage" })).toBeInTheDocument()
+})
+
+test("the whole service says which stages it replaces, and the account then shows it alone", async () => {
+  const { sent } = open({ accounts: [daniel] })
+  const dialog = await openAssign("Daniel Mikhail")
+  await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Service" }), sundaySchool.id)
+  const stage = dialog.getByRole("combobox", { name: "Stage" })
+  expect(stage).toHaveAccessibleDescription(/ Replaces ⁨3rd Class⁩\.$/)
+  await userEvent.selectOptions(stage, sundaySchool.stages[1]!.id)
+  expect(stage).not.toHaveAccessibleDescription(/Replaces/)
+  await userEvent.selectOptions(stage, "")
+  await userEvent.click(dialog.getByRole("button", { name: "Assign" }))
+
+  await expectToast("⁨Daniel Mikhail⁩ now serves in ⁨Sunday School⁩.")
+
+  const row = within(await rowOf("Daniel Mikhail"))
+  expect(await row.findByText("Sunday School")).toBeInTheDocument()
+  expect(row.queryByText("Sunday School · 3rd Class")).toBeNull()
+  expect(sent).toEqual([`assign ${daniel.id} ${sundaySchool.id} null`])
 })
 
 test("an account already in the group keeps the dialog open with the reason", async () => {

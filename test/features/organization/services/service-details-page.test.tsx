@@ -92,9 +92,10 @@ function open(
     http.post(apiUrl("/accounts/:id/assignments"), async ({ params, request }) => {
       const body = (await request.json()) as { serviceId: string; stageId: string | null }
       sent.push(`assign ${params.id} ${body.serviceId} ${body.stageId}`)
-      const stage = stageRef("3rd Class", 3)
+      const stage = body.stageId === null ? null : stageRef("3rd Class", 3)
       const assigned = [CHRISTINE, DANIEL, REBECCA].find((option) => option.id === params.id)!
-      servants = [...servants, { assignmentId: assignment(99), account: assigned, stage }]
+      const kept = stage ? servants : servants.filter((servant) => servant.account !== assigned)
+      servants = [...kept, { assignmentId: assignment(99), account: assigned, stage }]
 
       return HttpResponse.json(
         { id: assignment(99), service: ref(sundaySchool), stage },
@@ -228,6 +229,50 @@ test("Servants lists each servant with their groups, and Assign adds one", async
     `assign ${REBECCA.id} ${sundaySchool.id} ${stageRef("3rd Class", 3).id}`,
     "list",
   ])
+})
+
+const openAssignServant = async () => {
+  open(sundaySchool, STAGES, 0)
+  const section = await servantsSection()
+  await userEvent.click(await section.findByRole("button", { name: "Assign" }))
+
+  return { section, dialog: within(await screen.findByRole("dialog")) }
+}
+
+test("an account that holds the whole service is offered none of its stages", async () => {
+  const { dialog } = await openAssignServant()
+  const account = dialog.getByRole("combobox", { name: "Account" })
+  await userEvent.selectOptions(account, REBECCA.id)
+  await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Stage" }), "3rd Class")
+  await userEvent.selectOptions(account, CHRISTINE.id)
+  expect(dialog.queryByRole("combobox", { name: "Stage" })).toBeNull()
+  await userEvent.click(dialog.getByRole("button", { name: "Assign" }))
+
+  await waitFor(() =>
+    expect(sent).toEqual(["list", `assign ${CHRISTINE.id} ${sundaySchool.id} null`, "list"])
+  )
+})
+
+test("the whole service says which of the account's stages it replaces, and then lists alone", async () => {
+  const { section, dialog } = await openAssignServant()
+  await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Account" }), DANIEL.id)
+  const stage = dialog.getByRole("combobox", { name: "Stage" })
+  expect(stage).toHaveAccessibleDescription(/ Replaces ⁨3rd Class⁩, ⁨4th Class⁩\.$/)
+  await userEvent.selectOptions(stage, "1st Class")
+  expect(stage).not.toHaveAccessibleDescription(/Replaces/)
+  await userEvent.selectOptions(stage, "The whole service")
+  await userEvent.click(dialog.getByRole("button", { name: "Assign" }))
+  const daniel = section.getByText("Daniel Mikhail").closest("li")!
+
+  await waitFor(() =>
+    expect(
+      within(daniel)
+        .getAllByRole("listitem")
+        .map((group) => group.textContent)
+    ).toEqual(["The whole service"])
+  )
+
+  expect(sent).toEqual(["list", `assign ${DANIEL.id} ${sundaySchool.id} null`, "list"])
 })
 
 test("a service leader without users: read sees the servants and takes one out", async () => {
