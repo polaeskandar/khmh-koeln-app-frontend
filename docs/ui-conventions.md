@@ -56,6 +56,12 @@ closing still fades. Enter in a field submits it; Enter in a search box (`ignore
 action takes `submitOnEnter={false}`, so only its button starts it: approving an account. `role="alertdialog"`
 makes it an alert dialog, as for deleting one's own account.
 
+## Status
+
+A status is a `StatusBadge` (`src/components/status.tsx`): a tone, a word and usually an icon, so it never
+relies on colour alone. Its `variant` is `default`, `live` (a pulsing dot instead of the icon, for a session whose
+attendance is open) or `dashed` (a dashed border, for a planned date that has no session yet).
+
 ## Text and direction
 
 Titles people typed sit in `<bdi>` (`PageHeader` does it), longer typed text gets `dir="auto"`, and typed
