@@ -465,11 +465,6 @@
     }
   },
   "dashboard": {
-    "greeting": {
-      "morning": "صباح الخير يا {name}",
-      "afternoon": "مساء الخير يا {name}",
-      "evening": "مساء الخير يا {name}"
-    },
     "stagesCount": "{count, plural, one {مرحلة واحدة} two {مرحلتان} few {# مراحل} other {# مرحلة}}",
     "summary": {
       "none": "لا توجد اجتماعات اليوم.",
@@ -1306,6 +1301,11 @@
       "archived": "تمت أرشفة «{name}». لن تُنشأ لها اجتماعات جديدة."
     }
   },
+  "greeting": {
+    "morning": "صباح الخير يا {name}",
+    "afternoon": "مساء الخير يا {name}",
+    "evening": "مساء الخير يا {name}"
+  },
   "parent": {
     "brand": {
       "forParents": "لأولياء الأمور"
@@ -1321,11 +1321,6 @@
       "accountOf": "حساب {name}"
     },
     "home": {
-      "greeting": {
-        "morning": "صباح الخير يا {name}",
-        "afternoon": "مساء الخير يا {name}",
-        "evening": "مساء الخير يا {name}"
-      },
       "noChild": {
         "title": "لم يُربط أي طفل بعد",
         "description": "يربط مكتب الكنيسة حسابك بأطفالك. بعد ذلك ستظهر واجباتهم هنا."

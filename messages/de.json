@@ -465,11 +465,6 @@
     }
   },
   "dashboard": {
-    "greeting": {
-      "morning": "Guten Morgen, {name}",
-      "afternoon": "Guten Tag, {name}",
-      "evening": "Guten Abend, {name}"
-    },
     "stagesCount": "{count, plural, one {# Stufe} other {# Stufen}}",
     "summary": {
       "none": "Heute gibt es keine Treffen.",
@@ -1306,6 +1301,11 @@
       "archived": "{name} archiviert. Für den Dienst werden keine neuen Termine mehr angelegt."
     }
   },
+  "greeting": {
+    "morning": "Guten Morgen, {name}",
+    "afternoon": "Guten Tag, {name}",
+    "evening": "Guten Abend, {name}"
+  },
   "parent": {
     "brand": {
       "forParents": "Für Eltern"
@@ -1321,11 +1321,6 @@
       "accountOf": "Konto von {name}"
     },
     "home": {
-      "greeting": {
-        "morning": "Guten Morgen, {name}",
-        "afternoon": "Guten Tag, {name}",
-        "evening": "Guten Abend, {name}"
-      },
       "noChild": {
         "title": "Noch kein Kind verknüpft",
         "description": "Das Gemeindebüro verknüpft Ihr Konto mit Ihren Kindern. Sobald das geschehen ist, erscheinen hier ihre Hausaufgaben."

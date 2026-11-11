@@ -6,12 +6,11 @@ import { useTranslations } from "next-intl"
 
 import { Section } from "@/components/page-header"
 import { QueryErrorState, QueryState } from "@/components/page-states"
+import { PortalGreeting } from "@/components/portal/portal-greeting"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSession } from "@/features/identity/auth/session"
 import { ListSkeleton } from "@/components/list-skeleton"
 import { TaskList, useOwnCompletion } from "@/features/learning/homework/task-list"
-import { useFormat } from "@/i18n/format"
-import { localTimeOf } from "@/lib/domain/time"
 import { routes } from "@/lib/routes"
 
 import { type ParentHomeworkItem, memberHomeworkQuery } from "@/features/learning/homework/api"
@@ -25,33 +24,14 @@ const DONE_RECENTLY = 3
 
 const taskHref = (task: ParentHomeworkItem) => routes.memberHomeworkTask(task.id)
 
-function partOfDay(): "morning" | "afternoon" | "evening" {
-  const hour = Number(localTimeOf(Date.now()).slice(0, 2))
-
-  return hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening"
-}
-
-function Homework({ which }: { which: "todo" | "done" }) {
+function ToDoHomework() {
   const t = useTranslations("member.home")
   const toDo = useQuery(memberHomeworkQuery("todo"))
   const done = useQuery(memberHomeworkQuery("done"))
   const completion = useOwnCompletion()
-  const own = which === "todo" ? toDo : done
 
-  if (own.isError) {
-    return <QueryErrorState error={own.error} onRetry={() => own.refetch()} />
-  }
-
-  if (which === "done") {
-    return done.data && done.data.items.length > 0 ? (
-      <TaskList
-        title={t("doneRecently")}
-        tasks={done.data.items.slice(0, DONE_RECENTLY)}
-        today={done.data.today}
-        href={taskHref}
-        completion={completion}
-      />
-    ) : null
+  if (toDo.isError) {
+    return <QueryErrorState error={toDo.error} onRetry={() => toDo.refetch()} />
   }
 
   if (!toDo.data) {
@@ -70,6 +50,30 @@ function Homework({ which }: { which: "todo" | "done" }) {
       href={taskHref}
       completion={completion}
       empty={t("emptyToDo")}
+    />
+  )
+}
+
+function DoneHomework() {
+  const t = useTranslations("member.home")
+  const done = useQuery(memberHomeworkQuery("done"))
+  const completion = useOwnCompletion()
+
+  if (done.isError) {
+    return <QueryErrorState error={done.error} onRetry={() => done.refetch()} />
+  }
+
+  if (!done.data || done.data.items.length === 0) {
+    return null
+  }
+
+  return (
+    <TaskList
+      title={t("doneRecently")}
+      tasks={done.data.items.slice(0, DONE_RECENTLY)}
+      today={done.data.today}
+      href={taskHref}
+      completion={completion}
     />
   )
 }
@@ -130,8 +134,6 @@ function NotLinked() {
 }
 
 export function MemberHomePage() {
-  const t = useTranslations("parent.home")
-  const f = useFormat()
   const { session } = useSession()
   const groups = useMemberGroups()
 
@@ -144,22 +146,15 @@ export function MemberHomePage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <header className="flex flex-col gap-1">
-        <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
-          {t(`greeting.${partOfDay()}`, { name: me.account.displayName.split(" ")[0] })}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {f.longDate(me.today)} · {f.copticDate(me.today)}
-        </p>
-      </header>
+      <PortalGreeting name={me.account.displayName} today={me.today} />
       {unlinked ? (
         <NotLinked />
       ) : (
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,340px)]">
           <div className="flex min-w-0 flex-col gap-8">
-            <Homework which="todo" />
+            <ToDoHomework />
             <Meetings />
-            <Homework which="done" />
+            <DoneHomework />
           </div>
           <Groups />
         </div>

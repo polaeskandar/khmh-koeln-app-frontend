@@ -6,10 +6,9 @@ import { useTranslations } from "next-intl"
 import { Suspense } from "react"
 
 import { QueryErrorState, QueryState } from "@/components/page-states"
+import { PortalGreeting } from "@/components/portal/portal-greeting"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSession } from "@/features/identity/auth/session"
-import { useFormat } from "@/i18n/format"
-import { localTimeOf } from "@/lib/domain/time"
 import { routes } from "@/lib/routes"
 
 import {
@@ -24,12 +23,6 @@ import { ListSkeleton } from "@/components/list-skeleton"
 import { TaskList, useChildCompletion } from "@/features/learning/homework/task-list"
 
 const DONE_RECENTLY = 5
-
-function partOfDay(): "morning" | "afternoon" | "evening" {
-  const hour = Number(localTimeOf(Date.now()).slice(0, 2))
-
-  return hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening"
-}
 
 function HomeSkeleton() {
   const t = useTranslations("common")
@@ -120,26 +113,15 @@ function Children({ data }: { data: ChildList }) {
 }
 
 function Home() {
-  const t = useTranslations("parent.home")
-  const f = useFormat()
   const { session } = useSession()
   const query = useQuery(parentChildrenQuery)
-
-  const firstName =
-    session.status === "authenticated" ? session.me.account.displayName.split(" ")[0] : ""
+  const name = session.status === "authenticated" ? session.me.account.displayName : ""
 
   return (
     <QueryState query={query} loading={<HomeSkeleton />}>
       {(data) => (
         <div className="flex flex-col gap-8">
-          <header className="flex flex-col gap-1">
-            <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
-              {t(`greeting.${partOfDay()}`, { name: firstName })}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {f.longDate(data.today)} · {f.copticDate(data.today)}
-            </p>
-          </header>
+          <PortalGreeting name={name} today={data.today} />
           <Children data={data} />
         </div>
       )}

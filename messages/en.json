@@ -465,11 +465,6 @@
     }
   },
   "dashboard": {
-    "greeting": {
-      "morning": "Good morning, {name}",
-      "afternoon": "Good afternoon, {name}",
-      "evening": "Good evening, {name}"
-    },
     "stagesCount": "{count, plural, one {# stage} other {# stages}}",
     "summary": {
       "none": "There are no meetings today.",
@@ -1306,6 +1301,11 @@
       "archived": "Archived {name}. No new sessions will be created for it."
     }
   },
+  "greeting": {
+    "morning": "Good morning, {name}",
+    "afternoon": "Good afternoon, {name}",
+    "evening": "Good evening, {name}"
+  },
   "parent": {
     "brand": {
       "forParents": "For parents"
@@ -1321,11 +1321,6 @@
       "accountOf": "Account of {name}"
     },
     "home": {
-      "greeting": {
-        "morning": "Good morning, {name}",
-        "afternoon": "Good afternoon, {name}",
-        "evening": "Good evening, {name}"
-      },
       "noChild": {
         "title": "No child linked yet",
         "description": "The church office links your account to your children. Once that is done, their homework appears here."
