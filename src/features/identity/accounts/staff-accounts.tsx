@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { KeyRound, Plus, X } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { Section } from "@/components/page-header"
@@ -31,12 +31,10 @@ import {
 } from "@/features/organization/assignments/group-choice"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
-import { ApiError } from "@/lib/api/problem"
-import { describeProblem } from "@/lib/api/translate-problem"
 import { isStale, useRefetch } from "@/lib/api/refetch"
+import type { Problem } from "@/lib/api/translate-problem"
 import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
-import { useProblemTranslator } from "@/lib/api/use-problem-translator"
 import { isolate } from "@/lib/bidi"
 import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
@@ -157,40 +155,18 @@ function GiveRoleDialog({
 function PasswordLinkDialog({
   account,
   today,
+  link,
+  problem,
   onOpenChange,
 }: {
   account: StaffAccount
   today: LocalDate
+  link: PasswordLink | undefined
+  problem: Problem | null
   onOpenChange: (open: boolean) => void
 }) {
   const t = useTranslations()
-  const translate = useProblemTranslator()
   const f = useFormat()
-  const [link, setLink] = useState<PasswordLink | null>(null)
-  const [problem, setProblem] = useState<string | null>(null)
-
-  useEffect(() => {
-    let current = true
-
-    passwordLinkRequest(account.id).then(
-      (created) => current && setLink(created),
-      (error: unknown) => {
-        if (!current) {
-          return
-        }
-
-        if (error instanceof ApiError) {
-          setProblem(describeProblem(error, translate).message)
-        } else {
-          throw error
-        }
-      }
-    )
-
-    return () => {
-      current = false
-    }
-  }, [account.id, translate])
 
   return (
     <Dialog open onOpenChange={onOpenChange}>
@@ -207,7 +183,7 @@ function PasswordLinkDialog({
         </DialogHeader>
         {problem ? (
           <Alert variant="destructive">
-            <AlertDescription>{problem}</AlertDescription>
+            <AlertDescription>{problem.message}</AlertDescription>
           </Alert>
         ) : link ? (
           <p className="text-sm text-muted-foreground" role="status">
@@ -296,8 +272,14 @@ function AccountRow({
   const t = useTranslations()
   const canAssign = useCanAssign()
   const [dialog, setDialog] = useState<"role" | "group" | "link" | null>(null)
+  const passwordLink = useApiMutation(passwordLinkRequest, { toastOnError: false })
   const left = roles.filter((role) => !account.roles.some((had) => had.id === role.id))
   const close = (open: boolean) => !open && setDialog(null)
+
+  function sendPasswordLink() {
+    setDialog("link")
+    void passwordLink.execute(account.id)
+  }
 
   const needsGroups = account.roles.some(
     (held) => roles.find((role) => role.id === held.id)?.scope === "assignedGroups"
@@ -369,7 +351,7 @@ function AccountRow({
           size="sm"
           className="self-start"
           disabled={account.disabled}
-          onClick={() => setDialog("link")}
+          onClick={sendPasswordLink}
         >
           <KeyRound data-icon="inline-start" />
           {t("settings.users.passwordLink.action")}
@@ -382,7 +364,13 @@ function AccountRow({
         <AssignGroupDialog account={account} services={groups} onOpenChange={close} />
       ) : null}
       {dialog === "link" ? (
-        <PasswordLinkDialog account={account} today={today} onOpenChange={close} />
+        <PasswordLinkDialog
+          account={account}
+          today={today}
+          link={passwordLink.data}
+          problem={passwordLink.problem}
+          onOpenChange={close}
+        />
       ) : null}
     </li>
   )

@@ -77,6 +77,7 @@ export function useApiMutation<A extends unknown[], T>(
 
   return {
     execute,
+    data: mutation.data,
     pending: mutation.isPending,
     problem,
     fieldErrors: problem?.fieldErrors ?? {},

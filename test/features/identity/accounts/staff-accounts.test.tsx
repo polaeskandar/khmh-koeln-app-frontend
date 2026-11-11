@@ -1,6 +1,7 @@
 import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
+import { StrictMode } from "react"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
@@ -90,12 +91,14 @@ function open({
   assign,
   who = me.administrator,
   accounts = [mariam, rebecca, sara, samuel],
+  strict = false,
 }: {
   remove?: () => Response
   link?: () => Response
   assign?: () => Response
   who?: Me
   accounts?: StaffAccount[]
+  strict?: boolean
 } = {}) {
   let items = accounts
   const sent: string[] = []
@@ -169,12 +172,13 @@ function open({
 
   const { client, wrapper } = testProviders()
 
-  render(
+  const page = (
     <SessionProvider>
       <StaffAccounts />
-    </SessionProvider>,
-    { wrapper }
+    </SessionProvider>
   )
+
+  render(strict ? <StrictMode>{page}</StrictMode> : page, { wrapper })
 
   return { sent, client, reads }
 }
@@ -275,6 +279,18 @@ test("a password link is emailed to the account and never shown", async () => {
   expect(sent).toEqual([`link ${sara.id} {}`])
   await userEvent.click(dialog.getByRole("button", { name: "Close" }))
   await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
+})
+
+test("one click sends one link, also where StrictMode runs effects twice", async () => {
+  const { sent } = open({ strict: true })
+  const row = within(await rowOf("Sara Wissa"))
+  await userEvent.click(await row.findByRole("button", { name: "Password link…" }))
+
+  expect(
+    await within(await screen.findByRole("dialog")).findByText(/^Sent to sara@example.org\./)
+  ).toBeInTheDocument()
+
+  expect(sent).toEqual([`link ${sara.id} {}`])
 })
 
 test("a disabled account's link refusal shows its text", async () => {
