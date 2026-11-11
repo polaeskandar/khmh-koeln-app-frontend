@@ -15,7 +15,7 @@ import type { Uuid } from "@/lib/api/types/common"
 import { routes } from "@/lib/routes"
 
 import {
-  type MemberTaskDetail,
+  type MemberHomeworkDetail,
   memberTaskQuery,
   OWN_REPORT_QUERIES,
   reportOwnDoneRequest,
@@ -23,7 +23,7 @@ import {
 } from "./api"
 import { MemberNotAvailable } from "@/features/portals/member/member-shell"
 
-function TaskView({ data }: { data: MemberTaskDetail }) {
+function TaskView({ data }: { data: MemberHomeworkDetail }) {
   const t = useTranslations("member")
   const { task, today } = data
 

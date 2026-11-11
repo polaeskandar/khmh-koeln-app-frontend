@@ -13,7 +13,7 @@ import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { Me } from "@/features/identity/auth/api"
-import type { ServiceFields } from "@/features/organization/services/api"
+import type { ServiceRequest } from "@/features/organization/services/api"
 import { ServicesOverviewPage } from "@/features/organization/services/services-overview-page"
 
 beforeEach(() => {
@@ -41,7 +41,7 @@ function open(viewer: Me = me.administrator, locale: Locale = "en") {
       return createAnswer()
     }),
     http.put(apiUrl(`/services/${sundaySchool.id}`), async ({ request }) => {
-      const body = (await request.json()) as ServiceFields
+      const body = (await request.json()) as ServiceRequest
       sent.push({ method: "PUT", body })
 
       return HttpResponse.json({ ...sundaySchool, ...body })

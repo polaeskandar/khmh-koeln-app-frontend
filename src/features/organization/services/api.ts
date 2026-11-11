@@ -5,13 +5,15 @@ import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { Uuid } from "@/lib/api/types/common"
 import { SERVICES_KEY, AGENDA_KEY, SCHEDULES_KEY, STAGES_KEY } from "@/lib/api/query-keys"
 
+export type ServiceReference = Schemas["ServiceReference"]
+
 export type ServiceInsight = Schemas["ServiceInsight"]
 
 export type Trend = ServiceInsight["trend"]
 
-export type Impact = Schemas["ArchiveImpact"]
+export type ArchiveImpact = Schemas["ArchiveImpact"]
 
-export type ServiceRow = Schemas["ServiceResponse"]
+export type Service = Schemas["ServiceResponse"]
 
 export type ServiceList = Schemas["ServiceListResponse"]
 
@@ -37,12 +39,12 @@ export const servicesQuery = queryOptions({
     dataOf(api.GET("/services", { params: { query: { status: "all" } }, signal })),
 })
 
-export type ServiceFields = Schemas["ServiceRequest"]
+export type ServiceRequest = Schemas["ServiceRequest"]
 
-export const createServiceRequest = (fields: ServiceFields) =>
+export const createServiceRequest = (fields: ServiceRequest) =>
   dataOf(api.POST("/services", { body: fields }))
 
-export const updateServiceRequest = (id: Uuid, fields: ServiceFields) =>
+export const updateServiceRequest = (id: Uuid, fields: ServiceRequest) =>
   dataOf(api.PUT("/services/{id}", { params: { path: { id } }, body: fields }))
 
 export const serviceQuery = (id: Uuid) =>
@@ -52,7 +54,7 @@ export const serviceQuery = (id: Uuid) =>
       dataOf(api.GET("/services/{id}", { params: { path: { id } }, signal })),
   })
 
-export type ServiceStages = Schemas["StageListResponse"]
+export type StageList = Schemas["StageListResponse"]
 
 export const serviceStagesQuery = (id: Uuid) =>
   queryOptions({
@@ -63,7 +65,7 @@ export const serviceStagesQuery = (id: Uuid) =>
 
 export type ServiceServant = Schemas["ServiceServant"]
 
-export type ServantAccount = Schemas["AccountReference"]
+export type AccountReference = Schemas["AccountReference"]
 
 export const serviceServantsQuery = (id: Uuid) =>
   queryOptions({

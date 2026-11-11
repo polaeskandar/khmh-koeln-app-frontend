@@ -9,12 +9,12 @@ import { DialogMount } from "@/components/dialog-mount"
 import { FormDialog } from "@/components/form-dialog"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { type ServiceRow, servicesQuery } from "@/features/organization/services/api"
+import { type Service, servicesQuery } from "@/features/organization/services/api"
 import { useFormat } from "@/i18n/format"
 import { useRouter } from "@/i18n/navigation"
 import type { LocalDate, Uuid } from "@/lib/api/types/common"
 import { groupOf } from "./session-lines"
-import type { ScheduleSummary } from "@/lib/api/types/meetings"
+import type { Schedule } from "./api"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { recurrenceOf } from "@/lib/domain/recurrence"
 import { routes } from "@/lib/routes"
@@ -60,7 +60,7 @@ function ScheduleForm({
   onClose,
 }: {
   target: ScheduleTarget
-  services: ServiceRow[]
+  services: Service[]
   today: LocalDate
   onClose: () => void
 }) {
@@ -177,13 +177,7 @@ export function NewScheduleButton({
   )
 }
 
-export function EditScheduleButton({
-  schedule,
-  today,
-}: {
-  schedule: ScheduleSummary
-  today: LocalDate
-}) {
+export function EditScheduleButton({ schedule, today }: { schedule: Schedule; today: LocalDate }) {
   const t = useTranslations("meetings.actions")
   const [open, setOpen] = useState(false)
 

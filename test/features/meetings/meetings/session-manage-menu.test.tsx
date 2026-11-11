@@ -5,7 +5,7 @@ import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
-import type { SessionView } from "@/lib/api/types/meetings"
+import type { SessionView } from "@/features/meetings/meetings/api"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { session, sessionDetail, sessionState } from "@test/support/fixtures/sessions"

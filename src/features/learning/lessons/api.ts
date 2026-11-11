@@ -3,8 +3,13 @@ import { queryOptions } from "@tanstack/react-query"
 import { api, dataOf, type QueryParams, type Schemas } from "@/lib/api/client"
 import { HOMEWORK_KEY, LESSONS_KEY } from "@/lib/api/query-keys"
 import type { LocalDate, Uuid } from "@/lib/api/types/common"
-import type { LessonStatus } from "@/lib/api/types/learning"
 import type { Can } from "@/lib/permissions"
+
+export type LessonStatus = Schemas["LessonStatus"]
+
+export type MeetingView = Schemas["LessonRowResponse"]["meeting"]
+
+export type LessonOnDate = Schemas["LessonOnDate"]
 
 export type LessonRow = Schemas["LessonRowResponse"]
 
@@ -16,7 +21,7 @@ export type LessonStage = LessonDetail["stage"]
 
 export type LessonTab = NonNullable<QueryParams<"/stages/{stageId}/lessons">["tab"]>
 
-export type StageLessons = Schemas["LessonListResponse"]
+export type LessonList = Schemas["LessonListResponse"]
 
 export const lessonQuery = (id: Uuid) =>
   queryOptions({
@@ -36,16 +41,16 @@ export const stageLessonsQuery = (stage: Uuid, tab: LessonTab = "upcoming", q = 
       ),
   })
 
-export type LessonInput = Schemas["LessonRequest"]
+export type LessonRequest = Schemas["LessonRequest"]
 
-export type MeetingChoice = Schemas["LessonMeetingRequest"]
+export type LessonMeeting = Schemas["LessonMeetingRequest"]
 
-export const createLessonRequest = (stage: Uuid, input: LessonInput) =>
+export const createLessonRequest = (stage: Uuid, input: LessonRequest) =>
   dataOf(
     api.POST("/stages/{stageId}/lessons", { params: { path: { stageId: stage } }, body: input })
   )
 
-export const updateLessonRequest = (lesson: Uuid, version: number, input: LessonInput) =>
+export const updateLessonRequest = (lesson: Uuid, version: number, input: LessonRequest) =>
   dataOf(
     api.PUT("/lessons/{id}", {
       params: { path: { id: lesson }, query: { version } },
@@ -53,7 +58,7 @@ export const updateLessonRequest = (lesson: Uuid, version: number, input: Lesson
     })
   )
 
-export type MeetingOption = Schemas["LessonOptionResponse"]
+export type LessonOption = Schemas["LessonOptionResponse"]
 export type LessonOptions = Schemas["LessonOptionsResponse"]
 
 export const lessonOptionsQuery = (stage: Uuid, lesson?: Uuid) =>
@@ -70,20 +75,20 @@ export const lessonOptionsQuery = (stage: Uuid, lesson?: Uuid) =>
 
 export const OTHER_DATE = "other"
 
-export const optionValue = (option: Pick<MeetingOption, "scheduleId" | "date">) =>
+export const optionValue = (option: Pick<LessonOption, "scheduleId" | "date">) =>
   `${option.scheduleId}:${option.date}`
 
 export function toMeeting(
   value: string,
   otherDate: LocalDate,
-  options: MeetingOption[]
-): MeetingChoice {
+  options: LessonOption[]
+): LessonMeeting {
   const option = options.find((o) => optionValue(o) === value)
 
   return option ? { scheduleId: option.scheduleId, date: option.date } : { date: otherDate }
 }
 
-export const meetingOf = (lesson: Lesson): MeetingChoice =>
+export const meetingOf = (lesson: Lesson): LessonMeeting =>
   lesson.scheduleId
     ? { scheduleId: lesson.scheduleId, date: lesson.teachingDate }
     : { date: lesson.teachingDate }

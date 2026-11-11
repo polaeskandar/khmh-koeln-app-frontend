@@ -6,14 +6,14 @@ import { servicesQuery } from "@/features/organization/services/api"
 import type { Uuid } from "@/lib/api/types/common"
 import { placeLabel } from "@/lib/domain/place"
 
-export type GroupOption = {
+export type PlacementOption = {
   value: string
   label: string
   filter: { serviceId: Uuid } | { stageId: Uuid }
   placement: { serviceId: Uuid; stageId: Uuid | null }
 }
 
-export function useGroupOptions(): GroupOption[] {
+export function useGroupOptions(): PlacementOption[] {
   const services = useQuery(servicesQuery)
 
   return (services.data?.items ?? [])
@@ -34,7 +34,7 @@ export function useGroupOptions(): GroupOption[] {
     ])
 }
 
-type GroupPlacement = GroupOption["placement"]
+type GroupPlacement = PlacementOption["placement"]
 
 export function blocksPlacement(held: GroupPlacement, wanted: GroupPlacement): boolean {
   if (held.serviceId !== wanted.serviceId) {

@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { expect, test, vi } from "vitest"
 
-import type { DirectoryPerson } from "@/features/people/members/api"
+import type { DirectoryEntry } from "@/features/people/members/api"
 import type { Locale } from "@/i18n/config"
 import { apiUrl } from "@test/support/api"
 import {
@@ -32,8 +32,8 @@ const directoryPerson = (
   n: number,
   firstName: string,
   lastName: string,
-  groups: DirectoryPerson["groups"] = []
-): DirectoryPerson => ({
+  groups: DirectoryEntry["groups"] = []
+): DirectoryEntry => ({
   id: `0192f3a4-7b1c-7d2e-8f50-${String(n).padStart(12, "0")}`,
   firstName,
   lastName,
@@ -44,14 +44,14 @@ const directoryPerson = (
 const youthMina = directoryPerson(1, "Mina", "Hanna", [{ service: youth, stage: null }])
 
 function open(
-  results: (q: string) => DirectoryPerson[],
+  results: (q: string) => DirectoryEntry[],
   { board = thirdClassBoard(), locale = "en" as Locale } = {}
 ) {
   address.set(`session=${board.session.id}`)
   const queries: string[] = []
   const aborted: string[] = []
   let current = board
-  let found: DirectoryPerson[] = []
+  let found: DirectoryEntry[] = []
 
   server.use(
     http.get(apiUrl(`/sessions/${board.session.id}`), () => HttpResponse.json(detailOf(board))),

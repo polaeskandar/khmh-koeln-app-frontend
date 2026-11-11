@@ -5,7 +5,7 @@ import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
-import type { ServiceStages } from "@/features/organization/services/api"
+import type { StageList } from "@/features/organization/services/api"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { stageRef } from "@test/support/fixtures/sessions"
@@ -49,14 +49,14 @@ const kindergarten = { ...stageRef("Kindergarten", 0), description: null, member
 const first = { ...stageRef("1st Class", 1), description: null, memberCount: 11, impact }
 const third = { ...stageRef("3rd Class", 2), description: null, memberCount: 14, impact }
 
-const data = (stages = [kindergarten, first, third]): ServiceStages => ({
+const data = (stages = [kindergarten, first, third]): StageList => ({
   service: { id: SUNDAY_SCHOOL_ID, name: "Sunday School", tone: 1, archived: false },
   stages,
   archivedStages: [],
 })
 
 function open(
-  body: ServiceStages,
+  body: StageList,
   answer: () => Response | Promise<Response> = () => HttpResponse.json(body),
   viewer: Me = me.leader
 ) {

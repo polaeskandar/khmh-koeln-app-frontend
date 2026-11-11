@@ -31,8 +31,8 @@ import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import {
-  type ServiceRow,
-  type ServiceStages,
+  type Service,
+  type StageList,
   serviceQuery,
   serviceStagesQuery,
   useServiceInsight,
@@ -44,7 +44,7 @@ import { ServiceActionsMenu } from "./service-actions"
 import { ServiceDialog } from "./service-dialog"
 import { ServiceServants } from "./service-servants"
 
-function EditButton({ service }: { service: ServiceRow }) {
+function EditButton({ service }: { service: Service }) {
   const t = useTranslations("common")
   const [open, setOpen] = useState(false)
 
@@ -72,7 +72,7 @@ function Stat({ label, value }: { label: string; value: ReactNode }) {
   )
 }
 
-function Stages({ service, stages }: { service: ServiceRow; stages: ServiceStages }) {
+function Stages({ service, stages }: { service: Service; stages: StageList }) {
   const t = useTranslations()
   const f = useFormat()
   const can = useCan()
@@ -156,7 +156,7 @@ function Stages({ service, stages }: { service: ServiceRow; stages: ServiceStage
   )
 }
 
-function Details({ service }: { service: ServiceRow }) {
+function Details({ service }: { service: Service }) {
   const t = useTranslations()
   const f = useFormat()
   const stages = useQuery(serviceStagesQuery(service.id))

@@ -15,7 +15,7 @@ import { routes } from "@/lib/routes"
 import {
   createLessonRequest,
   type Lesson,
-  type LessonInput,
+  type LessonRequest,
   type LessonOptions,
   type LessonStage,
   LESSON_QUERIES,
@@ -131,7 +131,7 @@ export function LessonForm({
   const materials = useLinkRows(lesson?.materials ?? [], { keepOneRow: true })
 
   const save = useApiMutation(
-    (input: LessonInput) =>
+    (input: LessonRequest) =>
       lesson
         ? updateLessonRequest(lesson.id, version, input)
         : createLessonRequest(stage.id, input),
@@ -157,7 +157,7 @@ export function LessonForm({
     return saved && kept ? meetingOf(saved) : toMeeting(meeting, otherDate, choices.options)
   }
 
-  function input(status: Status): LessonInput {
+  function input(status: Status): LessonRequest {
     return {
       details: {
         title: texts.title,

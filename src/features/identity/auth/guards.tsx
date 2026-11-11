@@ -21,7 +21,8 @@ import {
 import { isLocale, type Locale } from "@/i18n/config"
 import { storeLocale } from "@/i18n/locale-choice"
 import { usePathname, useRouter } from "@/i18n/navigation"
-import { type Action, GROUP_RESOURCES, type Resource } from "@/lib/permissions"
+import type { Action, Resource } from "@/features/identity/roles/api"
+import { GROUP_RESOURCES } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import { LANGUAGE_APPLIED_KEY, markLanguageApplied } from "./account-language"

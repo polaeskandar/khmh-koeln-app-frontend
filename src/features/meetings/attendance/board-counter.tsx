@@ -6,10 +6,10 @@ import type { ReactNode } from "react"
 import { RosterCells } from "./roster-cells"
 import { Button } from "@/components/ui/button"
 
-import type { AttendanceSheet as Board } from "./api"
+import type { AttendanceSheet } from "./api"
 import type { BoardActions } from "./person-row"
 
-export function tallyOf(board: Board) {
+export function tallyOf(board: AttendanceSheet) {
   const rosterSize = board.roster.length
 
   return {
@@ -23,7 +23,7 @@ const num = (chunks: ReactNode) => (
   <span className="font-heading text-3xl font-semibold text-foreground tabular-nums">{chunks}</span>
 )
 
-function BoardCounter({ board }: { board: Board }) {
+function BoardCounter({ board }: { board: AttendanceSheet }) {
   const t = useTranslations("attendance.board")
   const { counts } = board
   const { expected, rosterSize } = tallyOf(board)
@@ -45,7 +45,7 @@ export function CounterPanel({
   canRecord,
   actions,
 }: {
-  board: Board
+  board: AttendanceSheet
   canRecord: boolean
   actions: BoardActions
 }) {
@@ -94,7 +94,7 @@ export function MobileCounterBar({
   canRecord,
   actions,
 }: {
-  board: Board
+  board: AttendanceSheet
   canRecord: boolean
   actions: BoardActions
 }) {

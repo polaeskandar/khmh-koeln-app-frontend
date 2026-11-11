@@ -16,12 +16,12 @@ import { useCanIn, useUnassigned } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
-import type { CountedSession, SessionView } from "@/lib/api/types/meetings"
+import type { CountedSession, SessionView } from "@/features/meetings/meetings/api"
 import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import {
-  type AttendanceOverview as Overview,
+  type AttendanceOverview,
   overviewSessionIds,
   useAttendanceCounts,
   attendanceOverviewQuery,
@@ -65,7 +65,7 @@ export function CardAction({ session, today }: { session: SessionView; today: Lo
   return null
 }
 
-function Today({ overview, counted }: { overview: Overview; counted: Counted }) {
+function Today({ overview, counted }: { overview: AttendanceOverview; counted: Counted }) {
   const t = useTranslations("attendance.home")
 
   if (overview.sessions.length === 0) {
@@ -104,7 +104,7 @@ function Today({ overview, counted }: { overview: Overview; counted: Counted }) 
   )
 }
 
-function Lists({ overview, counted }: { overview: Overview; counted: Counted }) {
+function Lists({ overview, counted }: { overview: AttendanceOverview; counted: Counted }) {
   const t = useTranslations("attendance.home")
   const f = useFormat()
 
@@ -159,7 +159,7 @@ function Lists({ overview, counted }: { overview: Overview; counted: Counted }) 
   )
 }
 
-function OverviewView({ overview }: { overview: Overview }) {
+function OverviewView({ overview }: { overview: AttendanceOverview }) {
   const t = useTranslations()
   const f = useFormat()
   const counts = useAttendanceCounts(overviewSessionIds(overview))

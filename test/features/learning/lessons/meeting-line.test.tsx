@@ -1,7 +1,7 @@
 import { screen } from "@testing-library/react"
 import { describe, expect, test } from "vitest"
 
-import type { MeetingView } from "@/lib/api/types/learning"
+import type { MeetingView } from "@/features/learning/lessons/api"
 import { renderWithProviders } from "@test/support/providers"
 
 import { MeetingLine } from "@/features/learning/lessons/meeting-line"

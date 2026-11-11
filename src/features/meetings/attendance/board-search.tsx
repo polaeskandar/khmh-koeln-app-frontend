@@ -12,14 +12,14 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { oneOf } from "@/lib/one-of"
 
-import type { AttendanceSheet as Board, Mark } from "./api"
+import type { AttendanceSheet, MarkReference } from "./api"
 import { tallyOf } from "./board-counter"
 
 export type Filter = "all" | "open" | "present"
 
 const FILTERS: Filter[] = ["all", "open", "present"]
 
-export const passesFilter = (filter: Filter, mark: Mark | null) =>
+export const passesFilter = (filter: Filter, mark: MarkReference | null) =>
   filter === "all" || (filter === "present" ? mark !== null : mark === null)
 
 export function BoardSearch({
@@ -29,7 +29,7 @@ export function BoardSearch({
   filter,
   onFilterChange,
 }: {
-  board: Board
+  board: AttendanceSheet
   query: string
   onQueryChange: (query: string) => void
   filter: Filter

@@ -4,6 +4,8 @@ import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { Uuid } from "@/lib/api/types/common"
 import { STAGES_KEY, SERVICES_KEY } from "@/lib/api/query-keys"
 
+export type StageReference = Schemas["StageReference"]
+
 export type Stage = Schemas["StageResponse"]
 
 export const stageQuery = (id: Uuid) =>
@@ -12,12 +14,12 @@ export const stageQuery = (id: Uuid) =>
     queryFn: ({ signal }) => dataOf(api.GET("/stages/{id}", { params: { path: { id } }, signal })),
   })
 
-export type StageFields = Schemas["StageRequest"]
+export type StageRequest = Schemas["StageRequest"]
 
-export const addStageRequest = (serviceId: Uuid, fields: StageFields) =>
+export const addStageRequest = (serviceId: Uuid, fields: StageRequest) =>
   dataOf(api.POST("/services/{id}/stages", { params: { path: { id: serviceId } }, body: fields }))
 
-export const updateStageRequest = (stageId: Uuid, fields: StageFields) =>
+export const updateStageRequest = (stageId: Uuid, fields: StageRequest) =>
   dataOf(api.PUT("/stages/{id}", { params: { path: { id: stageId } }, body: fields }))
 
 export const reorderStagesRequest = (serviceId: Uuid, stageIds: Uuid[]) =>

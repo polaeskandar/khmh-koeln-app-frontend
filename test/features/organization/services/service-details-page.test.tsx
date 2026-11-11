@@ -14,30 +14,30 @@ import { renderWithProviders } from "@test/support/providers"
 
 import type { Me } from "@/features/identity/auth/api"
 import type {
-  ServantAccount,
-  ServiceRow,
+  AccountReference,
+  Service,
   ServiceServant,
-  ServiceStages,
+  StageList,
 } from "@/features/organization/services/api"
 import { ServiceDetailsPage } from "@/features/organization/services/service-details-page"
 
 const STAGES = ["Kindergarten", "1st Class", "2nd Class", "3rd Class", "4th Class", "5th Class"]
 
-const sundaySchool: ServiceRow = {
+const sundaySchool: Service = {
   ...services.items[0],
   memberCount: 72,
   serviceLevelMemberCount: 0,
 }
 
-const familyMeeting: ServiceRow = {
+const familyMeeting: Service = {
   ...services.items.find((s) => s.name === "Family Meeting")!,
   memberCount: 0,
   serviceLevelMemberCount: 0,
 }
 
-const ref = ({ id, name, tone }: ServiceRow) => ({ id, name, tone, archived: false })
+const ref = ({ id, name, tone }: Service) => ({ id, name, tone, archived: false })
 
-const account = (n: number, name: string): ServantAccount => ({
+const account = (n: number, name: string): AccountReference => ({
   id: `0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef${String(n).padStart(3, "0")}`,
   name,
 })
@@ -62,7 +62,7 @@ beforeEach(() => {
   sent.length = 0
 })
 
-const stagesOf = (service: ServiceRow, names: string[]): ServiceStages => ({
+const stagesOf = (service: Service, names: string[]): StageList => ({
   service: { id: service.id, name: service.name, tone: service.tone, archived: false },
   stages: names
     .map((name, position) => ({
@@ -76,7 +76,7 @@ const stagesOf = (service: ServiceRow, names: string[]): ServiceStages => ({
 })
 
 function open(
-  service: ServiceRow,
+  service: Service,
   names: string[],
   scheduleCount: number,
   viewer: Me = me.administrator

@@ -25,7 +25,7 @@ import type { Uuid } from "@/lib/api/types/common"
 import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import { type StageHomework, stageHomeworkQuery } from "./api"
+import { type HomeworkList, stageHomeworkQuery } from "./api"
 import { HomeworkForm } from "./homework-form"
 
 function LessonFirst({ stage }: { stage: Uuid }) {
@@ -49,11 +49,11 @@ function LessonFirst({ stage }: { stage: Uuid }) {
   )
 }
 
-function lessonFrom(data: StageHomework, wanted: Uuid | null): Uuid | null {
+function lessonFrom(data: HomeworkList, wanted: Uuid | null): Uuid | null {
   return wanted && data.lessons.some((l) => l.id === wanted) ? wanted : null
 }
 
-function firstLesson(data: StageHomework, wanted: Uuid | null): Uuid {
+function firstLesson(data: HomeworkList, wanted: Uuid | null): Uuid {
   return lessonFrom(data, wanted) ?? data.defaultLessonId ?? data.lessons[0]!.id
 }
 

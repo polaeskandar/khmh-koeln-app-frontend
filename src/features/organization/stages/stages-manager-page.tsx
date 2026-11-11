@@ -10,7 +10,7 @@ import { PageBody, PageHeader, Section } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty"
-import { type ServiceStages, serviceStagesQuery } from "@/features/organization/services/api"
+import { type StageList, serviceStagesQuery } from "@/features/organization/services/api"
 import { useFormat } from "@/i18n/format"
 import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
@@ -24,7 +24,7 @@ function ArchivedStages({
   stages,
   manage,
 }: {
-  stages: ServiceStages["archivedStages"]
+  stages: StageList["archivedStages"]
   manage: boolean
 }) {
   const t = useTranslations()
@@ -59,7 +59,7 @@ function ArchivedStages({
   )
 }
 
-function Manager({ data }: { data: ServiceStages }) {
+function Manager({ data }: { data: StageList }) {
   const t = useTranslations()
   const can = useCan()
   const { service } = data

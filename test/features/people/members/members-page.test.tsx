@@ -13,7 +13,7 @@ import { server } from "@test/support/msw"
 import { address, navigation, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { PeopleList } from "@/features/people/members/api"
+import type { PeoplePage } from "@/features/people/members/api"
 import { MembersPage } from "@/features/people/members/members-page"
 
 beforeEach(() => {
@@ -23,7 +23,7 @@ beforeEach(() => {
 const sundaySchool = services.items[0]
 const thirdClassStage = sundaySchool.stages.find((stage) => stage.name === "3rd Class")!
 
-function open(answer: (url: URL) => PeopleList | Response, locale: Locale = "en") {
+function open(answer: (url: URL) => PeoplePage | Response, locale: Locale = "en") {
   const requests: URLSearchParams[] = []
 
   server.use(

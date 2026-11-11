@@ -4,8 +4,8 @@ import { http, HttpResponse } from "msw"
 import { expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
-import type { ServiceStages } from "@/features/organization/services/api"
-import type { StageFields } from "@/features/organization/stages/api"
+import type { StageList } from "@/features/organization/services/api"
+import type { StageRequest } from "@/features/organization/stages/api"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { stageRef } from "@test/support/fixtures/sessions"
@@ -20,7 +20,7 @@ const service = { id: SUNDAY_SCHOOL_ID, name: "Sunday School", tone: 1, archived
 
 const noImpact = { activeSchedules: 0, upcomingSessions: 0 }
 
-const stagesData = (): ServiceStages => ({
+const stagesData = (): StageList => ({
   service,
   stages: [
     { ...stageRef("3rd Class", 2), description: "Ages 8 to 9", memberCount: 14, impact: noImpact },
@@ -30,11 +30,7 @@ const stagesData = (): ServiceStages => ({
   archivedStages: [],
 })
 
-function open(
-  data: ServiceStages,
-  write?: () => Response | Promise<Response>,
-  viewer: Me = me.leader
-) {
+function open(data: StageList, write?: () => Response | Promise<Response>, viewer: Me = me.leader) {
   address.set(`id=${SUNDAY_SCHOOL_ID}`)
   const sent: { method: string; body: unknown }[] = []
 
@@ -52,7 +48,7 @@ function open(
       )
     }),
     http.put(apiUrl("/stages/:id"), async ({ request }) => {
-      const body = (await request.json()) as StageFields
+      const body = (await request.json()) as StageRequest
       sent.push({ method: "PUT", body })
 
       return write?.() ?? HttpResponse.json({ ...thirdClass, ...body })

@@ -50,7 +50,7 @@ export const memberCandidatesQuery = (q: string) =>
       dataOf(api.GET("/account-requests/member-candidates", { params: { query: { q } }, signal })),
   })
 
-export type MemberAccount = Schemas["MemberAccountItemResponse"]
+export type MemberAccountItem = Schemas["MemberAccountItemResponse"]
 
 export const memberAccountsQuery = queryOptions({
   queryKey: [...MEMBER_ACCOUNTS_KEY, "list"],
@@ -66,7 +66,7 @@ export const giveRoleRequest = (account: Uuid, roleId: Uuid) =>
 export const removeRoleRequest = (account: Uuid, roleId: Uuid) =>
   dataOf(api.DELETE("/accounts/{id}/roles/{roleId}", { params: { path: { id: account, roleId } } }))
 
-export type PasswordLink = Schemas["IssuedPasswordLink"]
+export type IssuedPasswordLink = Schemas["IssuedPasswordLink"]
 
 export const passwordLinkRequest = (account: Uuid) =>
   dataOf(api.POST("/accounts/{id}/password-link", { params: { path: { id: account } }, body: {} }))

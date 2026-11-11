@@ -21,9 +21,9 @@ import { useAssignGroup } from "@/features/organization/assignments/use-assign-g
 import type { Uuid } from "@/lib/api/types/common"
 import { isolate } from "@/lib/bidi"
 
-import { type ServantAccount, type ServiceServant, serviceServantsQuery } from "./api"
+import { type AccountReference, type ServiceServant, serviceServantsQuery } from "./api"
 
-type ServantRow = { account: ServantAccount; assignments: ServiceServant[] }
+type ServantRow = { account: AccountReference; assignments: ServiceServant[] }
 
 function rowsByAccount(servants: ServiceServant[]): ServantRow[] {
   const rows = new Map<Uuid, ServantRow>()
@@ -42,7 +42,7 @@ function AssignServantDialog({
   onClose,
 }: {
   service: GroupOption
-  accounts: ServantAccount[]
+  accounts: AccountReference[]
   onClose: () => void
 }) {
   const t = useTranslations()

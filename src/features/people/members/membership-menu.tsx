@@ -21,10 +21,10 @@ import { useCan } from "@/features/identity/auth/session"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { groupAt } from "@/lib/permissions"
 
-import { MEMBERSHIP_QUERIES, moveMembershipRequest, type PersonRow, type Placement } from "./api"
+import { MEMBERSHIP_QUERIES, moveMembershipRequest, type PersonRow, type PlacementRow } from "./api"
 import { useWhere } from "./use-where"
 
-function useMoveTargets(row: PersonRow, placement: Placement) {
+function useMoveTargets(row: PersonRow, placement: PlacementRow) {
   const can = useCan()
   const services = useQuery(servicesQuery)
   const service = services.data?.items.find((item) => item.id === placement.service.id)
@@ -50,7 +50,7 @@ export function MembershipMenu({
   onRemove,
 }: {
   row: PersonRow
-  placement: Placement
+  placement: PlacementRow
   onRemove: () => void
 }) {
   const t = useTranslations()

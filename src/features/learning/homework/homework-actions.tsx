@@ -26,13 +26,13 @@ import {
   deleteHomeworkRequest,
   homeworkFlagsFor,
   HOMEWORK_QUERIES,
-  type HomeworkRow,
+  type HomeworkItem,
   type HomeworkTransition,
   transitionHomeworkRequest,
 } from "./api"
 import { usePublishHomework } from "./use-publish-homework"
 
-type Homework = Pick<HomeworkRow, "id" | "title" | "status" | "publishedAt" | "counts" | "lesson">
+type Homework = Pick<HomeworkItem, "id" | "title" | "status" | "publishedAt" | "counts" | "lesson">
 type Change = HomeworkTransition | "delete"
 
 function useChangeHomework(homework: Homework, onDeleted?: () => void) {

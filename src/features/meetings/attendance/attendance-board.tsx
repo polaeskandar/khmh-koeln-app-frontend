@@ -4,11 +4,11 @@ import { useTranslations } from "next-intl"
 import { type ReactNode, useState } from "react"
 
 import { useCanIn } from "@/features/identity/auth/session"
-import type { PersonRef } from "@/lib/api/types/common"
+import type { PersonReference } from "@/features/people/members/api"
 import { matchesQuery } from "@/lib/domain/names"
 import { meetingGroup } from "@/lib/permissions"
 
-import type { AttendanceSheet as Board } from "./api"
+import type { AttendanceSheet } from "./api"
 import { CounterPanel, MobileCounterBar, tallyOf } from "./board-counter"
 import { Corrections, RecentlyMarked } from "./board-history"
 import { BoardSearch, type Filter, passesFilter } from "./board-search"
@@ -19,7 +19,7 @@ export function AttendanceBoard({
   actions = {},
   below,
 }: {
-  board: Board
+  board: AttendanceSheet
   actions?: BoardActions
   below?: (query: string) => ReactNode
 }) {
@@ -31,7 +31,7 @@ export function AttendanceBoard({
   const canRemove = can("delete", "attendance")
   const { expected } = tallyOf(board)
   const q = query.trim()
-  const shown = (person: PersonRef) => q === "" || matchesQuery(person, q)
+  const shown = (person: PersonReference) => q === "" || matchesQuery(person, q)
   const roster = board.roster.filter((row) => shown(row.person) && passesFilter(filter, row.mark))
   const others = board.notOnRoster.filter((row) => shown(row.person) && filter !== "open")
 

@@ -7,22 +7,22 @@ import { useTranslations } from "next-intl"
 import { MemberAvatar } from "@/components/member-avatar"
 import { Button } from "@/components/ui/button"
 import { useFormat } from "@/i18n/format"
-import type { PersonRef } from "@/lib/api/types/common"
+import type { PersonReference } from "@/features/people/members/api"
 import { fullName, initials, preferredName } from "@/lib/domain/names"
 import { placeLabel } from "@/lib/domain/place"
 
-import type { Mark, Placement } from "./api"
+import type { MarkReference, PersonGroup } from "./api"
 
 export type BoardActions = {
-  onMark?: (person: PersonRef) => void
-  onUndo?: (person: PersonRef, mark: Mark) => void
+  onMark?: (person: PersonReference) => void
+  onUndo?: (person: PersonReference, mark: MarkReference) => void
   onClose?: () => void
   onCorrect?: () => void
   pending?: ReadonlySet<string>
   saving?: boolean
 }
 
-const placementText = (placements: Placement[]) => placements.map(placeLabel).join(", ")
+const placementText = (placements: PersonGroup[]) => placements.map(placeLabel).join(", ")
 
 export function PersonRow({
   person,
@@ -32,9 +32,9 @@ export function PersonRow({
   canRemove = false,
   actions,
 }: {
-  person: PersonRef
-  mark: Mark | null
-  placements?: Placement[]
+  person: PersonReference
+  mark: MarkReference | null
+  placements?: PersonGroup[]
   canRecord: boolean
   canRemove?: boolean
   actions: BoardActions

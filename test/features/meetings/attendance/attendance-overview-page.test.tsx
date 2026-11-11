@@ -3,7 +3,7 @@ import { http, HttpResponse } from "msw"
 import { expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
-import type { SessionView } from "@/lib/api/types/meetings"
+import type { SessionView } from "@/features/meetings/meetings/api"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import {

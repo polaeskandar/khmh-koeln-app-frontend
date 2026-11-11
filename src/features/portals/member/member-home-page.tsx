@@ -15,7 +15,7 @@ import { ApiError } from "@/lib/api/problem"
 import { localTimeOf } from "@/lib/domain/time"
 import { routes } from "@/lib/routes"
 
-import { type MemberTask, memberHomeworkQuery } from "@/features/learning/homework/api"
+import { type ParentHomeworkItem, memberHomeworkQuery } from "@/features/learning/homework/api"
 import { memberGroupsQuery } from "@/features/people/groups/api"
 import { memberMeetingsQuery } from "@/features/meetings/meetings/api"
 import { GroupCard } from "@/features/people/groups/group-card"
@@ -24,7 +24,7 @@ import { MeetingList } from "@/features/meetings/meetings/member-meetings"
 const NEXT_MEETINGS = 6
 const DONE_RECENTLY = 3
 
-const taskHref = (task: MemberTask) => routes.memberHomeworkTask(task.id)
+const taskHref = (task: ParentHomeworkItem) => routes.memberHomeworkTask(task.id)
 
 function partOfDay(): "morning" | "afternoon" | "evening" {
   const hour = Number(localTimeOf(Date.now()).slice(0, 2))

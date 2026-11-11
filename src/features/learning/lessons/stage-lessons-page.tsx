@@ -24,12 +24,12 @@ import { StageLayout } from "@/features/organization/stages/stage-layout"
 import { useDebounced } from "@/hooks/use-debounced"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
-import type { LessonStatus } from "@/lib/api/types/learning"
+import type { LessonStatus } from "./api"
 import { oneOf } from "@/lib/one-of"
 import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import { type LessonRow, type LessonTab, type StageLessons, stageLessonsQuery } from "./api"
+import { type LessonRow, type LessonTab, type LessonList, stageLessonsQuery } from "./api"
 import { LessonStatusBadge } from "./lesson-status-badge"
 import { MeetingLine } from "./meeting-line"
 
@@ -107,7 +107,7 @@ function LessonList({
   filtered,
   onClear,
 }: {
-  data: StageLessons
+  data: LessonList
   tab: LessonTab
   status: string
   servant: string

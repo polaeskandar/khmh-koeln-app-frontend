@@ -22,11 +22,11 @@ import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { preferredName } from "@/lib/domain/names"
 
-import { type DirectoryPerson } from "@/features/people/members/api"
+import { type DirectoryEntry } from "@/features/people/members/api"
 import {
   giveAccessRequest,
-  type GuardianLink,
-  type GuardianLinks,
+  type ParentAccessItem,
+  type ParentAccessList,
   guardianLinksQuery,
   revokeAccessRequest,
   GUARDIAN_LINK_QUERIES,
@@ -37,12 +37,12 @@ function GiveAccessDialog({
   accounts,
   onClose,
 }: {
-  accounts: GuardianLinks["accounts"]
+  accounts: ParentAccessList["accounts"]
   onClose: () => void
 }) {
   const t = useTranslations("settings.parents")
   const [userId, setUserId] = useState("")
-  const [child, setChild] = useState<DirectoryPerson | null>(null)
+  const [child, setChild] = useState<DirectoryEntry | null>(null)
   const toastText = useTranslations("toast")
 
   const give = useApiMutation(giveAccessRequest, {
@@ -101,7 +101,15 @@ function GiveAccessDialog({
   )
 }
 
-function LinkRow({ link, today, manage }: { link: GuardianLink; today: string; manage: boolean }) {
+function LinkRow({
+  link,
+  today,
+  manage,
+}: {
+  link: ParentAccessItem
+  today: string
+  manage: boolean
+}) {
   const t = useTranslations()
   const f = useFormat()
   const refetch = useRefetch()

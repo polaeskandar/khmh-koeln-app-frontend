@@ -16,7 +16,7 @@ import { makeTestQueryClient, renderWithProviders } from "@test/support/provider
 
 import {
   type AttendanceSheet,
-  type Mark,
+  type MarkReference,
   stageAttendanceHistoryQuery,
 } from "@/features/meetings/attendance/api"
 import { applyWrites, type Writes, writesReducer } from "@/features/meetings/attendance/mark-writes"
@@ -28,9 +28,9 @@ beforeEach(() => {
 
 const ramy = rosterPeople[1]
 
-const savedMark: Mark = { id: "m-new", recordedAt: "2026-11-08T12:31:00+01:00" }
+const savedMark: MarkReference = { id: "m-new", recordedAt: "2026-11-08T12:31:00+01:00" }
 
-const markResponse = (mark: Mark, by = "Daniel Mikhail"): Schemas["MarkResponse"] => ({
+const markResponse = (mark: MarkReference, by = "Daniel Mikhail"): Schemas["MarkResponse"] => ({
   ...mark,
   sessionId: "0192f3a4-7b1c-7d2e-8f3a-000000000001",
   personId: ramy.id,

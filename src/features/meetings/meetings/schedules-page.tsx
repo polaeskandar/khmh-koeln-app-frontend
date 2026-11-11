@@ -16,20 +16,20 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/
 import { useCan, useUnassigned } from "@/features/identity/auth/session"
 import { servicesQuery } from "@/features/organization/services/api"
 import { Link } from "@/i18n/navigation"
-import type { ServiceRef } from "@/lib/api/types/common"
+import type { ServiceReference } from "@/features/organization/services/api"
 import { orderOf } from "./agenda-order"
-import type { ScheduleSummary } from "@/lib/api/types/meetings"
+import type { Schedule } from "./api"
 import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import { type ScheduleList as Schedules, schedulesQuery } from "./api"
+import { type ScheduleListResponse, schedulesQuery } from "./api"
 import { MeetingsTabs, ServiceFilter, withQuery } from "./meetings-nav"
 import { EditScheduleButton, NewScheduleButton } from "./schedule-dialog"
 import { ScheduleList } from "./schedule-list"
 
 type Status = "active" | "inactive" | "all"
 
-const STATUSES: Record<Status, (schedule: ScheduleSummary) => boolean> = {
+const STATUSES: Record<Status, (schedule: Schedule) => boolean> = {
   active: (s) => s.active,
   inactive: (s) => !s.active,
   all: () => true,
@@ -38,7 +38,7 @@ const STATUSES: Record<Status, (schedule: ScheduleSummary) => boolean> = {
 const statusOf = (value: string | null): Status =>
   value === "inactive" || value === "all" ? value : "active"
 
-function compareSchedules(a: ScheduleSummary, b: ScheduleSummary) {
+function compareSchedules(a: Schedule, b: Schedule) {
   return (
     orderOf(a) - orderOf(b) ||
     (a.stage?.name ?? "").localeCompare(b.stage?.name ?? "", "de") ||
@@ -46,8 +46,8 @@ function compareSchedules(a: ScheduleSummary, b: ScheduleSummary) {
   )
 }
 
-function groupByService(schedules: ScheduleSummary[]) {
-  const groups = new Map<string, { service: ServiceRef | null; schedules: ScheduleSummary[] }>()
+function groupByService(schedules: Schedule[]) {
+  const groups = new Map<string, { service: ServiceReference | null; schedules: Schedule[] }>()
 
   for (const schedule of schedules) {
     const key = schedule.service?.id ?? ""
@@ -70,7 +70,7 @@ function Schedules({
   status,
   serviceId,
 }: {
-  list: Schedules
+  list: ScheduleListResponse
   status: Status
   serviceId: string | null
 }) {

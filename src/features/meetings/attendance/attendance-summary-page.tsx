@@ -19,7 +19,8 @@ import { useCanIn } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
 import { isolate } from "@/lib/bidi"
-import type { Instant, PersonRef } from "@/lib/api/types/common"
+import type { Instant } from "@/lib/api/types/common"
+import type { PersonReference } from "@/features/people/members/api"
 import { groupOf } from "@/features/meetings/meetings/session-lines"
 import { isStale, useRefetch } from "@/lib/api/refetch"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -30,13 +31,13 @@ import { routes } from "@/lib/routes"
 import {
   ATTENDANCE_QUERIES,
   SESSION_STATUS_QUERIES,
-  type AttendanceSheet as Board,
+  type AttendanceSheet,
   reopenAttendanceRequest,
 } from "./api"
 import { SheetState } from "./sheet-state"
 import { BoardFrame } from "./take-attendance-page"
 
-function People({ people }: { people: { person: PersonRef; at?: Instant }[] }) {
+function People({ people }: { people: { person: PersonReference; at?: Instant }[] }) {
   const f = useFormat()
 
   return (
@@ -59,7 +60,7 @@ function People({ people }: { people: { person: PersonRef; at?: Instant }[] }) {
   )
 }
 
-function ReopenButton({ board }: { board: Board }) {
+function ReopenButton({ board }: { board: AttendanceSheet }) {
   const t = useTranslations("attendance.reopen")
   const router = useRouter()
   const refetch = useRefetch()
@@ -108,7 +109,7 @@ function ReopenButton({ board }: { board: Board }) {
   )
 }
 
-function Corrections({ board }: { board: Board }) {
+function Corrections({ board }: { board: AttendanceSheet }) {
   const t = useTranslations("attendance.summary")
   const f = useFormat()
 
@@ -147,7 +148,7 @@ function Corrections({ board }: { board: Board }) {
   )
 }
 
-function Summary({ board }: { board: Board }) {
+function Summary({ board }: { board: AttendanceSheet }) {
   const t = useTranslations("attendance.summary")
   const f = useFormat()
   const lines = useSessionLines()
@@ -251,7 +252,7 @@ function Summary({ board }: { board: Board }) {
   )
 }
 
-function SummaryActions({ board }: { board: Board }) {
+function SummaryActions({ board }: { board: AttendanceSheet }) {
   const t = useTranslations("attendance.summary")
   const can = useCanIn(meetingGroup(board.session))
   const { session } = board

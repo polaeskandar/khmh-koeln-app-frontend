@@ -4,7 +4,7 @@ import { Archive, Eye, EyeOff } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { StatusBadge } from "@/components/status"
-import type { HomeworkStatus } from "@/lib/api/types/learning"
+import type { HomeworkStatus } from "./api"
 
 export function HomeworkStatusBadge({
   status,

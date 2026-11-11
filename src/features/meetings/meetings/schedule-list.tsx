@@ -12,10 +12,10 @@ import { Link } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 import type { LocalDate } from "@/lib/api/types/common"
 import { groupOf } from "./session-lines"
-import type { ScheduleSummary } from "@/lib/api/types/meetings"
+import type { Schedule } from "./api"
 import { recurrenceOf } from "@/lib/domain/recurrence"
 
-function NextLabel({ schedule, today }: { schedule: ScheduleSummary; today: LocalDate }) {
+function NextLabel({ schedule, today }: { schedule: Schedule; today: LocalDate }) {
   const t = useTranslations("meetings.list")
   const f = useFormat()
   const [next] = schedule.nextDates
@@ -38,11 +38,11 @@ export function ScheduleList({
   emptyText,
   trailing,
 }: {
-  schedules: ScheduleSummary[]
+  schedules: Schedule[]
   today: LocalDate
   showService?: boolean
   emptyText: string
-  trailing?: (schedule: ScheduleSummary) => ReactNode
+  trailing?: (schedule: Schedule) => ReactNode
 }) {
   const t = useTranslations("meetings")
   const f = useFormat()

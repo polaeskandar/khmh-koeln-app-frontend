@@ -4,14 +4,14 @@ import type { DragEndEvent } from "@dnd-kit/core"
 import { arrayMove } from "@dnd-kit/sortable"
 import { useMemo, useState } from "react"
 
-import type { ServiceStages } from "@/features/organization/services/api"
+import type { StageList } from "@/features/organization/services/api"
 import { useRefetch } from "@/lib/api/refetch"
 import type { Uuid } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
 import { reorderStagesRequest, STAGE_ORDER_QUERIES } from "./api"
 
-export type StageItem = ServiceStages["stages"][number]
+export type StageItem = StageList["stages"][number]
 
 type LocalOrder = { ids: Uuid[]; savedKey: string }
 

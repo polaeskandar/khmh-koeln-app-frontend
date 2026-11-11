@@ -13,7 +13,7 @@ import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { DataRequestRow, DataRequests } from "@/features/privacy/data-requests/api"
+import type { DataRequestRow, DataRequestList } from "@/features/privacy/data-requests/api"
 import { DataRequestsPage } from "@/features/privacy/data-requests/data-requests-page"
 import { DueLabel } from "@/features/privacy/data-requests/request-labels"
 
@@ -36,7 +36,7 @@ const row = (id: string, extra: Partial<DataRequestRow>): DataRequestRow => ({
   ...extra,
 })
 
-const mockup: DataRequests = {
+const mockup: DataRequestList = {
   today: "2026-11-08",
   open: [row("0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea901", {})],
   closed: [

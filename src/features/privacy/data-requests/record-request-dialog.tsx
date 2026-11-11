@@ -32,7 +32,7 @@ import { oneOf } from "@/lib/one-of"
 import { routes } from "@/lib/routes"
 
 import {
-  type NewDataRequest,
+  type RecordDataRequest,
   recordDataRequest,
   type RequestKind,
   DATA_REQUEST_QUERIES,
@@ -170,7 +170,7 @@ function RecordRequestDialog({ today, onClose }: { today: LocalDate; onClose: ()
   const errors = record.fieldErrors
 
   function submit() {
-    const input: NewDataRequest = {
+    const input: RecordDataRequest = {
       kind,
       subject: about === "member" ? { personId: subject } : { accountId: subject },
       receipt: { requestedBy, channel, receivedOn },

@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
 import { describe, expect, test, vi } from "vitest"
 
-import type { AgendaItem, PlannedItem } from "@/lib/api/types/meetings"
+import type { AgendaItem, PlannedSession } from "@/features/meetings/meetings/api"
 import { apiUrl } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { services } from "@test/support/fixtures/services"
@@ -16,7 +16,7 @@ import { AgendaPage } from "@/features/meetings/meetings/agenda-page"
 
 const asItem = (s: ReturnType<typeof session>): AgendaItem => ({ ...s, kind: "session" })
 
-const planned = (date: string, stage = stageRef("4th Class", 4)): PlannedItem => ({
+const planned = (date: string, stage = stageRef("4th Class", 4)): PlannedSession => ({
   kind: "planned",
   scheduleId: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f90",
   date,

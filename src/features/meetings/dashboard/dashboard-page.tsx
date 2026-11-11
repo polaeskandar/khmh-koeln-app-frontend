@@ -23,9 +23,10 @@ import { CardAction } from "@/features/meetings/attendance/attendance-overview-p
 import { withQuery } from "@/features/meetings/meetings/meetings-nav"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
-import type { LocalDate, ServiceRef } from "@/lib/api/types/common"
+import type { LocalDate } from "@/lib/api/types/common"
+import type { ServiceReference } from "@/features/organization/services/api"
 import { groupOf } from "@/features/meetings/meetings/session-lines"
-import type { SessionView } from "@/lib/api/types/meetings"
+import type { SessionView } from "@/features/meetings/meetings/api"
 import { addDays, localTimeOf } from "@/lib/domain/time"
 import { routes } from "@/lib/routes"
 
@@ -40,7 +41,7 @@ function partOfDay(): "morning" | "afternoon" | "evening" {
   return hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening"
 }
 
-const meetingsOn = (date: LocalDate, service: ServiceRef | null) =>
+const meetingsOn = (date: LocalDate, service: ServiceReference | null) =>
   withQuery(routes.meetings(), { date, service: service?.id })
 
 function Summary({ sessions, today }: { sessions: SessionView[]; today: LocalDate }) {

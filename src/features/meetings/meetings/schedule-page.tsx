@@ -25,7 +25,7 @@ import { useCanIn } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { useRouter } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
-import type { AgendaItem, ScheduleSummary } from "@/lib/api/types/meetings"
+import type { AgendaItem, Schedule } from "./api"
 import { groupOf } from "./session-lines"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
@@ -53,7 +53,7 @@ const DAYS = 119
 const itemKey = (item: AgendaItem) =>
   item.kind === "planned" ? `${item.scheduleId}-${item.date}` : item.id
 
-function archivedPart(schedule: ScheduleSummary) {
+function archivedPart(schedule: Schedule) {
   if (schedule.service?.archived) {
     return { kind: "service" as const, name: schedule.service.name }
   }
@@ -65,7 +65,7 @@ function archivedPart(schedule: ScheduleSummary) {
   return null
 }
 
-function Actions({ schedule, today }: { schedule: ScheduleSummary; today: LocalDate }) {
+function Actions({ schedule, today }: { schedule: Schedule; today: LocalDate }) {
   const t = useTranslations()
   const router = useRouter()
   const can = useCanIn(meetingGroup(schedule))
@@ -188,7 +188,7 @@ function AgendaList({
   )
 }
 
-function Dates({ schedule, today }: { schedule: ScheduleSummary; today: LocalDate }) {
+function Dates({ schedule, today }: { schedule: Schedule; today: LocalDate }) {
   const t = useTranslations("meetings.schedule")
   const can = useCanIn(meetingGroup(schedule))
 
@@ -256,7 +256,7 @@ function Dates({ schedule, today }: { schedule: ScheduleSummary; today: LocalDat
   )
 }
 
-function Facts({ schedule, today }: { schedule: ScheduleSummary; today: LocalDate }) {
+function Facts({ schedule, today }: { schedule: Schedule; today: LocalDate }) {
   const t = useTranslations("meetings")
   const f = useFormat()
 
@@ -300,7 +300,7 @@ function Facts({ schedule, today }: { schedule: ScheduleSummary; today: LocalDat
   )
 }
 
-function ScheduleView({ schedule, today }: { schedule: ScheduleSummary; today: LocalDate }) {
+function ScheduleView({ schedule, today }: { schedule: Schedule; today: LocalDate }) {
   const t = useTranslations()
   const f = useFormat()
   const archived = archivedPart(schedule)

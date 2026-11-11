@@ -6,14 +6,14 @@ import { beforeEach, expect, test, vi } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
-import type { Action, Permission, Resource } from "@/lib/permissions"
+import type { Action, Permission, Resource } from "@/features/identity/roles/api"
 import { apiUrl, problem } from "@test/support/api"
 import { church, me } from "@test/support/fixtures/me"
 import { answerSettingsLists } from "@test/support/fixtures/settings"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { Role } from "@/features/identity/roles/api"
+import type { RoleRow } from "@/features/identity/roles/api"
 import { SettingsPage } from "@/features/identity/accounts/settings-page"
 
 beforeEach(() => {
@@ -31,8 +31,8 @@ const role = (
   name: string,
   permissions: Permission[],
   holderCount: number,
-  scope: Role["scope"] = "church"
-): Role => ({
+  scope: RoleRow["scope"] = "church"
+): RoleRow => ({
   id: `0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e0${String(n).padStart(3, "0")}`,
   name,
   scope,

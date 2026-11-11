@@ -6,7 +6,7 @@ import { useState } from "react"
 import { FormDialog } from "@/components/form-dialog"
 import { SelectField } from "@/components/form-fields"
 import { NativeSelectOption } from "@/components/ui/native-select"
-import { type Role, ROLE_QUERIES } from "@/features/identity/roles/api"
+import { type RoleRow, ROLE_QUERIES } from "@/features/identity/roles/api"
 import { Link } from "@/i18n/navigation"
 import { isStale, useRefetch } from "@/lib/api/refetch"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
@@ -21,7 +21,7 @@ export function GiveRoleDialog({
   onClose,
 }: {
   account: StaffAccount
-  roles: Role[]
+  roles: RoleRow[]
   onClose: () => void
 }) {
   const t = useTranslations()

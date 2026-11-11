@@ -4,11 +4,11 @@ import type {
   AttendanceBoard,
   AttendanceSheet,
   BoardSession,
-  Mark,
+  MarkReference,
 } from "@/features/meetings/attendance/api"
-import type { MeetingSession } from "@/features/meetings/meetings/api"
-import type { PersonRef } from "@/lib/api/types/common"
-import type { SessionView } from "@/lib/api/types/meetings"
+import type { SessionDetail } from "@/features/meetings/meetings/api"
+import type { PersonReference } from "@/features/people/members/api"
+import type { SessionView } from "@/features/meetings/meetings/api"
 import { apiUrl } from "@test/support/api"
 
 import { session, sessionResponse, stageRef, sundaySchool } from "@test/support/fixtures/sessions"
@@ -18,14 +18,14 @@ const person = (
   firstName: string,
   lastName: string,
   displayName: string | null = null
-): PersonRef => ({
+): PersonReference => ({
   id: `0192f3a4-7b1c-7d2e-8f40-${String(n).padStart(12, "0")}`,
   firstName,
   lastName,
   displayName,
 })
 
-const mark = (n: number, time: string): Mark => ({
+const mark = (n: number, time: string): MarkReference => ({
   id: `0192f3a4-7b1c-7d2e-8f41-${String(n).padStart(12, "0")}`,
   recordedAt: `2026-11-08T${time}:00+01:00`,
 })
@@ -165,7 +165,7 @@ export const closedFirstNovember = (): AttendanceSheet => {
   }
 }
 
-export const detailOf = (sheet: AttendanceSheet): MeetingSession => ({
+export const detailOf = (sheet: AttendanceSheet): SessionDetail => ({
   today: sheet.today,
   session: sessionResponse(sheet.session),
   state: {

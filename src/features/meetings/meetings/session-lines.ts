@@ -1,17 +1,19 @@
 import { useTranslations } from "next-intl"
 
 import { useFormat } from "@/i18n/format"
-import type { LocalDate, ServiceRef, StageRef } from "@/lib/api/types/common"
-import type { PlannedItem, SessionView } from "@/lib/api/types/meetings"
+import type { LocalDate } from "@/lib/api/types/common"
+import type { ServiceReference } from "@/features/organization/services/api"
+import type { StageReference } from "@/features/organization/stages/api"
+import type { PlannedSession, SessionView } from "./api"
 import { isolate } from "@/lib/bidi"
 import { addDays } from "@/lib/domain/time"
 import type { Format } from "@/lib/format"
 
-export type Placed = { service: ServiceRef | null; stage: StageRef | null }
+export type Placed = { service: ServiceReference | null; stage: StageReference | null }
 
 export const groupOf = (item: Placed) => item.stage?.name ?? item.service?.name ?? ""
 
-export function createdOnOf(planned: Pick<PlannedItem, "date">, today: LocalDate): LocalDate {
+export function createdOnOf(planned: Pick<PlannedSession, "date">, today: LocalDate): LocalDate {
   const dayBefore = addDays(planned.date, -1)
 
   return dayBefore < today ? today : dayBefore

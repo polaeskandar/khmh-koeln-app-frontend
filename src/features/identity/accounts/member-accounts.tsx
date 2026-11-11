@@ -20,13 +20,13 @@ import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 
 import {
-  type MemberAccount,
+  type MemberAccountItem,
   memberAccountsQuery,
   unlinkMemberRequest,
   MEMBER_ACCOUNT_QUERIES,
 } from "./api"
 
-function AgeLine({ account }: { account: MemberAccount }) {
+function AgeLine({ account }: { account: MemberAccountItem }) {
   const t = useTranslations("settings.members")
 
   if (account.ageCheck === "sixteenOrOlder") {
@@ -49,7 +49,7 @@ function AccountRow({
   today,
   unlinks,
 }: {
-  account: MemberAccount
+  account: MemberAccountItem
   today: LocalDate
   unlinks: boolean
 }) {

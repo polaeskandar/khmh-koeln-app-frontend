@@ -7,7 +7,7 @@ import { FieldError, FieldLegend, FieldSet } from "@/components/ui/field"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useFormat } from "@/i18n/format"
-import type { Frequency } from "@/lib/api/types/common"
+import type { Frequency } from "./api"
 import { ISO_WEEKDAYS, MONTH_WEEKS } from "@/lib/domain/recurrence"
 import { oneOf } from "@/lib/one-of"
 

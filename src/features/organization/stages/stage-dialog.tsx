@@ -10,14 +10,14 @@ import { TextAreaField, TextField } from "@/components/form-fields"
 import { Button } from "@/components/ui/button"
 import { FieldGroup } from "@/components/ui/field"
 import { useRouter } from "@/i18n/navigation"
-import type { ServiceRef } from "@/lib/api/types/common"
+import type { ServiceReference } from "@/features/organization/services/api"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { routes } from "@/lib/routes"
 
 import {
   addStageRequest,
   type Stage,
-  type StageFields,
+  type StageRequest,
   updateStageRequest,
   STAGE_QUERIES,
 } from "./api"
@@ -29,7 +29,7 @@ export function StageDialog({
   stage,
   onClose,
 }: {
-  service: ServiceRef
+  service: ServiceReference
   stage?: EditableStage
   onClose: () => void
 }) {
@@ -38,14 +38,14 @@ export function StageDialog({
   const [name, setName] = useState(stage?.name ?? "")
   const [description, setDescription] = useState(stage?.description ?? "")
 
-  const add = useApiMutation((fields: StageFields) => addStageRequest(service.id, fields), {
+  const add = useApiMutation((fields: StageRequest) => addStageRequest(service.id, fields), {
     successMessage: (created) => t("toast.added", { name: created.name }),
     invalidate: STAGE_QUERIES,
     toastOnError: false,
     onSuccess: (created) => router.push(routes.stage(created.id)),
   })
 
-  const update = useApiMutation((fields: StageFields) => updateStageRequest(stage!.id, fields), {
+  const update = useApiMutation((fields: StageRequest) => updateStageRequest(stage!.id, fields), {
     successMessage: t("toast.saved"),
     invalidate: STAGE_QUERIES,
     toastOnError: false,
@@ -65,7 +65,7 @@ export function StageDialog({
       return
     }
 
-    const changes: Partial<StageFields> = {}
+    const changes: Partial<StageRequest> = {}
 
     if (fields.name !== stage.name) {
       changes.name = fields.name
@@ -132,7 +132,7 @@ export function AddStageButton({
   label,
   variant = "default",
 }: {
-  service: ServiceRef
+  service: ServiceReference
   label?: string
   variant?: "default" | "outline"
 }) {

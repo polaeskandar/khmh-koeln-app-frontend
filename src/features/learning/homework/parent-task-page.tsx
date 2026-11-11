@@ -17,7 +17,7 @@ import { routes } from "@/lib/routes"
 import { parentChildrenQuery } from "@/features/people/children/api"
 import {
   CHILD_REPORT_QUERIES,
-  type ParentTaskDetail,
+  type ChildHomeworkDetail,
   parentTaskQuery,
   reportDoneRequest,
   undoReportRequest,
@@ -28,7 +28,7 @@ import { ParentNotAvailable } from "@/features/portals/parent/parent-shell"
 
 const isWebLink = (url: string) => /^https?:\/\//i.test(url)
 
-function BackLink({ child }: { child: ParentTaskDetail["child"] }) {
+function BackLink({ child }: { child: ChildHomeworkDetail["child"] }) {
   const t = useTranslations("parent")
   const children = useQueryClient().getQueryData(parentChildrenQuery.queryKey)
   const several = (children?.items.length ?? 0) > 1
@@ -44,7 +44,7 @@ function BackLink({ child }: { child: ParentTaskDetail["child"] }) {
   )
 }
 
-type TaskContent = Pick<ParentTaskDetail, "task" | "lesson" | "today">
+type TaskContent = Pick<ChildHomeworkDetail, "task" | "lesson" | "today">
 
 export function HomeworkTaskView({
   data,
@@ -142,7 +142,7 @@ export function HomeworkTaskView({
   )
 }
 
-function TaskView({ data }: { data: ParentTaskDetail }) {
+function TaskView({ data }: { data: ChildHomeworkDetail }) {
   const t = useTranslations("parent")
   const { task, today, child } = data
 

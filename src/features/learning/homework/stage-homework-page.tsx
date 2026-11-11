@@ -21,7 +21,7 @@ import { oneOf } from "@/lib/one-of"
 import { type Group, groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import { type StageHomework, stageHomeworkQuery } from "./api"
+import { type HomeworkList, stageHomeworkQuery } from "./api"
 import { HomeworkActions } from "./homework-actions"
 import { DueLine } from "./due-line"
 
@@ -29,11 +29,11 @@ type Tab = "published" | "draft" | "archived"
 const TABS: Tab[] = ["published", "draft", "archived"]
 const TAB_LABEL = { published: "published", draft: "drafts", archived: "archived" } as const
 
-function defaultTab(data: StageHomework): Tab {
+function defaultTab(data: HomeworkList): Tab {
   return data.tabs.published === 0 && data.tabs.draft > 0 ? "draft" : "published"
 }
 
-function Rows({ data, tab, group }: { data: StageHomework; tab: Tab; group: Group }) {
+function Rows({ data, tab, group }: { data: HomeworkList; tab: Tab; group: Group }) {
   const t = useTranslations("homework")
   const f = useFormat()
   const rows = data.items.filter((row) => row.status === tab)

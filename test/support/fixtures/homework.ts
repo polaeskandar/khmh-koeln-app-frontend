@@ -1,8 +1,8 @@
-import type { HomeworkRow, StageHomework } from "@/features/learning/homework/api"
+import type { HomeworkItem, HomeworkList } from "@/features/learning/homework/api"
 
 import { goodSamaritan, lessonStage } from "@test/support/fixtures/lessons"
 
-export const homeworkRow = (overrides: Partial<HomeworkRow> = {}): HomeworkRow => ({
+export const homeworkRow = (overrides: Partial<HomeworkItem> = {}): HomeworkItem => ({
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea001",
   title: "Learn the memory verse",
   status: "draft",
@@ -18,7 +18,7 @@ export const homeworkRow = (overrides: Partial<HomeworkRow> = {}): HomeworkRow =
   ...overrides,
 })
 
-export const stageHomework = (overrides: Partial<StageHomework> = {}): StageHomework => ({
+export const stageHomework = (overrides: Partial<HomeworkList> = {}): HomeworkList => ({
   today: "2026-11-08",
   stage: lessonStage,
   archived: false,

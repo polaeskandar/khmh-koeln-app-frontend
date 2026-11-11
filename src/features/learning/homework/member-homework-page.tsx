@@ -10,9 +10,9 @@ import { TaskList, useOwnCompletion } from "./task-list"
 import { ApiError } from "@/lib/api/problem"
 import { routes } from "@/lib/routes"
 
-import { type MemberTask, memberHomeworkQuery } from "./api"
+import { type ParentHomeworkItem, memberHomeworkQuery } from "./api"
 
-const taskHref = (task: MemberTask) => routes.memberHomeworkTask(task.id)
+const taskHref = (task: ParentHomeworkItem) => routes.memberHomeworkTask(task.id)
 
 function Tasks({ state }: { state: TaskState }) {
   const t = useTranslations("member.homework")

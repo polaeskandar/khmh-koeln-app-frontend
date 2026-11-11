@@ -8,9 +8,11 @@ import { HOMEWORK_KEY, LESSONS_KEY, MEMBER_KEY, PARENT_KEY } from "@/lib/api/que
 import type { Uuid } from "@/lib/api/types/common"
 import type { Can } from "@/lib/permissions"
 
-export type HomeworkCounts = Schemas["AudienceCountsResponse"]
-export type HomeworkRow = Schemas["HomeworkItemResponse"]
-export type StageHomework = Schemas["HomeworkListResponse"]
+export type HomeworkStatus = Schemas["HomeworkStatus"]
+
+export type AudienceCounts = Schemas["AudienceCountsResponse"]
+export type HomeworkItem = Schemas["HomeworkItemResponse"]
+export type HomeworkList = Schemas["HomeworkListResponse"]
 
 export const stageHomeworkQuery = (stage: Uuid) =>
   queryOptions({
@@ -23,7 +25,7 @@ export const stageHomeworkQuery = (stage: Uuid) =>
 
 export type HomeworkDetail = Schemas["HomeworkDetailResponse"]
 
-export type HomeworkInput = Schemas["HomeworkRequest"]
+export type Homework = Schemas["HomeworkRequest"]
 
 export const homeworkQuery = (id: Uuid) =>
   queryOptions({
@@ -32,7 +34,7 @@ export const homeworkQuery = (id: Uuid) =>
       dataOf(api.GET("/homework/{id}", { params: { path: { id } }, signal })),
   })
 
-export const createHomeworkRequest = (lesson: Uuid, input: HomeworkInput) =>
+export const createHomeworkRequest = (lesson: Uuid, input: Homework) =>
   dataOf(
     api.POST("/lessons/{lessonId}/homework", {
       params: { path: { lessonId: lesson } },
@@ -40,13 +42,13 @@ export const createHomeworkRequest = (lesson: Uuid, input: HomeworkInput) =>
     })
   )
 
-export const updateHomeworkRequest = (id: Uuid, version: number, input: HomeworkInput) =>
+export const updateHomeworkRequest = (id: Uuid, version: number, input: Homework) =>
   dataOf(api.PUT("/homework/{id}", { params: { path: { id }, query: { version } }, body: input }))
 
 export const publishHomeworkRequest = (id: Uuid) =>
   dataOf(api.POST("/homework/{id}/publish", { params: { path: { id } }, body: {} }))
 
-export type ProgressRow = Schemas["AudienceRowResponse"]
+export type AudienceRow = Schemas["AudienceRowResponse"]
 export type HomeworkProgress = Schemas["HomeworkProgressResponse"]
 
 export const homeworkProgressQuery = (id: Uuid) =>
@@ -63,8 +65,8 @@ export type HomeworkFlags = Record<
   boolean
 >
 
-export type HomeworkState = Pick<HomeworkRow, "status" | "publishedAt" | "counts"> & {
-  lesson: Pick<HomeworkRow["lesson"], "archived">
+export type HomeworkState = Pick<HomeworkItem, "status" | "publishedAt" | "counts"> & {
+  lesson: Pick<HomeworkItem["lesson"], "archived">
 }
 
 export function homeworkFlagsFor(
@@ -105,7 +107,7 @@ export const deleteHomeworkRequest = (id: Uuid) =>
 
 export type TaskState = NonNullable<QueryParams<"/member/homework">["state"]>
 
-export type ParentTask = Schemas["ParentHomeworkItemResponse"]
+export type ParentHomeworkItem = Schemas["ParentHomeworkItemResponse"]
 
 const childHomeworkQuery = (child: Uuid, state: TaskState) =>
   queryOptions({
@@ -136,9 +138,12 @@ export function useChildHomework(child: Uuid, state: TaskState) {
   return query
 }
 
-export type Report = Pick<ParentTask, "done" | "completedAt" | "completedBy" | "completedByYou">
+export type Report = Pick<
+  ParentHomeworkItem,
+  "done" | "completedAt" | "completedBy" | "completedByYou"
+>
 
-export type ParentTaskDetail = Schemas["ChildHomeworkDetailResponse"]
+export type ChildHomeworkDetail = Schemas["ChildHomeworkDetailResponse"]
 
 const taskParams = (child: Uuid, id: Uuid) => ({ path: { childId: child, homeworkId: id } })
 
@@ -169,8 +174,6 @@ export const undoReportRequest = (child: Uuid, id: Uuid) =>
     })
   )
 
-export type MemberTask = ParentTask
-
 export const memberHomeworkQuery = (state: TaskState) =>
   queryOptions({
     queryKey: [...MEMBER_KEY, "homework", state],
@@ -178,7 +181,7 @@ export const memberHomeworkQuery = (state: TaskState) =>
       dataOf(api.GET("/member/homework", { params: { query: { state } }, signal })),
   })
 
-export type MemberTaskDetail = Schemas["MemberHomeworkDetailResponse"]
+export type MemberHomeworkDetail = Schemas["MemberHomeworkDetailResponse"]
 
 export const memberTaskQuery = (id: Uuid) =>
   queryOptions({

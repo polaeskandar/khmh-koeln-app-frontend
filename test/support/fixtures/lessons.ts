@@ -2,7 +2,7 @@ import type {
   Lesson,
   LessonDetail,
   LessonOptions,
-  StageLessons,
+  LessonList,
 } from "@/features/learning/lessons/api"
 
 import { thirdClass } from "@test/support/fixtures/stages"
@@ -50,7 +50,7 @@ export const lessonDetail = (
   ...detail,
 })
 
-export const stageLessons = (overrides: Partial<StageLessons> = {}): StageLessons => ({
+export const stageLessons = (overrides: Partial<LessonList> = {}): LessonList => ({
   service: lessonService,
   stage: lessonStage,
   today: "2026-11-08",

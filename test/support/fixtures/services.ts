@@ -1,4 +1,4 @@
-import type { ServiceInsight, ServiceList, ServiceRow } from "@/features/organization/services/api"
+import type { ServiceInsight, ServiceList, Service } from "@/features/organization/services/api"
 
 export type ServiceInsightList = { items: ServiceInsight[] }
 
@@ -18,7 +18,7 @@ function service(
     description?: string | null
     tone?: number
   } = {}
-): ServiceRow {
+): Service {
   n++
 
   return {
@@ -67,7 +67,7 @@ const insight = (
 })
 
 export const insightsOf = (
-  rows: ServiceRow[],
+  rows: Service[],
   extra: Record<string, Partial<Omit<ServiceInsight, "serviceId">>> = {}
 ): ServiceInsightList => ({
   items: rows.map((row) => insight(row.id, extra[row.id])),

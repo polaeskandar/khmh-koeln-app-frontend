@@ -3,7 +3,7 @@ import { http, HttpResponse } from "msw"
 import { expect, test } from "vitest"
 
 import type { Locale } from "@/i18n/config"
-import type { AgendaItem, ScheduleSummary, SessionView } from "@/lib/api/types/meetings"
+import type { AgendaItem, Schedule, SessionView } from "@/features/meetings/meetings/api"
 import { apiUrl } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { schedule } from "@test/support/fixtures/schedules"
@@ -79,7 +79,7 @@ test("in German", async () => {
   expect(await rowOf("Kindergarten")).toHaveTextContent("4 von 11 anwesend")
 })
 
-function schedules(items: ScheduleSummary[], locale: Locale = "en") {
+function schedules(items: Schedule[], locale: Locale = "en") {
   server.use(
     http.get(apiUrl("/schedules"), () => HttpResponse.json({ today: "2026-11-08", items })),
     http.get(apiUrl("/services"), () => HttpResponse.json(services))
