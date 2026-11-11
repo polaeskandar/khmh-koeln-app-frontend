@@ -23,8 +23,6 @@ export const stageHomeworkQuery = (stage: Uuid) =>
 
 export type HomeworkDetail = Schemas["HomeworkDetailResponse"]
 
-export type Resource = HomeworkDetail["resources"][number]
-
 export type HomeworkInput = Schemas["HomeworkRequest"]
 
 export const homeworkQuery = (id: Uuid) =>
