@@ -10,9 +10,13 @@ import { FieldError } from "@/components/ui/field"
 import { isStale, useRefetch } from "@/lib/api/refetch"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
-import { ACCOUNT_REQUEST_QUERIES, type AccountRequest, type Approval, approveRequest } from "./api"
-
-const CHANGED_MEANWHILE = ["accounts.alreadyApproved", "notFound.user"]
+import {
+  ACCOUNT_REQUEST_QUERIES,
+  type AccountRequest,
+  type Approval,
+  approveRequest,
+  DECIDED_MEANWHILE,
+} from "./api"
 
 export function useApproval(request: AccountRequest, invalidate: QueryKey[], onClose: () => void) {
   const t = useTranslations("accountRequests.toast")
@@ -28,7 +32,7 @@ export function useApproval(request: AccountRequest, invalidate: QueryKey[], onC
   async function send(approval: Approval) {
     const result = await approve.execute(request.account.id, approval)
 
-    if (!result.ok && isStale(result.problem, CHANGED_MEANWHILE)) {
+    if (!result.ok && isStale(result.problem, DECIDED_MEANWHILE)) {
       toast.error(result.problem.message)
       void refetch(ACCOUNT_REQUEST_QUERIES)
       onClose()
@@ -38,7 +42,7 @@ export function useApproval(request: AccountRequest, invalidate: QueryKey[], onC
   const generalError =
     approve.problem &&
     Object.keys(approve.fieldErrors).length === 0 &&
-    !isStale(approve.problem, CHANGED_MEANWHILE)
+    !isStale(approve.problem, DECIDED_MEANWHILE)
       ? approve.problem.message
       : null
 
