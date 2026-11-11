@@ -9,15 +9,13 @@ import { Spinner } from "@/components/ui/spinner"
 import type { Uuid } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
-import { openAttendanceRequest } from "./api"
+import { SESSION_STATUS_QUERIES, openAttendanceRequest } from "./api"
 
 const REFETCH_CODES = new Set([
   "meetings.opensOnTheDay",
   "meetings.sessionCanceled",
   "meetings.attendanceClosed",
 ])
-
-const SESSION_QUERIES = [["attendance"], ["sessions"], ["agenda"], ["dashboard"]]
 
 export function OpenAttendanceButton({
   session,
@@ -30,10 +28,10 @@ export function OpenAttendanceButton({
   const queryClient = useQueryClient()
 
   const refetch = () =>
-    SESSION_QUERIES.forEach((queryKey) => void queryClient.invalidateQueries({ queryKey }))
+    SESSION_STATUS_QUERIES.forEach((queryKey) => void queryClient.invalidateQueries({ queryKey }))
 
   const open = useApiMutation(openAttendanceRequest, {
-    invalidate: SESSION_QUERIES,
+    invalidate: SESSION_STATUS_QUERIES,
     onSuccess: onOpened,
   })
 

@@ -10,8 +10,10 @@ import type { PersonRef, Uuid } from "@/lib/api/types/common"
 import { translateProblem } from "@/lib/api/translate-problem"
 import { useProblemTranslator } from "@/lib/api/use-problem-translator"
 
+import { meetingSessionQuery } from "../meetings/api"
 import {
   type AttendanceBoard,
+  MARK_QUERIES,
   type Mark,
   type Placement,
   recordMarkRequest,
@@ -176,7 +178,7 @@ export function useMarkWrites(sessionId: Uuid) {
   const [writes, dispatch] = useReducer(writesReducer, {})
 
   const refetchBoard = useCallback(
-    () => queryClient.invalidateQueries({ queryKey: ["attendance"] }),
+    () => Promise.all(MARK_QUERIES.map((queryKey) => queryClient.invalidateQueries({ queryKey }))),
     [queryClient]
   )
 
@@ -184,7 +186,7 @@ export function useMarkWrites(sessionId: Uuid) {
     () =>
       Promise.all([
         refetchBoard(),
-        queryClient.invalidateQueries({ queryKey: ["sessions", "detail", sessionId] }),
+        queryClient.invalidateQueries({ queryKey: meetingSessionQuery(sessionId).queryKey }),
       ]),
     [queryClient, refetchBoard, sessionId]
   )

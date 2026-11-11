@@ -8,7 +8,7 @@ import { useSubmitOnce } from "@/hooks/use-submit-once"
 import type { Instant, Uuid } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
-import { publishHomeworkRequest } from "./api"
+import { HOMEWORK_QUERIES, publishHomeworkRequest } from "./api"
 
 type Target = { id: Uuid; title: string; publishedAt: Instant | null }
 
@@ -31,7 +31,9 @@ export function usePublishHomework(message?: string) {
       published.current.add(attempt)
     }
 
-    await queryClient.invalidateQueries({ queryKey: ["homework"] })
+    await Promise.all(
+      HOMEWORK_QUERIES.map((queryKey) => queryClient.invalidateQueries({ queryKey }))
+    )
 
     return result
   })

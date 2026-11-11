@@ -1,6 +1,13 @@
 import { queryOptions, useQueries, type UseQueryResult } from "@tanstack/react-query"
 
 import { api, dataOf, type Schemas } from "@/lib/api/client"
+import {
+  AGENDA_KEY,
+  ATTENDANCE_KEY,
+  DASHBOARD_KEY,
+  SESSIONS_KEY,
+  STAGES_KEY,
+} from "@/lib/api/query-keys"
 import type { Counts, Uuid } from "@/lib/api/types/common"
 import type { CountedSession, SessionView } from "@/lib/api/types/meetings"
 
@@ -11,7 +18,7 @@ export type AttendanceOverview = Schemas["AttendanceOverviewResponse"]
 export type OverviewCard = AttendanceOverview["sessions"][number]
 
 export const attendanceOverviewQuery = queryOptions({
-  queryKey: ["attendance", "overview"],
+  queryKey: [...ATTENDANCE_KEY, "overview"],
   queryFn: ({ signal }) => dataOf(api.GET("/attendance/overview", { signal })),
 })
 
@@ -24,7 +31,7 @@ export type AttendanceCounts = Schemas["AttendanceCountsResponse"]
 
 const attendanceCountsQuery = (sessionIds: Uuid[]) =>
   queryOptions({
-    queryKey: ["attendance", "counts", sessionIds],
+    queryKey: [...ATTENDANCE_KEY, "counts", sessionIds],
     queryFn: ({ signal }) =>
       dataOf(
         api.GET("/attendance/counts", { params: { query: { "sessionIds[]": sessionIds } }, signal })
@@ -65,14 +72,14 @@ export type AttendanceBoard = Schemas["AttendanceBoardResponse"]
 
 export const attendanceBoardQuery = (session: Uuid) =>
   queryOptions({
-    queryKey: ["attendance", "board", session],
+    queryKey: [...ATTENDANCE_KEY, "board", session],
     queryFn: ({ signal }) =>
       dataOf(api.GET("/sessions/{id}/attendance", { params: { path: { id: session } }, signal })),
   })
 
 export const attendanceCorrectionsQuery = (session: Uuid) =>
   queryOptions({
-    queryKey: ["attendance", "corrections", session],
+    queryKey: [...ATTENDANCE_KEY, "corrections", session],
     queryFn: ({ signal }) =>
       dataOf(
         api.GET("/sessions/{id}/attendance/corrections", {
@@ -144,7 +151,13 @@ export type StageAttendanceHistory = Schemas["AttendanceHistory"]
 
 export const stageAttendanceHistoryQuery = (id: Uuid) =>
   queryOptions({
-    queryKey: ["stages", "attendanceHistory", id],
+    queryKey: [...STAGES_KEY, "attendance-history", id],
     queryFn: ({ signal }) =>
       dataOf(api.GET("/stages/{id}/attendance-history", { params: { path: { id } }, signal })),
   })
+
+export const MARK_QUERIES = [ATTENDANCE_KEY]
+
+export const ATTENDANCE_QUERIES = [ATTENDANCE_KEY, SESSIONS_KEY]
+
+export const SESSION_STATUS_QUERIES = [ATTENDANCE_KEY, SESSIONS_KEY, AGENDA_KEY, DASHBOARD_KEY]

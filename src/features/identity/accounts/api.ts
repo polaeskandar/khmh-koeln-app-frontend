@@ -25,7 +25,7 @@ export const declineRequest = (account: Uuid) =>
 export type StaffAccount = Schemas["StaffAccountResponse"]
 
 export const staffAccountsQuery = queryOptions({
-  queryKey: STAFF_ACCOUNTS_KEY,
+  queryKey: [...STAFF_ACCOUNTS_KEY, "list"],
   queryFn: ({ signal }) => dataOf(api.GET("/staff-accounts", { signal })),
 })
 
@@ -45,7 +45,7 @@ export type MemberCandidate = Schemas["MemberCandidateResponse"]
 
 export const memberCandidatesQuery = (q: string) =>
   queryOptions({
-    queryKey: [...ACCOUNT_REQUESTS_KEY, "memberCandidates", q],
+    queryKey: [...ACCOUNT_REQUESTS_KEY, "member-candidates", q],
     queryFn: ({ signal }) =>
       dataOf(api.GET("/account-requests/member-candidates", { params: { query: { q } }, signal })),
   })
@@ -53,7 +53,7 @@ export const memberCandidatesQuery = (q: string) =>
 export type MemberAccount = Schemas["MemberAccountItemResponse"]
 
 export const memberAccountsQuery = queryOptions({
-  queryKey: MEMBER_ACCOUNTS_KEY,
+  queryKey: [...MEMBER_ACCOUNTS_KEY, "list"],
   queryFn: ({ signal }) => dataOf(api.GET("/member-accounts", { signal })),
 })
 

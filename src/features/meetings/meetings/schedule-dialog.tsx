@@ -55,13 +55,17 @@ import {
 } from "@/lib/domain/recurrence"
 import { addDays } from "@/lib/domain/time"
 
-import { type ScheduleChanges, createScheduleRequest, updateScheduleRequest } from "./api"
+import {
+  type ScheduleChanges,
+  createScheduleRequest,
+  SCHEDULE_QUERIES,
+  updateScheduleRequest,
+} from "./api"
 
 const WEEKDAYS: IsoWeekday[] = [1, 2, 3, 4, 5, 6, 7]
 const MONTH_WEEKS: MonthWeek[] = [1, 2, 3, 4, -1]
 const PREVIEW_DATES = 4
 const PREVIEW_HORIZON_DAYS = 400
-const MEETING_QUERIES = [["schedules"], ["agenda"], ["sessions"], ["attendance"], ["dashboard"]]
 
 const SELECTED =
   "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:bg-primary/90 data-[state=on]:hover:text-primary-foreground"
@@ -230,7 +234,7 @@ function ScheduleForm({
 
   const create = useApiMutation(createScheduleRequest, {
     successMessage: (saved) => t("toast.scheduleCreated", { created: saved.createdSessions }),
-    invalidate: MEETING_QUERIES,
+    invalidate: SCHEDULE_QUERIES,
     onSuccess: (saved) => {
       onDone()
       router.push(routes.schedule(saved.id))
@@ -241,7 +245,7 @@ function ScheduleForm({
     (changes: ScheduleChanges) => updateScheduleRequest(schedule!.id, changes),
     {
       successMessage: (saved) => t("toast.scheduleSaved", { created: saved.createdSessions }),
-      invalidate: MEETING_QUERIES,
+      invalidate: SCHEDULE_QUERIES,
       onSuccess: onDone,
     }
   )

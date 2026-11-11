@@ -15,7 +15,13 @@ import { isolate } from "@/lib/bidi"
 import { routes } from "@/lib/routes"
 
 import { parentChildrenQuery } from "@/features/people/children/api"
-import { type ParentTaskDetail, parentTaskQuery, reportDoneRequest, undoReportRequest } from "./api"
+import {
+  CHILD_REPORT_QUERIES,
+  type ParentTaskDetail,
+  parentTaskQuery,
+  reportDoneRequest,
+  undoReportRequest,
+} from "./api"
 import { CompletionControl, reportOf } from "./completion-control"
 import { ListSkeleton } from "./task-list"
 import { ParentNotAvailable } from "@/features/portals/parent/parent-shell"
@@ -153,7 +159,7 @@ function TaskView({ data }: { data: ParentTaskDetail }) {
         undone={t("completion.undone", { name: child.name })}
         reportDone={() => reportDoneRequest(child.id, task.id)}
         undoReport={() => undoReportRequest(child.id, task.id)}
-        invalidate={[["parent"]]}
+        invalidate={CHILD_REPORT_QUERIES}
       />
     </HomeworkTaskView>
   )

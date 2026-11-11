@@ -16,9 +16,7 @@ import { useFormat } from "@/i18n/format"
 import { groupOf, type SessionView } from "@/lib/api/types/meetings"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
-import { cancelSessionRequest } from "./api"
-
-const MEETING_QUERIES = [["sessions"], ["agenda"], ["schedules"], ["attendance"], ["dashboard"]]
+import { cancelSessionRequest, SCHEDULE_QUERIES } from "./api"
 
 export function SessionManageMenu({ session }: { session: SessionView }) {
   const t = useTranslations()
@@ -28,7 +26,7 @@ export function SessionManageMenu({ session }: { session: SessionView }) {
   const cancel = useApiMutation(cancelSessionRequest, {
     toastOnError: false,
     successMessage: t("toast.sessionCanceled"),
-    invalidate: MEETING_QUERIES,
+    invalidate: SCHEDULE_QUERIES,
   })
 
   return (

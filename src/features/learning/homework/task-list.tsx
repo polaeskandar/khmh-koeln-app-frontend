@@ -12,6 +12,8 @@ import type { LocalDate, Uuid } from "@/lib/api/types/common"
 import { isolate } from "@/lib/bidi"
 
 import {
+  CHILD_REPORT_QUERIES,
+  OWN_REPORT_QUERIES,
   type ParentTask,
   type Report,
   reportDoneRequest,
@@ -38,7 +40,7 @@ export function useChildCompletion(child: { id: Uuid; name: string }): TaskCompl
     undone: t("completion.undone", { name: child.name }),
     reportDone: (task) => reportDoneRequest(child.id, task.id),
     undoReport: (task) => undoReportRequest(child.id, task.id),
-    invalidate: [["parent"]],
+    invalidate: CHILD_REPORT_QUERIES,
   }
 }
 
@@ -50,7 +52,7 @@ export function useOwnCompletion(): TaskCompletion {
     undone: t("completion.undone"),
     reportDone: (task) => reportOwnDoneRequest(task.id),
     undoReport: (task) => undoOwnReportRequest(task.id),
-    invalidate: [["member"]],
+    invalidate: OWN_REPORT_QUERIES,
   }
 }
 
