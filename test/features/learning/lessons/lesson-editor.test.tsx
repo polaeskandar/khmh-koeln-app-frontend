@@ -179,6 +179,33 @@ test("a material error lands on its row when an empty row comes first", async ()
   expect(screen.getByLabelText("Link for material 1")).not.toHaveAttribute("aria-invalid")
 })
 
+test("removing a material keeps a 422 on the material it belongs to", async () => {
+  openNew(() =>
+    problem(422, "checkFields", {
+      fieldErrors: { "plan.materials.1.url": { code: "materials.url", params: {} } },
+    })
+  )
+
+  const user = userEvent.setup()
+  await user.type(await screen.findByLabelText("Title"), "The Good Samaritan")
+  await user.type(screen.getByLabelText("Material 1"), "Felt board figures")
+  await user.click(screen.getByRole("button", { name: "Add material" }))
+  await user.type(screen.getByLabelText("Material 2"), "Bandages")
+  await user.type(screen.getByLabelText("Link for material 2"), "not a link")
+  await user.click(screen.getByRole("button", { name: "Add material" }))
+  await user.type(screen.getByLabelText("Material 3"), "Oil")
+  await user.click(screen.getByRole("button", { name: "Save draft" }))
+
+  await waitFor(() =>
+    expect(screen.getByLabelText("Link for material 2")).toHaveAttribute("aria-invalid", "true")
+  )
+
+  await user.click(screen.getByRole("button", { name: "Remove material 1" }))
+
+  expect(screen.getByLabelText("Link for material 1")).toHaveAttribute("aria-invalid", "true")
+  expect(screen.getByLabelText("Link for material 2")).not.toHaveAttribute("aria-invalid")
+})
+
 test.each([
   ["draft", ["Mark ready", "Save draft"]],
   ["ready", ["Save", "Save as draft"]],

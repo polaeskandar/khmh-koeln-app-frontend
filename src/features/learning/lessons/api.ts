@@ -14,8 +14,6 @@ export type Lesson = LessonDetail["lesson"]
 
 export type LessonStage = LessonDetail["stage"]
 
-export type Material = Lesson["materials"][number]
-
 export type LessonTab = NonNullable<QueryParams<"/stages/{stageId}/lessons">["tab"]>
 
 export type StageLessons = Schemas["LessonListResponse"]
