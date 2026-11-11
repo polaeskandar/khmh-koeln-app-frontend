@@ -8,7 +8,7 @@ export function LinkTabs({
   className,
   label,
 }: {
-  items: { href: string; label: string; key: string; count?: number }[]
+  items: { href: string; label: string; key: string }[]
   active: string
   className?: string
   label: string
@@ -37,11 +37,6 @@ export function LinkTabs({
                 )}
               >
                 {item.label}
-                {item.count ? (
-                  <span className="bg-muted px-1.5 py-0.5 text-[10px] tracking-normal text-muted-foreground tabular-nums">
-                    {item.count}
-                  </span>
-                ) : null}
               </Link>
             </li>
           )

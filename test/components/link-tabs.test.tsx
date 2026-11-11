@@ -12,7 +12,7 @@ test("LinkTabs marks the current tab as the current page", () => {
       active="lessons"
       items={[
         { key: "overview", label: "Overview", href: "/stages/view/?id=1" },
-        { key: "lessons", label: "Lessons", href: "/stages/lessons/?id=1", count: 3 },
+        { key: "lessons", label: "Lessons", href: "/stages/lessons/?id=1" },
       ]}
     />
   )
