@@ -326,6 +326,43 @@ test("the groups start with the named service and send a chosen stage too", asyn
   )
 })
 
+test("the whole service replaces its chosen stages and is then sent without them", async () => {
+  const { sent } = open()
+  servantNamed([youth])
+  const dialog = await openApprove()
+  const groups = within(await dialog.findByRole("group", { name: "Groups" }))
+  const service = groups.getByRole("combobox", { name: "Service" })
+  await userEvent.selectOptions(service, sundaySchool.id)
+  await userEvent.selectOptions(groups.getByRole("combobox", { name: "Stage" }), thirdClass.id)
+  await userEvent.click(groups.getByRole("button", { name: "Add group" }))
+  await userEvent.selectOptions(service, sundaySchool.id)
+
+  expect(groups.getByRole("combobox", { name: "Stage" })).toHaveAccessibleDescription(
+    / Replaces ⁨3rd Class⁩\.$/
+  )
+
+  await userEvent.click(groups.getByRole("button", { name: "Add group" }))
+  expect(groups.getByText("Sunday School", { selector: "bdi" })).toBeInTheDocument()
+  expect(groups.queryByText("Sunday School · 3rd Class")).toBeNull()
+  await userEvent.selectOptions(service, sundaySchool.id)
+  expect(groups.queryByRole("combobox", { name: "Stage" })).toBeNull()
+  await userEvent.click(dialog.getByRole("checkbox", { name: /Servant/ }))
+  await userEvent.click(dialog.getByRole("button", { name: "Approve account" }))
+
+  await waitFor(() =>
+    expect(sent).toEqual([
+      {
+        as: "servant",
+        roleIds: [servantRole.id],
+        assignments: [
+          { serviceId: youth.id, stageId: null },
+          { serviceId: sundaySchool.id, stageId: null },
+        ],
+      },
+    ])
+  )
+})
+
 test("without a named service the servant starts without a group", async () => {
   open()
   servantNamed([])

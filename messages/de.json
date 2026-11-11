@@ -2081,6 +2081,7 @@
     "stage": "Stufe",
     "chooseService": "Dienst wählen",
     "stageHint": "Der ganze Dienst umfasst seine eigene Liste und alle seine Stufen, wie für eine Dienstleitung; eine Stufe nur diese Stufe.",
+    "replaces": "Ersetzt {stages}.",
     "assign": "Zuordnen",
     "remove": "Herausnehmen",
     "removeLabel": "{name} aus {where} herausnehmen",
