@@ -781,7 +781,6 @@
     "stages": "{count, plural, zero {لا مراحل} one {مرحلة واحدة} two {مرحلتان} few {# مراحل} many {# مرحلة} other {# مرحلة}}",
     "members": "{count, plural, zero {لا مخدومين} one {مخدوم واحد} two {مخدومان} few {# مخدومين} many {# مخدومًا} other {# مخدوم}}",
     "sessions": "{count, plural, zero {لا اجتماعات} one {اجتماع واحد} two {اجتماعان} few {# اجتماعات} many {# اجتماعًا} other {# اجتماع}}",
-    "children": "{count, plural, zero {لا أطفال} one {طفل واحد} two {طفلان} few {# أطفال} many {# طفلًا} other {# طفل}}",
     "parents": "{count, plural, zero {لا أولياء أمور} one {ولي أمر واحد} two {وليا أمر} few {# أولياء أمور} many {# ولي أمر} other {# ولي أمر}}",
     "homework": "{count, plural, zero {لا واجبات} one {واجب واحد} two {واجبان} few {# واجبات} many {# واجبًا} other {# واجب}}"
   },
