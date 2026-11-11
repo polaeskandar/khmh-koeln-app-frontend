@@ -7,12 +7,13 @@ import type { ReactNode } from "react"
 
 import { RecordNotFound } from "@/components/app-shell/record-not-found"
 import { Topbar } from "@/components/app-shell/topbar"
-import { HistoryTimeline } from "@/components/history-timeline"
+import { HistoryTimeline } from "./history-timeline"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { ServiceTag } from "@/components/service-tag"
-import { SessionBadges, SessionWhen } from "@/components/session-bits"
+import { SessionBadges } from "./session-badges"
+import { SessionWhen } from "./session-when"
 import { Button } from "@/components/ui/button"
 import { useCanIn } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
@@ -20,14 +21,15 @@ import { Link, useRouter } from "@/i18n/navigation"
 import { isolate } from "@/lib/bidi"
 import { recurrenceOf } from "@/lib/domain/recurrence"
 import type { LocalDate } from "@/lib/api/types/common"
-import { groupOf, type SessionView } from "@/lib/api/types/meetings"
+import { groupOf } from "./session-lines"
+import type { SessionView } from "@/lib/api/types/meetings"
 import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import { OpenAttendanceButton } from "@/features/meetings/attendance/open-attendance-button"
 
 import { type MeetingSession, meetingSessionQuery } from "./api"
-import { SessionManageMenu } from "./session-dialogs"
+import { SessionManageMenu } from "./session-manage-menu"
 
 function AttendanceAction({ session, today }: { session: SessionView; today: LocalDate }) {
   const t = useTranslations()

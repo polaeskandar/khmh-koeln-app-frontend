@@ -8,12 +8,9 @@ import { NotAssigned } from "@/components/not-assigned"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
 import { QueryState } from "@/components/page-states"
 import { ServiceTag } from "@/components/service-tag"
-import {
-  agendaHref,
-  createdOnOf,
-  SessionCardView,
-  useSessionLines,
-} from "@/components/session-bits"
+import { agendaHref } from "@/features/meetings/meetings/agenda-links"
+import { createdOnOf, useSessionLines } from "@/features/meetings/meetings/session-lines"
+import { SessionCardView } from "@/features/meetings/meetings/session-card"
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCan, useSession, useUnassigned } from "@/features/identity/auth/session"
@@ -27,7 +24,8 @@ import { withQuery } from "@/features/meetings/meetings/meetings-nav"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import type { LocalDate, ServiceRef } from "@/lib/api/types/common"
-import { groupOf, type SessionView } from "@/lib/api/types/meetings"
+import { groupOf } from "@/features/meetings/meetings/session-lines"
+import type { SessionView } from "@/lib/api/types/meetings"
 import { addDays, localTimeOf } from "@/lib/domain/time"
 import { routes } from "@/lib/routes"
 

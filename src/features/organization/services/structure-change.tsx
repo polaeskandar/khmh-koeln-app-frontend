@@ -1,56 +1,50 @@
 "use client"
 
-import { useState } from "react"
+import type { ComponentProps } from "react"
 
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
+
 import { STRUCTURE_QUERIES } from "./api"
 
-type Props = Omit<React.ComponentProps<typeof ConfirmDialog>, "onConfirm" | "note"> & {
-  run: () => Promise<unknown>
+type Props = Omit<ComponentProps<typeof ConfirmDialog>, "onConfirm" | "note"> & {
+  request: () => Promise<unknown>
   successMessage: string
   onSuccess?: () => void
 }
 
 export function StructureChangeDialog({
-  run,
+  request,
   successMessage,
   onSuccess,
   onOpenChange,
   ...props
 }: Props) {
-  const mutation = useApiMutation(run, {
+  const mutation = useApiMutation(request, {
     successMessage,
     toastOnError: false,
     invalidate: STRUCTURE_QUERIES,
     onSuccess,
   })
 
-  const [shown, setShown] = useState(false)
-
   return (
     <ConfirmDialog
       {...props}
       onOpenChange={(open) => {
         if (!open) {
-          setShown(false)
+          mutation.reset()
         }
 
         onOpenChange?.(open)
       }}
       note={
-        shown && mutation.problem ? (
+        mutation.problem ? (
           <span role="alert" className="text-destructive">
             {mutation.problem.message}
           </span>
         ) : undefined
       }
-      onConfirm={async () => {
-        const result = await mutation.execute()
-        setShown(!result.ok)
-
-        return result.ok
-      }}
+      onConfirm={async () => (await mutation.execute()).ok}
     />
   )
 }

@@ -13,7 +13,7 @@ import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { AttendanceSheet } from "@/features/meetings/attendance/api"
-import { CorrectionDialog } from "@/features/meetings/attendance/board-dialogs"
+import { CorrectionDialog } from "@/features/meetings/attendance/correction-dialog"
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
 
 beforeEach(() => {

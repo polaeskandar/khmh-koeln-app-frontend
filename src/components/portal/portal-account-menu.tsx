@@ -4,6 +4,7 @@ import { LogOut, ShieldCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { LanguageSubmenu } from "@/components/language-switch"
+import { useSwitchLocale } from "@/features/identity/auth/use-switch-locale"
 import { MemberAvatar } from "@/components/member-avatar"
 import { AppearanceSubmenu } from "@/components/theme-switch"
 import { Button } from "@/components/ui/button"
@@ -33,6 +34,7 @@ export function PortalAccountMenu({
   links: React.ReactNode
 }) {
   const t = useTranslations()
+  const switchLocale = useSwitchLocale()
   const { session, signOut, signingOut } = useSession()
 
   if (session.status !== "authenticated") {
@@ -68,7 +70,7 @@ export function PortalAccountMenu({
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <LanguageSubmenu />
+        <LanguageSubmenu onSwitch={switchLocale} />
         <AppearanceSubmenu />
         <DropdownMenuSeparator />
         {links}

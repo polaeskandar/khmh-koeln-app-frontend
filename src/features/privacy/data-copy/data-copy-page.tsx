@@ -12,7 +12,7 @@ import { forgetAddressFragment, tokenInAddress } from "@/features/identity/auth/
 import { AuthFrame, AuthHeading } from "@/features/identity/auth/auth-frame"
 import { useInBrowser } from "@/hooks/use-in-browser"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
-import { carryFragment } from "@/i18n/use-switch-locale"
+import { carryFragment } from "@/features/identity/auth/use-switch-locale"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
 import { downloadDataCopyRequest } from "./api"

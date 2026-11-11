@@ -10,7 +10,8 @@ import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 import type { LocalDate } from "@/lib/api/types/common"
-import { groupOf, type ScheduleSummary } from "@/lib/api/types/meetings"
+import { groupOf } from "./session-lines"
+import type { ScheduleSummary } from "@/lib/api/types/meetings"
 import { recurrenceOf } from "@/lib/domain/recurrence"
 
 function NextLabel({ schedule, today }: { schedule: ScheduleSummary; today: LocalDate }) {

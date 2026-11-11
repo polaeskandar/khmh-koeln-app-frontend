@@ -4,6 +4,7 @@ import { ChevronsUpDown, House, LogOut, ShieldCheck, UserRound, UsersRound } fro
 import { useTranslations } from "next-intl"
 
 import { LanguageSubmenu } from "@/components/language-switch"
+import { useSwitchLocale } from "@/features/identity/auth/use-switch-locale"
 import { AppearanceSubmenu } from "@/components/theme-switch"
 import { MemberAvatar } from "@/components/member-avatar"
 import {
@@ -22,6 +23,7 @@ import { routes } from "@/lib/routes"
 
 export function AccountMenuItems() {
   const t = useTranslations()
+  const switchLocale = useSwitchLocale()
   const { session, signOut, signingOut } = useSession()
   const parent = session.status === "authenticated" && session.areas.parent
   const member = session.status === "authenticated" && (session.me.member?.groupCount ?? 0) > 0
@@ -34,7 +36,7 @@ export function AccountMenuItems() {
           {t("shell.yourAccount")}
         </Link>
       </DropdownMenuItem>
-      <LanguageSubmenu />
+      <LanguageSubmenu onSwitch={switchLocale} />
       <AppearanceSubmenu />
       <DropdownMenuSeparator />
       {member ? (

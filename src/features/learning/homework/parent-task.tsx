@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl"
 import { Suspense } from "react"
 
 import { QueryState } from "@/components/page-states"
-import { DueLine } from "./homework-bits"
+import { DueLine } from "./due-line"
 import { useSearchParamId } from "@/hooks/use-search-param-id"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"

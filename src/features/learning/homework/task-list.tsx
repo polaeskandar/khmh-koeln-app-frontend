@@ -21,7 +21,7 @@ import {
   undoReportRequest,
 } from "./api"
 import { useCompletion } from "./completion-control"
-import { DueLine } from "./homework-bits"
+import { DueLine } from "./due-line"
 
 export type TaskCompletion = {
   label: (task: ParentTask) => string

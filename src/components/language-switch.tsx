@@ -14,17 +14,17 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { isLocale, LOCALE_NAMES, LOCALES } from "@/i18n/config"
-import { useSwitchLocale } from "@/i18n/use-switch-locale"
+import { isLocale, type Locale, LOCALE_NAMES, LOCALES } from "@/i18n/config"
 
-function LanguageChoices() {
+type SwitchProps = { onSwitch: (locale: Locale) => void }
+
+function LanguageChoices({ onSwitch }: SwitchProps) {
   const locale = useLocale()
-  const switchLocale = useSwitchLocale()
 
   return (
     <DropdownMenuRadioGroup
       value={locale}
-      onValueChange={(value) => isLocale(value) && value !== locale && switchLocale(value)}
+      onValueChange={(value) => isLocale(value) && value !== locale && onSwitch(value)}
     >
       {LOCALES.map((l) => (
         <DropdownMenuRadioItem key={l} value={l} lang={l} className="normal-case">
@@ -35,7 +35,7 @@ function LanguageChoices() {
   )
 }
 
-export function LanguageMenu() {
+export function LanguageMenu({ onSwitch }: SwitchProps) {
   const t = useTranslations("prefs")
   const locale = useLocale()
 
@@ -51,13 +51,13 @@ export function LanguageMenu() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <LanguageChoices />
+        <LanguageChoices onSwitch={onSwitch} />
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
 
-export function LanguageSubmenu() {
+export function LanguageSubmenu({ onSwitch }: SwitchProps) {
   const t = useTranslations("prefs")
   const locale = useLocale()
 
@@ -74,7 +74,7 @@ export function LanguageSubmenu() {
         </span>
       </DropdownMenuSubTrigger>
       <DropdownMenuSubContent>
-        <LanguageChoices />
+        <LanguageChoices onSwitch={onSwitch} />
       </DropdownMenuSubContent>
     </DropdownMenuSub>
   )

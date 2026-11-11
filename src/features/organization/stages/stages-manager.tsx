@@ -15,7 +15,8 @@ import { useFormat } from "@/i18n/format"
 import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import { AddStageButton, RestoreStageButton } from "./stage-dialogs"
+import { AddStageButton } from "./stage-dialog"
+import { RestoreStageButton } from "./stage-actions"
 import { StagesTable } from "./stages-table"
 import { useStageOrder } from "./use-stage-order"
 

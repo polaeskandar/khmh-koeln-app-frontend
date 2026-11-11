@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import type { ReactNode } from "react"
 
-import { RosterCells } from "@/components/roster-cells"
+import { RosterCells } from "./roster-cells"
 import { Button } from "@/components/ui/button"
 
 import type { AttendanceSheet as Board } from "./api"

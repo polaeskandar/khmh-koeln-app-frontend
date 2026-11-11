@@ -1,5 +1,6 @@
 import type { LocalDate, LocalTime, ServiceRef } from "@/lib/api/types/common"
-import { type AgendaItem, groupOf } from "@/lib/api/types/meetings"
+import type { AgendaItem } from "@/lib/api/types/meetings"
+import { groupOf } from "@/features/meetings/meetings/session-lines"
 
 export type UpcomingEntry =
   | { kind: "single"; item: AgendaItem }

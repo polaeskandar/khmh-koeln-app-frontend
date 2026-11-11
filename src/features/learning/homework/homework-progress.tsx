@@ -17,7 +17,8 @@ import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useCanIn } from "@/features/identity/auth/session"
-import { CompletionMeter, HomeworkStatusBadge } from "@/features/learning/lessons/lesson-bits"
+import { CompletionMeter } from "./completion-meter"
+import { HomeworkStatusBadge } from "./homework-status-badge"
 import { useStageCrumbs } from "@/features/organization/stages/stage-layout"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
@@ -37,7 +38,7 @@ import {
   type ProgressRow,
 } from "./api"
 import { HomeworkActions } from "./homework-actions"
-import { DueLine } from "./homework-bits"
+import { DueLine } from "./due-line"
 
 type Tab = "all" | "done" | "open" | "noAccount"
 
