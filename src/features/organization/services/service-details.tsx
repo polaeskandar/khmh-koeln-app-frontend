@@ -6,9 +6,10 @@ import { Archive, ArrowRight, PencilLine } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
+import { RecordNotFound } from "@/components/app-shell/record-not-found"
 import { Topbar } from "@/components/app-shell/topbar"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
-import { NotFoundState, QueryState } from "@/components/page-states"
+import { QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { ServiceSwatch } from "@/components/service-tag"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -244,27 +245,20 @@ function Details({ service }: { service: ServiceRow }) {
   )
 }
 
-function NotFoundPage() {
-  const t = useTranslations("nav")
-
-  return (
-    <>
-      <Topbar crumbs={[{ label: t("services"), href: routes.services() }]} />
-      <NotFoundState home={routes.services()} />
-    </>
-  )
-}
-
 function LoadedService({ id }: { id: string }) {
   const query = useQuery(serviceQuery(id))
 
   return (
-    <QueryState query={query} notFound={<NotFoundPage />}>
+    <QueryState query={query} notFound={<RecordNotFound area="services" />}>
       {(service) => <Details service={service} />}
     </QueryState>
   )
 }
 
 export function ServiceDetails() {
-  return <RecordPage notFound={<NotFoundPage />}>{(id) => <LoadedService id={id} />}</RecordPage>
+  return (
+    <RecordPage notFound={<RecordNotFound area="services" />}>
+      {(id) => <LoadedService id={id} />}
+    </RecordPage>
+  )
 }

@@ -5,12 +5,13 @@ import { Ellipsis, PencilLine, Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
+import { RecordNotFound } from "@/components/app-shell/record-not-found"
 import { Topbar } from "@/components/app-shell/topbar"
 import { ConfirmDialog } from "@/components/confirm-dialog"
 
 import { MemberAvatar } from "@/components/member-avatar"
 import { PageBody, PageHeader } from "@/components/page-header"
-import { NotFoundState, QueryState } from "@/components/page-states"
+import { QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { Button } from "@/components/ui/button"
 import {
@@ -27,6 +28,7 @@ import type { LessonStatus } from "@/lib/api/types/learning"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 
+import { useStageCrumbs } from "@/features/organization/stages/stage-layout"
 import { initialsOf } from "@/features/identity/auth/role-summary"
 import { useCanIn } from "@/features/identity/auth/session"
 import { stageHomeworkQuery } from "@/features/learning/homework/api"
@@ -277,19 +279,11 @@ function LessonView({ data }: { data: LessonDetail }) {
   const can = useCanIn(groupAt(service, stage))
   const everPublished = useEverPublished(data)
   const flags = lessonFlagsFor(can, data, everPublished)
+  const crumbs = useStageCrumbs({ ...stage, service }, "lessons", [{ label: lesson.title }])
 
   return (
     <>
-      <Topbar
-        crumbs={[
-          { label: t("nav.services"), href: routes.services() },
-          { label: service.name, href: routes.service(service.id) },
-          { label: t("stages.title"), href: routes.serviceStages(service.id) },
-          { label: stage.name, href: routes.stage(stage.id) },
-          { label: t("stages.tabs.lessons"), href: routes.stageLessons(stage.id) },
-          { label: lesson.title },
-        ]}
-      />
+      <Topbar crumbs={crumbs} />
       <PageBody>
         <PageHeader
           meta={<LessonStatusBadge status={lesson.status} archived={!!lesson.archivedAt} />}
@@ -445,27 +439,20 @@ function LessonView({ data }: { data: LessonDetail }) {
   )
 }
 
-function NotFoundPage() {
-  const t = useTranslations("nav")
-
-  return (
-    <>
-      <Topbar crumbs={[{ label: t("services"), href: routes.services() }]} />
-      <NotFoundState home={routes.services()} />
-    </>
-  )
-}
-
 function LoadedLesson({ id }: { id: string }) {
   const query = useQuery(lessonQuery(id))
 
   return (
-    <QueryState query={query} notFound={<NotFoundPage />}>
+    <QueryState query={query} notFound={<RecordNotFound area="services" />}>
       {(data) => <LessonView data={data} />}
     </QueryState>
   )
 }
 
 export function LessonPage() {
-  return <RecordPage notFound={<NotFoundPage />}>{(id) => <LoadedLesson id={id} />}</RecordPage>
+  return (
+    <RecordPage notFound={<RecordNotFound area="services" />}>
+      {(id) => <LoadedLesson id={id} />}
+    </RecordPage>
+  )
 }

@@ -5,7 +5,6 @@ import { cn } from "cn"
 import { Check, ChevronRight } from "lucide-react"
 import { useTranslations } from "next-intl"
 
-import { Skeleton } from "@/components/ui/skeleton"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import type { LocalDate, Uuid } from "@/lib/api/types/common"
@@ -199,15 +198,5 @@ export function TaskList({
         </ul>
       )}
     </section>
-  )
-}
-
-export function ListSkeleton() {
-  return (
-    <div aria-busy="true" className="flex flex-col gap-2">
-      <Skeleton className="h-5 w-40" />
-      <Skeleton className="h-20 w-full" />
-      <Skeleton className="h-20 w-full" />
-    </div>
   )
 }

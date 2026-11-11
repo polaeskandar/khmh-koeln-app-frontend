@@ -8,7 +8,7 @@ import { FormPanel } from "@/components/form-panel"
 import { PasswordSection, PreferencesFields } from "@/features/identity/account/account-sections"
 import { useSession } from "@/features/identity/auth/session"
 import { OwnData } from "@/features/privacy/own-data/own-data"
-import { ListSkeleton } from "@/features/learning/homework/task-list"
+import { ListSkeleton } from "@/components/list-skeleton"
 import { useFormat } from "@/i18n/format"
 import { ApiError } from "@/lib/api/problem"
 

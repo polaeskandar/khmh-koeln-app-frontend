@@ -5,10 +5,11 @@ import { ClipboardCheck, Repeat } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { ReactNode } from "react"
 
+import { RecordNotFound } from "@/components/app-shell/record-not-found"
 import { Topbar } from "@/components/app-shell/topbar"
 import { HistoryTimeline } from "@/components/history-timeline"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
-import { NotFoundState, QueryState } from "@/components/page-states"
+import { QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { ServiceTag } from "@/components/service-tag"
 import { SessionBadges, SessionWhen } from "@/components/session-bits"
@@ -169,22 +170,11 @@ function SessionDetail({ data, actions }: { data: MeetingSession; actions?: Reac
   )
 }
 
-function NotFoundPage() {
-  const t = useTranslations("nav")
-
-  return (
-    <>
-      <Topbar crumbs={[{ label: t("meetings"), href: routes.meetings() }]} />
-      <NotFoundState home={routes.meetings()} />
-    </>
-  )
-}
-
 function LoadedSession({ id, actions }: { id: string; actions?: ReactNode }) {
   const query = useQuery(meetingSessionQuery(id))
 
   return (
-    <QueryState query={query} notFound={<NotFoundPage />}>
+    <QueryState query={query} notFound={<RecordNotFound area="meetings" />}>
       {(data) => <SessionDetail data={data} actions={actions} />}
     </QueryState>
   )
@@ -192,7 +182,7 @@ function LoadedSession({ id, actions }: { id: string; actions?: ReactNode }) {
 
 export function SessionPage({ actions }: { actions?: ReactNode }) {
   return (
-    <RecordPage notFound={<NotFoundPage />}>
+    <RecordPage notFound={<RecordNotFound area="meetings" />}>
       {(id) => <LoadedSession id={id} actions={actions} />}
     </RecordPage>
   )

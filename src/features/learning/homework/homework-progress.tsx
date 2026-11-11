@@ -5,11 +5,12 @@ import { Pencil, Search } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
+import { RecordNotFound } from "@/components/app-shell/record-not-found"
 import { Topbar } from "@/components/app-shell/topbar"
 import { MemberAvatar } from "@/components/member-avatar"
 import { NoAccess } from "@/components/no-access"
 import { PageBody, PageHeader } from "@/components/page-header"
-import { NotFoundState, QueryState } from "@/components/page-states"
+import { QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { Button } from "@/components/ui/button"
 import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
@@ -285,11 +286,9 @@ function ProgressView({ data }: { data: HomeworkProgress }) {
   const stageArchived = detail.data?.archived ?? true
   const flags = homeworkFlagsFor(can, homework, stageArchived)
 
-  const crumbs = useStageCrumbs(
-    { ...data.stage, archived: stageArchived, service: data.service },
-    "homework",
-    [{ label: homework.title }]
-  )
+  const crumbs = useStageCrumbs({ ...data.stage, service: data.service }, "homework", [
+    { label: homework.title },
+  ])
 
   return (
     <>
@@ -343,17 +342,6 @@ function ProgressView({ data }: { data: HomeworkProgress }) {
   )
 }
 
-function NotFoundPage() {
-  const t = useTranslations("nav")
-
-  return (
-    <>
-      <Topbar crumbs={[{ label: t("services"), href: routes.services() }]} />
-      <NotFoundState home={routes.services()} />
-    </>
-  )
-}
-
 function Progress({ id }: { id: Uuid }) {
   const t = useTranslations()
   const query = useQuery(homeworkProgressQuery(id))
@@ -367,12 +355,16 @@ function Progress({ id }: { id: Uuid }) {
   }
 
   return (
-    <QueryState query={query} notFound={<NotFoundPage />}>
+    <QueryState query={query} notFound={<RecordNotFound area="services" />}>
       {(data) => <ProgressView data={data} />}
     </QueryState>
   )
 }
 
 export function HomeworkProgressPage() {
-  return <RecordPage notFound={<NotFoundPage />}>{(id) => <Progress id={id} />}</RecordPage>
+  return (
+    <RecordPage notFound={<RecordNotFound area="services" />}>
+      {(id) => <Progress id={id} />}
+    </RecordPage>
+  )
 }

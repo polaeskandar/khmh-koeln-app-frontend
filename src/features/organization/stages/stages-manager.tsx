@@ -28,9 +28,10 @@ import { GripVertical } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useMemo, useState } from "react"
 
+import { RecordNotFound } from "@/components/app-shell/record-not-found"
 import { Topbar } from "@/components/app-shell/topbar"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
-import { NotFoundState, QueryState } from "@/components/page-states"
+import { QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty"
 import { type ServiceStages, serviceStagesQuery } from "@/features/organization/services/api"
@@ -339,27 +340,20 @@ function Manager({ data }: { data: ServiceStages }) {
   )
 }
 
-function NotFoundPage() {
-  const t = useTranslations("nav")
-
-  return (
-    <>
-      <Topbar crumbs={[{ label: t("services"), href: routes.services() }]} />
-      <NotFoundState home={routes.services()} />
-    </>
-  )
-}
-
 function LoadedManager({ id }: { id: string }) {
   const query = useQuery(serviceStagesQuery(id))
 
   return (
-    <QueryState query={query} notFound={<NotFoundPage />}>
+    <QueryState query={query} notFound={<RecordNotFound area="services" />}>
       {(data) => <Manager data={data} />}
     </QueryState>
   )
 }
 
 export function StagesManager() {
-  return <RecordPage notFound={<NotFoundPage />}>{(id) => <LoadedManager id={id} />}</RecordPage>
+  return (
+    <RecordPage notFound={<RecordNotFound area="services" />}>
+      {(id) => <LoadedManager id={id} />}
+    </RecordPage>
+  )
 }

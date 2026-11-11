@@ -6,12 +6,11 @@ import { Link2, Plus, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
-import { type Crumb, Topbar } from "@/components/app-shell/topbar"
+import { RecordNotFound } from "@/components/app-shell/record-not-found"
 import { FormPanel } from "@/components/form-panel"
 import { SelectField, TextAreaField, TextField } from "@/components/form-fields"
 import { NoAccess } from "@/components/no-access"
-import { PageBody, PageHeader } from "@/components/page-header"
-import { NotFoundState, QueryState } from "@/components/page-states"
+import { QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -26,10 +25,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
+import { StageEditorPage } from "@/features/learning/editor-shell"
 import { useCan, useSession } from "@/features/identity/auth/session"
 import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { Link, useRouter } from "@/i18n/navigation"
-import type { ServiceRef } from "@/lib/api/types/common"
 import { ApiError } from "@/lib/api/problem"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { groupAt } from "@/lib/permissions"
@@ -84,19 +83,6 @@ function Block({
       {children}
     </FormPanel>
   )
-}
-
-function useLessonCrumbs(service: ServiceRef, stage: LessonStage, last: string): Crumb[] {
-  const t = useTranslations()
-
-  return [
-    { label: t("nav.services"), href: routes.services() },
-    { label: service.name, href: routes.service(service.id) },
-    { label: t("stages.title"), href: routes.serviceStages(service.id) },
-    { label: stage.name, href: routes.stage(stage.id) },
-    { label: t("stages.tabs.lessons"), href: routes.stageLessons(stage.id) },
-    { label: last },
-  ]
 }
 
 type EditorProps = {
@@ -524,41 +510,6 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
   )
 }
 
-function EditorPage({
-  service,
-  stage,
-  title,
-  children,
-}: {
-  service: ServiceRef
-  stage: LessonStage
-  title: string
-  children: React.ReactNode
-}) {
-  const t = useTranslations("lessons")
-
-  return (
-    <>
-      <Topbar crumbs={useLessonCrumbs(service, stage, title)} />
-      <PageBody>
-        <PageHeader title={title} description={t("newDescription")} />
-        {children}
-      </PageBody>
-    </>
-  )
-}
-
-function NotFoundPage() {
-  const t = useTranslations("nav")
-
-  return (
-    <>
-      <Topbar crumbs={[{ label: t("services"), href: routes.services() }]} />
-      <NotFoundState home={routes.services()} />
-    </>
-  )
-}
-
 function WithOptions({
   stage,
   lesson,
@@ -589,9 +540,14 @@ function NewLesson({ stageId }: { stageId: string }) {
   const query = useQuery(stageLessonsQuery(stageId))
 
   return (
-    <QueryState query={query} notFound={<NotFoundPage />}>
+    <QueryState query={query} notFound={<RecordNotFound area="services" />}>
       {(data) => (
-        <EditorPage service={data.service} stage={data.stage} title={t("newLesson")}>
+        <StageEditorPage
+          stage={{ ...data.stage, service: data.service }}
+          tab="lessons"
+          title={t("newLesson")}
+          description={t("newDescription")}
+        >
           {!data.archived && can("create", "lessons", groupAt(data.service, data.stage)) ? (
             <WithOptions stage={data.stage}>
               {(choices) => <LessonForm stage={data.stage} viewNotes choices={choices} />}
@@ -601,7 +557,7 @@ function NewLesson({ stageId }: { stageId: string }) {
               {t("noAccess.prepareBody", { stage: data.stage.name })}
             </NoAccess>
           )}
-        </EditorPage>
+        </StageEditorPage>
       )}
     </QueryState>
   )
@@ -613,9 +569,14 @@ function EditLesson({ id }: { id: string }) {
   const query = useQuery(lessonQuery(id))
 
   return (
-    <QueryState query={query} notFound={<NotFoundPage />}>
+    <QueryState query={query} notFound={<RecordNotFound area="services" />}>
       {(data) => (
-        <EditorPage service={data.service} stage={data.stage} title={t("editLesson")}>
+        <StageEditorPage
+          stage={{ ...data.stage, service: data.service }}
+          tab="lessons"
+          title={t("editLesson")}
+          description={t("newDescription")}
+        >
           {data.lesson.archivedAt ? (
             <NoAccess title={t("noAccess.archivedTitle")}>{t("noAccess.archivedBody")}</NoAccess>
           ) : data.archived || !can("update", "lessons", groupAt(data.service, data.stage)) ? (
@@ -634,7 +595,7 @@ function EditLesson({ id }: { id: string }) {
               )}
             </WithOptions>
           )}
-        </EditorPage>
+        </StageEditorPage>
       )}
     </QueryState>
   )
@@ -642,7 +603,7 @@ function EditLesson({ id }: { id: string }) {
 
 export function NewLessonPage() {
   return (
-    <RecordPage param="stage" notFound={<NotFoundPage />}>
+    <RecordPage param="stage" notFound={<RecordNotFound area="services" />}>
       {(stageId) => <NewLesson stageId={stageId} />}
     </RecordPage>
   )
@@ -650,6 +611,8 @@ export function NewLessonPage() {
 
 export function EditLessonPage() {
   return (
-    <RecordPage notFound={<NotFoundPage />}>{(id) => <EditLesson key={id} id={id} />}</RecordPage>
+    <RecordPage notFound={<RecordNotFound area="services" />}>
+      {(id) => <EditLesson key={id} id={id} />}
+    </RecordPage>
   )
 }

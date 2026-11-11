@@ -10,7 +10,7 @@ import { Link } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 
 import { type ChildSummary, parentChildrenQuery } from "./api"
-import { ListSkeleton } from "@/features/learning/homework/task-list"
+import { ListSkeleton } from "@/components/list-skeleton"
 
 function ChildCard({ child }: { child: ChildSummary }) {
   const t = useTranslations("parent.children")

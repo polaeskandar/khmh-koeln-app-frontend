@@ -22,6 +22,7 @@ import type { PersonRef } from "@/lib/api/types/common"
 import { fullName, initials, matchesQuery, preferredName } from "@/lib/domain/names"
 import { oneOf } from "@/lib/one-of"
 import { meetingGroup } from "@/lib/permissions"
+import { placeLabel } from "@/lib/domain/place"
 
 import type { AttendanceSheet as Board, Mark, Placement } from "./api"
 
@@ -38,10 +39,7 @@ export type BoardActions = {
   saving?: boolean
 }
 
-const placementText = (placements: Placement[]) =>
-  placements
-    .map((p) => (p.stage ? `${p.service.name} · ${p.stage.name}` : p.service.name))
-    .join(", ")
+const placementText = (placements: Placement[]) => placements.map(placeLabel).join(", ")
 
 export function PersonRow({
   person,

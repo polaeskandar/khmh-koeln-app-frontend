@@ -7,7 +7,7 @@ import { Suspense } from "react"
 
 import { QueryState } from "@/components/page-states"
 import { CompletionControl, reportOf } from "./completion-control"
-import { ListSkeleton } from "./task-list"
+import { ListSkeleton } from "@/components/list-skeleton"
 import { HomeworkTaskView } from "./parent-task"
 import { useSearchParamId } from "@/hooks/use-search-param-id"
 import { Link } from "@/i18n/navigation"

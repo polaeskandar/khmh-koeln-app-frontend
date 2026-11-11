@@ -2,19 +2,19 @@
 
 import { CircleAlert, Info } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { type ReactNode, useEffect, useState } from "react"
+import { type ReactNode, useState } from "react"
 
 import { ReasonDialog } from "@/components/confirm-dialog"
 import { HistoryTimeline } from "@/components/history-timeline"
 import { MemberAvatar } from "@/components/member-avatar"
-import { NotFoundState } from "@/components/page-states"
 import { Section } from "@/components/page-header"
 import { RecordPage } from "@/components/record-page"
 import { RosterCells } from "@/components/roster-cells"
 import { useSessionLines } from "@/components/session-bits"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { Topbar } from "@/components/app-shell/topbar"
+import { RecordNotFound } from "@/components/app-shell/record-not-found"
+import { Redirect } from "@/components/redirect"
 import { useCanIn } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
@@ -270,30 +270,12 @@ function SummaryActions({ board }: { board: Board }) {
   )
 }
 
-function ToBoard({ session }: { session: string }) {
-  const router = useRouter()
-  useEffect(() => router.replace(routes.takeAttendance(session)), [router, session])
-
-  return null
-}
-
-function NotFoundPage() {
-  const t = useTranslations("nav")
-
-  return (
-    <>
-      <Topbar crumbs={[{ label: t("attendance"), href: routes.attendance() }]} />
-      <NotFoundState home={routes.attendance()} />
-    </>
-  )
-}
-
 function LoadedSummary({ id }: { id: string }) {
   return (
-    <SheetState id={id} notFound={<NotFoundPage />}>
+    <SheetState id={id} notFound={<RecordNotFound area="attendance" />}>
       {(board) =>
         board.session.status === "scheduled" || board.session.status === "canceled" ? (
-          <ToBoard session={id} />
+          <Redirect to={routes.takeAttendance(id)} />
         ) : (
           <BoardFrame board={board}>
             <SummaryActions board={board} />
@@ -307,7 +289,7 @@ function LoadedSummary({ id }: { id: string }) {
 
 export function AttendanceSummaryPage() {
   return (
-    <RecordPage param="session" notFound={<NotFoundPage />}>
+    <RecordPage param="session" notFound={<RecordNotFound area="attendance" />}>
       {(id) => <LoadedSummary id={id} />}
     </RecordPage>
   )

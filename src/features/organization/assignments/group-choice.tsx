@@ -16,14 +16,9 @@ import type { Uuid } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { type Group, groupAt } from "@/lib/permissions"
+import { type Place, placeLabel } from "@/lib/domain/place"
 
-import {
-  ASSIGNMENT_QUERIES,
-  type GroupOption,
-  type Place,
-  removeAssignmentRequest,
-  whereOf,
-} from "./api"
+import { ASSIGNMENT_QUERIES, type GroupOption, removeAssignmentRequest } from "./api"
 import { useAssignGroup } from "./use-assign-group"
 
 export const NO_GROUP: Group = { serviceId: "", stageId: null }
@@ -138,7 +133,7 @@ export function AssignGroupDialog({
 export function AssignmentChip({
   account,
   assignment,
-  label = whereOf(assignment),
+  label = placeLabel(assignment),
   removable,
 }: {
   account: { displayName: string }
@@ -149,7 +144,7 @@ export function AssignmentChip({
   const t = useTranslations()
   const [removing, setRemoving] = useState(false)
   const name = account.displayName
-  const where = whereOf(assignment)
+  const where = placeLabel(assignment)
 
   const remove = useApiMutation(() => removeAssignmentRequest(assignment.id), {
     successMessage: t("toast.groupRemoved", { name: isolate(name), where: isolate(where) }),

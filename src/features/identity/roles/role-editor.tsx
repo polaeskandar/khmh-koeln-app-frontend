@@ -6,13 +6,14 @@ import { TriangleAlert } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useId, useState } from "react"
 
+import { RecordNotFound } from "@/components/app-shell/record-not-found"
 import { Topbar } from "@/components/app-shell/topbar"
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { FormPanel } from "@/components/form-panel"
 import { TextField } from "@/components/form-fields"
 import { NoAccess } from "@/components/no-access"
 import { PageBody, PageHeader } from "@/components/page-header"
-import { NotFoundState, QueryState } from "@/components/page-states"
+import { QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { StatusBadge } from "@/components/status"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -437,23 +438,12 @@ function NoRoles() {
   )
 }
 
-function NotFoundPage() {
-  const t = useTranslations("nav")
-
-  return (
-    <>
-      <Topbar crumbs={[{ label: t("settings"), href: routes.settings() }]} />
-      <NotFoundState home={routes.settings()} />
-    </>
-  )
-}
-
 function ExistingRole({ id }: { id: string }) {
   const t = useTranslations("roleEditor")
   const query = useQuery(roleQuery(id))
 
   return (
-    <QueryState query={query} notFound={<NotFoundPage />}>
+    <QueryState query={query} notFound={<RecordNotFound area="settings" />}>
       {(role) => (
         <EditorPage title={role.name} description={t("description")}>
           <RoleForm role={role} />
@@ -470,7 +460,11 @@ export function RolePage() {
     return <NoRoles />
   }
 
-  return <RecordPage notFound={<NotFoundPage />}>{(id) => <ExistingRole id={id} />}</RecordPage>
+  return (
+    <RecordPage notFound={<RecordNotFound area="settings" />}>
+      {(id) => <ExistingRole id={id} />}
+    </RecordPage>
+  )
 }
 
 export function NewRolePage() {

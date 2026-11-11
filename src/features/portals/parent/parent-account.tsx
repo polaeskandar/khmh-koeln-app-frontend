@@ -12,7 +12,7 @@ import { useSession } from "@/features/identity/auth/session"
 import { useFormat } from "@/i18n/format"
 
 import { parentChildrenQuery } from "@/features/people/children/api"
-import { ListSkeleton } from "@/features/learning/homework/task-list"
+import { ListSkeleton } from "@/components/list-skeleton"
 
 export function ParentAccount() {
   const t = useTranslations()
