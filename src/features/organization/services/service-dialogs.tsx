@@ -1,5 +1,6 @@
 "use client"
 
+import { DialogMount } from "@/components/dialog-mount"
 import { FormDialog } from "@/components/form-dialog"
 import { useCan } from "@/features/identity/auth/session"
 import { Archive, ArchiveRestore, Ellipsis, PencilLine, Plus, Trash2 } from "lucide-react"
@@ -132,7 +133,9 @@ export function NewServiceButton() {
         <Plus data-icon="inline-start" />
         {t("new")}
       </Button>
-      {open ? <ServiceDialog onClose={() => setOpen(false)} /> : null}
+      <DialogMount open={open}>
+        <ServiceDialog onClose={() => setOpen(false)} />
+      </DialogMount>
     </>
   )
 }
@@ -196,9 +199,9 @@ export function ServiceActionsMenu({ service }: { service: ServiceRow }) {
           ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
-      {edit && open === "edit" ? (
+      <DialogMount open={edit && open === "edit"}>
         <ServiceDialog service={service} onClose={() => setOpen(null)} />
-      ) : null}
+      </DialogMount>
       <StructureChangeDialog
         open={open === "archive"}
         onOpenChange={close}

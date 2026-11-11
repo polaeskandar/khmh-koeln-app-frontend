@@ -13,6 +13,7 @@ import {
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
+import { DialogMount } from "@/components/dialog-mount"
 import { FormDialog } from "@/components/form-dialog"
 import { TextAreaField, TextField } from "@/components/form-fields"
 import { Button } from "@/components/ui/button"
@@ -165,7 +166,9 @@ export function AddStageButton({
         <Plus data-icon="inline-start" />
         {label ?? t("add")}
       </Button>
-      {open ? <StageDialog service={service} onClose={() => setOpen(false)} /> : null}
+      <DialogMount open={open}>
+        <StageDialog service={service} onClose={() => setOpen(false)} />
+      </DialogMount>
     </>
   )
 }
@@ -229,9 +232,9 @@ export function StageActionsMenu({
           ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
-      {open === "edit" ? (
+      <DialogMount open={open === "edit"}>
         <StageDialog service={service} stage={stage} onClose={() => setOpen(null)} />
-      ) : null}
+      </DialogMount>
       <StructureChangeDialog
         open={open === "archive"}
         onOpenChange={close}

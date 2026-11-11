@@ -24,6 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Spinner } from "@/components/ui/spinner"
+import { useDialogMount } from "@/components/dialog-mount"
 import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 
 type FormDialogProps = {
@@ -146,6 +147,7 @@ export function FormDialog({
   children,
 }: FormDialogProps) {
   const t = useTranslations("common")
+  const mount = useDialogMount()
   const formRef = useFocusFirstInvalid(problem)
   const layout = LAYOUTS[size]
 
@@ -169,8 +171,8 @@ export function FormDialog({
 
   if (role === "alertdialog") {
     return (
-      <AlertDialog open onOpenChange={changeOpen}>
-        <AlertDialogContent className={layout.content}>
+      <AlertDialog open={mount.open} onOpenChange={changeOpen}>
+        <AlertDialogContent className={layout.content} onCloseAutoFocus={mount.onCloseAutoFocus}>
           <AlertDialogHeader className={layout.header}>
             <AlertDialogTitle>{title}</AlertDialogTitle>
             <AlertDialogDescription>{description}</AlertDialogDescription>
@@ -186,8 +188,8 @@ export function FormDialog({
   }
 
   return (
-    <Dialog open onOpenChange={changeOpen}>
-      <DialogContent className={layout.content}>
+    <Dialog open={mount.open} onOpenChange={changeOpen}>
+      <DialogContent className={layout.content} onCloseAutoFocus={mount.onCloseAutoFocus}>
         <DialogHeader className={layout.header}>
           <DialogTitle className={cn(Icon && "flex items-center gap-2")}>
             {Icon ? <Icon className="size-4" /> : null}

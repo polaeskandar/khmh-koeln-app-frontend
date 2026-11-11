@@ -5,6 +5,7 @@ import { Download, Hourglass, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
+import { DialogMount } from "@/components/dialog-mount"
 import { FormDialog } from "@/components/form-dialog"
 import { TextAreaField } from "@/components/form-fields"
 import { FormPanel } from "@/components/form-panel"
@@ -111,7 +112,9 @@ function DeleteAccountButton() {
         <Trash2 data-icon="inline-start" />
         {t("delete")}
       </Button>
-      {open ? <DeleteAccountDialog onClose={() => setOpen(false)} /> : null}
+      <DialogMount open={open}>
+        <DeleteAccountDialog onClose={() => setOpen(false)} />
+      </DialogMount>
     </>
   )
 }

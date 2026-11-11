@@ -5,6 +5,7 @@ import { Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
+import { DialogMount } from "@/components/dialog-mount"
 import { FormDialog } from "@/components/form-dialog"
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { SelectField } from "@/components/form-fields"
@@ -224,9 +225,9 @@ export function ParentAccess() {
                 </table>
               </div>
             ) : null}
-            {giving ? (
+            <DialogMount open={giving}>
               <GiveAccessDialog accounts={data.accounts} onClose={() => setGiving(false)} />
-            ) : null}
+            </DialogMount>
           </div>
         )}
       </QueryState>

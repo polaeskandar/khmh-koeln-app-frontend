@@ -4,6 +4,7 @@ import { KeyRound } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 import { useId, useState } from "react"
 
+import { DialogMount } from "@/components/dialog-mount"
 import { FormDialog } from "@/components/form-dialog"
 import { FormPanel } from "@/components/form-panel"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -159,7 +160,9 @@ export function PasswordSection() {
         <KeyRound data-icon="inline-start" />
         {t("submit")}…
       </Button>
-      {open ? <PasswordDialog onClose={() => setOpen(false)} /> : null}
+      <DialogMount open={open}>
+        <PasswordDialog onClose={() => setOpen(false)} />
+      </DialogMount>
     </FormPanel>
   )
 }

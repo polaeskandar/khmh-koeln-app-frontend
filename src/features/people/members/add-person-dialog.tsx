@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl"
 import { useState } from "react"
 import { toast } from "sonner"
 
+import { DialogMount } from "@/components/dialog-mount"
 import { FormDialog } from "@/components/form-dialog"
 import { TextField } from "@/components/form-fields"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -247,7 +248,9 @@ export function AddPersonButton({ placement }: { placement?: PlacementInput }) {
         <UserPlus data-icon="inline-start" />
         {t("addPerson")}
       </Button>
-      {open ? <AddPersonDialog preset={placement} onClose={() => setOpen(false)} /> : null}
+      <DialogMount open={open}>
+        <AddPersonDialog preset={placement} onClose={() => setOpen(false)} />
+      </DialogMount>
     </>
   )
 }

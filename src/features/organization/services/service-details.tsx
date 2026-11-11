@@ -6,6 +6,7 @@ import { Archive, ArrowRight, PencilLine } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
+import { DialogMount } from "@/components/dialog-mount"
 import { RecordNotFound } from "@/components/app-shell/record-not-found"
 import { Topbar } from "@/components/app-shell/topbar"
 import { PageBody, PageHeader, Section } from "@/components/page-header"
@@ -52,7 +53,9 @@ function EditButton({ service }: { service: ServiceRow }) {
         <PencilLine data-icon="inline-start" />
         {t("edit")}
       </Button>
-      {open ? <ServiceDialog service={service} onClose={() => setOpen(false)} /> : null}
+      <DialogMount open={open}>
+        <ServiceDialog service={service} onClose={() => setOpen(false)} />
+      </DialogMount>
     </>
   )
 }
