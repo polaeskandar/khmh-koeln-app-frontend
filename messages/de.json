@@ -781,7 +781,6 @@
     "stages": "{count, plural, one {# Stufe} other {# Stufen}}",
     "members": "{count, plural, one {# Mitglied} other {# Mitglieder}}",
     "sessions": "{count, plural, one {# Termin} other {# Termine}}",
-    "children": "{count, plural, one {# Kind} other {# Kinder}}",
     "parents": "{count, plural, one {# Elternteil} other {# Elternteile}}",
     "homework": "{count, plural, one {# Hausaufgabe} other {# Hausaufgaben}}"
   },
