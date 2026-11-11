@@ -44,22 +44,16 @@
     "archive": "Archive",
     "restore": "Restore",
     "close": "Close",
-    "more": "More",
     "moreActions": "More actions",
-    "moreActionsFor": "More actions for {name}",
     "actionsFor": "Actions for {name}",
-    "optional": "optional",
     "clearSearch": "Clear search",
-    "loading": "Loading",
     "none": "None",
-    "dash": "—",
     "archived": "Archived",
     "inactive": "Inactive",
     "optionalNote": "(optional)",
     "reason": "Reason",
     "loadingEllipsis": "Loading…",
     "formerAccount": "Former account",
-    "disabled": "Disabled",
     "retry": "Try again",
     "unsupportedBrowser": "This browser is too old for the app. Update it, or open the app in a current version of Safari, Chrome, Firefox or Edge."
   },
@@ -76,8 +70,7 @@
     "title": {
       "forbidden": "Not allowed",
       "notFound": "Not found",
-      "conflict": "Not possible right now",
-      "invalid": "Some fields need attention"
+      "conflict": "Not possible right now"
     },
     "forbidden": "Your roles don’t allow this.",
     "checkFields": "Check the highlighted fields.",
@@ -161,13 +154,9 @@
       "onlyActiveCanClose": "Only a session that is taking attendance can be closed.",
       "onlyCompletedCanReopen": "Only a completed session can be reopened.",
       "onlyScheduledCanCancel": "Only a session that has not started can be canceled.",
-      "sessionEndAfterStart": "The session has to end after it starts.",
-      "onlyScheduledCanMove": "Only a session that has not started can be moved.",
-      "chooseFutureTime": "Choose a time in the future.",
       "titleRequired": "Enter a title.",
       "noMeetingOnDate": "The schedule has no meeting on that date.",
       "scheduleInactive": "This schedule is inactive. Activate it first.",
-      "reopenNotAllowed": "You can’t reopen meetings.",
       "reopenLeadersOnly": "You can’t reopen closed sessions.",
       "dateInPast": "Choose today or a later date."
     },
@@ -192,7 +181,6 @@
     "people": {
       "firstNameRequired": "Enter a first name.",
       "lastNameRequired": "Enter a last name.",
-      "duplicateTitle": "Possible duplicate",
       "duplicate": "{count, plural, one {Someone called {name} already exists.} other {# people called {name} already exist.}} Check that this is a different person.",
       "alreadyIn": "{name} is already in {where}.",
       "alreadyInService": "{name} is already in {where}. Within one service, a person is on the service itself or on its stages, not both.",
@@ -214,10 +202,6 @@
       "chooseRole": "Choose at least one role.",
       "nameRequired": "Enter a name for the role.",
       "nameTaken": "A role called “{name}” already exists.",
-      "unknownPermission": "Some of these permissions don’t exist.",
-      "createNotAllowed": "You can’t add roles.",
-      "updateNotAllowed": "You can’t change roles.",
-      "deleteNotAllowed": "You can’t delete roles.",
       "unknown": "This role doesn’t exist any more. Choose another one.",
       "chooseService": "Choose the service this role applies to.",
       "ownAdminRole": "You can’t remove your own administrator role. Ask another administrator.",
@@ -245,9 +229,6 @@
       "taughtAfterDate": "A lesson is marked as taught on or after its teaching date.",
       "deleteDraftsOnly": "Only draft lessons can be deleted. Archive it instead.",
       "homeworkPublished": "Homework of this lesson was published to parents. Archive the lesson instead.",
-      "createNotAllowed": "You can’t prepare lessons.",
-      "changeNotAllowed": "You can’t change lessons.",
-      "deleteNotAllowed": "You can’t archive or delete lessons.",
       "prepareStageOnly": "You can’t prepare lessons for this stage.",
       "changeStageOnly": "You can’t change lessons of this stage.",
       "changedMeanwhile": "Someone else changed this lesson in the meantime. Reload it and save again."
@@ -268,9 +249,6 @@
       "ownChildrenOnly": "You can only report homework for your own children.",
       "notAvailable": "This homework is not available.",
       "otherClass": "This homework is for another class than {name}’s.",
-      "createNotAllowed": "You can’t give homework.",
-      "changeNotAllowed": "You can’t change homework.",
-      "deleteNotAllowed": "You can’t archive or delete homework.",
       "changeStageOnly": "You can’t change homework of this stage.",
       "assignStageOnly": "You can’t give homework to this stage.",
       "alreadyUndone": "This report was already undone.",
@@ -305,7 +283,6 @@
       "personHasAccount": "{name} already has an account. Check that you chose the right person.",
       "chooseAge": "Choose whether the member is 16 or older, or under 16 with a parent’s agreement.",
       "notLinked": "This account isn’t linked to a member record.",
-      "unlinkNotAllowed": "You can’t remove member links.",
       "notApproved": "This account hasn’t been approved yet. Approve it under Account requests first.",
       "nameRequired": "Enter the name to show for the account.",
       "chooseServiceForRole": "Choose the service for this role.",
@@ -358,7 +335,6 @@
   },
   "toast": {
     "saved": "Saved.",
-    "orderSaved": "Order saved.",
     "created": "Created {name}.",
     "added": "Added {name}.",
     "archived": "Archived {name}.",
@@ -370,15 +346,9 @@
     "scheduleActivated": "Schedule activated.{created, plural, =0 {} one { # session was created for today and tomorrow.} other { # sessions were created for today and tomorrow.}}",
     "scheduleDeactivated": "Schedule deactivated. No new sessions will be created; existing ones stay.",
     "scheduleDeleted": "Schedule deleted.",
-    "attendanceOpen": "Attendance is open.",
     "attendanceClosed": "Attendance closed.",
-    "sessionReopened": "Session reopened for corrections.",
     "sessionCanceled": "Session canceled. The schedule and its other sessions are unchanged.",
-    "sessionMoved": "Session moved. The schedule and its other sessions are unchanged.",
-    "sessionSaved": "Session saved. The schedule is unchanged.",
     "dateCanceled": "That date is canceled. The schedule and its other dates are unchanged.",
-    "dateMoved": "That date is moved. The schedule and its other dates are unchanged.",
-    "oneOffCreated": "One-off session created.",
     "personReactivated": "Reactivated {name}.",
     "personInactive": "Marked {name} as inactive.",
     "membershipAdded": "Added.",
@@ -386,7 +356,6 @@
     "membershipMoved": "Moved. Past attendance stays with the old stage.",
     "roleAssigned": "Role given.",
     "roleRemoved": "Role removed.",
-    "lessonReady": "“{title}” is ready to teach.",
     "lessonDraftSaved": "Draft saved: “{title}”.",
     "lessonSavedReady": "Saved. The lesson is ready to teach.",
     "lessonTaught": "Marked as taught.",
@@ -407,13 +376,9 @@
     "accessGiven": "Access given. The parent sees this child’s published homework.",
     "approved": "Approved.",
     "accessRemoved": "Access removed.",
-    "registered": "Account created. It is waiting for approval.",
     "accountApproved": "{name} can sign in now.",
     "accountDeclined": "Declined. {name}’s registration was deleted.",
     "dataRequestRecorded": "Request recorded. The answer is due in one month.",
-    "dataErased": "Data erased. The request stays in the log, without the name.",
-    "copySent": "Marked as sent.",
-    "dataRequestDeclined": "Request declined. Tell the person why, and that they can complain to the data protection authority.",
     "memberUnlinked": "Link removed for {name}.",
     "roleCreated": "Role “{name}” created.",
     "roleSaved": "Role saved.",
@@ -423,11 +388,7 @@
   },
   "roles": {
     "summary": {
-      "parentOf": "Parent of {children}",
-      "parentWaiting": "Parent, waiting for access",
-      "none": "No role yet",
-      "memberOf": "Member · {groups}",
-      "member": "Member"
+      "none": "No role yet"
     }
   },
   "dashboard": {
@@ -450,39 +411,13 @@
       "tomorrow": "Tomorrow: {names}.",
       "checkMeetings": "Check Meetings for the coming days."
     },
-    "attention": {
-      "title": "Needs attention",
-      "description": "Earlier sessions whose attendance was never taken or never closed.",
-      "notClosed": "Not closed",
-      "notTaken": "Not taken"
-    },
-    "recent": {
-      "title": "Recently closed",
-      "description": "Attendance that was closed recently.",
-      "link": "Attendance",
-      "empty": "Nothing closed yet.",
-      "closedAt": "closed at {time}",
-      "closedAtBy": "closed at {time} by {name}"
-    },
     "comingUp": {
       "title": "Coming up",
       "description": "The next seven days.",
       "empty": "Nothing planned."
-    },
-    "services": {
-      "title": "Services",
-      "link": "Services",
-      "next": "next {when}, {time}",
-      "ofRoster": "of roster, 4 weeks",
-      "onAverage": "on average",
-      "noSessionsYet": "No sessions yet"
     }
   },
   "stages": {
-    "deleteBlocked": {
-      "history": "Has meeting history ({count, plural, one {# session} other {# sessions}})",
-      "members": "{count, plural, one {# person is} other {# people are}} still in this stage"
-    },
     "title": "Stages",
     "kind": "Stage",
     "tabs": {
@@ -491,10 +426,6 @@
       "homework": "Homework"
     },
     "sections": "{name} sections",
-    "meets": "{pattern}, {time}",
-    "noSchedule": "No schedule",
-    "pastSessions": "{count, plural, one {# past session} other {# past sessions}}",
-    "archivedOn": "Archived {date}",
     "form": {
       "add": "Add stage",
       "addTitle": "Add a stage to {service}",
@@ -515,8 +446,7 @@
       "title": "Archive {name}?",
       "description": "It is hidden from {service}’s stage list. Nothing is deleted.",
       "schedules": "Its schedules stop creating new sessions.",
-      "members": "{count, plural, one {# person stays} other {# people stay}} assigned to it; move them to another stage if they continue.",
-      "sessions": "Its {count, plural, one {# past session} other {# past sessions}} and their attendance are kept."
+      "members": "{count, plural, one {# person stays} other {# people stay}} assigned to it; move them to another stage if they continue."
     },
     "restore": {
       "title": "Restore {name}?",
@@ -530,9 +460,7 @@
     },
     "page": {
       "title": "Stages of {name}",
-      "description": "Each stage has its own members, meetings, lessons and homework. Names are unique within the service.",
-      "hint": "Drag the rows, or use Move up and Move down, to set the order used everywhere stages are listed.",
-      "withoutStage": "{count, plural, one {# person belongs} other {# people belong}} to {name} without a stage."
+      "hint": "Drag the rows, or use Move up and Move down, to set the order used everywhere stages are listed."
     },
     "manager": {
       "dragHandle": "Drag to reorder {name}",
@@ -548,8 +476,6 @@
         "position": "#",
         "stage": "Stage",
         "members": "Members",
-        "meets": "Meets",
-        "sessions": "Sessions",
         "actions": "Actions"
       },
       "empty": "No stages yet. {name} meets as one group until you add some.",
@@ -557,23 +483,9 @@
     },
     "overview": {
       "members": "Members ({count, number})",
-      "squares": "Squares show the last {count, plural, one {# session} other {# sessions}}, oldest first. Filled means marked present.",
-      "squaresEmpty": "Attendance appears here after the first session.",
       "empty": "No members yet",
       "emptyDescription": "Add the children or people of this stage to build its roster.",
-      "since": "since {date}",
-      "presentAt": "Present at {present, number} of the last {total, plural, one {# session} other {# sessions}}",
-      "dayPresent": "{date}: present",
-      "dayNotMarked": "{date}: not marked present",
-      "comingUp": "Coming up",
-      "nothingPlanned": "Nothing planned.",
-      "nextLesson": "Next lesson",
-      "noLesson": "No lesson prepared yet.",
-      "openHomework": "Open homework",
-      "noHomework": "No published homework is due.",
-      "due": "Due {date}",
-      "noDueDate": "No due date",
-      "completedOf": "{completed, number} of {assigned, plural, one {# child} other {# children}}"
+      "since": "since {date}"
     }
   },
   "history": {
@@ -584,7 +496,6 @@
     "closed": "Attendance closed",
     "reopened": "Reopened for corrections",
     "canceled": "Canceled",
-    "moved": "Moved",
     "edited": "Title or place changed"
   },
   "lessons": {
@@ -593,10 +504,7 @@
     "lesson": "Lesson",
     "newLesson": "New lesson",
     "editLesson": "Edit lesson",
-    "editTitle": "Edit “{title}”",
     "newDescription": "Prepare it as far ahead as you like. Parents and members never see the lesson plan, only the passage, the memory verse and the homework you publish.",
-    "backToLessons": "Back to lessons",
-    "backToLesson": "Back to the lesson",
     "completion": "<strong>{completed, number}</strong> of {assigned, number} reported done",
     "status": {
       "draft": "Draft",
@@ -665,20 +573,14 @@
       "noActivities": "No activities yet.",
       "noMaterials": "No materials listed.",
       "homework": "Homework",
-      "homeworkDescription": "Parents of {stage}, and members with their own account, see published homework and tick it off when it is done.",
       "addHomework": "Add homework",
       "noHomework": "No homework for this lesson. Add one if the children should continue at home, for example learning the memory verse.",
-      "archivedHomework": "{count, plural, one {# archived homework task} other {# archived homework tasks}} kept in the <link>homework history</link>.",
       "sharedWithParents": "Shared with parents and members",
       "sharedHint": "Shown next to this lesson’s published homework{count, plural, =0 {, once there is some} other { (# now)}}.",
       "noPassage": "No passage.",
       "noMemoryVerse": "No memory verse.",
       "helping": "Helping",
-      "session": "Session",
-      "openSession": "Open the session",
-      "created": "Created",
-      "lastChange": "Last change",
-      "markedTaught": "Marked taught"
+      "openSession": "Open the session"
     },
     "editor": {
       "title": "Title",
@@ -743,8 +645,6 @@
     }
   },
   "settings": {
-    "unknownAccount": "Unknown account",
-    "unknownPerson": "Unknown",
     "description": "Accounts and roles, parent access, and the church’s basic settings.",
     "users": {
       "title": "Staff accounts and roles",
@@ -785,41 +685,14 @@
       "child": "Child",
       "giveAccess": "Give access",
       "summary": "{count, plural, one {# link} other {# links}} between parent accounts and children. A child can have several parents, a parent several children.",
-      "waiting": "Waiting for approval ({count, number})",
-      "asks": "<b>{parent}</b> asks to see <b>{child}</b>",
-      "asksWithGroup": "<b>{parent}</b> asks to see <b>{child}</b> ({group})",
-      "requested": "requested {when}",
-      "approve": "Approve",
-      "decline": "Decline",
       "parent": "Parent",
       "approved": "Approved",
       "actions": "Actions",
       "approvedAtBy": "{when} by {name}",
-      "approvedBy": "by {name}",
       "remove": "Remove",
-      "declineTitle": "Decline {name}’s request?",
-      "declineDescription": "The parent won’t see anything about this child.",
       "removeTitle": "Remove {parent}’s access to {child}?",
       "removeDescription": "The parent no longer sees this child in the portal. Completions they reported stay in the history.",
       "removeAccess": "Remove access"
-    },
-    "church": {
-      "title": "Church",
-      "name": "Name",
-      "timeZone": "Time zone",
-      "calendar": "Calendar",
-      "calendarValue": "Dates with the Coptic date, e.g. {date} is {coptic}",
-      "language": "Language",
-      "languageValue": "English, German and Arabic; everyone chooses theirs in the account menu"
-    },
-    "generator": {
-      "title": "Session generator",
-      "description": "Creates each schedule’s sessions on the day before, for today and tomorrow, and never touches a date twice.",
-      "noRuns": "No runs yet.",
-      "ran": "Ran",
-      "for": "For",
-      "created": "Created",
-      "existing": "({count, number} already there)"
     },
     "members": {
       "title": "Member accounts",
@@ -890,7 +763,6 @@
     "completed": "Completed",
     "canceled": "Canceled",
     "planned": "Planned",
-    "moved": "Moved",
     "oneOff": "One-off"
   },
   "roster": {
@@ -908,16 +780,10 @@
   "counts": {
     "stages": "{count, plural, one {# stage} other {# stages}}",
     "members": "{count, plural, one {# member} other {# members}}",
-    "people": "{count, plural, one {# person} other {# people}}",
     "sessions": "{count, plural, one {# session} other {# sessions}}",
-    "schedules": "{count, plural, one {# schedule} other {# schedules}}",
     "children": "{count, plural, one {# child} other {# children}}",
     "parents": "{count, plural, one {# parent} other {# parents}}",
-    "lessons": "{count, plural, one {# lesson} other {# lessons}}",
-    "homework": "{count, plural, one {# homework task} other {# homework tasks}}",
-    "servants": "{count, plural, one {# servant} other {# servants}}",
-    "days": "{count, plural, one {# day} other {# days}}",
-    "weeks": "{count, plural, one {# week} other {# weeks}}"
+    "homework": "{count, plural, one {# homework task} other {# homework tasks}}"
   },
   "attendance": {
     "sessionDetails": "Session details",
@@ -929,7 +795,6 @@
       "today": "Today",
       "empty": "No meetings to take attendance for today",
       "emptyLink": "Sessions appear here on their day. <link>See the coming days</link>.",
-      "emptyStaff": "Servants and service leaders take attendance for their own groups.",
       "earlier": "Still open from earlier",
       "earlierDescription": "Earlier sessions whose attendance was never taken or never closed.",
       "notClosed": "Not closed",
@@ -952,7 +817,6 @@
     },
     "summary": {
       "metaTitle": "Attendance summary",
-      "crumb": "{group}, {date}",
       "continue": "Continue taking attendance",
       "ofRoster": "of {total, number} on the roster present",
       "present": "present",
@@ -970,8 +834,7 @@
       "correctionBy": "<person>{name}</person> was marked at {time} and removed {when} by {by}.",
       "correctionReason": "<person>{name}</person> was marked at {time} and removed {when}: “{reason}”",
       "correctionByReason": "<person>{name}</person> was marked at {time} and removed {when} by {by}: “{reason}”",
-      "history": "History",
-      "erasedPresent": "{count, plural, one {Plus # person whose data was erased: counted in the totals, no longer listed by name.} other {Plus # people whose data was erased: counted in the totals, no longer listed by name.}}"
+      "history": "History"
     },
     "board": {
       "noGroup": "No group",
@@ -1060,10 +923,6 @@
     "addPerson": "Add person",
     "name": "Name",
     "belongsTo": "Belongs to",
-    "lastPresent": "Last marked present",
-    "last4Weeks": "Last 4 weeks",
-    "notYet": "Not yet",
-    "lastPresentInline": "last {when}",
     "noService": "No service",
     "tabs": {
       "active": "Active ({count, number})",
@@ -1096,25 +955,14 @@
     "newPerson": {
       "title": "Add a person",
       "description": "Name and where they belong. Nothing else is needed for attendance.",
-      "duplicateFallback": "Someone with this name already exists.",
-      "duplicateHint": "Search for them first; namesakes are common.",
       "addAnyway": "It’s a different person, add anyway",
       "alreadyIn": "Already in {where}"
     },
     "addMember": {
-      "trigger": "Add member",
-      "title": "Add a member to {stage}",
-      "searchFirst": "Search first: the person may already be registered in another service.",
-      "registerNew": "Register someone new. They join {stage} from today.",
-      "typeName": "Type a name",
-      "typeTwoLetters": "Type at least two letters.",
-      "nobodyFound": "Nobody found with that name.",
       "notInAnyService": "Not in any service",
-      "add": "Add",
-      "registerPerson": "Register a new person"
+      "add": "Add"
     },
     "membership": {
-      "change": "Change {name}’s membership",
       "moveFromToday": "Move from today to",
       "removeFrom": "Remove from {where}",
       "removeTitle": "Remove {name} from {where}?",
@@ -1131,9 +979,6 @@
       "since": "since {date}",
       "earlier": "Earlier",
       "pastPlacement": "{where}, {from} to {to}",
-      "recentlyPresent": "Recently marked present",
-      "notPresentYet": "Not marked present in any session yet.",
-      "last4Weeks": "{count, plural, one {# session} other {# sessions}} in the last four weeks. Not being marked present doesn’t mean someone was absent.",
       "reactivate": "Reactivate",
       "markInactive": "Mark as inactive",
       "inactiveTitle": "Mark {name} as inactive?",
@@ -1151,11 +996,9 @@
     "title": "Homework",
     "newHomework": "New homework",
     "editHomework": "Edit homework",
-    "backToList": "Back to homework",
     "notYet": "Not yet",
     "childrenWithoutAccount": "{count, plural, one {# person} other {# people}} without an account",
     "hiddenFromParents": "Hidden from parents and members",
-    "notVisibleYet": "Not visible to parents and members yet",
     "due": {
       "none": "No due date",
       "today": "Due today",
@@ -1187,7 +1030,6 @@
     },
     "progress": {
       "noAccessTitle": "You can’t see this progress",
-      "noAccess": "Only the servants of {stage} and the service leaders see what was reported.",
       "lessonOn": "<link>{lesson}</link>, {date}",
       "note": "Parents, or members with their own account, report this at home. “Done” means someone ticked it off; it says nothing about how well anyone learned, and nobody is ranked.",
       "childrenIn": "In {stage}",
@@ -1263,23 +1105,6 @@
       "givenWith": "Given with the lesson",
       "lessonNote": "Parents and members see the lesson’s passage and memory verse with the homework.",
       "homework": "Homework",
-      "startFrom": "Start from:",
-      "templates": {
-        "verse": {
-          "title": "Learn the memory verse",
-          "text": "Learn the memory verse by heart together. Say it once a day, for example at bedtime, so it is easy by next week.",
-          "textRef": "Learn the memory verse ({ref}) by heart together. Say it once a day, for example at bedtime, so it is easy by next week."
-        },
-        "story": {
-          "title": "Read the Bible story",
-          "text": "Read the story together. Afterwards, let your child tell the story in their own words.",
-          "textPassage": "Read {passage} together. Afterwards, let your child tell the story in their own words."
-        },
-        "prayer": {
-          "title": "Pray together",
-          "text": "Pray together once this week and thank God for one thing from the lesson."
-        }
-      },
       "titleLabel": "Title",
       "titlePlaceholder": "e.g. Learn the memory verse",
       "instructionsLabel": "What to do",
@@ -1296,8 +1121,6 @@
       "resourceLink": "Link for resource {n, number}",
       "resourceRemove": "Remove resource {n, number}",
       "addResource": "Add resource",
-      "preview": "Preview",
-      "previewLabel": "Preview of what parents and members see",
       "visible": "Visible for {count, plural, one {# member} other {# members}} of {stage}, through their parents or in their own account. Changes show right away{completions, plural, =0 {} one {; the # completion already reported stays} other {; the # completions already reported stay}}.",
       "hiddenUntilPublished": "Once published, it is visible for {count, plural, one {# member} other {# members}} of {stage}, through their parents or in their own account. Until then it stays hidden.",
       "saveDraft": "Save draft"
@@ -1319,8 +1142,7 @@
       "create": "Create service"
     },
     "actions": {
-      "editDetails": "Edit name and description",
-      "deleteBlocked": "Has meeting history ({count, plural, one {# session} other {# sessions}}). Archive it instead."
+      "editDetails": "Edit name and description"
     },
     "archive": {
       "title": "Archive {name}?",
@@ -1328,8 +1150,7 @@
       "schedules": "No new sessions are created for its {count, plural, one {# active schedule} other {# active schedules}}.",
       "noSchedules": "It has no active schedules.",
       "upcoming": "{count, plural, one {# session already created for the coming days stays. Cancel it if it won’t happen.} other {# sessions already created for the coming days stay. Cancel them if they won’t happen.}}",
-      "kept": "Stages, members and attendance history are kept. You can restore it at any time.",
-      "note": "It is taking attendance right now. Close the open sessions before archiving."
+      "kept": "Stages, members and attendance history are kept. You can restore it at any time."
     },
     "restore": {
       "title": "Restore {name}?",
@@ -1340,9 +1161,6 @@
       "description": "It has never met, so it can be removed completely.",
       "removes": "Removes the service.",
       "removesStages": "Removes the service and {stages, plural, one {# stage} other {# stages}}.",
-      "removesSchedules": "Removes the service and {schedules, plural, one {# schedule} other {# schedules}}.",
-      "removesAll": "Removes the service, {stages, plural, one {# stage} other {# stages}} and {schedules, plural, one {# schedule} other {# schedules}}.",
-      "members": "{count, plural, one {# person} other {# people}} will no longer be listed in it.",
       "cantUndo": "This can’t be undone."
     },
     "table": {
@@ -1351,9 +1169,6 @@
       "members": "Members",
       "next": "Next meeting",
       "attendance": "Attendance, 4 wk",
-      "attendanceHint": "Share of the roster marked present over the last four weeks",
-      "leaders": "Leaders",
-      "actions": "Actions",
       "onAverage": "{count, number} <muted>on average</muted>",
       "noSessions": "No sessions",
       "when": "{day}, {time}",
@@ -1379,8 +1194,7 @@
         "stages": "Stages",
         "members": "Members",
         "activeSchedules": "Active schedules",
-        "attendance": "Attendance, last 4 weeks",
-        "average": "{count, number} avg"
+        "attendance": "Attendance, last 4 weeks"
       },
       "stages": {
         "description": "Groups within the service, in their display order. Open a stage for its members, meetings, lessons and homework.",
@@ -1388,22 +1202,12 @@
         "empty": "No stages",
         "emptyDescription": "{name} meets as one group. {count, plural, =0 {It has no members yet.} one {Its # member belongs to the service itself.} other {Its # members belong to the service itself.}} Add stages if it splits into classes or levels.",
         "addFirst": "Add the first stage",
-        "next": "Next: {day}, {time}",
-        "noAttendance": "No attendance yet",
         "archived": "Archived: {names}. <link>Manage stages</link>"
       },
       "schedules": {
         "title": "Meeting schedules",
         "description": "Recurring meetings. Each session is created automatically the day before.",
         "empty": "No schedules yet."
-      },
-      "recent": {
-        "title": "Recent attendance",
-        "empty": "No completed sessions yet."
-      },
-      "upcoming": {
-        "title": "Coming up",
-        "empty": "Nothing planned in the next two weeks."
       },
       "servants": {
         "title": "Servants",
@@ -1419,9 +1223,6 @@
     }
   },
   "parent": {
-    "meta": {
-      "title": "Parents"
-    },
     "brand": {
       "forParents": "For parents"
     },
@@ -1441,7 +1242,6 @@
         "afternoon": "Good afternoon, {name}",
         "evening": "Good evening, {name}"
       },
-      "pendingAccess": "A request to see one of your children is waiting for the church office. <link>Details</link>",
       "noChild": {
         "title": "No child linked yet",
         "description": "The church office links your account to your children. Once that is done, their homework appears here."
@@ -1462,7 +1262,6 @@
       "email": "Email",
       "children": "Children",
       "noneLinked": "None linked yet",
-      "waiting": "{count, plural, other {# waiting for approval}}",
       "churchSees": {
         "title": "What the church sees",
         "body": "The servants of your child’s class see whether you ticked off a homework task and when. They don’t see anything else from this portal, and other parents see nothing about your family."
@@ -1475,9 +1274,6 @@
       "toDo": "{count, plural, other {<num>#</num> to do}}",
       "nothingToDo": "Nothing to do",
       "done": "{count, plural, other {# done}}",
-      "pendingTitle": "Waiting for approval",
-      "pending": "Access to {name}, requested {date}. The church office checks every request before you see anything.",
-      "pendingUnknown": "Access to a child, requested {date}. The church office checks every request before you see anything.",
       "help": "Missing a child, or something isn’t right? Talk to the servants of the class or the church office. Children under 16 get an account of their own only with your agreement."
     },
     "homework": {
@@ -1517,10 +1313,7 @@
     },
     "view": {
       "forChild": "For {name}",
-      "forYourChild": "For your child",
-      "titlePlaceholder": "Homework title",
       "whatToDo": "What to do",
-      "instructionsPlaceholder": "The instructions appear here.",
       "fromLessonLabel": "From the lesson",
       "fromLesson": "From the lesson “{title}”, {date}",
       "resources": "Resources"
@@ -1534,8 +1327,7 @@
     },
     "root": {
       "description": "The link may be wrong or out of date.",
-      "openApp": "Open the app",
-      "parentPortal": "Parent portal"
+      "openApp": "Open the app"
     },
     "parent": {
       "title": "This page isn’t available",
@@ -1557,13 +1349,8 @@
       "service": "Service",
       "stage": "Stage",
       "wholeService": "Whole service",
-      "title": "Title",
       "name": "Name",
       "place": "Place",
-      "placePlaceholder": "e.g. Church hall",
-      "date": "Date",
-      "starts": "Starts",
-      "ends": "Ends",
       "whoIsExpected": "Who is expected"
     },
     "roster": {
@@ -1607,7 +1394,6 @@
     },
     "list": {
       "next": "Next: {when}, {time}",
-      "nextCanceled": "{when}, {time} canceled",
       "nowOpen": "Now: attendance open",
       "noUpcoming": "No upcoming date",
       "inactive": "Inactive",
@@ -1630,7 +1416,6 @@
       "time": "Time",
       "notSet": "Not set",
       "who": "Who",
-      "members": "The members of {group} ({count, number} today)",
       "sessions": "Sessions",
       "generating": "Created the day before",
       "notGenerating": "Not created (inactive)",
@@ -1661,7 +1446,6 @@
       "placePlaceholder": "e.g. Room 4",
       "rosterOf": "The roster of {group}",
       "rosterOfService": "The roster of the service",
-      "rosterToday": "{count, plural, one {# person} other {# people}} today.",
       "rosterStage": "Members of the stage.",
       "rosterServiceOnly": "Only people in the service without a stage; members of its stages are on their stage’s roster.",
       "rosterService": "Everyone in the service.",
@@ -1694,18 +1478,6 @@
       "save": "Save schedule",
       "create": "Create schedule"
     },
-    "oneOff": {
-      "button": "One-off session",
-      "title": "New one-off session",
-      "description": "A meeting that happens once, outside the regular schedules.",
-      "titlePlaceholder": "e.g. Extra rehearsal before the feast",
-      "membersOf": "The members of {group}",
-      "membersOfService": "The members of the service",
-      "onRosterToday": "{count, plural, one {# person} other {# people}} on the roster today",
-      "openHint": "No roster; anyone can be marked present",
-      "hint": "Attendance can be taken on the day itself.",
-      "create": "Create session"
-    },
     "session": {
       "pageTitle": "Session",
       "crumb": "{group}, {date}",
@@ -1717,26 +1489,13 @@
       "notOpenYet": "Attendance isn’t open yet.",
       "notTaken": "Attendance wasn’t taken.",
       "takenOn": "Attendance can be taken on {date}.",
-      "rosterIs": "The roster is the {count, plural, one {# member} other {# members}} of {group} on that day.",
-      "lesson": "Lesson",
-      "lessonPrepared": "Prepared for this meeting",
-      "lessonCanceled": "Prepared for this meeting, which was canceled. Move the lesson to another date.",
-      "noLesson": "No lesson is linked to this meeting.",
-      "stageLessons": "Lessons of {stage}",
       "fromSchedule": "Created from the schedule <link>{name}</link> ({pattern}). Changes here affect only this date; to change every week, edit the schedule.",
       "oneOff": "A one-off session, not part of a schedule.",
       "history": "History"
     },
     "dialogs": {
-      "moveDescription": "Only this date changes. The schedule and its other dates stay as they are.",
-      "move": "Move",
-      "editTitle": "Title and place of this session",
-      "editDescription": "For example a different room this week. The schedule is not changed.",
       "sessionMenu": "Change this session",
-      "moveSession": "Move to another time",
-      "editSession": "Change title or place",
       "cancelSession": "Cancel this session",
-      "moveTitle": "Move {group} on {date}",
       "cancelTitle": "Cancel {group} on {date}?",
       "cancelSessionDescription": "Members see it as canceled. The schedule and its other dates stay as they are.",
       "cancelReasonHint": "Shown with the canceled session, e.g. “Church trip to Hamburg”.",
@@ -1744,18 +1503,9 @@
       "confirmCancelSession": "Cancel session",
       "keepSession": "Keep the session",
       "dateMenu": "Change {group} on {date}",
-      "moveDate": "Move this date",
       "cancelDate": "Cancel this date",
       "cancelDateDescription": "Its session is created now and marked as canceled, so nothing is generated for that date. The schedule and its other dates stay as they are.",
       "keepDate": "Keep the date"
-    },
-    "stage": {
-      "pageTitle": "Stage meetings",
-      "schedulesDescription": "Recurring meetings of this stage. Their sessions are created automatically the day before.",
-      "noSchedule": "This stage has no schedule yet.",
-      "upcomingTitle": "Next five weeks",
-      "upcomingDescription": "Sessions already created, and planned dates that will be created the day before.",
-      "nothingPlanned": "Nothing planned."
     }
   },
   "auth": {
@@ -1908,9 +1658,6 @@
     "preferences": "Language and appearance",
     "password": {
       "title": "Password",
-      "text": "We’ll email you a link to choose a new password.",
-      "send": "Send link",
-      "sent": "We’ve sent you a link. (Prototype: no email is sent.)",
       "intro": "Change the password you sign in with.",
       "current": "Current password",
       "new": "New password",
@@ -1935,7 +1682,6 @@
       "parentDescription": "Check the family first, for example in person after the liturgy. The parent then sees these children’s published homework.",
       "servantDescription": "Check with the service leader first. The roles decide what the servant can see and do; the groups, where.",
       "children": "Children",
-      "childrenHint": "Children whose names {name} wrote are already chosen. Search to add others.",
       "findChild": "Find a child by name or class",
       "noChildMatches": "No child matches.",
       "searchToAdd": "Type a name to find a child.",
@@ -2031,8 +1777,7 @@
     "summary": {
       "title": "Data protection",
       "description": "Requests to see or delete personal data. Each one must be answered within one month.",
-      "all": "All requests",
-      "noneOpen": "No open requests."
+      "all": "All requests"
     },
     "record": {
       "open": "Record a request",
@@ -2064,23 +1809,12 @@
       "submit": "Record request"
     },
     "actions": {
-      "downloadCopy": "Download the copy",
-      "downloadFirst": "Download a copy",
-      "decline": "Decline…",
       "erase": "Erase data…",
-      "markSent": "Mark as sent",
       "eraseTitle": "Erase {name}’s data?",
       "eraseDescription": "This can’t be undone. If the person also asked for a copy, download it first.",
       "eraseKeeps": "Past attendance totals and the request itself stay, without the name.",
       "clearNotes": "{count, plural, one {Also empty the note that may mention them} other {Also empty the # notes that may mention them}}",
-      "eraseConfirm": "Erase data",
-      "declineTitle": "Decline this request?",
-      "declineDescription": "For example when you couldn’t confirm who is asking, or when the data must be kept by law. The person must be told the reason, and that they can complain to the data protection authority.",
-      "declineReason": "Reason",
-      "declinePlaceholder": "e.g. We couldn’t confirm that the sender is the child’s parent.",
-      "declineConfirm": "Decline request",
-      "sentTitle": "Mark the copy as sent?",
-      "sentDescription": "Send the downloaded file to the person in a safe way, for example in person or by encrypted email. The request is then closed."
+      "eraseConfirm": "Erase data"
     },
     "detail": {
       "requestedBy": "Asked by {name}.",
@@ -2089,7 +1823,6 @@
       "received": "Received",
       "channel": "How it came",
       "due": "Answer due",
-      "note": "Note",
       "who": "Who it is about",
       "memberRecord": "Member record: {name}",
       "noMemberships": "No memberships.",
@@ -2105,11 +1838,9 @@
       "noMentions": "No notes mention their name.",
       "mentionWhere": "{where} · {group} · {date}",
       "copy": "What the copy contains",
-      "copyDescription": "A JSON file with everything the app stores about them. Other people’s contact details are left out.",
       "outcome": "Outcome",
       "erasedOn": "Erased {when}",
       "sentOn": "Copy sent {when}",
-      "declinedOn": "Declined {when}",
       "by": "by {name}",
       "erasedNote": "The name was removed from this log as well.",
       "erasesOn": "Erased automatically on {date}, unless the person cancels before then. You can also erase the data now.",
@@ -2187,9 +1918,6 @@
     }
   },
   "member": {
-    "meta": {
-      "title": "Members"
-    },
     "brand": {
       "forMembers": "For members"
     },
@@ -2218,8 +1946,7 @@
     },
     "meetings": {
       "empty": "No meetings in the next two weeks.",
-      "canceled": "Canceled",
-      "moved": "Moved"
+      "canceled": "Canceled"
     },
     "groups": {
       "noSchedule": "No regular meetings at the moment.",
@@ -2281,7 +2008,6 @@
     "cell": "{resource}: {action}",
     "opensNothing": "Accounts with only this role can’t open the staff app or the parent portal. Tick Services: See to let them into the staff app.",
     "locksOut": "Nobody else can change roles. Without “Roles: Change” here, no one could repair roles any more, so this change would be refused.",
-    "deleteLocksOut": "Nobody else can change roles, so this role can’t be deleted. Give another role “Roles: Change” first.",
     "added": "Added {when}",
     "changed": "Last changed {when}",
     "scope": "Where it applies",
