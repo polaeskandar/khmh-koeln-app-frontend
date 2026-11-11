@@ -11,12 +11,11 @@ import { useSession } from "@/features/identity/auth/session"
 import { ListSkeleton } from "@/components/list-skeleton"
 import { TaskList, useOwnCompletion } from "@/features/learning/homework/task-list"
 import { useFormat } from "@/i18n/format"
-import { ApiError } from "@/lib/api/problem"
 import { localTimeOf } from "@/lib/domain/time"
 import { routes } from "@/lib/routes"
 
 import { type ParentHomeworkItem, memberHomeworkQuery } from "@/features/learning/homework/api"
-import { memberGroupsQuery } from "@/features/people/groups/api"
+import { memberGroupsQuery, useMemberGroups } from "@/features/people/groups/api"
 import { memberMeetingsQuery } from "@/features/meetings/meetings/api"
 import { GroupCard } from "@/features/people/groups/group-card"
 import { MeetingList } from "@/features/meetings/meetings/member-meetings"
@@ -134,14 +133,14 @@ export function MemberHomePage() {
   const t = useTranslations("parent.home")
   const f = useFormat()
   const { session } = useSession()
-  const groups = useQuery(memberGroupsQuery)
+  const groups = useMemberGroups()
 
   if (session.status !== "authenticated") {
     return <ListSkeleton />
   }
 
   const { me } = session
-  const unlinked = !me.member || (groups.error instanceof ApiError && groups.error.status === 403)
+  const unlinked = !me.member || groups.unlinked
 
   return (
     <div className="flex flex-col gap-8">
