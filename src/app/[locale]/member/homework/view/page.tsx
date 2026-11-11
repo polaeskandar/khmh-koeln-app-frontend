@@ -1,15 +1,12 @@
 import type { Metadata } from "next"
-import { getTranslations } from "next-intl/server"
 
 import { MemberTaskPage } from "@/features/learning/homework/member-task-page"
-import { pageLocale } from "@/i18n/page"
+import { pageLocale, pageTitle } from "@/i18n/page"
 
 export async function generateMetadata({
   params,
 }: PageProps<"/[locale]/member/homework/view">): Promise<Metadata> {
-  const t = await getTranslations({ locale: await pageLocale(params), namespace: "member.nav" })
-
-  return { title: t("homework") }
+  return { title: await pageTitle(params, "memberHomeworkTask") }
 }
 
 export default async function Page({ params }: PageProps<"/[locale]/member/homework/view">) {

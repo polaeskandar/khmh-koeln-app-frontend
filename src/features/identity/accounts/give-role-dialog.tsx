@@ -29,7 +29,7 @@ export function GiveRoleDialog({
   const [roleId, setRoleId] = useState("")
 
   const give = useApiMutation((id: string) => giveRoleRequest(account.id, id), {
-    successMessage: t("toast.roleAssigned"),
+    successMessage: t("roles.toast.assigned"),
     invalidate: ROLE_QUERIES,
     onSuccess: onClose,
   })

@@ -21,16 +21,16 @@ const DYNAMIC_KEYS = [
   "lessons.status.*",
   "nav.(dashboard|services|meetings|attendance|members|settings)",
   "parent.home.greeting.*",
-  "permissions.actions.*",
-  "permissions.resources.*.description",
-  "permissions.resources.*.name",
+  "roles.permissions.actions.*",
+  "roles.permissions.resources.*.description",
+  "roles.permissions.resources.*.name",
   "privacy.channel.*",
   "privacy.kind.*",
   "privacy.mention.*",
   "privacy.status.*",
-  "roleEditor.*Hint",
+  "roles.editor.*Hint",
   "services.table.tabs.*",
-  "settings.roles.scope.*",
+  "roles.list.scope.*",
   "status.(scheduled|active|planned)",
 ]
 
@@ -62,6 +62,16 @@ function literalsOf(file, text) {
   function visit(node) {
     if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
       literals.add(node.text)
+    }
+
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === "pageTitle" &&
+      node.arguments[1] &&
+      ts.isStringLiteral(node.arguments[1])
+    ) {
+      literals.add(`pages.${node.arguments[1].text}`)
     }
 
     if (

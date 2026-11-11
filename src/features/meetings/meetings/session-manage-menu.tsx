@@ -26,7 +26,7 @@ export function SessionManageMenu({ session }: { session: SessionView }) {
 
   const cancel = useApiMutation(cancelSessionRequest, {
     toastOnError: false,
-    successMessage: t("toast.sessionCanceled"),
+    successMessage: t("meetings.toast.sessionCanceled"),
     invalidate: SCHEDULE_QUERIES,
   })
 

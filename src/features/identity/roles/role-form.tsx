@@ -57,7 +57,7 @@ function ScopeChoice({
   disabled: boolean
   error: string | undefined
 }) {
-  const t = useTranslations("roleEditor")
+  const t = useTranslations("roles.editor")
   const id = useId()
 
   return (
@@ -94,7 +94,7 @@ function ScopeChoice({
   )
 }
 function Holders({ role }: { role: RoleDetails | null }) {
-  const t = useTranslations("roleEditor")
+  const t = useTranslations("roles.editor")
   const f = useFormat()
   const { session } = useSession()
   const today = session.status === "authenticated" ? session.me.today : null
@@ -147,13 +147,13 @@ function Holders({ role }: { role: RoleDetails | null }) {
 }
 
 function useSaveRole(role: RoleDetails | null, name: string) {
-  const t = useTranslations("toast")
+  const t = useTranslations("roles.toast")
   const router = useRouter()
 
   return useApiMutation(
     (input: RoleRequest) => (role ? updateRoleRequest(role.id, input) : createRoleRequest(input)),
     {
-      successMessage: role ? t("roleSaved") : t("roleCreated", { name: name.trim() }),
+      successMessage: role ? t("saved") : t("created", { name: name.trim() }),
       invalidate: ROLE_QUERIES,
       onSuccess: role ? undefined : (saved) => router.push(routes.role(saved.id)),
     }
@@ -212,20 +212,20 @@ export function RoleForm({ role }: { role: RoleDetails | null }) {
       >
         {!editable ? (
           <p className="border border-dashed p-4 text-sm text-muted-foreground">
-            {t("roleEditor.readOnlyNote")}
+            {t("roles.editor.readOnlyNote")}
           </p>
         ) : null}
-        <FormPanel title={t("roleEditor.details")}>
+        <FormPanel title={t("roles.editor.details")}>
           <TextField
-            label={t("roleEditor.name")}
+            label={t("roles.editor.name")}
             dir="auto"
             value={name}
             maxLength={NAME_MAX}
             disabled={!editable}
-            description={taken ? undefined : t("roleEditor.nameHint")}
+            description={taken ? undefined : t("roles.editor.nameHint")}
             error={
               taken
-                ? t("roleEditor.nameTaken", { name: isolate(taken.name) })
+                ? t("roles.editor.nameTaken", { name: isolate(taken.name) })
                 : save.fieldErrors.name
             }
             onChange={(event) => setName(event.target.value)}
@@ -238,24 +238,24 @@ export function RoleForm({ role }: { role: RoleDetails | null }) {
           error={save.fieldErrors.scope}
         />
         <FormPanel
-          title={t("roleEditor.permissions")}
+          title={t("roles.editor.permissions")}
           note={
             <span className="text-xs text-muted-foreground tabular-nums">
-              {t("roleEditor.chosen", { count: chosen.size, total: PERMISSION_COUNT })}
+              {t("roles.editor.chosen", { count: chosen.size, total: PERMISSION_COUNT })}
             </span>
           }
         >
-          <p className="text-xs text-muted-foreground">{t("roleEditor.permissionsHint")}</p>
+          <p className="text-xs text-muted-foreground">{t("roles.editor.permissionsHint")}</p>
           {opensNothing ? (
             <Alert>
               <TriangleAlert />
-              <AlertDescription>{t("roleEditor.opensNothing")}</AlertDescription>
+              <AlertDescription>{t("roles.editor.opensNothing")}</AlertDescription>
             </Alert>
           ) : null}
           {locksOut ? (
             <Alert variant="destructive">
               <TriangleAlert />
-              <AlertDescription>{t("roleEditor.locksOut")}</AlertDescription>
+              <AlertDescription>{t("roles.editor.locksOut")}</AlertDescription>
             </Alert>
           ) : null}
           <PermissionGrid chosen={chosen} onChange={setChosen} disabled={!editable} />
@@ -265,12 +265,12 @@ export function RoleForm({ role }: { role: RoleDetails | null }) {
             {editable ? (
               <Button type="submit" disabled={blocked}>
                 {save.pending ? <Spinner data-icon="inline-start" /> : null}
-                {role ? t("roleEditor.save") : t("roleEditor.create")}
+                {role ? t("roles.editor.save") : t("roles.editor.create")}
               </Button>
             ) : null}
             {role && can("delete", "roles") ? (
               <Button type="button" variant="outline" onClick={() => setDeleting(true)}>
-                {t("roleEditor.deleteRole")}
+                {t("roles.editor.deleteRole")}
               </Button>
             ) : null}
           </div>

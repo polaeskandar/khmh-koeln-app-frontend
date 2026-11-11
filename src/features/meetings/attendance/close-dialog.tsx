@@ -34,7 +34,7 @@ export function CloseDialog({
   const notMarked = rosterSize - counts.rosterPresent
 
   const close = useApiMutation(closeAttendanceRequest, {
-    successMessage: t("toast.attendanceClosed"),
+    successMessage: t("attendance.toast.closed"),
     invalidate: SESSION_STATUS_QUERIES,
     onSuccess: () => router.replace(routes.attendanceSummary(session.id)),
   })

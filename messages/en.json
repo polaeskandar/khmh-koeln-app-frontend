@@ -338,55 +338,130 @@
     "archived": "Archived {name}.",
     "restored": "Restored {name}.",
     "deleted": "Deleted {name}.",
-    "serviceArchived": "Archived {name}. No new sessions will be created for it.",
-    "scheduleCreated": "Schedule created.{created, plural, =0 {} one { # session was created for today and tomorrow.} other { # sessions were created for today and tomorrow.}}",
-    "scheduleSaved": "Schedule saved. Sessions created from now on use the new details.{created, plural, =0 {} one { # session was created for today and tomorrow.} other { # sessions were created for today and tomorrow.}}",
-    "scheduleActivated": "Schedule activated.{created, plural, =0 {} one { # session was created for today and tomorrow.} other { # sessions were created for today and tomorrow.}}",
-    "scheduleDeactivated": "Schedule deactivated. No new sessions will be created; existing ones stay.",
-    "scheduleDeleted": "Schedule deleted.",
-    "attendanceClosed": "Attendance closed.",
-    "sessionCanceled": "Session canceled. The schedule and its other sessions are unchanged.",
-    "dateCanceled": "That date is canceled. The schedule and its other dates are unchanged.",
-    "personReactivated": "Reactivated {name}.",
-    "personInactive": "Marked {name} as inactive.",
-    "membershipAdded": "Added.",
-    "membershipEnded": "Removed. Past attendance is kept.",
-    "membershipMoved": "Moved. Past attendance stays with the old stage.",
-    "roleAssigned": "Role given.",
-    "roleRemoved": "Role removed.",
-    "lessonDraftSaved": "Draft saved: “{title}”.",
-    "lessonSavedReady": "Saved. The lesson is ready to teach.",
-    "lessonTaught": "Marked as taught.",
-    "lessonMarkedReady": "Marked as ready.",
-    "lessonBackToDraft": "Back to draft.",
     "archivedTitle": "Archived “{title}”.",
     "restoredTitle": "Restored “{title}”.",
-    "deletedTitle": "Deleted “{title}”.",
-    "homeworkPublishedNew": "Published. Parents and members of the class can see it now.",
-    "homeworkDraftSaved": "Saved as a draft. Parents and members can’t see it yet.",
-    "homeworkSavedPublished": "Saved. Parents and members see the new version.",
-    "homeworkSavedDraft": "Saved as a draft.",
-    "homeworkPublished": "Published “{title}”. Parents and members of the class can see it now.",
-    "homeworkUnpublished": "“{title}” is a draft again and hidden from parents and members.",
-    "homeworkArchived": "Archived “{title}”. Reported completions are kept.",
-    "homeworkRestoredPublished": "Restored “{title}”. Parents and members of the class see it again.",
-    "homeworkRestoredDraft": "Restored “{title}” as a draft.",
-    "accessGiven": "Access given. The parent sees this child’s published homework.",
-    "approved": "Approved.",
-    "accessRemoved": "Access removed.",
-    "accountApproved": "{name} can sign in now.",
-    "accountDeclined": "Declined. {name}’s registration was deleted.",
-    "dataRequestRecorded": "Request recorded. The answer is due in one month.",
-    "memberUnlinked": "Link removed for {name}.",
-    "roleCreated": "Role “{name}” created.",
-    "roleSaved": "Role saved.",
-    "roleDeleted": "Role “{name}” deleted.",
-    "groupAssigned": "{name} now serves in {where}.",
-    "groupRemoved": "{name} no longer serves in {where}."
+    "deletedTitle": "Deleted “{title}”."
   },
   "roles": {
     "summary": {
       "none": "No role yet"
+    },
+    "editor": {
+      "titleNew": "New role",
+      "descriptionNew": "Name the role and choose what it allows. You give it to accounts afterwards.",
+      "roles": "Roles",
+      "details": "Role",
+      "name": "Name",
+      "nameHint": "For example: Church office, Attendance helper.",
+      "description": "What the role allows, where it holds, and who has it.",
+      "permissions": "What it allows",
+      "permissionsHint": "Ticking Add, Change or Delete ticks See too.",
+      "chosen": "{count, number} of {total, number} chosen",
+      "readOnlyNote": "You can see this role, but your roles don’t let you change it.",
+      "create": "Create role",
+      "save": "Save changes",
+      "deleteRole": "Delete role",
+      "holdersTitle": "Who has this role",
+      "holdersNone": "Nobody yet. Give the role to accounts in <link>Staff accounts and roles</link>.",
+      "holdersNew": "After you create the role, give it to accounts in <link>Staff accounts and roles</link>.",
+      "disabledAccount": "disabled",
+      "applyCount": "{count, plural, =0 {Nobody has this role yet.} one {Changes apply to # account at once.} other {Changes apply to # accounts at once.}}",
+      "sensitive": "Sensitive",
+      "sensitiveHint": "Lets people see everyone’s personal data or decide who may do what. Only for people you would trust as an administrator.",
+      "noAccess": "You can’t see roles",
+      "noAccessHint": "Seeing roles needs a role with “Roles: See”; adding them needs “Roles: Add”.",
+      "nameTaken": "There is already a role called “{name}”.",
+      "area": "Area",
+      "cell": "{resource}: {action}",
+      "opensNothing": "Accounts with only this role can’t open the staff app or the parent portal. Tick Services: See to let them into the staff app.",
+      "locksOut": "Nobody else can change roles. Without “Roles: Change” here, no one could repair roles any more, so this change would be refused.",
+      "added": "Added {when}",
+      "changed": "Last changed {when}",
+      "scope": "Where it applies",
+      "scopeChurch": "Everywhere in the church",
+      "scopeChurchHint": "In every service and stage. For the administrator, the church office and parents.",
+      "scopeAssigned": "Only in the account’s assigned groups",
+      "scopeAssignedHint": "In the services and stages the account is assigned to under Staff accounts and roles. For servants and service leaders."
+    },
+    "list": {
+      "title": "Roles",
+      "description": "What each role allows. Give roles to accounts under Staff accounts and roles.",
+      "newRole": "New role",
+      "role": "Role",
+      "accounts": "Accounts",
+      "permissionCount": "{count, number} of {total, number} permissions",
+      "holders": "{count, plural, =0 {No one} one {# account} other {# accounts}}",
+      "actionsFor": "Actions for {role}",
+      "edit": "Edit",
+      "view": "View",
+      "delete": "Delete",
+      "deleteTitle": "Delete the role “{name}”?",
+      "deleteDescription": "{count, plural, =0 {Nobody has it.} one {# account has it and loses what it allows at once.} other {# accounts have it and lose what it allows at once.}}",
+      "deleteConfirm": "Delete role",
+      "readOnly": "Your roles let you see roles, not change them.",
+      "allows": "Allows",
+      "global": "Some roles hold everywhere in the church, others only in the services and stages an account is assigned to. Which children a parent sees still comes from parent access; members see their own groups without a role.",
+      "scope": {
+        "church": "Everywhere",
+        "assignedGroups": "In assigned groups"
+      }
+    },
+    "permissions": {
+      "actions": {
+        "read": "See",
+        "create": "Add",
+        "update": "Change",
+        "delete": "Delete"
+      },
+      "resources": {
+        "services": {
+          "name": "Services",
+          "description": "See: open the staff app with every service, stage and meeting. Add: start services. Change: edit them. Delete: archive, restore and delete them."
+        },
+        "stages": {
+          "name": "Stages",
+          "description": "Add, Change, Delete: add, rename, reorder, archive and delete a service’s stages. Whoever sees services sees the stages."
+        },
+        "sessions": {
+          "name": "Meetings",
+          "description": "Add: plan schedules and one-off meetings. Change: edit, move, cancel and reopen meetings. Delete: delete schedules. Whoever sees services sees the meetings."
+        },
+        "attendance": {
+          "name": "Attendance",
+          "description": "See: attendance lists and history. Add: take attendance (open a meeting, mark who is there, close it). Delete: remove a mark set by mistake. Change isn’t used yet."
+        },
+        "members": {
+          "name": "Members",
+          "description": "See: the member list and people’s details. Add: add people. Change: edit people, put them in stages and move them. Delete: take people out of stages."
+        },
+        "lessons": {
+          "name": "Lessons",
+          "description": "See: lessons. Add: prepare lessons. Change: edit and complete them. Delete: archive and delete them."
+        },
+        "homework": {
+          "name": "Homework",
+          "description": "See: homework and who reported it done. Add: give homework. Change: edit, publish and take it back. Delete: archive and delete it."
+        },
+        "parentPortal": {
+          "name": "Parent portal",
+          "description": "See: open the parent portal, for the children the account has parent access to. Add, Change and Delete aren’t used yet."
+        },
+        "users": {
+          "name": "Accounts",
+          "description": "See: accounts, account requests, parent access and member accounts. Add: approve and decline account requests. Change: give and remove roles, parent access and member links. Delete: data protection requests and erasure."
+        },
+        "roles": {
+          "name": "Roles",
+          "description": "See: the roles and what they allow. Add, Change, Delete: create, change and delete roles."
+        }
+      }
+    },
+    "toast": {
+      "assigned": "Role given.",
+      "removed": "Role removed.",
+      "created": "Role “{name}” created.",
+      "saved": "Role saved.",
+      "deleted": "Role “{name}” deleted."
     }
   },
   "dashboard": {
@@ -478,12 +553,6 @@
       },
       "empty": "No stages yet. {name} meets as one group until you add some.",
       "archived": "Archived stages"
-    },
-    "overview": {
-      "members": "Members ({count, number})",
-      "empty": "No members yet",
-      "emptyDescription": "Add the children or people of this stage to build its roster.",
-      "since": "since {date}"
     }
   },
   "history": {
@@ -640,6 +709,13 @@
       "changeBody": "Only the servants of {stage} and the service leaders can change its lessons.",
       "archivedTitle": "This lesson is archived",
       "archivedBody": "Restore it first to make changes."
+    },
+    "toast": {
+      "draftSaved": "Draft saved: “{title}”.",
+      "savedReady": "Saved. The lesson is ready to teach.",
+      "taught": "Marked as taught.",
+      "markedReady": "Marked as ready.",
+      "backToDraft": "Back to draft."
     }
   },
   "settings": {
@@ -690,7 +766,11 @@
       "remove": "Remove",
       "removeTitle": "Remove {parent}’s access to {child}?",
       "removeDescription": "The parent no longer sees this child in the portal. Completions they reported stay in the history.",
-      "removeAccess": "Remove access"
+      "removeAccess": "Remove access",
+      "toast": {
+        "given": "Access given. The parent sees this child’s published homework.",
+        "removed": "Access removed."
+      }
     },
     "members": {
       "title": "Member accounts",
@@ -712,29 +792,9 @@
       "removeDescription": "The account no longer shows the member’s groups, meetings and homework.",
       "removeKept": "Homework reports made with the account stay in the history.",
       "removeAgain": "An account without another role goes back to the account requests, so you can link it to the right record or decline it.",
-      "removeConfirm": "Remove link"
-    },
-    "roles": {
-      "title": "Roles",
-      "description": "What each role allows. Give roles to accounts under Staff accounts and roles.",
-      "newRole": "New role",
-      "role": "Role",
-      "accounts": "Accounts",
-      "permissionCount": "{count, number} of {total, number} permissions",
-      "holders": "{count, plural, =0 {No one} one {# account} other {# accounts}}",
-      "actionsFor": "Actions for {role}",
-      "edit": "Edit",
-      "view": "View",
-      "delete": "Delete",
-      "deleteTitle": "Delete the role “{name}”?",
-      "deleteDescription": "{count, plural, =0 {Nobody has it.} one {# account has it and loses what it allows at once.} other {# accounts have it and lose what it allows at once.}}",
-      "deleteConfirm": "Delete role",
-      "readOnly": "Your roles let you see roles, not change them.",
-      "allows": "Allows",
-      "global": "Some roles hold everywhere in the church, others only in the services and stages an account is assigned to. Which children a parent sees still comes from parent access; members see their own groups without a role.",
-      "scope": {
-        "church": "Everywhere",
-        "assignedGroups": "In assigned groups"
+      "removeConfirm": "Remove link",
+      "toast": {
+        "unlinked": "Link removed for {name}."
       }
     }
   },
@@ -813,7 +873,6 @@
       "servantsCanStillOpen": "The servants of this group can still open it to record who came."
     },
     "summary": {
-      "metaTitle": "Attendance summary",
       "continue": "Continue taking attendance",
       "ofRoster": "of {total, number} on the roster present",
       "present": "present",
@@ -895,7 +954,6 @@
       "confirm": "Reopen"
     },
     "stage": {
-      "metaTitle": "Stage attendance",
       "title": "Last sessions",
       "description": "Today’s members against the last closed sessions. A filled square means marked present; an empty one means not marked present. Lines show sessions before someone joined.",
       "empty": "No closed sessions yet.",
@@ -913,6 +971,9 @@
         "notInStage": "not yet in stage"
       },
       "footnote": "Counts include people who came but are not on the roster. Absence is not recorded: an empty square only means nobody marked the person present."
+    },
+    "toast": {
+      "closed": "Attendance closed."
     }
   },
   "members": {
@@ -987,12 +1048,24 @@
       }
     },
     "noAccess": "You can’t see the member list",
-    "noAccessHint": "Seeing members needs a role with “Members: See”."
+    "noAccessHint": "Seeing members needs a role with “Members: See”.",
+    "toast": {
+      "personReactivated": "Reactivated {name}.",
+      "personInactive": "Marked {name} as inactive.",
+      "membershipAdded": "Added.",
+      "membershipEnded": "Removed. Past attendance is kept.",
+      "membershipMoved": "Moved. Past attendance stays with the old stage."
+    },
+    "stageRoster": {
+      "members": "Members ({count, number})",
+      "empty": "No members yet",
+      "emptyDescription": "Add the children or people of this stage to build its roster.",
+      "since": "since {date}"
+    }
   },
   "homework": {
     "title": "Homework",
     "newHomework": "New homework",
-    "editHomework": "Edit homework",
     "notYet": "Not yet",
     "childrenWithoutAccount": "{count, plural, one {# person} other {# people}} without an account",
     "hiddenFromParents": "Hidden from parents and members",
@@ -1121,6 +1194,17 @@
       "visible": "Visible for {count, plural, one {# member} other {# members}} of {stage}, through their parents or in their own account. Changes show right away{completions, plural, =0 {} one {; the # completion already reported stays} other {; the # completions already reported stay}}.",
       "hiddenUntilPublished": "Once published, it is visible for {count, plural, one {# member} other {# members}} of {stage}, through their parents or in their own account. Until then it stays hidden.",
       "saveDraft": "Save draft"
+    },
+    "toast": {
+      "publishedNew": "Published. Parents and members of the class can see it now.",
+      "draftSaved": "Saved as a draft. Parents and members can’t see it yet.",
+      "savedPublished": "Saved. Parents and members see the new version.",
+      "savedDraft": "Saved as a draft.",
+      "published": "Published “{title}”. Parents and members of the class can see it now.",
+      "unpublished": "“{title}” is a draft again and hidden from parents and members.",
+      "archived": "Archived “{title}”. Reported completions are kept.",
+      "restoredPublished": "Restored “{title}”. Parents and members of the class see it again.",
+      "restoredDraft": "Restored “{title}” as a draft."
     }
   },
   "services": {
@@ -1217,6 +1301,9 @@
           "chooseAccount": "Choose an account"
         }
       }
+    },
+    "toast": {
+      "archived": "Archived {name}. No new sessions will be created for it."
     }
   },
   "parent": {
@@ -1377,7 +1464,6 @@
       "day": "{date}: {count, plural, =0 {no meetings} one {# meeting} other {# meetings}}"
     },
     "schedules": {
-      "pageTitle": "Meeting schedules",
       "description": "Schedules describe meetings that repeat. Each creates its sessions automatically the day before they take place.",
       "statusNav": "Schedule status",
       "active": "Active ({count, number})",
@@ -1397,7 +1483,6 @@
       "sessionsSoFar": "{count, plural, one {# session} other {# sessions}} so far"
     },
     "schedule": {
-      "pageTitle": "Schedule",
       "when": "{pattern}, {time}",
       "archived": "{name} is archived.",
       "inactiveNote": "This schedule is inactive: no new sessions are created from it. Its past sessions stay in the history.",
@@ -1476,7 +1561,6 @@
       "create": "Create schedule"
     },
     "session": {
-      "pageTitle": "Session",
       "crumb": "{group}, {date}",
       "viewAttendance": "View attendance",
       "canceled": "This session was canceled.",
@@ -1503,6 +1587,15 @@
       "cancelDate": "Cancel this date",
       "cancelDateDescription": "Its session is created now and marked as canceled, so nothing is generated for that date. The schedule and its other dates stay as they are.",
       "keepDate": "Keep the date"
+    },
+    "toast": {
+      "scheduleCreated": "Schedule created.{created, plural, =0 {} one { # session was created for today and tomorrow.} other { # sessions were created for today and tomorrow.}}",
+      "scheduleSaved": "Schedule saved. Sessions created from now on use the new details.{created, plural, =0 {} one { # session was created for today and tomorrow.} other { # sessions were created for today and tomorrow.}}",
+      "scheduleActivated": "Schedule activated.{created, plural, =0 {} one { # session was created for today and tomorrow.} other { # sessions were created for today and tomorrow.}}",
+      "scheduleDeactivated": "Schedule deactivated. No new sessions will be created; existing ones stay.",
+      "scheduleDeleted": "Schedule deleted.",
+      "sessionCanceled": "Session canceled. The schedule and its other sessions are unchanged.",
+      "dateCanceled": "That date is canceled. The schedule and its other dates are unchanged."
     }
   },
   "auth": {
@@ -1722,7 +1815,11 @@
       "tell": "Let them know, in person or by email.",
       "confirm": "Decline and delete"
     },
-    "asMember": "Member"
+    "asMember": "Member",
+    "toast": {
+      "approved": "{name} can sign in now.",
+      "declined": "Declined. {name}’s registration was deleted."
+    }
   },
   "privacy": {
     "subject": {
@@ -1912,6 +2009,9 @@
       "savedTitle": "Your data is downloaded",
       "savedText": "The file is in your downloads. This link no longer works; for another copy, ask the church office.",
       "linkInvalid": "This link is invalid, was already used or has expired. Ask the church office for a new one."
+    },
+    "toast": {
+      "recorded": "Request recorded. The answer is due in one month."
     }
   },
   "member": {
@@ -1976,93 +2076,6 @@
       }
     }
   },
-  "roleEditor": {
-    "titleNew": "New role",
-    "descriptionNew": "Name the role and choose what it allows. You give it to accounts afterwards.",
-    "roles": "Roles",
-    "details": "Role",
-    "name": "Name",
-    "nameHint": "For example: Church office, Attendance helper.",
-    "description": "What the role allows, where it holds, and who has it.",
-    "permissions": "What it allows",
-    "permissionsHint": "Ticking Add, Change or Delete ticks See too.",
-    "chosen": "{count, number} of {total, number} chosen",
-    "readOnlyNote": "You can see this role, but your roles don’t let you change it.",
-    "create": "Create role",
-    "save": "Save changes",
-    "deleteRole": "Delete role",
-    "holdersTitle": "Who has this role",
-    "holdersNone": "Nobody yet. Give the role to accounts in <link>Staff accounts and roles</link>.",
-    "holdersNew": "After you create the role, give it to accounts in <link>Staff accounts and roles</link>.",
-    "disabledAccount": "disabled",
-    "applyCount": "{count, plural, =0 {Nobody has this role yet.} one {Changes apply to # account at once.} other {Changes apply to # accounts at once.}}",
-    "sensitive": "Sensitive",
-    "sensitiveHint": "Lets people see everyone’s personal data or decide who may do what. Only for people you would trust as an administrator.",
-    "noAccess": "You can’t see roles",
-    "noAccessHint": "Seeing roles needs a role with “Roles: See”; adding them needs “Roles: Add”.",
-    "nameTaken": "There is already a role called “{name}”.",
-    "area": "Area",
-    "cell": "{resource}: {action}",
-    "opensNothing": "Accounts with only this role can’t open the staff app or the parent portal. Tick Services: See to let them into the staff app.",
-    "locksOut": "Nobody else can change roles. Without “Roles: Change” here, no one could repair roles any more, so this change would be refused.",
-    "added": "Added {when}",
-    "changed": "Last changed {when}",
-    "scope": "Where it applies",
-    "scopeChurch": "Everywhere in the church",
-    "scopeChurchHint": "In every service and stage. For the administrator, the church office and parents.",
-    "scopeAssigned": "Only in the account’s assigned groups",
-    "scopeAssignedHint": "In the services and stages the account is assigned to under Staff accounts and roles. For servants and service leaders."
-  },
-  "permissions": {
-    "actions": {
-      "read": "See",
-      "create": "Add",
-      "update": "Change",
-      "delete": "Delete"
-    },
-    "resources": {
-      "services": {
-        "name": "Services",
-        "description": "See: open the staff app with every service, stage and meeting. Add: start services. Change: edit them. Delete: archive, restore and delete them."
-      },
-      "stages": {
-        "name": "Stages",
-        "description": "Add, Change, Delete: add, rename, reorder, archive and delete a service’s stages. Whoever sees services sees the stages."
-      },
-      "sessions": {
-        "name": "Meetings",
-        "description": "Add: plan schedules and one-off meetings. Change: edit, move, cancel and reopen meetings. Delete: delete schedules. Whoever sees services sees the meetings."
-      },
-      "attendance": {
-        "name": "Attendance",
-        "description": "See: attendance lists and history. Add: take attendance (open a meeting, mark who is there, close it). Delete: remove a mark set by mistake. Change isn’t used yet."
-      },
-      "members": {
-        "name": "Members",
-        "description": "See: the member list and people’s details. Add: add people. Change: edit people, put them in stages and move them. Delete: take people out of stages."
-      },
-      "lessons": {
-        "name": "Lessons",
-        "description": "See: lessons. Add: prepare lessons. Change: edit and complete them. Delete: archive and delete them."
-      },
-      "homework": {
-        "name": "Homework",
-        "description": "See: homework and who reported it done. Add: give homework. Change: edit, publish and take it back. Delete: archive and delete it."
-      },
-      "parentPortal": {
-        "name": "Parent portal",
-        "description": "See: open the parent portal, for the children the account has parent access to. Add, Change and Delete aren’t used yet."
-      },
-      "users": {
-        "name": "Accounts",
-        "description": "See: accounts, account requests, parent access and member accounts. Add: approve and decline account requests. Change: give and remove roles, parent access and member links. Delete: data protection requests and erasure."
-      },
-      "roles": {
-        "name": "Roles",
-        "description": "See: the roles and what they allow. Add, Change, Delete: create, change and delete roles."
-      }
-    }
-  },
   "assignments": {
     "notAssigned": {
       "title": "You are not assigned to a group yet",
@@ -2081,6 +2094,59 @@
     "dialog": {
       "title": "Assign {name} to a group",
       "description": "Roles that hold only in assigned groups, such as Servant and Service leader, hold in the groups an account is assigned to."
+    },
+    "toast": {
+      "assigned": "{name} now serves in {where}.",
+      "removed": "{name} no longer serves in {where}."
     }
+  },
+  "pages": {
+    "confirmEmail": "Confirm your email address",
+    "dataCopy": "Download your data",
+    "forgotPassword": "Forgot your password?",
+    "privacy": "Privacy notice",
+    "registered": "Thank you for registering",
+    "register": "Create an account",
+    "setPassword": "Choose a new password",
+    "signInErasureScheduled": "Your account will be deleted",
+    "signIn": "Sign in",
+    "signInPending": "Your account is waiting for approval",
+    "signInUnconfirmed": "Confirm your email address first",
+    "account": "Your account",
+    "attendance": "Attendance",
+    "attendanceSummary": "Attendance summary",
+    "takeAttendance": "Take attendance",
+    "editHomework": "Edit homework",
+    "newHomework": "New homework",
+    "homework": "Homework",
+    "editLesson": "Edit lesson",
+    "newLesson": "New lesson",
+    "lesson": "Lesson",
+    "meetings": "Meetings",
+    "schedules": "Meeting schedules",
+    "schedule": "Schedule",
+    "session": "Session",
+    "members": "Members",
+    "services": "Services",
+    "serviceStages": "Stages",
+    "service": "Services",
+    "dataRequests": "Data protection requests",
+    "dataRequest": "Data protection requests",
+    "settings": "Settings",
+    "newRole": "New role",
+    "role": "Roles",
+    "stageAttendance": "Stage attendance",
+    "stageHomework": "Homework",
+    "stageLessons": "Lessons",
+    "stage": "Stage",
+    "memberAccount": "Account",
+    "memberHomework": "Homework",
+    "memberHomeworkTask": "Homework",
+    "memberHome": "Home",
+    "parentAccount": "Account",
+    "parentChildren": "My children",
+    "parentHomework": "Homework",
+    "parentHomeworkTask": "Homework",
+    "parentHome": "Home"
   }
 }

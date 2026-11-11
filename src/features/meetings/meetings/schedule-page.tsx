@@ -74,17 +74,18 @@ function Actions({ schedule, today }: { schedule: Schedule; today: LocalDate }) 
   const archived = archivedPart(schedule)
 
   const activate = useApiMutation(activateScheduleRequest, {
-    successMessage: (saved) => t("toast.scheduleActivated", { created: saved.createdSessions }),
+    successMessage: (saved) =>
+      t("meetings.toast.scheduleActivated", { created: saved.createdSessions }),
     invalidate: SCHEDULE_QUERIES,
   })
 
   const deactivate = useApiMutation(deactivateScheduleRequest, {
-    successMessage: t("toast.scheduleDeactivated"),
+    successMessage: t("meetings.toast.scheduleDeactivated"),
     invalidate: SCHEDULE_QUERIES,
   })
 
   const remove = useApiMutation(deleteScheduleRequest, {
-    successMessage: t("toast.scheduleDeleted"),
+    successMessage: t("meetings.toast.scheduleDeleted"),
     invalidate: SCHEDULE_DELETION_QUERIES,
     onSuccess: () => router.push(routes.schedules()),
   })

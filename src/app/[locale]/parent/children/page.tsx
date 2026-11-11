@@ -1,15 +1,12 @@
 import type { Metadata } from "next"
-import { getTranslations } from "next-intl/server"
 
 import { ParentChildrenPage } from "@/features/people/children/parent-children-page"
-import { pageLocale } from "@/i18n/page"
+import { pageLocale, pageTitle } from "@/i18n/page"
 
 export async function generateMetadata({
   params,
 }: PageProps<"/[locale]/parent/children">): Promise<Metadata> {
-  const t = await getTranslations({ locale: await pageLocale(params), namespace: "parent.nav" })
-
-  return { title: t("children") }
+  return { title: await pageTitle(params, "parentChildren") }
 }
 
 export default async function Page({ params }: PageProps<"/[locale]/parent/children">) {

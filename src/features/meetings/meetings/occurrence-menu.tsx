@@ -27,7 +27,7 @@ export function OccurrenceMenu({ item }: { item: PlannedSession }) {
 
   const cancel = useApiMutation(cancelOccurrenceRequest, {
     toastOnError: false,
-    successMessage: t("toast.dateCanceled"),
+    successMessage: t("meetings.toast.dateCanceled"),
     invalidate: SCHEDULE_QUERIES,
   })
 

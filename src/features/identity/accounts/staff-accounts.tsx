@@ -46,7 +46,7 @@ function RoleChip({
   const [removing, setRemoving] = useState(false)
 
   const remove = useApiMutation(() => removeRoleRequest(account.id, role.id), {
-    successMessage: t("toast.roleRemoved"),
+    successMessage: t("roles.toast.removed"),
     invalidate: ROLE_QUERIES,
   })
 

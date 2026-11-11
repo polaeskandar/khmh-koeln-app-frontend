@@ -32,7 +32,7 @@ import { RecurrenceFields } from "./recurrence-fields"
 import { DetailsFields, SchedulePreview, TimeFields } from "./schedule-fields"
 
 function useSaveSchedule(onClose: () => void) {
-  const t = useTranslations("toast")
+  const t = useTranslations("meetings.toast")
   const router = useRouter()
 
   const create = useApiMutation(createScheduleRequest, {

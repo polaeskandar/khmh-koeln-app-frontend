@@ -59,7 +59,7 @@ function AccountRow({
   const [removing, setRemoving] = useState(false)
 
   const unlink = useApiMutation(unlinkMemberRequest, {
-    successMessage: t("toast.memberUnlinked", { name: account.name }),
+    successMessage: t("settings.members.toast.unlinked", { name: account.name }),
     invalidate: MEMBER_ACCOUNT_QUERIES,
   })
 

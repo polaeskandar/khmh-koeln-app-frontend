@@ -62,7 +62,7 @@ export function MembershipMenu({
   const move = useApiMutation(
     (stageId: string) => moveMembershipRequest(placement.membershipId, stageId),
     {
-      successMessage: t("toast.membershipMoved"),
+      successMessage: t("members.toast.membershipMoved"),
       invalidate: MEMBERSHIP_QUERIES,
       awaitRefetch: true,
     }

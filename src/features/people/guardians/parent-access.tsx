@@ -43,10 +43,9 @@ function GiveAccessDialog({
   const t = useTranslations("settings.parents")
   const [userId, setUserId] = useState("")
   const [child, setChild] = useState<DirectoryEntry | null>(null)
-  const toastText = useTranslations("toast")
 
   const give = useApiMutation(giveAccessRequest, {
-    successMessage: toastText("accessGiven"),
+    successMessage: t("toast.given"),
     invalidate: GUARDIAN_LINK_QUERIES,
     toastOnError: false,
     onSuccess: onClose,
@@ -116,7 +115,7 @@ function LinkRow({
   const [removing, setRemoving] = useState(false)
 
   const revoke = useApiMutation(revokeAccessRequest, {
-    successMessage: t("toast.accessRemoved"),
+    successMessage: t("settings.parents.toast.removed"),
     invalidate: GUARDIAN_LINK_QUERIES,
   })
 

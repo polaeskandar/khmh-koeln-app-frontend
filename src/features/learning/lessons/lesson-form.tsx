@@ -138,8 +138,8 @@ export function LessonForm({
     {
       successMessage: (saved) =>
         saved.status === "ready"
-          ? t("toast.lessonSavedReady")
-          : t("toast.lessonDraftSaved", { title: texts.title.trim() }),
+          ? t("lessons.toast.savedReady")
+          : t("lessons.toast.draftSaved", { title: texts.title.trim() }),
       invalidate: LESSON_QUERIES,
       onSuccess: (saved) => router.push(routes.lesson(saved.id)),
     }

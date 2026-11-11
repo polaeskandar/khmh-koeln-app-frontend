@@ -51,18 +51,18 @@ export function PermissionGrid({
       <thead>
         <tr className="border-b text-xs font-semibold tracking-wider text-muted-foreground uppercase">
           <th scope="col" className="py-2 text-start">
-            {t("roleEditor.area")}
+            {t("roles.editor.area")}
           </th>
           {ACTIONS.map((action) => (
             <th key={action} scope="col" className="w-12 py-2 text-center sm:w-16">
-              {t(`permissions.actions.${action}`)}
+              {t(`roles.permissions.actions.${action}`)}
             </th>
           ))}
         </tr>
       </thead>
       <tbody>
         {RESOURCES.map((resource) => {
-          const name = t(`permissions.resources.${resource}.name`)
+          const name = t(`roles.permissions.resources.${resource}.name`)
           const describedBy = `${id}-${resource}`
 
           return (
@@ -71,21 +71,21 @@ export function PermissionGrid({
                 <span className="flex flex-wrap items-center gap-2 font-medium">
                   {name}
                   {SENSITIVE.includes(resource) ? (
-                    <StatusBadge tone="warning" title={t("roleEditor.sensitiveHint")}>
-                      {t("roleEditor.sensitive")}
+                    <StatusBadge tone="warning" title={t("roles.editor.sensitiveHint")}>
+                      {t("roles.editor.sensitive")}
                     </StatusBadge>
                   ) : null}
                 </span>
                 <span id={describedBy} className="mt-0.5 block text-xs text-muted-foreground">
-                  {t(`permissions.resources.${resource}.description`)}
+                  {t(`roles.permissions.resources.${resource}.description`)}
                 </span>
               </th>
               {ACTIONS.map((action) => (
                 <td key={action} className="py-3 text-center">
                   <Checkbox
-                    aria-label={t("roleEditor.cell", {
+                    aria-label={t("roles.editor.cell", {
                       resource: name,
-                      action: t(`permissions.actions.${action}`),
+                      action: t(`roles.permissions.actions.${action}`),
                     })}
                     aria-describedby={describedBy}
                     checked={chosen.has(permissionKey(resource, action))}

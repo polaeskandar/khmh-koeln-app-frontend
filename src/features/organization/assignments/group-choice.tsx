@@ -147,7 +147,7 @@ export function AssignmentChip({
   const where = placeLabel(assignment)
 
   const remove = useApiMutation(() => removeAssignmentRequest(assignment.id), {
-    successMessage: t("toast.groupRemoved", { name: isolate(name), where: isolate(where) }),
+    successMessage: t("assignments.toast.removed", { name: isolate(name), where: isolate(where) }),
     invalidate: ASSIGNMENT_QUERIES,
   })
 

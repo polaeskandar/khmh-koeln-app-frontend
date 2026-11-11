@@ -15,11 +15,11 @@ import { ACCOUNT_REQUEST_QUERIES, type AccountRequest, type Approval, approveReq
 const CHANGED_MEANWHILE = ["accounts.alreadyApproved", "notFound.user"]
 
 export function useApproval(request: AccountRequest, invalidate: QueryKey[], onClose: () => void) {
-  const t = useTranslations("toast")
+  const t = useTranslations("accountRequests.toast")
   const refetch = useRefetch()
 
   const approve = useApiMutation(approveRequest, {
-    successMessage: t("accountApproved", { name: request.account.displayName }),
+    successMessage: t("approved", { name: request.account.displayName }),
     invalidate,
     toastOnError: false,
     onSuccess: onClose,

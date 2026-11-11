@@ -20,7 +20,7 @@ export function Placements({ row }: { row: PersonRow }) {
   const [ending, setEnding] = useState<PlacementRow | null>(null)
 
   const end = useApiMutation(endMembershipRequest, {
-    successMessage: t("toast.membershipEnded"),
+    successMessage: t("members.toast.membershipEnded"),
     invalidate: MEMBERSHIP_QUERIES,
     awaitRefetch: true,
   })
