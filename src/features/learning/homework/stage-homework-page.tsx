@@ -178,7 +178,7 @@ function Homework({ stage }: { stage: Stage }) {
             <Tabs
               value={tab}
               onValueChange={(value) =>
-                router.replace(`${routes.stageHomework(stage.id)}&status=${value}`)
+                router.replace(routes.stageHomework(stage.id, oneOf(TABS, value)))
               }
             >
               <TabsList>

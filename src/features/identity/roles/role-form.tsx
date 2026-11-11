@@ -100,7 +100,7 @@ function Holders({ role }: { role: RoleDetails | null }) {
   const today = session.status === "authenticated" ? session.me.today : null
 
   const staff = (chunks: ReactNode) => (
-    <Link href={`${routes.settings()}#users`} className="underline underline-offset-4">
+    <Link href={routes.settings("users")} className="underline underline-offset-4">
       {chunks}
     </Link>
   )
@@ -285,7 +285,7 @@ export function RoleForm({ role }: { role: RoleDetails | null }) {
           holders={role.holders.length}
           open={deleting}
           onOpenChange={setDeleting}
-          onDeleted={() => router.push(`${routes.settings()}#roles`)}
+          onDeleted={() => router.push(routes.settings("roles"))}
         />
       ) : null}
     </div>

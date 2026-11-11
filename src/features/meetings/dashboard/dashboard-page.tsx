@@ -20,7 +20,6 @@ import {
   withCounts,
 } from "@/features/meetings/attendance/api"
 import { CardAction } from "@/features/meetings/attendance/attendance-overview-page"
-import { withQuery } from "@/features/meetings/meetings/meetings-nav"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
@@ -42,7 +41,7 @@ function partOfDay(): "morning" | "afternoon" | "evening" {
 }
 
 const meetingsOn = (date: LocalDate, service: ServiceReference | null) =>
-  withQuery(routes.meetings(), { date, service: service?.id })
+  routes.meetings({ date, service: service?.id })
 
 function Summary({ sessions, today }: { sessions: SessionView[]; today: LocalDate }) {
   const t = useTranslations("dashboard.summary")

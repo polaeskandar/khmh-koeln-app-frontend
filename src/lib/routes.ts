@@ -1,4 +1,5 @@
-import type { Uuid } from "@/lib/api/types/common"
+import type { Schemas } from "@/lib/api/client"
+import type { LocalDate, Uuid } from "@/lib/api/types/common"
 
 function href(path: `/${string}`, query: Record<string, string | null | undefined> = {}) {
   const search = new URLSearchParams()
@@ -21,10 +22,14 @@ export const routes = {
   serviceStages: (service: Uuid) => href("/services/stages/", { id: service }),
   stage: (id: Uuid) => href("/stages/view/", { id }),
   stageLessons: (stage: Uuid) => href("/stages/lessons/", { id: stage }),
-  stageHomework: (stage: Uuid) => href("/stages/homework/", { id: stage }),
+  stageHomework: (stage: Uuid, status?: Schemas["HomeworkStatus"]) =>
+    href("/stages/homework/", { id: stage, status }),
   stageAttendance: (stage: Uuid) => href("/stages/attendance/", { id: stage }),
-  meetings: () => "/meetings/",
-  schedules: () => "/meetings/schedules/",
+  meetings: (
+    view: { from?: LocalDate | null; date?: LocalDate | null; service?: Uuid | null } = {}
+  ) => href("/meetings/", { from: view.from, date: view.date, service: view.service }),
+  schedules: (view: { status?: string | null; service?: Uuid | null } = {}) =>
+    href("/meetings/schedules/", { status: view.status, service: view.service }),
   schedule: (id: Uuid) => href("/meetings/schedules/view/", { id }),
   session: (id: Uuid) => href("/meetings/sessions/view/", { id }),
   attendance: () => "/attendance/",
@@ -38,14 +43,14 @@ export const routes = {
   homework: (id: Uuid) => href("/homework/view/", { id }),
   newHomework: (stage: Uuid, lesson?: Uuid) => href("/homework/new/", { stage, lesson }),
   editHomework: (id: Uuid, lesson?: Uuid | null) => href("/homework/edit/", { id, lesson }),
-  settings: () => "/settings/",
+  settings: (section?: "roles" | "users") => (section ? `/settings/#${section}` : "/settings/"),
   newRole: () => "/settings/roles/new/",
   role: (id: Uuid) => href("/settings/roles/view/", { id }),
   dataRequests: () => "/settings/data-requests/",
   dataRequest: (id: Uuid) => href("/settings/data-requests/view/", { id }),
   account: () => "/account/",
 
-  parentHome: () => "/parent/",
+  parentHome: (child?: Uuid) => href("/parent/", { child }),
   parentChildren: () => "/parent/children/",
   parentHomework: (child?: Uuid) => href("/parent/homework/", { child }),
   parentHomeworkTask: (id: Uuid, child?: Uuid) => href("/parent/homework/view/", { id, child }),
