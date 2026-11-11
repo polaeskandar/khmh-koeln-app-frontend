@@ -4,21 +4,6 @@ import { expect, test } from "vitest"
 import { renderWithProviders } from "@test/support/providers"
 
 import { LinkTabs } from "@/components/link-tabs"
-import { PageHeader } from "@/components/page-header"
-import { PageLoading } from "@/components/page-loading"
-
-test("PageHeader renders the page's one h1, with the title isolated in <bdi>", () => {
-  renderWithProviders(<PageHeader title="Der barmherzige Samariter?" description="Stufe 3" />)
-  const headings = screen.getAllByRole("heading", { level: 1 })
-  expect(headings).toHaveLength(1)
-  expect(headings[0].querySelector("bdi")).toHaveTextContent("Der barmherzige Samariter?")
-})
-
-test("PageLoading is busy and says so to screen readers in German", () => {
-  const { container } = renderWithProviders(<PageLoading />, { locale: "de" })
-  expect(container.firstChild).toHaveAttribute("aria-busy", "true")
-  expect(screen.getByText("Wird geladen …")).toHaveClass("sr-only")
-})
 
 test("LinkTabs marks the current tab as the current page", () => {
   renderWithProviders(

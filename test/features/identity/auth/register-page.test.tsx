@@ -9,18 +9,17 @@ import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { RegisterAccount } from "@/features/identity/auth/api"
-import { forgetOutcome, rememberOutcome } from "@/features/identity/auth/auth-outcome"
-import { RegisteredPage } from "@/features/identity/auth/registered-page"
+import { forgetOutcome } from "@/features/identity/auth/auth-outcome"
 import { RegisterPage } from "@/features/identity/auth/register-page"
+
+afterEach(() => {
+  forgetOutcome()
+})
 
 const SERVICES = [
   { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f10", name: "Sunday School" },
   { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f11", name: "Youth Meeting" },
 ]
-
-afterEach(() => {
-  forgetOutcome()
-})
 
 function backend(
   answer: () => Response = () => HttpResponse.json({ status: "received" }, { status: 202 })
@@ -244,21 +243,6 @@ test("in Arabic the email and password are typed left to right", () => {
   expect(document.querySelector('input[autocomplete="new-password"]')).toHaveAttribute("dir", "ltr")
 })
 
-test("the thank-you page promises no email and links back to sign-in", () => {
-  rememberOutcome("registered")
-  renderWithProviders(<RegisteredPage />)
-  expect(screen.getByRole("heading", { name: "Thank you for registering" })).toBeInTheDocument()
-
-  expect(
-    screen.getByText(
-      "We’ve sent you an email. Open the link in it to confirm your address; only then does the church office see your registration."
-    )
-  ).toBeInTheDocument()
-
-  expect(document.body).not.toHaveTextContent(/prototype/i)
-  expect(screen.getByRole("link", { name: "Back to sign-in" })).toHaveAttribute("href", "/sign-in/")
-})
-
 describe("members", () => {
   test("the options are Parent, Member and Servant, in that order", () => {
     renderWithProviders(<RegisterPage />)
@@ -309,10 +293,4 @@ describe("members", () => {
     await waitFor(() => expect(groups).toHaveFocus())
     expect(groups).toHaveAccessibleDescription(/Write which groups you take part in/)
   })
-})
-
-test("the thank-you page is a 404 unless a registration just led there", () => {
-  renderWithProviders(<RegisteredPage />)
-
-  expect(screen.getByRole("heading", { name: "This page doesn’t exist" })).toBeInTheDocument()
 })

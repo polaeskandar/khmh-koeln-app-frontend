@@ -1,23 +1,12 @@
-import { readdirSync, readFileSync } from "node:fs"
+import { readFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { describe, expect, test } from "vitest"
 
 import { rawColours } from "@test/support/raw-colours"
+import { componentFiles } from "@test/support/source-files"
 
 const ALLOWED = [join("src", "components", "member-avatar.tsx")]
-
-function sourceFiles(dir: string): string[] {
-  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-    const path = join(dir, entry.name)
-
-    if (entry.isDirectory()) {
-      return path === join("src", "components", "ui") ? [] : sourceFiles(path)
-    }
-
-    return entry.name.endsWith(".tsx") && !ALLOWED.includes(path) ? [path] : []
-  })
-}
 
 describe("the raw-colour guard", () => {
   test.each([
@@ -37,7 +26,7 @@ describe("the raw-colour guard", () => {
 })
 
 test("no component outside components/ui paints with raw colours", () => {
-  const found = sourceFiles("src").flatMap((file) =>
+  const found = componentFiles("src", ALLOWED).flatMap((file) =>
     rawColours(readFileSync(file, "utf8")).map((cls) => `${file}: ${cls}`)
   )
 

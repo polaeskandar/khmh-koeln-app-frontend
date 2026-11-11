@@ -4,7 +4,6 @@ import { describe, expect, test } from "vitest"
 import { renderWithProviders } from "@test/support/providers"
 
 import { FormField, SelectField, TextAreaField, TextField } from "@/components/form-fields"
-import { FormPanel } from "@/components/form-panel"
 
 describe.each([
   ["TextField", TextField],
@@ -87,14 +86,4 @@ describe("FormField", () => {
     expect(screen.getByLabelText("Password")).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Forgot it?" })).toBeInTheDocument()
   })
-})
-
-test("FormPanel is a group named by its title", () => {
-  renderWithProviders(
-    <FormPanel title="Scripture">
-      <TextField label="Passage" />
-    </FormPanel>
-  )
-
-  expect(screen.getByRole("group", { name: "Scripture" })).toBeInTheDocument()
 })

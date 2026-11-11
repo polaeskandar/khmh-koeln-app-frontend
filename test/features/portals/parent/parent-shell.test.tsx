@@ -13,6 +13,7 @@ import { server } from "@test/support/msw"
 import { navigation } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
+import type { ChildSummary } from "@/features/people/children/api"
 import { ParentNotAvailable, ParentShell } from "@/features/portals/parent/parent-shell"
 
 function portal(account: Me = me.parent) {
@@ -110,4 +111,36 @@ test("no demo badge renders in the frame", async () => {
   portal()
   await screen.findByText("Page")
   expect(screen.queryByText(/Demo data/i)).toBeNull()
+})
+
+function serveChildren(items: ChildSummary[]) {
+  server.use(
+    http.get(apiUrl("/me"), () => HttpResponse.json(me.parent)),
+    http.get(apiUrl("/parent/children"), () => HttpResponse.json({ today: "2026-11-08", items }))
+  )
+}
+
+test("the tab bar shows Home, My children, Homework and Account", async () => {
+  navigation.pathname = "/parent/children/"
+  serveChildren([])
+
+  renderWithProviders(
+    <SessionProvider>
+      <ParentShell>
+        <p>Page</p>
+      </ParentShell>
+    </SessionProvider>
+  )
+
+  const navs = await screen.findAllByRole("navigation", { name: "Parent portal" })
+
+  for (const nav of navs) {
+    const links = within(nav).getAllByRole("link")
+    expect(links.map((l) => l.textContent)).toEqual(["Home", "My children", "Homework", "Account"])
+
+    expect(within(nav).getByRole("link", { name: "My children" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    )
+  }
 })
