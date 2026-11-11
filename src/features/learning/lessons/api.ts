@@ -1,6 +1,7 @@
 import { queryOptions } from "@tanstack/react-query"
 
 import { api, dataOf, type Schemas } from "@/lib/api/client"
+import { HOMEWORK_KEY, LESSONS_KEY } from "@/lib/api/query-keys"
 import type { LocalDate, Uuid } from "@/lib/api/types/common"
 import type { LessonStatus } from "@/lib/api/types/learning"
 import type { Can } from "@/lib/permissions"
@@ -21,13 +22,13 @@ export type StageLessons = Schemas["LessonListResponse"]
 
 export const lessonQuery = (id: Uuid) =>
   queryOptions({
-    queryKey: ["lessons", "detail", id],
+    queryKey: [...LESSONS_KEY, "detail", id],
     queryFn: ({ signal }) => dataOf(api.GET("/lessons/{id}", { params: { path: { id } }, signal })),
   })
 
 export const stageLessonsQuery = (stage: Uuid, tab: LessonTab = "upcoming", q = "") =>
   queryOptions({
-    queryKey: ["lessons", "list", { stage, tab, q }],
+    queryKey: [...LESSONS_KEY, "list", { stage, tab, q }],
     queryFn: ({ signal }) =>
       dataOf(
         api.GET("/stages/{stageId}/lessons", {
@@ -59,7 +60,7 @@ export type LessonOptions = Schemas["LessonOptionsResponse"]
 
 export const lessonOptionsQuery = (stage: Uuid, lesson?: Uuid) =>
   queryOptions({
-    queryKey: ["lessons", "options", { stage, lesson }],
+    queryKey: [...LESSONS_KEY, "options", { stage, lesson }],
     queryFn: ({ signal }) =>
       dataOf(
         api.GET("/stages/{stageId}/lesson-options", {
@@ -130,3 +131,7 @@ export function lessonFlagsFor(
     delete: update && lesson.status === "draft" && everPublished === false,
   }
 }
+
+export const LESSON_QUERIES = [LESSONS_KEY]
+
+export const LESSON_ARCHIVE_QUERIES = [LESSONS_KEY, HOMEWORK_KEY]

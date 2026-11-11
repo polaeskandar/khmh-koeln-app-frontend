@@ -44,6 +44,7 @@ import {
   lessonQuery,
   type LessonStage,
   type Material,
+  LESSON_QUERIES,
   meetingOf,
   OTHER_DATE,
   optionValue,
@@ -182,13 +183,13 @@ function LessonForm({ stage, lesson, viewNotes, choices }: EditorProps) {
 
   const create = useApiMutation((input: LessonInput) => createLessonRequest(stage.id, input), {
     successMessage,
-    invalidate: [["lessons"]],
+    invalidate: LESSON_QUERIES,
     onSuccess: onSaved,
   })
 
   const update = useApiMutation(
     (input: LessonInput) => updateLessonRequest(lesson!.id, version, input),
-    { successMessage, invalidate: [["lessons"]], onSuccess: onSaved }
+    { successMessage, invalidate: LESSON_QUERIES, onSuccess: onSaved }
   )
 
   const mutation = lesson ? update : create

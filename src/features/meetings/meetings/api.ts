@@ -1,18 +1,26 @@
 import { queryOptions } from "@tanstack/react-query"
 
 import { api, dataOf, type Schemas } from "@/lib/api/client"
+import {
+  AGENDA_KEY,
+  ATTENDANCE_KEY,
+  DASHBOARD_KEY,
+  MEMBER_KEY,
+  SCHEDULES_KEY,
+  SESSIONS_KEY,
+} from "@/lib/api/query-keys"
 import type { LocalDate, Uuid } from "@/lib/api/types/common"
 
 export type ScheduleList = Schemas["ScheduleListResponse"]
 
 export const schedulesQuery = queryOptions({
-  queryKey: ["schedules", "list"],
+  queryKey: [...SCHEDULES_KEY, "list"],
   queryFn: ({ signal }) => dataOf(api.GET("/schedules", { signal })),
 })
 
 export const serviceSchedulesQuery = (serviceId: Uuid) =>
   queryOptions({
-    queryKey: ["schedules", "list", { serviceId }],
+    queryKey: [...SCHEDULES_KEY, "list", { serviceId }],
     queryFn: ({ signal }) =>
       dataOf(api.GET("/schedules", { params: { query: { serviceId } }, signal })),
   })
@@ -23,7 +31,7 @@ export type AgendaFilter = { from?: LocalDate; to?: LocalDate; serviceId?: Uuid;
 
 export const agendaQuery = (filter: AgendaFilter) =>
   queryOptions({
-    queryKey: ["agenda", "list", filter],
+    queryKey: [...AGENDA_KEY, "list", filter],
     queryFn: ({ signal }) => dataOf(api.GET("/agenda", { params: { query: filter }, signal })),
   })
 
@@ -31,7 +39,7 @@ export type MeetingSession = Schemas["SessionDetailResponse"]
 
 export const meetingSessionQuery = (id: Uuid) =>
   queryOptions({
-    queryKey: ["sessions", "detail", id],
+    queryKey: [...SESSIONS_KEY, "detail", id],
     queryFn: ({ signal }) =>
       dataOf(api.GET("/sessions/{id}", { params: { path: { id } }, signal })),
   })
@@ -59,7 +67,7 @@ export const updateScheduleRequest = (id: Uuid, changes: ScheduleChanges) =>
 
 export const scheduleQuery = (id: Uuid) =>
   queryOptions({
-    queryKey: ["schedules", "detail", id],
+    queryKey: [...SCHEDULES_KEY, "detail", id],
     queryFn: ({ signal }) =>
       dataOf(api.GET("/schedules/{id}", { params: { path: { id } }, signal })),
   })
@@ -76,6 +84,21 @@ export const deleteScheduleRequest = (id: Uuid) =>
 export type MemberMeeting = Schemas["MemberMeetingResponse"]
 
 export const memberMeetingsQuery = queryOptions({
-  queryKey: ["member", "meetings"],
+  queryKey: [...MEMBER_KEY, "meetings"],
   queryFn: ({ signal }) => dataOf(api.GET("/member/meetings", { signal })),
 })
+
+export const SCHEDULE_QUERIES = [
+  SCHEDULES_KEY,
+  AGENDA_KEY,
+  SESSIONS_KEY,
+  ATTENDANCE_KEY,
+  DASHBOARD_KEY,
+]
+
+export const SCHEDULE_DELETION_QUERIES = [
+  [...SCHEDULES_KEY, "list"],
+  AGENDA_KEY,
+  ATTENDANCE_KEY,
+  DASHBOARD_KEY,
+]

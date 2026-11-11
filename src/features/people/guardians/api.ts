@@ -9,7 +9,7 @@ export type GuardianLink = Schemas["ParentAccessItemResponse"]
 export type GuardianLinks = Schemas["ParentAccessListResponse"]
 
 export const guardianLinksQuery = queryOptions({
-  queryKey: GUARDIAN_LINKS_KEY,
+  queryKey: [...GUARDIAN_LINKS_KEY, "list"],
   queryFn: ({ signal }) => dataOf(api.GET("/guardian-links", { signal })),
 })
 

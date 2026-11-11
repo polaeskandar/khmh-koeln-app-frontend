@@ -36,6 +36,8 @@ import {
   archiveLessonRequest,
   changeLessonStatusRequest,
   deleteLessonRequest,
+  LESSON_ARCHIVE_QUERIES,
+  LESSON_QUERIES,
   type LessonDetail,
   type LessonFlags,
   lessonFlagsFor,
@@ -64,7 +66,7 @@ function useLessonChange<A extends unknown[], T>(
 
   const mutation = useApiMutation(fn, {
     successMessage,
-    invalidate: [["lessons"], ["homework"]],
+    invalidate: LESSON_ARCHIVE_QUERIES,
     onSuccess,
   })
 
@@ -74,7 +76,7 @@ function useLessonChange<A extends unknown[], T>(
       const result = await mutation.execute(...args)
 
       if (!result.ok) {
-        void queryClient.invalidateQueries({ queryKey: ["lessons"] })
+        LESSON_QUERIES.forEach((queryKey) => void queryClient.invalidateQueries({ queryKey }))
       }
 
       return result.ok
@@ -115,7 +117,7 @@ function StatusActions({ data, flags }: { data: LessonDetail; flags: LessonFlags
 
   const change = useApiMutation(changeLessonStatusRequest, {
     successMessage: (saved) => t(STATUS_TOAST[saved.status]),
-    invalidate: [["lessons"]],
+    invalidate: LESSON_QUERIES,
   })
 
   const archive = useLessonChange(

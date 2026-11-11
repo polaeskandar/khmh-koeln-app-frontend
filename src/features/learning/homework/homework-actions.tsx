@@ -25,6 +25,7 @@ import { routes } from "@/lib/routes"
 import {
   deleteHomeworkRequest,
   homeworkFlagsFor,
+  HOMEWORK_QUERIES,
   type HomeworkRow,
   type HomeworkTransition,
   transitionHomeworkRequest,
@@ -54,7 +55,7 @@ function useChangeHomework(homework: Homework, onDeleted?: () => void) {
                 ? t("homeworkRestoredPublished", { title })
                 : t("homeworkRestoredDraft", { title })
               : t("deletedTitle", { title }),
-      invalidate: [["homework"]],
+      invalidate: HOMEWORK_QUERIES,
       onSuccess: ({ change }) => {
         if (change === "delete") {
           onDeleted?.()
@@ -123,7 +124,7 @@ function ChangeDialog({
         const result = await mutation.execute(change)
 
         if (!result.ok) {
-          void queryClient.invalidateQueries({ queryKey: ["homework"] })
+          HOMEWORK_QUERIES.forEach((queryKey) => void queryClient.invalidateQueries({ queryKey }))
         }
 
         return result.ok

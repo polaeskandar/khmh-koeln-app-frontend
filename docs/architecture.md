@@ -143,7 +143,8 @@ the portal account menu and the language switch); the warning becomes an error o
   of that resource refetches. Each resource's prefix is written once, in kebab-case, in
   `src/lib/api/query-keys.ts` (`SERVICES_KEY`); a feature's `api.ts` builds its query keys from it and exports
   the lists a change invalidates (`STAGE_QUERIES`, `MEMBERSHIP_QUERIES`). Components import those and never
-  write a key themselves.
+  write a key themselves. Each list's test (`test/features/…/api.test.ts`) names the queries it refetches out of
+  one of each kind in `test/support/queries.ts`, so a list can't lose or gain a query unnoticed.
 - **Changes** go through `useApiMutation(fn, {successMessage, invalidate, awaitRefetch, onSuccess, toastOnError})`
   (`src/lib/api/use-api-mutation.ts`). `execute()` resolves `{ok: true, data}` or `{ok: false, problem}`
   and never throws for an API problem, so a dialog stays open until it succeeds. Failures are never

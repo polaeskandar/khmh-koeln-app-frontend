@@ -4,7 +4,7 @@ import type { Locale } from "@/i18n/config"
 
 import { meQuery, saveLanguageRequest } from "./api"
 
-export const LANGUAGE_APPLIED_KEY = ["session", "languageApplied"] as const
+export const LANGUAGE_APPLIED_KEY = ["session", "language-applied"] as const
 
 type FailureListener = (language: Locale, error: unknown) => boolean
 

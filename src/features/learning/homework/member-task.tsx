@@ -17,6 +17,7 @@ import { routes } from "@/lib/routes"
 import {
   type MemberTaskDetail,
   memberTaskQuery,
+  OWN_REPORT_QUERIES,
   reportOwnDoneRequest,
   undoOwnReportRequest,
 } from "./api"
@@ -47,7 +48,7 @@ function TaskView({ data }: { data: MemberTaskDetail }) {
         undone={t("completion.undone")}
         reportDone={() => reportOwnDoneRequest(task.id)}
         undoReport={() => undoOwnReportRequest(task.id)}
-        invalidate={[["member"]]}
+        invalidate={OWN_REPORT_QUERIES}
       />
     </HomeworkTaskView>
   )

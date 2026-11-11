@@ -16,9 +16,7 @@ import { useFormat } from "@/i18n/format"
 import { groupOf, type PlannedItem } from "@/lib/api/types/meetings"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
-import { cancelOccurrenceRequest } from "./api"
-
-const MEETING_QUERIES = [["agenda"], ["schedules"], ["sessions"], ["attendance"], ["dashboard"]]
+import { cancelOccurrenceRequest, SCHEDULE_QUERIES } from "./api"
 
 export function OccurrenceMenu({ item }: { item: PlannedItem }) {
   const t = useTranslations()
@@ -29,7 +27,7 @@ export function OccurrenceMenu({ item }: { item: PlannedItem }) {
   const cancel = useApiMutation(cancelOccurrenceRequest, {
     toastOnError: false,
     successMessage: t("toast.dateCanceled"),
-    invalidate: MEETING_QUERIES,
+    invalidate: SCHEDULE_QUERIES,
   })
 
   return (

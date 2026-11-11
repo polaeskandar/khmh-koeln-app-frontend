@@ -46,6 +46,7 @@ import {
   homeworkFlagsFor,
   type HomeworkInput,
   homeworkQuery,
+  HOMEWORK_SAVE_QUERIES,
   type Resource,
   type StageHomework,
   stageHomeworkQuery,
@@ -98,7 +99,7 @@ function HomeworkForm(props: FormProps) {
       savedId
         ? updateHomeworkRequest(savedId, version, input)
         : createHomeworkRequest(lessonId, input),
-    { invalidate: [["homework"], ["lessons"]] }
+    { invalidate: HOMEWORK_SAVE_QUERIES }
   )
 
   const publisher = usePublishHomework(t("toast.homeworkPublishedNew"))

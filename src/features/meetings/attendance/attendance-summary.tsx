@@ -27,7 +27,12 @@ import { initials, preferredName } from "@/lib/domain/names"
 import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import { type AttendanceSheet as Board, reopenAttendanceRequest } from "./api"
+import {
+  ATTENDANCE_QUERIES,
+  SESSION_STATUS_QUERIES,
+  type AttendanceSheet as Board,
+  reopenAttendanceRequest,
+} from "./api"
 import { SheetState } from "./sheet-state"
 import { BoardFrame } from "./take-attendance-page"
 
@@ -63,7 +68,7 @@ function ReopenButton({ board }: { board: Board }) {
 
   const reopen = useApiMutation(reopenAttendanceRequest, {
     toastOnError: false,
-    invalidate: [["attendance"], ["sessions"], ["agenda"], ["dashboard"]],
+    invalidate: SESSION_STATUS_QUERIES,
     onSuccess: () => router.push(routes.takeAttendance(id)),
   })
 
@@ -87,8 +92,7 @@ function ReopenButton({ board }: { board: Board }) {
         const result = await reopen.execute(id, reason)
 
         if (!result.ok && result.problem.code === "meetings.onlyCompletedCanReopen") {
-          void queryClient.invalidateQueries({ queryKey: ["attendance"] })
-          void queryClient.invalidateQueries({ queryKey: ["sessions"] })
+          ATTENDANCE_QUERIES.forEach((queryKey) => void queryClient.invalidateQueries({ queryKey }))
         }
 
         return result.ok

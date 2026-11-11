@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { parentChildrenQuery } from "@/features/people/children/api"
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/problem"
+import { HOMEWORK_KEY, LESSONS_KEY, MEMBER_KEY, PARENT_KEY } from "@/lib/api/query-keys"
 import type { Uuid } from "@/lib/api/types/common"
 import type { Can } from "@/lib/permissions"
 
@@ -13,7 +14,7 @@ export type StageHomework = Schemas["HomeworkListResponse"]
 
 export const stageHomeworkQuery = (stage: Uuid) =>
   queryOptions({
-    queryKey: ["homework", "list", { stage }],
+    queryKey: [...HOMEWORK_KEY, "list", { stage }],
     queryFn: ({ signal }) =>
       dataOf(
         api.GET("/stages/{stageId}/homework", { params: { path: { stageId: stage } }, signal })
@@ -28,7 +29,7 @@ export type HomeworkInput = Schemas["HomeworkRequest"]
 
 export const homeworkQuery = (id: Uuid) =>
   queryOptions({
-    queryKey: ["homework", "detail", id],
+    queryKey: [...HOMEWORK_KEY, "detail", id],
     queryFn: ({ signal }) =>
       dataOf(api.GET("/homework/{id}", { params: { path: { id } }, signal })),
   })
@@ -52,7 +53,7 @@ export type HomeworkProgress = Schemas["HomeworkProgressResponse"]
 
 export const homeworkProgressQuery = (id: Uuid) =>
   queryOptions({
-    queryKey: ["homework", "progress", id],
+    queryKey: [...HOMEWORK_KEY, "progress", id],
     queryFn: ({ signal }) =>
       dataOf(api.GET("/homework/{id}/progress", { params: { path: { id } }, signal })),
   })
@@ -110,7 +111,7 @@ export type ParentTask = Schemas["ParentHomeworkItemResponse"]
 
 const childHomeworkQuery = (child: Uuid, state: TaskState) =>
   queryOptions({
-    queryKey: ["parent", "homework", child, state],
+    queryKey: [...PARENT_KEY, "homework", child, state],
     queryFn: ({ signal }) =>
       dataOf(
         api.GET("/parent/children/{childId}/homework", {
@@ -145,7 +146,7 @@ const taskParams = (child: Uuid, id: Uuid) => ({ path: { childId: child, homewor
 
 export const parentTaskQuery = (child: Uuid, id: Uuid) =>
   queryOptions({
-    queryKey: ["parent", "task", child, id],
+    queryKey: [...PARENT_KEY, "task", child, id],
     queryFn: ({ signal }) =>
       dataOf(
         api.GET("/parent/children/{childId}/homework/{homeworkId}", {
@@ -174,7 +175,7 @@ export type MemberTask = ParentTask
 
 export const memberHomeworkQuery = (state: TaskState) =>
   queryOptions({
-    queryKey: ["member", "homework", state],
+    queryKey: [...MEMBER_KEY, "homework", state],
     queryFn: ({ signal }) =>
       dataOf(api.GET("/member/homework", { params: { query: { state } }, signal })),
   })
@@ -183,7 +184,7 @@ export type MemberTaskDetail = Schemas["MemberHomeworkDetailResponse"]
 
 export const memberTaskQuery = (id: Uuid) =>
   queryOptions({
-    queryKey: ["member", "task", id],
+    queryKey: [...MEMBER_KEY, "task", id],
     queryFn: ({ signal }) =>
       dataOf(
         api.GET("/member/homework/{homeworkId}", { params: { path: { homeworkId: id } }, signal })
@@ -204,3 +205,11 @@ export const undoOwnReportRequest = (id: Uuid) =>
       params: { path: { homeworkId: id } },
     })
   )
+
+export const HOMEWORK_QUERIES = [HOMEWORK_KEY]
+
+export const HOMEWORK_SAVE_QUERIES = [HOMEWORK_KEY, LESSONS_KEY]
+
+export const CHILD_REPORT_QUERIES = [PARENT_KEY]
+
+export const OWN_REPORT_QUERIES = [MEMBER_KEY]
