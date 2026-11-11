@@ -82,6 +82,7 @@ export function ApprovalDialog({
       problem={problem}
       submitLabel={t("submit")}
       submitDisabled={submitDisabled}
+      submitOnEnter={false}
       onSubmit={onSubmit}
       onClose={onClose}
     >

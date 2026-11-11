@@ -12,6 +12,7 @@ function NameDialog({
   pending = false,
   problem = null,
   submitDisabled,
+  submitOnEnter,
   role,
   onSubmit = () => {},
   onClose = () => {},
@@ -19,6 +20,7 @@ function NameDialog({
   pending?: boolean
   problem?: unknown
   submitDisabled?: boolean
+  submitOnEnter?: boolean
   role?: "dialog" | "alertdialog"
   onSubmit?: () => unknown
   onClose?: () => void
@@ -32,6 +34,7 @@ function NameDialog({
       problem={problem}
       submitLabel="Save"
       submitDisabled={submitDisabled}
+      submitOnEnter={submitOnEnter}
       onSubmit={onSubmit}
       onClose={onClose}
     >
@@ -56,6 +59,24 @@ describe("FormDialog", () => {
     await userEvent.click(screen.getByRole("button", { name: "Save" }))
     await userEvent.type(screen.getByRole("textbox", { name: "Name" }), "{Enter}")
     expect(onSubmit).toHaveBeenCalledTimes(2)
+  })
+
+  test("without submitOnEnter, only the button submits, and only when it is enabled", async () => {
+    const onSubmit = vi.fn()
+
+    const { rerender } = renderWithProviders(
+      <NameDialog submitOnEnter={false} onSubmit={onSubmit} />
+    )
+
+    await userEvent.type(screen.getByRole("textbox", { name: "Name" }), "{Enter}")
+    await userEvent.type(screen.getByRole("textbox", { name: "Short name" }), "{Enter}")
+    expect(onSubmit).not.toHaveBeenCalled()
+    await userEvent.click(screen.getByRole("button", { name: "Save" }))
+    expect(onSubmit).toHaveBeenCalledTimes(1)
+
+    rerender(<NameDialog submitOnEnter={false} pending onSubmit={onSubmit} />)
+    await userEvent.click(screen.getByRole("button", { name: /Save/ }))
+    expect(onSubmit).toHaveBeenCalledTimes(1)
   })
 
   test("Cancel, Escape and the close button close it", async () => {

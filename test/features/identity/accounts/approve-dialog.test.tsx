@@ -187,6 +187,20 @@ test("a chosen child is taken off with its named remove button", async () => {
   expect(dialog.getByText("No child chosen yet")).toBeInTheDocument()
 })
 
+test("Enter in the child search approves nothing; only the button does", async () => {
+  const { sent } = open()
+  const dialog = await openApprove()
+  const search = dialog.getByRole("textbox")
+  await userEvent.type(search, "demi")
+  await userEvent.click(await dialog.findByRole("button", { name: /Demiana Fanous/ }))
+  await userEvent.type(search, "{Enter}")
+  await new Promise((resolve) => setTimeout(resolve, 50))
+  expect(sent).toEqual([])
+
+  await userEvent.click(dialog.getByRole("button", { name: "Approve account" }))
+  await waitFor(() => expect(sent).toHaveLength(1))
+})
+
 test("roles that fail to load say so and can be retried", async () => {
   open()
   let rolesFail = true

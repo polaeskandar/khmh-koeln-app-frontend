@@ -337,6 +337,22 @@ describe("a member without a record", () => {
     })
   })
 
+  test("Enter in a name field approves nothing; only the button does", async () => {
+    const approvals = open("Kirollos Iskander", [])
+    const created = withCreate()
+    const dialog = await openDialog()
+    await chooseNewRecord(dialog)
+    await userEvent.type(dialog.getByLabelText("First name"), "{Enter}")
+    await userEvent.type(dialog.getByLabelText("Last name"), "{Enter}")
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(created).toEqual([])
+    expect(approvals).toEqual([])
+
+    await userEvent.click(dialog.getByRole("button", { name: "Approve account" }))
+    await waitFor(() => expect(approvals).toHaveLength(1))
+    expect(created).toHaveLength(1)
+  })
+
   test("a failed approval retries with the record already made", async () => {
     let answers = 0
 
