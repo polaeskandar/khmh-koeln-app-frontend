@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCanIn } from "@/features/identity/auth/session"
-import { peopleQuery, type PeopleList } from "./api"
+import { peopleQuery, type PeoplePage } from "./api"
 import { AddPersonButton } from "./add-person-dialog"
 import { useFormat } from "@/i18n/format"
 import { fullName, initials, preferredName } from "@/lib/domain/names"
@@ -45,7 +45,7 @@ function EmptyRoster({ stage }: { stage: Stage }) {
   )
 }
 
-function MemberRows({ stage, list }: { stage: Stage; list: PeopleList }) {
+function MemberRows({ stage, list }: { stage: Stage; list: PeoplePage }) {
   const t = useTranslations("stages.overview")
   const f = useFormat()
 
@@ -85,7 +85,7 @@ function MemberRows({ stage, list }: { stage: Stage; list: PeopleList }) {
   )
 }
 
-function Pager({ list, onPage }: { list: PeopleList; onPage: (page: number) => void }) {
+function Pager({ list, onPage }: { list: PeoplePage; onPage: (page: number) => void }) {
   const t = useTranslations("table")
   const pages = Math.ceil(list.total / list.pageSize)
 

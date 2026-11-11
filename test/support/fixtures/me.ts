@@ -1,5 +1,6 @@
 import type { Me } from "@/features/identity/auth/api"
-import type { AccountPermission, Action, Resource, RoleScope } from "@/lib/permissions"
+import type { AccountPermission } from "@/features/identity/auth/api"
+import type { Action, Resource, RoleScope } from "@/features/identity/roles/api"
 import { services } from "@test/support/fixtures/services"
 
 const ACTIONS: Action[] = ["read", "create", "update", "delete"]

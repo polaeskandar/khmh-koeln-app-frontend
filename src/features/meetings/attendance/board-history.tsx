@@ -6,9 +6,15 @@ import { useFormat } from "@/i18n/format"
 import { isolate } from "@/lib/bidi"
 import { preferredName } from "@/lib/domain/names"
 
-import type { AttendanceSheet as Board } from "./api"
+import type { AttendanceSheet } from "./api"
 
-export function RecentlyMarked({ board, onCorrect }: { board: Board; onCorrect?: () => void }) {
+export function RecentlyMarked({
+  board,
+  onCorrect,
+}: {
+  board: AttendanceSheet
+  onCorrect?: () => void
+}) {
   const t = useTranslations("attendance.board")
   const f = useFormat()
 
@@ -47,7 +53,7 @@ export function RecentlyMarked({ board, onCorrect }: { board: Board; onCorrect?:
   )
 }
 
-export function Corrections({ board }: { board: Board }) {
+export function Corrections({ board }: { board: AttendanceSheet }) {
   const t = useTranslations("attendance.board")
   const f = useFormat()
 

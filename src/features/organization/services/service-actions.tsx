@@ -22,14 +22,14 @@ import {
   archiveServiceRequest,
   deleteServiceRequest,
   restoreServiceRequest,
-  type ServiceRow,
+  type Service,
   useServiceInsight,
 } from "./api"
 import { StructureChangeDialog } from "./structure-change"
 
 import { ServiceDialog } from "./service-dialog"
 
-export function ServiceActionsMenu({ service }: { service: ServiceRow }) {
+export function ServiceActionsMenu({ service }: { service: Service }) {
   const t = useTranslations()
   const router = useRouter()
   const [open, setOpen] = useState<"edit" | "archive" | "restore" | "delete" | null>(null)

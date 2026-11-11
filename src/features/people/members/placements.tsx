@@ -9,7 +9,7 @@ import { useFormat } from "@/i18n/format"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { preferredName } from "@/lib/domain/names"
 
-import { endMembershipRequest, MEMBERSHIP_QUERIES, type PersonRow, type Placement } from "./api"
+import { endMembershipRequest, MEMBERSHIP_QUERIES, type PersonRow, type PlacementRow } from "./api"
 import { MembershipMenu } from "./membership-menu"
 import { useWhere } from "./use-where"
 
@@ -17,7 +17,7 @@ export function Placements({ row }: { row: PersonRow }) {
   const t = useTranslations()
   const f = useFormat()
   const where = useWhere()
-  const [ending, setEnding] = useState<Placement | null>(null)
+  const [ending, setEnding] = useState<PlacementRow | null>(null)
 
   const end = useApiMutation(endMembershipRequest, {
     successMessage: t("toast.membershipEnded"),
@@ -85,7 +85,7 @@ export function Placements({ row }: { row: PersonRow }) {
   )
 }
 
-export function EarlierPlacements({ placements }: { placements: Placement[] }) {
+export function EarlierPlacements({ placements }: { placements: PlacementRow[] }) {
   const t = useTranslations("members.sheet")
   const f = useFormat()
   const where = useWhere()

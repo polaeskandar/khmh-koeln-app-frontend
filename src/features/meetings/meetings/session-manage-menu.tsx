@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useFormat } from "@/i18n/format"
 import { groupOf } from "./session-lines"
-import type { SessionView } from "@/lib/api/types/meetings"
+import type { SessionView } from "./api"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
 import { cancelSessionRequest, SCHEDULE_QUERIES } from "./api"

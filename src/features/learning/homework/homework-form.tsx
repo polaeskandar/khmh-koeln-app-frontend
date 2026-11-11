@@ -16,26 +16,27 @@ import { LinkRowsEditor, useLinkRows } from "@/features/learning/link-rows"
 import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
-import type { LessonRef, LocalDate, Uuid } from "@/lib/api/types/common"
+import type { LessonOnDate } from "@/features/learning/lessons/api"
+import type { LocalDate, Uuid } from "@/lib/api/types/common"
 import { addDays } from "@/lib/domain/time"
 import type { Group } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import { type HomeworkDetail, homeworkFlagsFor, type StageHomework } from "./api"
+import { type HomeworkDetail, homeworkFlagsFor, type HomeworkList } from "./api"
 import { type SaveStep, useSaveHomework } from "./use-save-homework"
 
 const QUICK_PICK = "h-auto min-h-9 shrink py-2 text-start whitespace-normal"
 
 const weekAfter = (date: LocalDate) => addDays(date, 7)
 
-type HomeworkStage = StageHomework["stage"]
+type HomeworkStage = HomeworkList["stage"]
 
 type FormProps = {
   stage: HomeworkStage
   group: Group
   audienceSize: number
   fromLesson: Uuid | null
-} & ({ lessons: LessonRef[]; lessonId: Uuid; homework?: never } | { homework: HomeworkDetail })
+} & ({ lessons: LessonOnDate[]; lessonId: Uuid; homework?: never } | { homework: HomeworkDetail })
 
 function DueDatePanel({
   value,
@@ -189,7 +190,7 @@ export function HomeworkForm(props: FormProps) {
   const save = useSaveHomework({ stageId: stage.id, lessonId, homework, fromLesson })
   const errors = save.fieldErrors
   const formRef = useFocusFirstInvalid(save.problem)
-  const lessonLabel = (l: LessonRef) => `${f.dayMonth(l.teachingDate)} · ${l.title}`
+  const lessonLabel = (l: LessonOnDate) => `${f.dayMonth(l.teachingDate)} · ${l.title}`
 
   const canPublish = homework
     ? homeworkFlagsFor(can, homework, homework.archived).publish

@@ -13,7 +13,8 @@ import { QueryState } from "@/components/page-states"
 import { RecordPage } from "@/components/record-page"
 import { ServiceTag } from "@/components/service-tag"
 import { StatusBadge } from "@/components/status"
-import type { ServiceRef, StageRef } from "@/lib/api/types/common"
+import type { ServiceReference } from "@/features/organization/services/api"
+import type { StageReference } from "./api"
 import { routes } from "@/lib/routes"
 
 import { type Stage, stageQuery } from "./api"
@@ -40,7 +41,7 @@ const TAB_ROUTES: Record<StageTab, (id: string) => string> = {
   homework: routes.stageHomework,
 }
 
-export type StageCrumbsOf = Pick<StageRef, "id" | "name"> & { service: ServiceRef }
+export type StageCrumbsOf = Pick<StageReference, "id" | "name"> & { service: ServiceReference }
 
 export function useStageCrumbs(stage: StageCrumbsOf, tab: StageTab, extra: Crumb[] = []): Crumb[] {
   const t = useTranslations()

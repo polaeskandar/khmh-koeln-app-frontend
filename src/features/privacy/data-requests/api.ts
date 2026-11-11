@@ -8,16 +8,16 @@ export type RequestKind = Schemas["RequestKind"]
 
 export type DataRequestRow = Schemas["DataRequestRowResponse"]
 
-export type DataRequests = Schemas["DataRequestListResponse"]
+export type DataRequestList = Schemas["DataRequestListResponse"]
 
 export const dataRequestsQuery = queryOptions({
   queryKey: [...DATA_REQUESTS_KEY, "list"],
   queryFn: ({ signal }) => dataOf(api.GET("/data-requests", { signal })),
 })
 
-export type NewDataRequest = Schemas["RecordDataRequestRequest"]
+export type RecordDataRequest = Schemas["RecordDataRequestRequest"]
 
-export const recordDataRequest = (input: NewDataRequest) =>
+export const recordDataRequest = (input: RecordDataRequest) =>
   dataOf(api.POST("/data-requests", { body: input }))
 
 export type ErasureReview = Schemas["ErasureReviewResponse"]

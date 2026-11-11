@@ -13,7 +13,7 @@ import { answerSettingsLists } from "@test/support/fixtures/settings"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { AccountRequest, MemberAccount } from "@/features/identity/accounts/api"
+import type { AccountRequest, MemberAccountItem } from "@/features/identity/accounts/api"
 import { SettingsPage } from "@/features/identity/accounts/settings-page"
 
 beforeEach(() => {
@@ -23,7 +23,11 @@ beforeEach(() => {
 
 const mariam = { id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f01", name: "Mariam Fahmy" }
 
-const account = (id: string, name: string, extra: Partial<MemberAccount> = {}): MemberAccount => ({
+const account = (
+  id: string,
+  name: string,
+  extra: Partial<MemberAccountItem> = {}
+): MemberAccountItem => ({
   id,
   name,
   email: `${name.split(" ")[0]!.toLowerCase()}@example.org`,

@@ -20,17 +20,17 @@ import { preferredName } from "@/lib/domain/names"
 import {
   addMembershipRequest,
   createPersonRequest,
-  type DirectoryPerson,
+  type DirectoryEntry,
   duplicateCandidatesOf,
   MEMBERSHIP_QUERIES,
-  type NewPerson,
+  type CreatePerson,
   type PlacementInput,
 } from "./api"
 import { blocksPlacement } from "./groups"
 import { groupsText } from "./person-search"
 import { PlacementFields, usePlacement } from "./placement-fields"
 
-const blockingGroupOf = (candidate: DirectoryPerson, placement: PlacementInput) =>
+const blockingGroupOf = (candidate: DirectoryEntry, placement: PlacementInput) =>
   candidate.groups.find((group) =>
     blocksPlacement({ serviceId: group.service.id, stageId: group.stage?.id ?? null }, placement)
   )
@@ -45,11 +45,11 @@ function DuplicateCandidatesAlert({
   onAddAnyway,
 }: {
   message: string
-  candidates: DirectoryPerson[]
+  candidates: DirectoryEntry[]
   placement: PlacementInput | null
   busy: boolean
   addError: string | undefined
-  onAdd: (candidate: DirectoryPerson) => void
+  onAdd: (candidate: DirectoryEntry) => void
   onAddAnyway: () => void
 }) {
   const t = useTranslations()
@@ -144,14 +144,14 @@ function AddPersonDialog({ preset, onClose }: { preset?: PlacementInput; onClose
   const errors = create.fieldErrors
   const shownInFields = Object.keys(errors).length > 0
 
-  const person: NewPerson = {
+  const person: CreatePerson = {
     firstName,
     lastName,
     displayName: displayName.trim() === "" ? null : displayName,
     placement,
   }
 
-  async function send(newPerson: NewPerson) {
+  async function send(newPerson: CreatePerson) {
     if (busy) {
       return
     }
@@ -167,7 +167,7 @@ function AddPersonDialog({ preset, onClose }: { preset?: PlacementInput; onClose
 
   const submitAnyway = () => send({ ...person, confirmDuplicate: true })
 
-  async function addExisting(candidate: DirectoryPerson) {
+  async function addExisting(candidate: DirectoryEntry) {
     if (!placement) {
       return
     }

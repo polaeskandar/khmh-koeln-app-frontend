@@ -3,7 +3,7 @@ import { http, HttpResponse } from "msw"
 import { describe, expect, test } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
-import type { HistoryEntry } from "@/lib/api/types/meetings"
+import type { HistoryEntry } from "@/features/meetings/meetings/api"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { session, sessionDetail } from "@test/support/fixtures/sessions"
@@ -11,10 +11,10 @@ import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { MeetingSession } from "@/features/meetings/meetings/api"
+import type { SessionDetail } from "@/features/meetings/meetings/api"
 import { SessionPage } from "@/features/meetings/meetings/session-page"
 
-const schedule: MeetingSession["schedule"] = {
+const schedule: SessionDetail["schedule"] = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f90",
   name: "Sunday class",
   recurrence: {
@@ -29,7 +29,7 @@ const schedule: MeetingSession["schedule"] = {
 
 function open(
   view: Parameters<typeof session>[0] = {},
-  extra: Partial<MeetingSession> = {},
+  extra: Partial<SessionDetail> = {},
   who: Me = me.leader
 ) {
   const base = session(view)

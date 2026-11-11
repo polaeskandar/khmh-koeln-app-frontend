@@ -12,7 +12,7 @@ import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { HomeworkRow, StageHomework } from "@/features/learning/homework/api"
+import type { HomeworkItem, HomeworkList } from "@/features/learning/homework/api"
 import { StageHomeworkPage } from "@/features/learning/homework/stage-homework-page"
 
 beforeEach(() => {
@@ -29,9 +29,9 @@ const lesson = {
 const row = (
   id: string,
   title: string,
-  status: HomeworkRow["status"],
-  extra: Partial<HomeworkRow> = {}
-): HomeworkRow => ({
+  status: HomeworkItem["status"],
+  extra: Partial<HomeworkItem> = {}
+): HomeworkItem => ({
   id,
   title,
   status,
@@ -53,7 +53,7 @@ const row = (
   ...extra,
 })
 
-const data = (items: HomeworkRow[], extra: Partial<StageHomework> = {}): StageHomework => ({
+const data = (items: HomeworkItem[], extra: Partial<HomeworkList> = {}): HomeworkList => ({
   today: "2026-11-01",
   stage: { id: THIRD_CLASS_ID, name: "Third class", position: 3 },
   archived: false,
@@ -76,7 +76,7 @@ const prayer = row("0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea003", "Pray for a neighbour
   counts: null,
 })
 
-function open(body: StageHomework | (() => StageHomework), account: Me = me.servant) {
+function open(body: HomeworkList | (() => HomeworkList), account: Me = me.servant) {
   server.use(
     http.get(apiUrl(`/stages/${THIRD_CLASS_ID}`), () => HttpResponse.json(thirdClass)),
     http.get(apiUrl(`/stages/${THIRD_CLASS_ID}/homework`), () =>

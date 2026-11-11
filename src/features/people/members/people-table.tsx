@@ -24,12 +24,12 @@ import { useFormat } from "@/i18n/format"
 import { isolate } from "@/lib/bidi"
 import { fullName, initials, preferredName } from "@/lib/domain/names"
 
-import type { PeopleList, PersonRow, Placement } from "./api"
+import type { PeoplePage, PersonRow, PlacementRow } from "./api"
 import { InactiveBadge } from "./person-status"
 
 const PAGE_SIZE = 25
 
-const placementLabel = (p: Placement) =>
+const placementLabel = (p: PlacementRow) =>
   p.stage ? `${p.stage.name} (${p.service.name})` : p.service.name
 
 function PersonName({ row: { person } }: { row: PersonRow }) {
@@ -130,7 +130,7 @@ export function PeopleTable({
   onClearFilters,
   onSelect,
 }: {
-  list: PeopleList
+  list: PeoplePage
   searchText: string
   filters: string[]
   onPage: (page: number) => void

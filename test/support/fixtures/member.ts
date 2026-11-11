@@ -1,6 +1,6 @@
 import type { GroupServant, MemberGroup } from "@/features/people/groups/api"
 import type { MemberMeeting } from "@/features/meetings/meetings/api"
-import type { MemberTask } from "@/features/learning/homework/api"
+import type { ParentHomeworkItem } from "@/features/learning/homework/api"
 import type { Recurrence } from "@/lib/api/types/common"
 
 const BIBLE_STUDY = {
@@ -160,7 +160,7 @@ export const nevineMeetings: MemberMeeting[] = [
   meeting("m7", "2026-11-21", "Level 1", "Extra class", COPTIC, { status: "planned" }),
 ]
 
-export const nevineHomework: { todo: MemberTask[]; done: MemberTask[] } = {
+export const nevineHomework: { todo: ParentHomeworkItem[]; done: ParentHomeworkItem[] } = {
   todo: [
     {
       id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ef601",

@@ -1,13 +1,7 @@
-import type { ServiceRow } from "@/features/organization/services/api"
-import type {
-  Frequency,
-  IsoWeekday,
-  LocalDate,
-  MonthWeek,
-  Recurrence,
-  Uuid,
-} from "@/lib/api/types/common"
-import type { RosterMode, ScheduleSummary } from "@/lib/api/types/meetings"
+import type { Service } from "@/features/organization/services/api"
+import type { Frequency } from "./api"
+import type { IsoWeekday, LocalDate, MonthWeek, Recurrence, Uuid } from "@/lib/api/types/common"
+import type { RosterMode, Schedule } from "./api"
 import {
   normalizeWeekdays,
   occurrencesBetween,
@@ -18,7 +12,7 @@ import {
 } from "@/lib/domain/recurrence"
 import { addDays } from "@/lib/domain/time"
 
-import type { ScheduleChanges, ScheduleRequest } from "./api"
+import type { ScheduleChanges, CreateSchedule } from "./api"
 
 export type Draft = {
   serviceId: string
@@ -45,7 +39,7 @@ export type DraftFieldsProps = {
 }
 
 export type ScheduleTarget =
-  { mode: "create"; fixedServiceId?: Uuid } | { mode: "edit"; schedule: ScheduleSummary }
+  { mode: "create"; fixedServiceId?: Uuid } | { mode: "edit"; schedule: Schedule }
 
 export type Preview =
   | { error: RecurrenceProblem; dates: LocalDate[]; recurrence: null }
@@ -60,7 +54,7 @@ const PREVIEW_DATES = 4
 const PREVIEW_HORIZON_DAYS = 400
 const LOCAL_DATE = /^\d{4}-\d{2}-\d{2}$/
 
-function draftOf(schedule: ScheduleSummary): Draft {
+function draftOf(schedule: Schedule): Draft {
   const recurrence = recurrenceOf(schedule.recurrence)
 
   return {
@@ -82,11 +76,7 @@ function draftOf(schedule: ScheduleSummary): Draft {
   }
 }
 
-export function initialDraft(
-  target: ScheduleTarget,
-  today: LocalDate,
-  services: ServiceRow[]
-): Draft {
+export function initialDraft(target: ScheduleTarget, today: LocalDate, services: Service[]): Draft {
   if (target.mode === "edit") {
     return draftOf(target.schedule)
   }
@@ -173,7 +163,7 @@ function scheduleOf(draft: Draft) {
   }
 }
 
-export function newScheduleOf(draft: Draft): ScheduleRequest {
+export function newScheduleOf(draft: Draft): CreateSchedule {
   return {
     ...scheduleOf(draft),
     roster: { serviceId: draft.serviceId, stageId: draft.stageId || null, mode: draft.rosterMode },

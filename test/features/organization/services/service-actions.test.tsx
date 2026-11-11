@@ -16,10 +16,10 @@ import { renderWithProviders } from "@test/support/providers"
 
 import type { Me } from "@/features/identity/auth/api"
 import {
-  type Impact,
+  type ArchiveImpact,
   serviceInsightsQuery,
-  type ServiceRow,
-  type ServiceStages,
+  type Service,
+  type StageList,
 } from "@/features/organization/services/api"
 import { ServiceDetailsPage } from "@/features/organization/services/service-details-page"
 import { ServiceActionsMenu } from "@/features/organization/services/service-actions"
@@ -29,12 +29,12 @@ beforeEach(() => {
   vi.spyOn(toast, "success")
 })
 
-const [, youth, choir] = services.items as [ServiceRow, ServiceRow, ServiceRow]
+const [, youth, choir] = services.items as [Service, Service, Service]
 
 function menu(
-  service: ServiceRow,
+  service: Service,
   viewer: Me = me.administrator,
-  impact: Impact = { activeSchedules: 0, upcomingSessions: 0 }
+  impact: ArchiveImpact = { activeSchedules: 0, upcomingSessions: 0 }
 ) {
   server.use(
     http.get(apiUrl("/services/insights"), () =>
@@ -185,7 +185,7 @@ test("an archived service's details show when and why", async () => {
   const archived = choir
   address.set(`id=${archived.id}`)
 
-  const archivedStages: ServiceStages = {
+  const archivedStages: StageList = {
     service: { id: archived.id, name: archived.name, tone: archived.tone, archived: true },
     stages: [],
     archivedStages: [
@@ -236,7 +236,7 @@ test("a leader's archived stage moves to Archived stages, and Restore puts it la
 
   let state: "active" | "archived" | "restored" = "active"
 
-  const data = (): ServiceStages => ({
+  const data = (): StageList => ({
     service,
     stages: [
       { ...stageRef("Kindergarten", 0), description: null, memberCount: 9, impact },

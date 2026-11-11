@@ -6,7 +6,7 @@ import { useState } from "react"
 import { ReasonDialog } from "@/components/confirm-dialog"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { useFormat } from "@/i18n/format"
-import type { PersonRef } from "@/lib/api/types/common"
+import type { PersonReference } from "@/features/people/members/api"
 import { isStale, useRefetch } from "@/lib/api/refetch"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { preferredName } from "@/lib/domain/names"
@@ -15,11 +15,11 @@ import {
   ATTENDANCE_QUERIES,
   type AttendanceBoard,
   type AttendanceSheet,
-  type Mark,
+  type MarkReference,
   removeMarkRequest,
 } from "./api"
 
-function marksOf(board: AttendanceBoard): { person: PersonRef; mark: Mark }[] {
+function marksOf(board: AttendanceBoard): { person: PersonReference; mark: MarkReference }[] {
   return [...board.roster, ...board.notOnRoster]
     .flatMap((row) => (row.mark?.id ? [{ person: row.person, mark: row.mark }] : []))
     .sort((a, b) => b.mark.recordedAt.localeCompare(a.mark.recordedAt))

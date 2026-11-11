@@ -1,15 +1,9 @@
 import type { Schemas } from "@/lib/api/client"
 import type { Uuid } from "@/lib/api/types/common"
 
-export type Action = Schemas["Action"]
+export const ACTIONS: Schemas["Action"][] = ["read", "create", "update", "delete"]
 
-export type Resource = Schemas["Resource"]
-
-export type RoleScope = Schemas["RoleScope"]
-
-export const ACTIONS: Action[] = ["read", "create", "update", "delete"]
-
-export const RESOURCES: Resource[] = [
+export const RESOURCES: Schemas["Resource"][] = [
   "services",
   "stages",
   "sessions",
@@ -22,7 +16,7 @@ export const RESOURCES: Resource[] = [
   "roles",
 ]
 
-export const GROUP_RESOURCES: Resource[] = [
+export const GROUP_RESOURCES: Schemas["Resource"][] = [
   "services",
   "stages",
   "sessions",
@@ -32,13 +26,9 @@ export const GROUP_RESOURCES: Resource[] = [
   "homework",
 ]
 
-export const SENSITIVE: Resource[] = ["members", "users", "roles"]
+export const SENSITIVE: Schemas["Resource"][] = ["members", "users", "roles"]
 
 export const PERMISSION_COUNT = ACTIONS.length * RESOURCES.length
-
-export type Permission = Schemas["PermissionResponse"]
-
-export type AccountPermission = Schemas["AccountPermissionResponse"]
 
 export type Group = { serviceId: Uuid; stageId: Uuid | null }
 
@@ -54,16 +44,28 @@ export const meetingGroup = (meeting: {
 
 export type AssignedGroup = { service: { id: Uuid }; stage: { id: Uuid } | null }
 
-export type Holder = { permissions: AccountPermission[]; assignments: AssignedGroup[] }
+export type Holder = {
+  permissions: Schemas["AccountPermissionResponse"][]
+  assignments: AssignedGroup[]
+}
 
-export type Can = (action: Action, resource: Resource, group?: Group) => boolean
+export type Can = (
+  action: Schemas["Action"],
+  resource: Schemas["Resource"],
+  group?: Group
+) => boolean
 
 export const within =
   (can: Can, group: Group | undefined): Can =>
   (action, resource, other) =>
     can(action, resource, other ?? group)
 
-export const canInAny = (can: Can, action: Action, resource: Resource, groups: Group[]) =>
+export const canInAny = (
+  can: Can,
+  action: Schemas["Action"],
+  resource: Schemas["Resource"],
+  groups: Group[]
+) =>
   groups.length === 0 ? can(action, resource) : groups.some((group) => can(action, resource, group))
 
 const covers = (assignments: AssignedGroup[], group: Group) =>
@@ -73,12 +75,17 @@ const covers = (assignments: AssignedGroup[], group: Group) =>
       (assignment.stage === null || assignment.stage.id === group.stageId)
   )
 
-const permissionOf = (me: Holder, action: Action, resource: Resource) =>
+const permissionOf = (me: Holder, action: Schemas["Action"], resource: Schemas["Resource"]) =>
   me.permissions.find(
     (permission) => permission.action === action && permission.resource === resource
   )
 
-export function can(me: Holder | null, action: Action, resource: Resource, group?: Group) {
+export function can(
+  me: Holder | null,
+  action: Schemas["Action"],
+  resource: Schemas["Resource"],
+  group?: Group
+) {
   const permission = me ? permissionOf(me, action, resource) : undefined
 
   if (!me || !permission) {

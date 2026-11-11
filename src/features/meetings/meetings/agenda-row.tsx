@@ -7,7 +7,7 @@ import { ServiceTag } from "@/components/service-tag"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
-import type { AgendaItem } from "@/lib/api/types/meetings"
+import type { AgendaItem } from "./api"
 
 import { agendaHref } from "./agenda-links"
 import { SessionBadges } from "./session-badges"

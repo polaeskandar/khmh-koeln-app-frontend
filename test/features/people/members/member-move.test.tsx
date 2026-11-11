@@ -5,7 +5,7 @@ import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
-import type { ServiceList, ServiceRow } from "@/features/organization/services/api"
+import type { ServiceList, Service } from "@/features/organization/services/api"
 import type { Me } from "@/features/identity/auth/api"
 import { stageQuery } from "@/features/organization/stages/api"
 import type { Locale } from "@/i18n/config"
@@ -28,7 +28,7 @@ beforeEach(() => {
 
 const base = services.items[0]!
 
-const stage = (name: string, position: number): ServiceRow["stages"][number] => ({
+const stage = (name: string, position: number): Service["stages"][number] => ({
   id: `0192f3a4-7b1c-7d2e-8f3d-${String(position).padStart(12, "0")}`,
   name,
   position,
@@ -38,7 +38,7 @@ const kindergarten = stage("Kindergarten", 0)
 const second = stage("2nd Class", 2)
 const third = stage("3rd Class", 3)
 
-const sundaySchool: ServiceRow = { ...base, stages: [kindergarten, second, third] }
+const sundaySchool: Service = { ...base, stages: [kindergarten, second, third] }
 
 const list: ServiceList = { items: [sundaySchool] }
 

@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { expect, test } from "vitest"
 
-import type { ScheduleSummary } from "@/lib/api/types/meetings"
+import type { Schedule } from "@/features/meetings/meetings/api"
 import { apiUrl } from "@test/support/api"
 import { schedule } from "@test/support/fixtures/schedules"
 import { me } from "@test/support/fixtures/me"
@@ -55,7 +55,7 @@ const pausedClass = schedule({
   generating: false,
 })
 
-const items: ScheduleSummary[] = [
+const items: Schedule[] = [
   choirPractice,
   youthMeeting,
   fourth,

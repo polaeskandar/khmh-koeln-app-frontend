@@ -4,7 +4,7 @@ import { cn } from "cn"
 import { Clock, MapPin } from "lucide-react"
 
 import { useFormat } from "@/i18n/format"
-import type { SessionView } from "@/lib/api/types/meetings"
+import type { SessionView } from "./api"
 
 export function SessionWhen({
   item,

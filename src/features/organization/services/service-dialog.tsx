@@ -15,14 +15,14 @@ import { routes } from "@/lib/routes"
 
 import {
   createServiceRequest,
-  type ServiceFields,
-  type ServiceRow,
+  type ServiceRequest,
+  type Service,
   updateServiceRequest,
   SERVICE_QUERIES,
 } from "./api"
 
-function changesOf(service: ServiceRow, fields: ServiceFields): Partial<ServiceFields> {
-  const changes: Partial<ServiceFields> = {}
+function changesOf(service: Service, fields: ServiceRequest): Partial<ServiceRequest> {
+  const changes: Partial<ServiceRequest> = {}
 
   if (fields.name !== service.name) {
     changes.name = fields.name
@@ -35,7 +35,7 @@ function changesOf(service: ServiceRow, fields: ServiceFields): Partial<ServiceF
   return changes
 }
 
-export function ServiceDialog({ service, onClose }: { service?: ServiceRow; onClose: () => void }) {
+export function ServiceDialog({ service, onClose }: { service?: Service; onClose: () => void }) {
   const t = useTranslations()
   const router = useRouter()
   const [name, setName] = useState(service?.name ?? "")
@@ -48,7 +48,7 @@ export function ServiceDialog({ service, onClose }: { service?: ServiceRow; onCl
   })
 
   const update = useApiMutation(
-    (fields: ServiceFields) => updateServiceRequest(service!.id, fields),
+    (fields: ServiceRequest) => updateServiceRequest(service!.id, fields),
     { successMessage: t("toast.saved"), invalidate: SERVICE_QUERIES, onSuccess: onClose }
   )
 

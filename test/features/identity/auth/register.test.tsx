@@ -8,7 +8,7 @@ import { server } from "@test/support/msw"
 import { router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { Registration } from "@/features/identity/auth/api"
+import type { RegisterAccount } from "@/features/identity/auth/api"
 import { forgetOutcome, rememberOutcome } from "@/features/identity/auth/auth-outcome"
 import { RegisteredPage } from "@/features/identity/auth/registered-page"
 import { RegisterPage } from "@/features/identity/auth/register-page"
@@ -25,12 +25,12 @@ afterEach(() => {
 function backend(
   answer: () => Response = () => HttpResponse.json({ status: "received" }, { status: 202 })
 ) {
-  const bodies: Registration[] = []
+  const bodies: RegisterAccount[] = []
 
   server.use(
     http.get(apiUrl("/auth/register/services"), () => HttpResponse.json({ items: SERVICES })),
     http.post(apiUrl("/auth/register"), async ({ request }) => {
-      bodies.push((await request.json()) as Registration)
+      bodies.push((await request.json()) as RegisterAccount)
 
       return answer()
     })
@@ -212,7 +212,7 @@ test("a double click sends one request", async () => {
 
   server.use(
     http.post(apiUrl("/auth/register"), async ({ request }) => {
-      bodies.push((await request.json()) as Registration)
+      bodies.push((await request.json()) as RegisterAccount)
       await new Promise<void>((resolve) => (release = resolve))
 
       return HttpResponse.json({ status: "received" }, { status: 202 })

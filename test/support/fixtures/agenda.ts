@@ -1,32 +1,38 @@
-import type { ServiceRef, StageRef } from "@/lib/api/types/common"
-import type { AgendaItem, SessionItem } from "@/lib/api/types/meetings"
+import type { ServiceReference } from "@/features/organization/services/api"
+import type { StageReference } from "@/features/organization/stages/api"
+import type { AgendaItem, AgendaSession } from "@/features/meetings/meetings/api"
 
 export const AGENDA_TODAY = "2026-11-08"
 
-export const sundaySchoolRef: ServiceRef = {
+export const sundaySchoolRef: ServiceReference = {
   id: "s1",
   name: "Sunday School",
   tone: 1,
   archived: false,
 }
 
-export const youthRef: ServiceRef = { id: "s2", name: "Youth Meeting", tone: 2, archived: false }
+export const youthRef: ServiceReference = {
+  id: "s2",
+  name: "Youth Meeting",
+  tone: 2,
+  archived: false,
+}
 
-export const thirdClassStage: StageRef = {
+export const thirdClassStage: StageReference = {
   id: "st3",
   name: "3rd Class",
   position: 2,
   archived: false,
 }
 
-export const firstClassStage: StageRef = {
+export const firstClassStage: StageReference = {
   id: "st1",
   name: "1st Class",
   position: 0,
   archived: false,
 }
 
-export const agendaSession = (overrides: Partial<SessionItem> = {}): SessionItem => ({
+export const agendaSession = (overrides: Partial<AgendaSession> = {}): AgendaSession => ({
   kind: "session",
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f99",
   scheduleId: "sch1",

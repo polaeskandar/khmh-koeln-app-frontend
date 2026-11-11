@@ -21,7 +21,7 @@ import { cn } from "cn"
 import { GripVertical } from "lucide-react"
 import { useTranslations } from "next-intl"
 
-import type { ServiceStages } from "@/features/organization/services/api"
+import type { StageList } from "@/features/organization/services/api"
 import { useInBrowser } from "@/hooks/use-in-browser"
 import { Link } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
@@ -30,7 +30,7 @@ import { StageActionsMenu } from "./stage-actions"
 import { useStageAnnouncements } from "./use-stage-announcements"
 import type { StageItem, StageOrder } from "./use-stage-order"
 
-type Service = ServiceStages["service"]
+type Service = StageList["service"]
 
 function SortableRow({
   stage,

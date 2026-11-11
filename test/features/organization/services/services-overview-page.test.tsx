@@ -10,10 +10,10 @@ import { insightsOf, services } from "@test/support/fixtures/services"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { ServiceRow } from "@/features/organization/services/api"
+import type { Service } from "@/features/organization/services/api"
 import { ServicesOverviewPage } from "@/features/organization/services/services-overview-page"
 
-const answerInsights = (rows: ServiceRow[] = services.items) =>
+const answerInsights = (rows: Service[] = services.items) =>
   server.use(http.get(apiUrl("/services/insights"), () => HttpResponse.json(insightsOf(rows))))
 
 function renderOverview(locale: Locale = "en") {

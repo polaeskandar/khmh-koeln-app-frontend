@@ -31,7 +31,7 @@ import {
 } from "./api"
 import { GiveRoleDialog } from "./give-role-dialog"
 import { PasswordLinkDialog } from "./password-link-dialog"
-import { type Role, rolesQuery, ROLE_QUERIES } from "@/features/identity/roles/api"
+import { type RoleRow, rolesQuery, ROLE_QUERIES } from "@/features/identity/roles/api"
 
 function RoleChip({
   account,
@@ -176,7 +176,7 @@ function AccountRow({
   today,
 }: {
   account: StaffAccount
-  roles: Role[]
+  roles: RoleRow[]
   groups: GroupOption[]
   changeRoles: boolean
   sendLinks: boolean

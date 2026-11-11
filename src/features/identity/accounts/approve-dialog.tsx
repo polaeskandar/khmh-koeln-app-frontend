@@ -22,7 +22,7 @@ import { placeLabel } from "@/lib/domain/place"
 import { type AccountRequest, STAFF_APPROVAL_QUERIES } from "./api"
 import { ApprovalDialog, useApproval } from "./approval-dialog"
 import { MemberApproval } from "./member-approval"
-import { type DirectoryPerson } from "@/features/people/members/api"
+import { type DirectoryEntry } from "@/features/people/members/api"
 import { parentPortalOnly, rolesQuery } from "@/features/identity/roles/api"
 import { PersonSearch } from "@/features/people/members/person-search"
 import { RolesChoice } from "@/features/identity/roles/roles-choice"
@@ -118,9 +118,9 @@ function ChildrenChoice({
   error,
   onChange,
 }: {
-  chosen: DirectoryPerson[]
+  chosen: DirectoryEntry[]
   error?: string
-  onChange: (children: DirectoryPerson[]) => void
+  onChange: (children: DirectoryEntry[]) => void
 }) {
   const t = useTranslations("accountRequests.approve")
 
@@ -138,7 +138,7 @@ function StaffApproval({ request, onClose }: { request: AccountRequest; onClose:
   const f = useFormat()
   const roles = useQuery(rolesQuery)
   const parent = request.registeredAs === "parent"
-  const [children, setChildren] = useState<DirectoryPerson[]>([])
+  const [children, setChildren] = useState<DirectoryEntry[]>([])
   const [ticked, setTicked] = useState<string[] | null>(null)
   const services = useAssignableGroups()
   const approval = useApproval(request, STAFF_APPROVAL_QUERIES, onClose)

@@ -14,7 +14,7 @@ import { renderWithProviders } from "@test/support/providers"
 import type {
   HomeworkDetail,
   HomeworkProgress,
-  ProgressRow,
+  AudienceRow,
 } from "@/features/learning/homework/api"
 import { HomeworkProgressPage } from "@/features/learning/homework/homework-progress-page"
 
@@ -34,8 +34,8 @@ const parentAccount = (n: number) => ({
 const child = (
   firstName: string,
   lastName: string,
-  extra: Partial<ProgressRow> = {}
-): ProgressRow => ({
+  extra: Partial<AudienceRow> = {}
+): AudienceRow => ({
   person: {
     id: `0192f3a4-7b1c-7d2e-8f3a-${String(++seq).padStart(12, "0")}`,
     firstName,

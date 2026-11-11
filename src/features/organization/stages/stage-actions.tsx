@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useCan } from "@/features/identity/auth/session"
-import type { ServiceRef } from "@/lib/api/types/common"
+import type { ServiceReference } from "@/features/organization/services/api"
 import { isolate } from "@/lib/bidi"
 import { groupAt } from "@/lib/permissions"
 
@@ -38,7 +38,7 @@ export function StageActionsMenu({
   stage,
   move,
 }: {
-  service: ServiceRef
+  service: ServiceReference
   stage: EditableStage & { memberCount?: number }
   move?: Move
 }) {

@@ -1,7 +1,7 @@
 import { cn } from "cn"
 import type { ReactNode } from "react"
 
-import type { ServiceRef } from "@/lib/api/types/common"
+import type { Schemas } from "@/lib/api/client"
 
 export const toneOf = (tone: number | null | undefined) =>
   typeof tone === "number" && Number.isInteger(tone) && tone >= 1 && tone <= 8 ? tone : 1
@@ -21,7 +21,7 @@ export function ServiceTag({
   label,
   className,
 }: {
-  service: Pick<ServiceRef, "name" | "tone"> | null
+  service: Pick<Schemas["ServiceReference"], "name" | "tone"> | null
   label?: ReactNode
   className?: string
 }) {

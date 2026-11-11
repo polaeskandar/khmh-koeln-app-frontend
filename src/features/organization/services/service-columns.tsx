@@ -13,11 +13,11 @@ import { Link } from "@/i18n/navigation"
 import { localDateOf } from "@/lib/domain/time"
 import { routes } from "@/lib/routes"
 
-import { type ServiceRow, useServiceInsights } from "./api"
+import { type Service, useServiceInsights } from "./api"
 import { AttendanceCell, NextMeetingCell } from "./service-cells"
 import { ServiceActionsMenu } from "./service-actions"
 
-export function ArchivedBadge({ row }: { row: ServiceRow }) {
+export function ArchivedBadge({ row }: { row: Service }) {
   const t = useTranslations()
   const f = useFormat()
 
@@ -36,7 +36,7 @@ export function ArchivedBadge({ row }: { row: ServiceRow }) {
   )
 }
 
-function ServiceNameCell({ service }: { service: ServiceRow }) {
+function ServiceNameCell({ service }: { service: Service }) {
   return (
     <div className="flex min-w-0 items-start gap-3 py-1">
       <ServiceSwatch tone={service.tone} className="mt-1.5 size-2.5" />
@@ -60,7 +60,7 @@ function ServiceNameCell({ service }: { service: ServiceRow }) {
   )
 }
 
-function StageCountCell({ service }: { service: ServiceRow }) {
+function StageCountCell({ service }: { service: Service }) {
   const t = useTranslations()
   const f = useFormat()
 
@@ -79,7 +79,7 @@ export function useServiceColumns() {
   const t = useTranslations("services.table")
   const insights = useServiceInsights()
 
-  return useMemo<ColumnDef<DataTableFeatures, ServiceRow, unknown>[]>(
+  return useMemo<ColumnDef<DataTableFeatures, Service, unknown>[]>(
     () => [
       {
         accessorKey: "name",

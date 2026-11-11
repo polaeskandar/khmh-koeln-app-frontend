@@ -8,7 +8,7 @@ import { ServiceTag } from "@/components/service-tag"
 import { RosterCells } from "@/features/meetings/attendance/roster-cells"
 import { Link } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
-import type { SessionView } from "@/lib/api/types/meetings"
+import type { SessionView } from "./api"
 
 import { agendaHref } from "./agenda-links"
 import { SessionBadges } from "./session-badges"

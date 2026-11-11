@@ -11,8 +11,29 @@ import {
   SESSIONS_KEY,
 } from "@/lib/api/query-keys"
 import type { LocalDate, Uuid } from "@/lib/api/types/common"
+import type { AttendanceCounts } from "@/features/meetings/attendance/api"
 
-export type ScheduleList = Schemas["ScheduleListResponse"]
+export type Frequency = Schemas["Frequency"]
+
+export type SessionStatus = Schemas["SessionStatus"]
+
+export type RosterMode = Schemas["RosterMode"]
+
+export type SessionView = Schemas["SessionResponse"] & { counts?: AttendanceCounts | null }
+
+export type AgendaSession = Schemas["AgendaSessionResponse"]
+
+export type CountedSession = Omit<AgendaSession, "kind">
+
+export type PlannedSession = Schemas["PlannedSessionResponse"]
+
+export type AgendaItem = Schemas["AgendaResponse"]["items"][number]
+
+export type Schedule = Schemas["ScheduleResponse"]
+
+export type HistoryEntry = Schemas["HistoryEntry"]
+
+export type ScheduleListResponse = Schemas["ScheduleListResponse"]
 
 export const schedulesQuery = queryOptions({
   queryKey: [...SCHEDULES_KEY, "list"],
@@ -36,7 +57,7 @@ export const agendaQuery = (filter: AgendaFilter) =>
     queryFn: ({ signal }) => dataOf(api.GET("/agenda", { params: { query: filter }, signal })),
   })
 
-export type MeetingSession = Schemas["SessionDetailResponse"]
+export type SessionDetail = Schemas["SessionDetailResponse"]
 
 export const meetingSessionQuery = (id: Uuid) =>
   queryOptions({
@@ -56,11 +77,11 @@ export const cancelOccurrenceRequest = (schedule: Uuid, date: LocalDate, reason:
     })
   )
 
-export type ScheduleRequest = Schemas["CreateScheduleRequest"]
+export type CreateSchedule = Schemas["CreateScheduleRequest"]
 
 export type ScheduleChanges = Schemas["ScheduleChangesRequest"]
 
-export const createScheduleRequest = (request: ScheduleRequest) =>
+export const createScheduleRequest = (request: CreateSchedule) =>
   dataOf(api.POST("/schedules", { body: request }))
 
 export const updateScheduleRequest = (id: Uuid, changes: ScheduleChanges) =>

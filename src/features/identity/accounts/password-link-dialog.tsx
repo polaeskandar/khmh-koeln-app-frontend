@@ -16,7 +16,7 @@ import type { Problem } from "@/lib/api/translate-problem"
 import type { LocalDate } from "@/lib/api/types/common"
 import { isolate } from "@/lib/bidi"
 
-import type { PasswordLink, StaffAccount } from "./api"
+import type { IssuedPasswordLink, StaffAccount } from "./api"
 
 export function PasswordLinkDialog({
   account,
@@ -28,7 +28,7 @@ export function PasswordLinkDialog({
 }: {
   account: StaffAccount
   today: LocalDate
-  link: PasswordLink | undefined
+  link: IssuedPasswordLink | undefined
   pending: boolean
   problem: Problem | null
   onClose: () => void

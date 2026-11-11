@@ -22,13 +22,14 @@ import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { nameKey } from "@/lib/domain/names"
 import { oneOf } from "@/lib/one-of"
-import { type Action, PERMISSION_COUNT, type Resource, type RoleScope } from "@/lib/permissions"
+import type { Action, Resource, RoleScope } from "./api"
+import { PERMISSION_COUNT } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
 import {
   createRoleRequest,
-  type RoleDetail,
-  type RoleInput,
+  type RoleDetails,
+  type RoleRequest,
   rolesQuery,
   ROLE_QUERIES,
   updateRoleRequest,
@@ -92,7 +93,7 @@ function ScopeChoice({
     </FormPanel>
   )
 }
-function Holders({ role }: { role: RoleDetail | null }) {
+function Holders({ role }: { role: RoleDetails | null }) {
   const t = useTranslations("roleEditor")
   const f = useFormat()
   const { session } = useSession()
@@ -145,12 +146,12 @@ function Holders({ role }: { role: RoleDetail | null }) {
   )
 }
 
-function useSaveRole(role: RoleDetail | null, name: string) {
+function useSaveRole(role: RoleDetails | null, name: string) {
   const t = useTranslations("toast")
   const router = useRouter()
 
   return useApiMutation(
-    (input: RoleInput) => (role ? updateRoleRequest(role.id, input) : createRoleRequest(input)),
+    (input: RoleRequest) => (role ? updateRoleRequest(role.id, input) : createRoleRequest(input)),
     {
       successMessage: role ? t("roleSaved") : t("roleCreated", { name: name.trim() }),
       invalidate: ROLE_QUERIES,
@@ -159,7 +160,7 @@ function useSaveRole(role: RoleDetail | null, name: string) {
   )
 }
 
-export function RoleForm({ role }: { role: RoleDetail | null }) {
+export function RoleForm({ role }: { role: RoleDetails | null }) {
   const t = useTranslations()
   const router = useRouter()
   const can = useCan()

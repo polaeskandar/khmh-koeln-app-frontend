@@ -12,7 +12,7 @@ import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { MemberTaskDetail } from "@/features/learning/homework/api"
+import type { MemberHomeworkDetail } from "@/features/learning/homework/api"
 import { MemberHomeworkPage } from "@/features/learning/homework/member-homework-page"
 import { MemberTaskPage } from "@/features/learning/homework/member-task-page"
 
@@ -25,7 +25,7 @@ beforeEach(() => {
   vi.spyOn(toast, "error")
 })
 
-const detail = (extra: Partial<MemberTaskDetail["task"]> = {}): MemberTaskDetail => ({
+const detail = (extra: Partial<MemberHomeworkDetail["task"]> = {}): MemberHomeworkDetail => ({
   today: "2026-11-08",
   task: {
     ...task,
@@ -41,7 +41,7 @@ const detail = (extra: Partial<MemberTaskDetail["task"]> = {}): MemberTaskDetail
   },
 })
 
-function openTask(data: MemberTaskDetail | (() => Response), locale: Locale = "en") {
+function openTask(data: MemberHomeworkDetail | (() => Response), locale: Locale = "en") {
   let reads = 0
 
   server.use(

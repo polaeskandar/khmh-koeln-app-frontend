@@ -6,7 +6,8 @@ import { toast } from "sonner"
 
 import { ApiError } from "@/lib/api/problem"
 import { isStale, useRefetch } from "@/lib/api/refetch"
-import type { PersonRef, Uuid } from "@/lib/api/types/common"
+import type { PersonReference } from "@/features/people/members/api"
+import type { Uuid } from "@/lib/api/types/common"
 import { translateProblem } from "@/lib/api/translate-problem"
 import { useProblemTranslator } from "@/lib/api/use-problem-translator"
 
@@ -14,18 +15,18 @@ import { meetingSessionQuery } from "../meetings/api"
 import {
   type AttendanceBoard,
   MARK_QUERIES,
-  type Mark,
-  type Placement,
+  type MarkReference,
+  type PersonGroup,
   recordMarkRequest,
   removeMarkRequest,
 } from "./api"
 
-export type Visitor = { person: PersonRef; placements: Placement[] }
+export type Visitor = { person: PersonReference; placements: PersonGroup[] }
 
 type Write = {
   present: boolean
   status: "pending" | "confirmed"
-  mark: Mark | null
+  mark: MarkReference | null
   settledAt: number
   confirmed: Write | null
   visitor?: Visitor
@@ -35,7 +36,7 @@ export type Writes = Readonly<Record<Uuid, Write>>
 
 export type WriteAction =
   | { type: "start"; personId: Uuid; present: boolean; visitor?: Visitor }
-  | { type: "confirm"; personId: Uuid; mark: Mark | null; at: number }
+  | { type: "confirm"; personId: Uuid; mark: MarkReference | null; at: number }
   | { type: "fail"; personId: Uuid }
 
 export function writesReducer(writes: Writes, action: WriteAction): Writes {
@@ -82,7 +83,7 @@ export function writesReducer(writes: Writes, action: WriteAction): Writes {
   }
 }
 
-const PENDING_MARK: Mark = { id: "", recordedAt: "" }
+const PENDING_MARK: MarkReference = { id: "", recordedAt: "" }
 
 export function applyWrites<Board extends AttendanceBoard>(
   board: Board,
@@ -95,7 +96,7 @@ export function applyWrites<Board extends AttendanceBoard>(
     return write && (write.status === "pending" || write.settledAt > boardAt) ? write : null
   }
 
-  const markOf = (personId: Uuid, mark: Mark | null) => {
+  const markOf = (personId: Uuid, mark: MarkReference | null) => {
     const write = live(personId)
 
     if (!write) {
@@ -177,7 +178,7 @@ export function useMarkWrites(sessionId: Uuid) {
   const refetch = useRefetch()
   const [writes, dispatch] = useReducer(writesReducer, {})
 
-  async function send(person: PersonRef, present: boolean, visitor?: Visitor) {
+  async function send(person: PersonReference, present: boolean, visitor?: Visitor) {
     dispatch({ type: "start", personId: person.id, present, visitor })
 
     try {
@@ -223,7 +224,7 @@ export function useMarkWrites(sessionId: Uuid) {
   return {
     writes,
     pending,
-    mark: (person: PersonRef) => {
+    mark: (person: PersonReference) => {
       if (!pending.has(person.id)) {
         void send(person, true)
       }
@@ -233,7 +234,7 @@ export function useMarkWrites(sessionId: Uuid) {
         void send(visitor.person, true, visitor)
       }
     },
-    undo: (person: PersonRef) => {
+    undo: (person: PersonReference) => {
       if (!pending.has(person.id)) {
         void send(person, false)
       }

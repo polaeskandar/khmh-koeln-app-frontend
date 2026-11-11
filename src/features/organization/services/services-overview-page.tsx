@@ -36,7 +36,7 @@ import { Link } from "@/i18n/navigation"
 import { fold } from "@/lib/domain/names"
 import { routes } from "@/lib/routes"
 
-import { type ServiceRow, servicesQuery } from "./api"
+import { type Service, servicesQuery } from "./api"
 import { useNextAt } from "./service-cells"
 import { ArchivedBadge, useServiceColumns } from "./service-columns"
 import { NewServiceButton } from "./service-dialog"
@@ -46,7 +46,7 @@ type Tab = "active" | "archived" | "all"
 
 const TAB_ORDER: Tab[] = ["active", "archived", "all"]
 
-const TABS: Record<Tab, (row: ServiceRow) => boolean> = {
+const TABS: Record<Tab, (row: Service) => boolean> = {
   active: (r) => !r.archived,
   archived: (r) => r.archived,
   all: () => true,
@@ -164,13 +164,7 @@ function ServicesEmpty({
   )
 }
 
-function CompactServiceList({
-  services,
-  empty,
-}: {
-  services: ServiceRow[]
-  empty: ReactNode | null
-}) {
+function CompactServiceList({ services, empty }: { services: Service[]; empty: ReactNode | null }) {
   const t = useTranslations()
   const nextAt = useNextAt()
 
@@ -210,13 +204,13 @@ function CompactServiceList({
   )
 }
 
-function matches(service: ServiceRow, words: string) {
+function matches(service: Service, words: string) {
   return fold(
     `${service.name} ${service.description ?? ""} ${service.stages.map((s) => s.name).join(" ")}`
   ).includes(words)
 }
 
-export function ServicesTable({ rows }: { rows: ServiceRow[] }) {
+export function ServicesTable({ rows }: { rows: Service[] }) {
   const [tab, setTab] = useState<Tab>("active")
   const [search, setSearch] = useState("")
   const counts = countByTab(rows, TABS)

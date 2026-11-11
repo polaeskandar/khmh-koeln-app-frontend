@@ -12,7 +12,7 @@ import { useTranslations } from "next-intl"
 
 import { useFormat } from "@/i18n/format"
 import type { LocalDate } from "@/lib/api/types/common"
-import type { MeetingView } from "@/lib/api/types/learning"
+import type { MeetingView } from "./api"
 import { isolate } from "@/lib/bidi"
 
 export function MeetingLine({

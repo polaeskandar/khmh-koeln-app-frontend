@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react"
 import { afterEach, describe, expect, test, vi } from "vitest"
 
-import type { HistoryEntry } from "@/lib/api/types/meetings"
+import type { HistoryEntry } from "@/features/meetings/meetings/api"
 import { AGENDA_TODAY } from "@test/support/fixtures/agenda"
 import { renderWithProviders } from "@test/support/providers"
 

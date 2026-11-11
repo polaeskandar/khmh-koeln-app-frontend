@@ -13,7 +13,7 @@ import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { HomeworkRow } from "@/features/learning/homework/api"
+import type { HomeworkItem } from "@/features/learning/homework/api"
 import type { LessonDetail } from "@/features/learning/lessons/api"
 import { LessonPage } from "@/features/learning/lessons/lesson-page"
 
@@ -26,7 +26,7 @@ beforeEach(() => {
   vi.spyOn(toast, "error")
 })
 
-type Options = { account?: Me; tasks?: HomeworkRow[] }
+type Options = { account?: Me; tasks?: HomeworkItem[] }
 
 function open(
   detail: LessonDetail | (() => LessonDetail),

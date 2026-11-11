@@ -20,7 +20,7 @@ import { groupOf } from "@/features/meetings/meetings/session-lines"
 import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import type { AttendanceSheet as Board } from "./api"
+import type { AttendanceSheet } from "./api"
 import { AttendanceBoard } from "./attendance-board"
 import { CloseDialog } from "./close-dialog"
 import { CorrectionDialog } from "./correction-dialog"
@@ -29,7 +29,7 @@ import { OpenAttendanceButton } from "./open-attendance-button"
 import { SheetState } from "./sheet-state"
 import { VisitorSearch } from "./visitor-search"
 
-export function BoardFrame({ board, children }: { board: Board; children: ReactNode }) {
+export function BoardFrame({ board, children }: { board: AttendanceSheet; children: ReactNode }) {
   const t = useTranslations()
   const f = useFormat()
   const { session } = board
@@ -71,7 +71,7 @@ export function BoardFrame({ board, children }: { board: Board; children: ReactN
   )
 }
 
-function ActiveBoard({ board, boardAt }: { board: Board; boardAt: number }) {
+function ActiveBoard({ board, boardAt }: { board: AttendanceSheet; boardAt: number }) {
   const t = useTranslations("attendance.board")
   const can = useCanIn(meetingGroup(board.session))
   const online = useOnline()
@@ -121,7 +121,7 @@ function ActiveBoard({ board, boardAt }: { board: Board; boardAt: number }) {
   )
 }
 
-function NotOpen({ board }: { board: Board }) {
+function NotOpen({ board }: { board: AttendanceSheet }) {
   const t = useTranslations("attendance.session")
   const f = useFormat()
   const can = useCanIn(meetingGroup(board.session))
@@ -143,7 +143,7 @@ function NotOpen({ board }: { board: Board }) {
   )
 }
 
-function Canceled({ board }: { board: Board }) {
+function Canceled({ board }: { board: AttendanceSheet }) {
   const t = useTranslations("attendance.session")
 
   return (

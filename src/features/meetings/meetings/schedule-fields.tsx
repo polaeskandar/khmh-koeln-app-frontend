@@ -13,11 +13,11 @@ import {
 } from "@/components/ui/field"
 import { NativeSelectOption } from "@/components/ui/native-select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import type { ServiceRow } from "@/features/organization/services/api"
+import type { Service } from "@/features/organization/services/api"
 import { useFormat } from "@/i18n/format"
 import type { LocalDate } from "@/lib/api/types/common"
 import { groupOf } from "./session-lines"
-import type { RosterMode } from "@/lib/api/types/meetings"
+import type { RosterMode } from "./api"
 import { addDays } from "@/lib/domain/time"
 import { oneOf } from "@/lib/one-of"
 
@@ -30,7 +30,7 @@ function RosterModeField({
   services,
   target,
   onChange,
-}: Omit<DraftFieldsProps, "errors"> & { services: ServiceRow[]; target: ScheduleTarget }) {
+}: Omit<DraftFieldsProps, "errors"> & { services: Service[]; target: ScheduleTarget }) {
   const t = useTranslations("meetings")
   const service = services.find((s) => s.id === draft.serviceId)
   const stage = service?.stages.find((s) => s.id === draft.stageId)
@@ -82,7 +82,7 @@ export function DetailsFields({
   services,
   target,
   onChange,
-}: DraftFieldsProps & { services: ServiceRow[]; target: ScheduleTarget }) {
+}: DraftFieldsProps & { services: Service[]; target: ScheduleTarget }) {
   const t = useTranslations("meetings")
   const schedule = target.mode === "edit" ? target.schedule : null
   const service = services.find((s) => s.id === draft.serviceId)

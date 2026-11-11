@@ -12,8 +12,8 @@ import { stageRef } from "@test/support/fixtures/sessions"
 import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { DirectoryPerson } from "@/features/people/members/api"
-import type { GuardianLink, GuardianLinks } from "@/features/people/guardians/api"
+import type { DirectoryEntry } from "@/features/people/members/api"
+import type { ParentAccessItem, ParentAccessList } from "@/features/people/guardians/api"
 import { ParentAccess } from "@/features/people/guardians/parent-access"
 
 beforeEach(() => {
@@ -28,12 +28,7 @@ const sundaySchool = {
   archived: false,
 }
 
-const child = (
-  id: string,
-  firstName: string,
-  lastName: string,
-  stage: string
-): DirectoryPerson => ({
+const child = (id: string, firstName: string, lastName: string, stage: string): DirectoryEntry => ({
   id,
   firstName,
   lastName,
@@ -65,9 +60,9 @@ const daniel = {
 const link = (
   id: string,
   parent: typeof hoda,
-  person: DirectoryPerson,
-  extra: Partial<GuardianLink> = {}
-): GuardianLink => ({
+  person: DirectoryEntry,
+  extra: Partial<ParentAccessItem> = {}
+): ParentAccessItem => ({
   id,
   relationship: "parent",
   parent,
@@ -78,7 +73,7 @@ const link = (
 })
 
 function open(
-  initial: GuardianLink[],
+  initial: ParentAccessItem[],
   {
     give,
     revoke,
@@ -97,7 +92,7 @@ function open(
         today: "2026-11-08",
         items,
         accounts: [mariamFanous, hoda, daniel],
-      } satisfies GuardianLinks)
+      } satisfies ParentAccessList)
     }),
     http.get(apiUrl("/people/directory"), () => HttpResponse.json({ items: [kiro] })),
     http.post(apiUrl("/guardian-links"), async ({ request }) => {

@@ -1,14 +1,14 @@
 import { http, HttpResponse } from "msw"
 
 import type {
-  AttendanceCounts,
+  AttendanceCountsResponse,
   OverviewCard,
-  SessionState,
+  SessionStateResponse,
 } from "@/features/meetings/attendance/api"
-import type { MeetingSession } from "@/features/meetings/meetings/api"
+import type { SessionDetail } from "@/features/meetings/meetings/api"
 import type { Schemas } from "@/lib/api/client"
-import type { StageRef } from "@/lib/api/types/common"
-import type { CountedSession, SessionView } from "@/lib/api/types/meetings"
+import type { StageReference } from "@/features/organization/stages/api"
+import type { CountedSession, SessionView } from "@/features/meetings/meetings/api"
 import { apiUrl } from "@test/support/api"
 
 export const sundaySchool = {
@@ -18,7 +18,7 @@ export const sundaySchool = {
   archived: false,
 }
 
-export const stageRef = (name: string, position: number): StageRef => ({
+export const stageRef = (name: string, position: number): StageReference => ({
   id: `0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f2${position}`,
   name,
   position,
@@ -74,8 +74,8 @@ export const sessionResponse = (view: SessionView): Schemas["SessionResponse"] =
 
 export const sessionState = (
   view: SessionView,
-  overrides: Partial<SessionState> = {}
-): SessionState => ({
+  overrides: Partial<SessionStateResponse> = {}
+): SessionStateResponse => ({
   id: view.id,
   status: view.status,
   openedAt: null,
@@ -84,15 +84,18 @@ export const sessionState = (
   ...overrides,
 })
 
-export const card = (view: SessionView, state: Partial<SessionState> = {}): OverviewCard => ({
+export const card = (
+  view: SessionView,
+  state: Partial<SessionStateResponse> = {}
+): OverviewCard => ({
   session: sessionResponse(view),
   state: sessionState(view, state),
 })
 
 export const sessionDetail = (
   view: SessionView,
-  extra: Partial<MeetingSession> = {}
-): MeetingSession => ({
+  extra: Partial<SessionDetail> = {}
+): SessionDetail => ({
   today: "2026-11-08",
   session: sessionResponse(view),
   state: sessionState(view),
@@ -101,7 +104,7 @@ export const sessionDetail = (
   ...extra,
 })
 
-const countsOf = (views: SessionView[]): AttendanceCounts => ({
+const countsOf = (views: SessionView[]): AttendanceCountsResponse => ({
   items: views.flatMap((view) =>
     view.counts ? [{ sessionId: view.id, counts: view.counts }] : []
   ),

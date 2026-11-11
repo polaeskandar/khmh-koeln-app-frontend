@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl"
 
 import { useFormat } from "@/i18n/format"
 import type { LocalDate } from "@/lib/api/types/common"
-import type { HistoryEntry } from "@/lib/api/types/meetings"
+import type { HistoryEntry } from "./api"
 
 const ICON: Record<HistoryEntry["type"], LucideIcon> = {
   created: CalendarPlus,

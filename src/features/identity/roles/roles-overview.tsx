@@ -20,10 +20,10 @@ import { Link } from "@/i18n/navigation"
 import { PERMISSION_COUNT, RESOURCES } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import { type Role, rolesQuery } from "./api"
+import { type RoleRow, rolesQuery } from "./api"
 import { DeleteRoleDialog } from "./delete-role-dialog"
 
-function RoleMenu({ role }: { role: Role }) {
+function RoleMenu({ role }: { role: RoleRow }) {
   const t = useTranslations()
   const can = useCan()
   const [deleting, setDeleting] = useState(false)
@@ -63,7 +63,7 @@ function RoleMenu({ role }: { role: Role }) {
   )
 }
 
-function RolesTable({ roles }: { roles: Role[] }) {
+function RolesTable({ roles }: { roles: RoleRow[] }) {
   const t = useTranslations()
   const f = useFormat()
   const can = useCan()

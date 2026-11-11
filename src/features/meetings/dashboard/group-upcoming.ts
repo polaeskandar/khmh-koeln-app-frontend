@@ -1,5 +1,6 @@
-import type { LocalDate, LocalTime, ServiceRef } from "@/lib/api/types/common"
-import type { AgendaItem } from "@/lib/api/types/meetings"
+import type { LocalDate, LocalTime } from "@/lib/api/types/common"
+import type { ServiceReference } from "@/features/organization/services/api"
+import type { AgendaItem } from "@/features/meetings/meetings/api"
 import { groupOf } from "@/features/meetings/meetings/session-lines"
 
 export type UpcomingEntry =
@@ -8,7 +9,7 @@ export type UpcomingEntry =
       kind: "group"
       date: LocalDate
       startTime: LocalTime
-      service: ServiceRef | null
+      service: ServiceReference | null
       title: string
       planned: boolean
       groups: string[]

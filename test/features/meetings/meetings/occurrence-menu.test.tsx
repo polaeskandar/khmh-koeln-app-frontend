@@ -5,7 +5,7 @@ import { toast } from "sonner"
 import { beforeEach, expect, test, vi } from "vitest"
 
 import type { Me } from "@/features/identity/auth/api"
-import type { AgendaItem, PlannedItem } from "@/lib/api/types/meetings"
+import type { AgendaItem, PlannedSession } from "@/features/meetings/meetings/api"
 import { apiUrl, problem } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import { services } from "@test/support/fixtures/services"
@@ -35,7 +35,7 @@ const youth = {
   archived: false,
 }
 
-const planned = (service: typeof youth, date: string, scheduleId: string): PlannedItem => ({
+const planned = (service: typeof youth, date: string, scheduleId: string): PlannedSession => ({
   kind: "planned",
   scheduleId,
   date,

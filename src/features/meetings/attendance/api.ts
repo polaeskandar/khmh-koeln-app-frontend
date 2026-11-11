@@ -8,10 +8,12 @@ import {
   DASHBOARD_KEY,
   SESSIONS_KEY,
 } from "@/lib/api/query-keys"
-import type { Counts, Uuid } from "@/lib/api/types/common"
-import type { CountedSession, SessionView } from "@/lib/api/types/meetings"
+import type { Uuid } from "@/lib/api/types/common"
+import type { CountedSession, SessionView } from "@/features/meetings/meetings/api"
 
-import type { MeetingSession } from "../meetings/api"
+import type { SessionDetail } from "../meetings/api"
+
+export type AttendanceCounts = Schemas["AttendanceCounts"]
 
 export type AttendanceOverview = Schemas["AttendanceOverviewResponse"]
 
@@ -27,7 +29,7 @@ export const overviewSessionIds = (overview: AttendanceOverview): Uuid[] =>
 
 const COUNTS_PER_REQUEST = 100
 
-export type AttendanceCounts = Schemas["AttendanceCountsResponse"]
+export type AttendanceCountsResponse = Schemas["AttendanceCountsResponse"]
 
 const attendanceCountsQuery = (sessionIds: Uuid[]) =>
   queryOptions({
@@ -38,7 +40,9 @@ const attendanceCountsQuery = (sessionIds: Uuid[]) =>
       ),
   })
 
-const countsById = (results: UseQueryResult<AttendanceCounts>[]): Map<Uuid, Counts> =>
+const countsById = (
+  results: UseQueryResult<AttendanceCountsResponse>[]
+): Map<Uuid, AttendanceCounts> =>
   new Map(
     results
       .flatMap((result) => result.data?.items ?? [])
@@ -51,20 +55,23 @@ function chunksOf<T>(items: T[], size: number): T[][] {
   )
 }
 
-export function useAttendanceCounts(sessionIds: Uuid[]): Map<Uuid, Counts> {
+export function useAttendanceCounts(sessionIds: Uuid[]): Map<Uuid, AttendanceCounts> {
   const chunks = chunksOf([...new Set(sessionIds)], COUNTS_PER_REQUEST)
 
   return useQueries({ queries: chunks.map(attendanceCountsQuery), combine: countsById })
 }
 
-export const withCounts = (session: SessionView, counts: Map<Uuid, Counts>): CountedSession => ({
+export const withCounts = (
+  session: SessionView,
+  counts: Map<Uuid, AttendanceCounts>
+): CountedSession => ({
   ...session,
   counts: counts.get(session.id) ?? null,
 })
 
-export type Mark = Schemas["MarkReference"]
+export type MarkReference = Schemas["MarkReference"]
 
-export type Placement = Schemas["PersonGroup"]
+export type PersonGroup = Schemas["PersonGroup"]
 
 export type Correction = Schemas["Correction"]
 
@@ -89,15 +96,16 @@ export const attendanceCorrectionsQuery = (session: Uuid) =>
       ),
   })
 
-export type SessionState = Schemas["SessionStateResponse"]
+export type SessionStateResponse = Schemas["SessionStateResponse"]
 
-export type BoardSession = SessionView & Pick<SessionState, "openedAt" | "closedAt" | "closedBy">
+export type BoardSession = SessionView &
+  Pick<SessionStateResponse, "openedAt" | "closedAt" | "closedBy">
 
 export type AttendanceSheet = AttendanceBoard &
-  Pick<MeetingSession, "today" | "history"> & { session: BoardSession; corrections: Correction[] }
+  Pick<SessionDetail, "today" | "history"> & { session: BoardSession; corrections: Correction[] }
 
 export const sheetOf = (
-  detail: MeetingSession,
+  detail: SessionDetail,
   board: AttendanceBoard,
   corrections: Correction[]
 ): AttendanceSheet => ({
@@ -147,7 +155,7 @@ export const removeMarkRequest = (
 
 export type HistoryCell = "present" | "notMarked" | "notOnRoster"
 
-export type StageAttendanceHistory = Schemas["AttendanceHistory"]
+export type AttendanceHistory = Schemas["AttendanceHistory"]
 
 export const stageAttendanceHistoryQuery = (id: Uuid) =>
   queryOptions({

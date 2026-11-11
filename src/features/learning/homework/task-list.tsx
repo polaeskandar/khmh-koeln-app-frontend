@@ -14,7 +14,7 @@ import { isolate } from "@/lib/bidi"
 import {
   CHILD_REPORT_QUERIES,
   OWN_REPORT_QUERIES,
-  type ParentTask,
+  type ParentHomeworkItem,
   type Report,
   reportDoneRequest,
   reportOwnDoneRequest,
@@ -25,10 +25,10 @@ import { useCompletion } from "./completion-control"
 import { DueLine } from "./due-line"
 
 export type TaskCompletion = {
-  label: (task: ParentTask) => string
+  label: (task: ParentHomeworkItem) => string
   undone: string
-  reportDone: (task: ParentTask) => Promise<Report>
-  undoReport: (task: ParentTask) => Promise<void>
+  reportDone: (task: ParentHomeworkItem) => Promise<Report>
+  undoReport: (task: ParentHomeworkItem) => Promise<void>
   invalidate: QueryKey[]
 }
 
@@ -65,9 +65,9 @@ function TaskCard({
   href,
   completion,
 }: {
-  task: ParentTask
+  task: ParentHomeworkItem
   today: LocalDate
-  href: (task: ParentTask) => string
+  href: (task: ParentHomeworkItem) => string
   completion: TaskCompletion
 }) {
   const t = useTranslations("parent")
@@ -171,9 +171,9 @@ export function TaskList({
   empty,
 }: {
   title: string
-  tasks: ParentTask[]
+  tasks: ParentHomeworkItem[]
   today: LocalDate
-  href: (task: ParentTask) => string
+  href: (task: ParentHomeworkItem) => string
   completion: TaskCompletion
   empty?: ReactNode
 }) {

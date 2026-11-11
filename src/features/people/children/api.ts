@@ -6,7 +6,7 @@ import { PARENT_KEY } from "@/lib/api/query-keys"
 
 export type ChildSummary = Schemas["ChildSummaryResponse"]
 
-export type ParentChildren = Schemas["ChildListResponse"]
+export type ChildList = Schemas["ChildListResponse"]
 
 export const parentChildrenQuery = queryOptions({
   queryKey: [...PARENT_KEY, "children"],

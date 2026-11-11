@@ -1,5 +1,5 @@
 import type { ChildSummary } from "@/features/people/children/api"
-import type { ParentTask } from "@/features/learning/homework/api"
+import type { ParentHomeworkItem } from "@/features/learning/homework/api"
 
 export const MIMI_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ec001"
 export const MINA_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ec002"
@@ -28,7 +28,7 @@ export const mina: ChildSummary = {
 
 let seq = 0
 
-const task = (title: string, extra: Partial<ParentTask> = {}): ParentTask => ({
+const task = (title: string, extra: Partial<ParentHomeworkItem> = {}): ParentHomeworkItem => ({
   id: `0192f3a4-7b1c-7d2e-8f3a-${String(0xd000 + ++seq).padStart(12, "0")}`,
   title,
   lessonTitle: "The Good Shepherd",
@@ -41,7 +41,7 @@ const task = (title: string, extra: Partial<ParentTask> = {}): ParentTask => ({
   ...extra,
 })
 
-const done = (title: string, completedAt: string, extra: Partial<ParentTask> = {}) =>
+const done = (title: string, completedAt: string, extra: Partial<ParentHomeworkItem> = {}) =>
   task(title, { done: true, completedAt, ...extra })
 
 export const homeworkOf = {
@@ -64,4 +64,4 @@ export const homeworkOf = {
       done("Visit a neighbour", "2026-10-29T12:00:00Z", { completedByYou: true }),
     ],
   },
-} as const satisfies Record<string, { todo: ParentTask[]; done: ParentTask[] }>
+} as const satisfies Record<string, { todo: ParentHomeworkItem[]; done: ParentHomeworkItem[] }>

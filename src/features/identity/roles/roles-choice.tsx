@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { FieldDescription, FieldError, FieldLegend, FieldSet } from "@/components/ui/field"
 import { useFormat } from "@/i18n/format"
 
-import type { Role } from "./api"
+import type { RoleRow } from "./api"
 
 export function RolesChoice({
   roles,
@@ -15,7 +15,7 @@ export function RolesChoice({
   onChange,
   error,
 }: {
-  roles: Role[]
+  roles: RoleRow[]
   selected: string[]
   onChange: (ids: string[]) => void
   error?: string

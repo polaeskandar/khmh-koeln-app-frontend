@@ -12,7 +12,7 @@ import { address } from "@test/support/navigation"
 import { testProviders } from "@test/support/providers"
 
 import { type ChildSummary, parentChildrenQuery } from "@/features/people/children/api"
-import type { ParentTaskDetail } from "@/features/learning/homework/api"
+import type { ChildHomeworkDetail } from "@/features/learning/homework/api"
 import { ParentTaskPage } from "@/features/learning/homework/parent-task-page"
 
 const TASK_ID = "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ed001"
@@ -25,9 +25,9 @@ beforeEach(() => {
 })
 
 const detail = (
-  task: Partial<ParentTaskDetail["task"]> = {},
-  extra: Partial<ParentTaskDetail> = {}
-): ParentTaskDetail => ({
+  task: Partial<ChildHomeworkDetail["task"]> = {},
+  extra: Partial<ChildHomeworkDetail> = {}
+): ChildHomeworkDetail => ({
   today: "2026-11-08",
   child: { id: MINA_ID, name: "Mina" },
   task: {
@@ -57,7 +57,7 @@ const detail = (
 })
 
 function open(
-  data: ParentTaskDetail | (() => Response),
+  data: ChildHomeworkDetail | (() => Response),
   { locale = "en", children }: { locale?: Locale; children?: ChildSummary[] } = {}
 ) {
   let reads = 0

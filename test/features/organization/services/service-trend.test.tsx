@@ -13,9 +13,9 @@ import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import {
-  type ServiceRow,
+  type Service,
   serviceInsightsQuery,
-  type ServiceStages,
+  type StageList,
 } from "@/features/organization/services/api"
 import { ServiceDetailsPage } from "@/features/organization/services/service-details-page"
 import { ServicesTable } from "@/features/organization/services/services-overview-page"
@@ -28,11 +28,11 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
-const [sundaySchool, youth, , deacons] = services.items as ServiceRow[]
+const [sundaySchool, youth, , deacons] = services.items as Service[]
 
 const kindergarten = stageRef("Kindergarten", 0)
 
-const rows: ServiceRow[] = [sundaySchool!, youth!, deacons!]
+const rows: Service[] = [sundaySchool!, youth!, deacons!]
 
 const insights: ServiceInsightList = insightsOf(rows, {
   [sundaySchool!.id]: {
@@ -108,7 +108,7 @@ test("details show the attendance stat and no leaders", async () => {
   const service = rows[0]!
   address.set(`id=${service.id}`)
 
-  const stages: ServiceStages = {
+  const stages: StageList = {
     service: { id: service.id, name: service.name, tone: service.tone, archived: false },
     stages: [],
     archivedStages: [],

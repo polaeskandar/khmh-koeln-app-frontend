@@ -10,7 +10,7 @@ import { isolate } from "@/lib/bidi"
 import type { LocalDate } from "@/lib/api/types/common"
 import { addDays } from "@/lib/domain/time"
 
-import { type MeetingOption, OTHER_DATE, optionValue } from "./api"
+import { type LessonOption, OTHER_DATE, optionValue } from "./api"
 
 export function MeetingSelect({
   options,
@@ -22,7 +22,7 @@ export function MeetingSelect({
   onOtherDateChange,
   error,
 }: {
-  options: MeetingOption[]
+  options: LessonOption[]
   today: LocalDate
   value: string
   saved: string | null
@@ -35,7 +35,7 @@ export function MeetingSelect({
   const f = useFormat()
   const selected = options.find((o) => optionValue(o) === value)
 
-  const label = (o: MeetingOption) =>
+  const label = (o: LessonOption) =>
     [
       t("editor.option.when", {
         day: o.date === today ? f.relativeDay(o.date, today) : f.dayMonth(o.date),

@@ -14,7 +14,7 @@ import { server } from "@test/support/msw"
 import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { HomeworkDetail, StageHomework } from "@/features/learning/homework/api"
+import type { HomeworkDetail, HomeworkList } from "@/features/learning/homework/api"
 import { EditHomeworkPage } from "@/features/learning/homework/edit-homework-page"
 import { NewHomeworkPage } from "@/features/learning/homework/new-homework-page"
 
@@ -54,7 +54,7 @@ const servantWithoutUpdate: Me = {
   ),
 }
 
-const list = (extra: Partial<StageHomework> = {}): StageHomework => ({
+const list = (extra: Partial<HomeworkList> = {}): HomeworkList => ({
   today: "2026-11-10",
   stage: stageRef,
   archived: false,
@@ -94,7 +94,7 @@ const detail = (extra: Partial<HomeworkDetail> = {}): HomeworkDetail => ({
   ...extra,
 })
 
-function openNew(data: StageHomework, query = "", locale: Locale = "en", account: Me = me.servant) {
+function openNew(data: HomeworkList, query = "", locale: Locale = "en", account: Me = me.servant) {
   address.set(`stage=${THIRD_CLASS_ID}${query}`)
   const posted: { lesson: string; body: unknown }[] = []
 

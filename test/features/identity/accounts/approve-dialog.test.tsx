@@ -13,8 +13,8 @@ import { server } from "@test/support/msw"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { AccountRequest } from "@/features/identity/accounts/api"
-import type { DirectoryPerson } from "@/features/people/members/api"
-import type { Role } from "@/features/identity/roles/api"
+import type { DirectoryEntry } from "@/features/people/members/api"
+import type { RoleRow } from "@/features/identity/roles/api"
 import { SettingsPage } from "@/features/identity/accounts/settings-page"
 
 beforeEach(() => {
@@ -45,7 +45,7 @@ const fady: AccountRequest = {
   registeredAs: "servant",
 }
 
-const parentRole: Role = {
+const parentRole: RoleRow = {
   id: "role-parent",
   name: "Parent",
   scope: "church",
@@ -53,7 +53,7 @@ const parentRole: Role = {
   holderCount: 0,
 }
 
-const servantRole: Role = {
+const servantRole: RoleRow = {
   id: "role-servant",
   name: "Servant",
   scope: "assignedGroups",
@@ -61,7 +61,7 @@ const servantRole: Role = {
   holderCount: 0,
 }
 
-const child = (n: number, firstName: string, lastName: string): DirectoryPerson => ({
+const child = (n: number, firstName: string, lastName: string): DirectoryEntry => ({
   id: `0192f3a4-7b1c-7d2e-8f71-00000000000${n}`,
   firstName,
   lastName,

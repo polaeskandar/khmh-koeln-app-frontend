@@ -13,11 +13,11 @@ import { address, router } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type {
-  HomeworkCounts,
+  AudienceCounts,
   HomeworkDetail,
   HomeworkProgress,
-  HomeworkRow,
-  StageHomework,
+  HomeworkItem,
+  HomeworkList,
 } from "@/features/learning/homework/api"
 import { HomeworkProgressPage } from "@/features/learning/homework/homework-progress-page"
 import { StageHomeworkPage } from "@/features/learning/homework/stage-homework-page"
@@ -37,7 +37,7 @@ const lesson = {
   archived: false,
 }
 
-const counts = (reported: number): HomeworkCounts => ({
+const counts = (reported: number): AudienceCounts => ({
   assigned: 14,
   completed: reported,
   notCompleted: 14 - reported,
@@ -48,9 +48,9 @@ const counts = (reported: number): HomeworkCounts => ({
 })
 
 const homework = (
-  status: HomeworkRow["status"],
-  extra: Partial<HomeworkRow> = {}
-): HomeworkRow => ({
+  status: HomeworkItem["status"],
+  extra: Partial<HomeworkItem> = {}
+): HomeworkItem => ({
   id: ID,
   title: "Learn the memory verse",
   status,
@@ -61,7 +61,7 @@ const homework = (
   ...extra,
 })
 
-const list = (item: HomeworkRow, archived = false): StageHomework => ({
+const list = (item: HomeworkItem, archived = false): HomeworkList => ({
   today: "2026-11-08",
   stage,
   archived,
@@ -79,7 +79,7 @@ const list = (item: HomeworkRow, archived = false): StageHomework => ({
 type Options = { account?: Me; archived?: boolean }
 
 function openList(
-  item: HomeworkRow | (() => HomeworkRow),
+  item: HomeworkItem | (() => HomeworkItem),
   { account = me.servant, archived = false }: Options = {}
 ) {
   const current = typeof item === "function" ? item : () => item

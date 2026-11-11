@@ -12,12 +12,12 @@ import { useFormat } from "@/i18n/format"
 import { preferredName } from "@/lib/domain/names"
 import { placeLabel } from "@/lib/domain/place"
 
-import { type DirectoryPerson, directoryQuery } from "./api"
+import { type DirectoryEntry, directoryQuery } from "./api"
 
 const MIN_LETTERS = 2
 const DEBOUNCE_MS = 250
 
-export function groupsText(person: DirectoryPerson, separator: string, none: string) {
+export function groupsText(person: DirectoryEntry, separator: string, none: string) {
   if (person.groups.length === 0) {
     return none
   }
@@ -36,8 +36,8 @@ export function PersonSearch({
   onChange,
   label,
 }: {
-  chosen: DirectoryPerson[]
-  onChange: (people: DirectoryPerson[]) => void
+  chosen: DirectoryEntry[]
+  onChange: (people: DirectoryEntry[]) => void
   label: string
 }) {
   const t = useTranslations("accountRequests.approve")

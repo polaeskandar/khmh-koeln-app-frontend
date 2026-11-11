@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { useNow } from "@/hooks/use-today"
 import { useFormat } from "@/i18n/format"
 
-import { type ServiceRow, type Trend, useServiceInsight, useServiceInsights } from "./api"
+import { type Service, type Trend, useServiceInsight, useServiceInsights } from "./api"
 
 const DASH = "—"
 
@@ -16,7 +16,7 @@ type NextStatus = (typeof NEXT_STATUSES)[number]
 const isNextStatus = (status: string): status is NextStatus =>
   NEXT_STATUSES.some((known) => known === status)
 
-export function NextMeetingCell({ service }: { service: ServiceRow }) {
+export function NextMeetingCell({ service }: { service: Service }) {
   const t = useTranslations()
   const f = useFormat()
   const now = useNow()
@@ -55,7 +55,7 @@ export function useNextAt() {
   const today = useNow()?.date ?? null
   const insights = useServiceInsights()
 
-  return (service: ServiceRow): string | null => {
+  return (service: Service): string | null => {
     const next = insights.get(service.id)?.next
 
     if (service.archived || !next) {
@@ -71,7 +71,7 @@ export function useNextAt() {
   }
 }
 
-export function AttendanceCell({ service }: { service: ServiceRow }) {
+export function AttendanceCell({ service }: { service: Service }) {
   const t = useTranslations("services.table")
   const f = useFormat()
   const trend = useServiceInsight(service.id)?.trend

@@ -35,7 +35,7 @@ import {
   type HomeworkProgress,
   homeworkProgressQuery,
   homeworkQuery,
-  type ProgressRow,
+  type AudienceRow,
 } from "./api"
 import { HomeworkActions } from "./homework-actions"
 import { DueLine } from "./due-line"
@@ -44,7 +44,7 @@ type Tab = "all" | "done" | "open" | "noAccount"
 
 const TABS: Tab[] = ["all", "done", "open", "noAccount"]
 
-const FILTERS: Record<Tab, (row: ProgressRow) => boolean> = {
+const FILTERS: Record<Tab, (row: AudienceRow) => boolean> = {
   all: () => true,
   done: (row) => row.done,
   open: (row) => !row.done,
@@ -100,7 +100,7 @@ function Figures({ data }: { data: HomeworkProgress }) {
   )
 }
 
-function Reported({ row, today }: { row: ProgressRow; today: string }) {
+function Reported({ row, today }: { row: AudienceRow; today: string }) {
   const t = useTranslations()
   const f = useFormat()
 
@@ -124,7 +124,7 @@ function Reported({ row, today }: { row: ProgressRow; today: string }) {
   )
 }
 
-function Accounts({ row }: { row: ProgressRow }) {
+function Accounts({ row }: { row: AudienceRow }) {
   const t = useTranslations()
 
   const accounts = [

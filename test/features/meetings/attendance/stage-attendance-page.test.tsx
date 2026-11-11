@@ -9,7 +9,7 @@ import { server } from "@test/support/msw"
 import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
-import type { HistoryCell, StageAttendanceHistory } from "@/features/meetings/attendance/api"
+import type { HistoryCell, AttendanceHistory } from "@/features/meetings/attendance/api"
 import { StageAttendancePage } from "@/features/meetings/attendance/stage-attendance-page"
 
 beforeEach(() => {
@@ -36,7 +36,7 @@ const person = (n: number, firstName: string, displayName: string | null = null)
   displayName,
 })
 
-const history: StageAttendanceHistory = {
+const history: AttendanceHistory = {
   today: "2026-11-08",
   sessions,
   rows: [

@@ -6,15 +6,17 @@ import type { Problem } from "@/lib/api/translate-problem"
 import type { Group } from "@/lib/permissions"
 import { PEOPLE_KEY, SERVICES_KEY, STAGES_KEY } from "@/lib/api/query-keys"
 
-export type Placement = Schemas["PlacementRow"]
+export type PersonReference = Schemas["PersonReference"]
+
+export type PlacementRow = Schemas["PlacementRow"]
 
 export type PersonRow = Schemas["PersonRow"]
 
-export type PeopleList = Schemas["PeoplePageResponse"]
+export type PeoplePage = Schemas["PeoplePageResponse"]
 
-export type PeopleFilter = Schemas["PeopleQueryRequest"]
+export type PeopleQuery = Schemas["PeopleQueryRequest"]
 
-export const peopleQuery = (filter: PeopleFilter) =>
+export const peopleQuery = (filter: PeopleQuery) =>
   queryOptions({
     queryKey: [...PEOPLE_KEY, "list", filter],
     queryFn: ({ signal }) => dataOf(api.GET("/people", { params: { query: filter }, signal })),
@@ -37,14 +39,14 @@ export const personRowQuery = (person: PersonRow["person"], version: number) =>
     },
   })
 
-export type DirectoryPerson = Schemas["DirectoryEntry"]
+export type DirectoryEntry = Schemas["DirectoryEntry"]
 
-export function duplicateCandidatesOf(problem: Problem | null): DirectoryPerson[] {
+export function duplicateCandidatesOf(problem: Problem | null): DirectoryEntry[] {
   if (problem?.code !== "people.duplicate") {
     return []
   }
 
-  return (problem.extensions.candidates as DirectoryPerson[] | undefined) ?? []
+  return (problem.extensions.candidates as DirectoryEntry[] | undefined) ?? []
 }
 
 export const directoryQuery = (q: string) =>
@@ -60,9 +62,9 @@ export const PERSON_NAME_QUERIES = [PEOPLE_KEY, SERVICES_KEY]
 
 export type PlacementInput = Group
 
-export type NewPerson = Schemas["CreatePersonRequest"]
+export type CreatePerson = Schemas["CreatePersonRequest"]
 
-export const createPersonRequest = (person: NewPerson) =>
+export const createPersonRequest = (person: CreatePerson) =>
   dataOf(api.POST("/people", { body: person }))
 
 export const addMembershipRequest = (person: Uuid, placement: PlacementInput) =>

@@ -5,6 +5,8 @@ import { api, dataOf, type Schemas } from "@/lib/api/client"
 import { can } from "@/lib/permissions"
 import { ME_KEY, REGISTRATION_SERVICES_KEY } from "@/lib/api/query-keys"
 
+export type AccountPermission = Schemas["AccountPermissionResponse"]
+
 export type Me = Schemas["MeResponse"]
 
 export function areasOf(me: Me) {
@@ -32,14 +34,15 @@ export const MIN_PASSWORD_LENGTH = 10
 
 export type RegisteredAs = Schemas["RegisteredAs"]
 
-export type Registration = Schemas["RegisterAccountRequest"]
+export type RegisterAccount = Schemas["RegisterAccountRequest"]
 
 export const registrationServicesQuery = queryOptions({
   queryKey: [...REGISTRATION_SERVICES_KEY, "list"],
   queryFn: ({ signal }) => dataOf(api.GET("/auth/register/services", { signal })),
 })
 
-export const registerRequest = (body: Registration) => dataOf(api.POST("/auth/register", { body }))
+export const registerRequest = (body: RegisterAccount) =>
+  dataOf(api.POST("/auth/register", { body }))
 
 export const confirmEmailRequest = (token: string) =>
   dataOf(api.POST("/auth/email-confirmations", { body: { token } }))

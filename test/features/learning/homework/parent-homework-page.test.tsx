@@ -13,7 +13,7 @@ import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import type { ChildSummary } from "@/features/people/children/api"
-import type { ParentTask } from "@/features/learning/homework/api"
+import type { ParentHomeworkItem } from "@/features/learning/homework/api"
 import { ParentHomeworkPage } from "@/features/learning/homework/parent-homework-page"
 
 beforeEach(() => {
@@ -21,7 +21,10 @@ beforeEach(() => {
   vi.spyOn(toast, "error")
 })
 
-type Lists = Record<string, { todo: readonly ParentTask[]; done: readonly ParentTask[] }>
+type Lists = Record<
+  string,
+  { todo: readonly ParentHomeworkItem[]; done: readonly ParentHomeworkItem[] }
+>
 
 function open({
   items = [mimi, mina],
@@ -158,7 +161,7 @@ test("in Arabic stage names sit in bdi", async () => {
 const drawing = homeworkOf[MINA_ID].todo[0]
 const reading = homeworkOf[MINA_ID].done[0]
 
-const completion = (task: ParentTask) =>
+const completion = (task: ParentHomeworkItem) =>
   apiUrl(`/parent/children/${MINA_ID}/homework/${task.id}/completion`)
 
 const square = (title: string) =>

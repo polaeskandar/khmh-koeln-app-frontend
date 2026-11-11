@@ -14,12 +14,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useFormat } from "@/i18n/format"
 import { groupOf } from "./session-lines"
-import type { PlannedItem } from "@/lib/api/types/meetings"
+import type { PlannedSession } from "./api"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
 import { cancelOccurrenceRequest, SCHEDULE_QUERIES } from "./api"
 
-export function OccurrenceMenu({ item }: { item: PlannedItem }) {
+export function OccurrenceMenu({ item }: { item: PlannedSession }) {
   const t = useTranslations()
   const f = useFormat()
   const [canceling, setCanceling] = useState(false)

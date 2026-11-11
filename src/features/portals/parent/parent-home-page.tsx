@@ -14,7 +14,7 @@ import { routes } from "@/lib/routes"
 
 import {
   type ChildSummary,
-  type ParentChildren,
+  type ChildList,
   parentChildrenQuery,
   useSelectedChild,
 } from "@/features/people/children/api"
@@ -80,7 +80,7 @@ function ChildTasks({ child }: { child: ChildSummary }) {
   )
 }
 
-function Children({ data }: { data: ParentChildren }) {
+function Children({ data }: { data: ChildList }) {
   const t = useTranslations("parent.home")
   const selected = useSelectedChild(data.items)
 

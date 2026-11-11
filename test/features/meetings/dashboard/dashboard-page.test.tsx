@@ -6,7 +6,7 @@ import { SidebarNav } from "@/features/portals/staff/sidebar-nav"
 import type { Me } from "@/features/identity/auth/api"
 import { SessionProvider } from "@/features/identity/auth/session"
 import type { Locale } from "@/i18n/config"
-import type { AgendaItem, PlannedItem, SessionView } from "@/lib/api/types/meetings"
+import type { AgendaItem, PlannedSession, SessionView } from "@/features/meetings/meetings/api"
 import { apiUrl } from "@test/support/api"
 import { me } from "@test/support/fixtures/me"
 import {
@@ -43,8 +43,8 @@ const planned = (
   date: string,
   stage: string,
   position: number,
-  extra: Partial<PlannedItem> = {}
-): PlannedItem => ({
+  extra: Partial<PlannedSession> = {}
+): PlannedSession => ({
   kind: "planned",
   scheduleId: `0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e9${String(position).padStart(3, "0")}`,
   date,

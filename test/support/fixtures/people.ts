@@ -1,4 +1,4 @@
-import type { PeopleList, PersonRow } from "@/features/people/members/api"
+import type { PeoplePage, PersonRow } from "@/features/people/members/api"
 
 import { thirdClass } from "@test/support/fixtures/stages"
 
@@ -43,7 +43,7 @@ export function person(
 export const peopleList = (
   items: PersonRow[],
   { page = 1, total = items.length } = {}
-): PeopleList => ({
+): PeoplePage => ({
   today: "2026-11-08",
   items,
   page,
