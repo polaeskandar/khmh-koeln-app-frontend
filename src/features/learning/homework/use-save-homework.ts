@@ -13,7 +13,7 @@ import { routes } from "@/lib/routes"
 import {
   createHomeworkRequest,
   type HomeworkDetail,
-  type Homework,
+  type HomeworkRequest,
   HOMEWORK_SAVE_QUERIES,
   updateHomeworkRequest,
 } from "./api"
@@ -21,7 +21,7 @@ import { usePublishHomework } from "./use-publish-homework"
 
 export type SaveStep = "save" | "publish"
 
-type HomeworkFields = Homework & { title: string }
+type HomeworkFields = HomeworkRequest & { title: string }
 
 export function useSaveHomework({
   stageId,
@@ -43,7 +43,7 @@ export function useSaveHomework({
   const lessonPage = fromLesson ? routes.lesson(fromLesson) : null
 
   const mutation = useApiMutation(
-    (input: Homework) =>
+    (input: HomeworkRequest) =>
       savedId
         ? updateHomeworkRequest(savedId, version, input)
         : createHomeworkRequest(lessonId, input),

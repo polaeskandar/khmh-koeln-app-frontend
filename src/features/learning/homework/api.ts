@@ -25,7 +25,7 @@ export const stageHomeworkQuery = (stage: Uuid) =>
 
 export type HomeworkDetail = Schemas["HomeworkDetailResponse"]
 
-export type Homework = Schemas["HomeworkRequest"]
+export type HomeworkRequest = Schemas["HomeworkRequest"]
 
 export const homeworkQuery = (id: Uuid) =>
   queryOptions({
@@ -34,7 +34,7 @@ export const homeworkQuery = (id: Uuid) =>
       dataOf(api.GET("/homework/{id}", { params: { path: { id } }, signal })),
   })
 
-export const createHomeworkRequest = (lesson: Uuid, input: Homework) =>
+export const createHomeworkRequest = (lesson: Uuid, input: HomeworkRequest) =>
   dataOf(
     api.POST("/lessons/{lessonId}/homework", {
       params: { path: { lessonId: lesson } },
@@ -42,7 +42,7 @@ export const createHomeworkRequest = (lesson: Uuid, input: Homework) =>
     })
   )
 
-export const updateHomeworkRequest = (id: Uuid, version: number, input: Homework) =>
+export const updateHomeworkRequest = (id: Uuid, version: number, input: HomeworkRequest) =>
   dataOf(api.PUT("/homework/{id}", { params: { path: { id }, query: { version } }, body: input }))
 
 export const publishHomeworkRequest = (id: Uuid) =>
