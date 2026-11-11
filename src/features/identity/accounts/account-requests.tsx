@@ -15,7 +15,7 @@ import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty"
 import { initialsOf } from "@/features/identity/auth/role-summary"
 import { LOCALE_NAMES } from "@/i18n/config"
 import { useFormat } from "@/i18n/format"
-import { useRefetch } from "@/lib/api/refetch"
+import { isStale, useRefetch } from "@/lib/api/refetch"
 import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
@@ -24,6 +24,7 @@ import {
   accountRequestsQuery,
   declineRequest,
   ACCOUNT_REQUEST_QUERIES,
+  DECIDED_MEANWHILE,
 } from "./api"
 
 const KIND = { parent: "asParent", servant: "asServant", member: "asMember" } as const
@@ -99,11 +100,13 @@ function DeclineButton({ request }: { request: AccountRequest }) {
       onConfirm={async () => {
         const result = await decline.execute(request.account.id)
 
-        if (!result.ok) {
+        if (!result.ok && isStale(result.problem, DECIDED_MEANWHILE)) {
           void refetch(ACCOUNT_REQUEST_QUERIES)
+
+          return true
         }
 
-        return true
+        return result.ok
       }}
     />
   )

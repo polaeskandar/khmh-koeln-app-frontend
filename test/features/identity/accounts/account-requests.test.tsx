@@ -131,6 +131,20 @@ test("a 409 alreadyApproved toasts and refetches", async () => {
   await waitFor(() => expect(calls.list).toBe(2))
 })
 
+test("a network error keeps the dialog open without refetching", async () => {
+  const calls = open(me.administrator, () => HttpResponse.error())
+  await screen.findByRole("heading", { name: "Account requests (3)" })
+  await userEvent.click(within(rows()[0]).getByRole("button", { name: "Decline" }))
+  const dialog = within(screen.getByRole("alertdialog"))
+
+  await userEvent.click(dialog.getByRole("button", { name: "Decline and delete" }))
+
+  await waitFor(() => expect(toast.error).toHaveBeenCalled())
+  expect(dialog.getByRole("button", { name: "Decline and delete" })).toBeEnabled()
+  expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+  expect(calls.list).toBe(1)
+})
+
 test("staff who may only read requests are not offered Decline", async () => {
   open({
     ...me.churchOffice,
