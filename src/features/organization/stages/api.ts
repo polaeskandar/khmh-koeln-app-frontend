@@ -12,7 +12,7 @@ export const stageQuery = (id: Uuid) =>
     queryFn: ({ signal }) => dataOf(api.GET("/stages/{id}", { params: { path: { id } }, signal })),
   })
 
-export type StageFields = { name: string; description: string | null }
+export type StageFields = Schemas["StageRequest"]
 
 export const addStageRequest = (service: Uuid, fields: StageFields) =>
   dataOf(api.POST("/services/{id}/stages", { params: { path: { id: service } }, body: fields }))

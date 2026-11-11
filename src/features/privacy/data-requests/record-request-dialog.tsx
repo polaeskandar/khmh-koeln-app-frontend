@@ -35,6 +35,7 @@ import { useRouter } from "@/i18n/navigation"
 import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { fold, preferredName } from "@/lib/domain/names"
+import { oneOf } from "@/lib/one-of"
 import { routes } from "@/lib/routes"
 
 import {
@@ -45,6 +46,12 @@ import {
 } from "./api"
 
 const CHANNELS = ["email", "letter", "in_person"] as const
+
+const KINDS: RequestKind[] = ["erasure", "copy"]
+
+const ABOUTS = ["member", "account"] as const
+
+type About = (typeof ABOUTS)[number]
 
 function Choice({
   id,
@@ -77,7 +84,7 @@ function SubjectSearch({
   onChange,
   error,
 }: {
-  about: "member" | "account"
+  about: About
   subject: string | null
   onChange: (id: string | null) => void
   error?: string
@@ -150,7 +157,7 @@ function RecordForm({ today, onDone }: { today: LocalDate; onDone: () => void })
   const router = useRouter()
   const id = useId()
   const [kind, setKind] = useState<RequestKind>("erasure")
-  const [about, setAbout] = useState<"member" | "account">("member")
+  const [about, setAbout] = useState<About>("member")
   const [subject, setSubject] = useState<string | null>(null)
   const [requestedBy, setRequestedBy] = useState("")
   const [channel, setChannel] = useState<(typeof CHANNELS)[number]>("email")
@@ -193,7 +200,7 @@ function RecordForm({ today, onDone }: { today: LocalDate; onDone: () => void })
           <FieldLegend variant="label">{t("privacy.record.kind")}</FieldLegend>
           <RadioGroup
             value={kind}
-            onValueChange={(value) => setKind(value as RequestKind)}
+            onValueChange={(value) => setKind(oneOf(KINDS, value) ?? kind)}
             className="flex flex-col gap-2"
           >
             <Choice
@@ -216,7 +223,7 @@ function RecordForm({ today, onDone }: { today: LocalDate; onDone: () => void })
           <RadioGroup
             value={about}
             onValueChange={(value) => {
-              setAbout(value as "member" | "account")
+              setAbout(oneOf(ABOUTS, value) ?? about)
               setSubject(null)
             }}
             className="grid grid-cols-2 gap-2"
@@ -248,7 +255,7 @@ function RecordForm({ today, onDone }: { today: LocalDate; onDone: () => void })
               id={`${id}-channel`}
               className="w-full"
               value={channel}
-              onChange={(event) => setChannel(event.target.value as (typeof CHANNELS)[number])}
+              onChange={(event) => setChannel(oneOf(CHANNELS, event.target.value) ?? channel)}
             >
               {CHANNELS.map((value) => (
                 <NativeSelectOption key={value} value={value}>

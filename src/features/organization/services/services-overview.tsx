@@ -48,6 +48,8 @@ import { NewServiceButton, ServiceActionsMenu } from "./service-dialogs"
 
 type Tab = "active" | "archived" | "all"
 
+const TAB_ORDER: Tab[] = ["active", "archived", "all"]
+
 const TABS: Record<Tab, (row: ServiceRow) => boolean> = {
   active: (r) => !r.archived,
   archived: (r) => r.archived,
@@ -247,7 +249,7 @@ export function ServicesTable({ rows }: { rows: ServiceRow[] }) {
         <DataTableTabs
           value={tab}
           onValueChange={setTab}
-          tabs={(Object.keys(TABS) as Tab[]).map((value) => ({
+          tabs={TAB_ORDER.map((value) => ({
             value,
             label: t(`services.table.tabs.${value}`, { count: counts[value] }),
           }))}

@@ -57,7 +57,10 @@ production; off unless set, the page says to ask the church office.
   `src/lib/api/client.ts`, an [openapi-fetch](https://openapi-ts.dev/openapi-fetch/) client, wrapped in
   `dataOf()`: `dataOf(api.GET("/stages/{id}", { params: { path: { id } }, signal }))`. Paths, parameters,
   bodies and the data are checked against the document; types of API data are `Schemas["…"]`, never written
-  by hand.
+  by hand. That holds for request bodies (`Schemas["ServiceRequest"]`) and for a GET's query parameters,
+  which have no schema of their own: `QueryParams<"/agenda">` from the same module. A tab, radio or select
+  hands back a string; `oneOf(options, value)` from `src/lib/one-of.ts` turns it into one of the options,
+  or `undefined`, without a cast.
 - **The contract snapshot.** `openapi/openapi.json` is the backend's document as the frontend is built
   against it; it sits outside `src/`, so it is never bundled. The frontend PR that follows a backend change
   runs `pnpm api:types` against the backend with that change and commits the copy and the types together,

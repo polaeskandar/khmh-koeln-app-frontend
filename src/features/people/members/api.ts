@@ -2,6 +2,8 @@ import { queryOptions } from "@tanstack/react-query"
 
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { Uuid } from "@/lib/api/types/common"
+import type { Problem } from "@/lib/api/translate-problem"
+import type { Group } from "@/lib/permissions"
 import { PEOPLE_KEY, SERVICES_KEY, STAGES_KEY } from "@/lib/api/query-keys"
 
 export type Placement = Schemas["PlacementRow"]
@@ -10,13 +12,7 @@ export type PersonRow = Schemas["PersonRow"]
 
 export type PeopleList = Schemas["PeoplePageResponse"]
 
-export type PeopleFilter = {
-  status?: "active" | "inactive" | "all"
-  serviceId?: Uuid
-  stageId?: Uuid
-  q?: string
-  page?: number
-}
+export type PeopleFilter = Schemas["PeopleQueryRequest"]
 
 export const peopleQuery = (filter: PeopleFilter) =>
   queryOptions({
@@ -43,6 +39,14 @@ export const personRowQuery = (person: PersonRow["person"], version: number) =>
 
 export type DirectoryPerson = Schemas["DirectoryEntry"]
 
+export function duplicateCandidatesOf(problem: Problem | null): DirectoryPerson[] {
+  if (problem?.code !== "people.duplicate") {
+    return []
+  }
+
+  return (problem.extensions.candidates as DirectoryPerson[] | undefined) ?? []
+}
+
 export const directoryQuery = (q: string) =>
   queryOptions({
     queryKey: [...PEOPLE_KEY, "directory", q],
@@ -54,15 +58,9 @@ export const MEMBERSHIP_QUERIES = [PEOPLE_KEY, SERVICES_KEY, STAGES_KEY]
 
 export const PERSON_NAME_QUERIES = [PEOPLE_KEY, SERVICES_KEY]
 
-export type PlacementInput = { serviceId: Uuid; stageId: Uuid | null }
+export type PlacementInput = Group
 
-export type NewPerson = {
-  firstName: string
-  lastName: string
-  displayName: string | null
-  placement: PlacementInput | null
-  confirmDuplicate?: boolean
-}
+export type NewPerson = Schemas["CreatePersonRequest"]
 
 export const createPersonRequest = (person: NewPerson) =>
   dataOf(api.POST("/people", { body: person }))
@@ -72,9 +70,9 @@ export const addMembershipRequest = (person: Uuid, placement: PlacementInput) =>
     api.POST("/people/{id}/memberships", { params: { path: { id: person } }, body: placement })
   )
 
-export type PersonNames = { firstName: string; lastName: string; displayName: string | null }
+export type PersonNames = Pick<PersonRow["person"], "firstName" | "lastName" | "displayName">
 
-export const renamePersonRequest = (person: Uuid, names: PersonNames) =>
+export const renamePersonRequest = (person: Uuid, names: Schemas["RenamePersonRequest"]) =>
   dataOf(api.PUT("/people/{id}", { params: { path: { id: person } }, body: names }))
 
 export const endMembershipRequest = (membership: Uuid) =>

@@ -21,7 +21,6 @@ import { Spinner } from "@/components/ui/spinner"
 import { useCan } from "@/features/identity/auth/session"
 import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useFormat } from "@/i18n/format"
-import type { PersonRef, ServiceRef, StageRef } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { preferredName } from "@/lib/domain/names"
@@ -29,6 +28,8 @@ import { preferredName } from "@/lib/domain/names"
 import {
   addMembershipRequest,
   createPersonRequest,
+  type DirectoryPerson,
+  duplicateCandidatesOf,
   MEMBERSHIP_QUERIES,
   type NewPerson,
   type PlacementInput,
@@ -36,9 +37,7 @@ import {
 import { blocksPlacement } from "./groups"
 import { PlacementFields, usePlacement } from "./placement-fields"
 
-type Candidate = PersonRef & { groups: { service: ServiceRef; stage: StageRef | null }[] }
-
-const groupAt = (candidate: Candidate, placement: PlacementInput) =>
+const blockingGroupOf = (candidate: DirectoryPerson, placement: PlacementInput) =>
   candidate.groups.find((group) =>
     blocksPlacement({ serviceId: group.service.id, stageId: group.stage?.id ?? null }, placement)
   )
@@ -79,9 +78,7 @@ function AddPersonForm({
   const problem = create.problem
   const duplicate = problem?.code === "people.duplicate"
 
-  const candidates = duplicate
-    ? ((problem.extensions.candidates as Candidate[] | undefined) ?? [])
-    : []
+  const candidates = duplicateCandidatesOf(problem)
 
   const errors = create.fieldErrors
   const shownInFields = Object.keys(errors).length > 0
@@ -90,27 +87,30 @@ function AddPersonForm({
 
   useEffect(() => onPendingChange(busy), [busy, onPendingChange])
 
-  const person = (confirmDuplicate?: boolean): NewPerson => ({
+  const person: NewPerson = {
     firstName,
     lastName,
     displayName: displayName.trim() === "" ? null : displayName,
     placement,
-    ...(confirmDuplicate ? { confirmDuplicate } : {}),
-  })
+  }
 
-  async function submit(confirmDuplicate?: boolean) {
+  async function send(newPerson: NewPerson) {
     if (busy) {
       return
     }
 
-    const result = await create.execute(person(confirmDuplicate))
+    const result = await create.execute(newPerson)
 
     if (!result.ok && result.problem.status === 403) {
       toast.error(result.problem.message)
     }
   }
 
-  async function addExisting(candidate: Candidate) {
+  const submit = () => send(person)
+
+  const submitAnyway = () => send({ ...person, confirmDuplicate: true })
+
+  async function addExisting(candidate: DirectoryPerson) {
     if (!placement) {
       return
     }
@@ -140,7 +140,7 @@ function AddPersonForm({
             {candidates.length > 0 ? (
               <ul className="flex flex-col divide-y border-y">
                 {candidates.map((candidate) => {
-                  const there = placement ? groupAt(candidate, placement) : undefined
+                  const there = placement ? blockingGroupOf(candidate, placement) : undefined
 
                   return (
                     <li key={candidate.id} className="flex items-center justify-between gap-3 py-2">
@@ -190,7 +190,7 @@ function AddPersonForm({
               variant="outline"
               className="self-start"
               disabled={busy}
-              onClick={() => void submit(true)}
+              onClick={() => void submitAnyway()}
             >
               {t("members.newPerson.addAnyway")}
             </Button>

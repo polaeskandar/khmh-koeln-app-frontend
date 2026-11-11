@@ -28,6 +28,7 @@ import { Link, useRouter } from "@/i18n/navigation"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { nameKey } from "@/lib/domain/names"
+import { oneOf } from "@/lib/one-of"
 import {
   type Action,
   ACTIONS,
@@ -58,6 +59,8 @@ const SCOPES: { value: RoleScope; label: "scopeChurch" | "scopeAssigned" }[] = [
   { value: "assignedGroups", label: "scopeAssigned" },
 ]
 
+const SCOPE_VALUES = SCOPES.map((scope) => scope.value)
+
 function ScopeChoice({
   value,
   onChange,
@@ -76,7 +79,7 @@ function ScopeChoice({
     <FormPanel title={t("scope")}>
       <RadioGroup
         value={value}
-        onValueChange={(next) => onChange(next as RoleScope)}
+        onValueChange={(next) => onChange(oneOf(SCOPE_VALUES, next) ?? value)}
         disabled={disabled}
         aria-label={t("scope")}
         className="flex flex-col gap-2"

@@ -24,6 +24,7 @@ import { ApiError } from "@/lib/api/problem"
 import type { Uuid } from "@/lib/api/types/common"
 import { isolate } from "@/lib/bidi"
 import { initials, matchesQuery, preferredName } from "@/lib/domain/names"
+import { oneOf } from "@/lib/one-of"
 import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
@@ -38,6 +39,8 @@ import { HomeworkActions } from "./homework-actions"
 import { DueLine } from "./homework-bits"
 
 type Tab = "all" | "done" | "open" | "noAccount"
+
+const TABS: Tab[] = ["all", "done", "open", "noAccount"]
 
 const FILTERS: Record<Tab, (row: ProgressRow) => boolean> = {
   all: () => true,
@@ -141,9 +144,9 @@ function Completion({ data }: { data: HomeworkProgress }) {
   return (
     <div className="flex min-w-0 flex-col gap-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
+        <Tabs value={tab} onValueChange={(value) => setTab(oneOf(TABS, value) ?? tab)}>
           <TabsList className="flex-wrap">
-            {(Object.keys(FILTERS) as Tab[]).map((key) => (
+            {TABS.map((key) => (
               <TabsTrigger key={key} value={key}>
                 {t(`homework.completion.${TAB_LABEL[key]}`, {
                   count: data.rows.filter(FILTERS[key]).length,

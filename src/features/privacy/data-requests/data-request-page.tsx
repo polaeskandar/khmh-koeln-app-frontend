@@ -28,7 +28,6 @@ import { preferredName } from "@/lib/domain/names"
 import { routes } from "@/lib/routes"
 
 import {
-  accountRecordOf,
   type CopyLink,
   type CopyLinkStatus,
   type Counts,
@@ -38,7 +37,7 @@ import {
   eraseRequest,
   type ErasureReview,
   erasureReviewQuery,
-  memberRecordOf,
+  groupOfMembership,
   mentionLabelOf,
   DATA_REQUEST_QUERIES,
 } from "./api"
@@ -395,8 +394,7 @@ function CopyLinkSection({ data }: { data: DataRequestDetail }) {
 function Subject({ data }: { data: DataRequestDetail }) {
   const t = useTranslations("privacy.detail")
   const f = useFormat()
-  const member = data.member ? memberRecordOf(data.member) : null
-  const account = data.account ? accountRecordOf(data.account) : null
+  const { member, account } = data
 
   if (!member && !account) {
     return null
@@ -413,20 +411,21 @@ function Subject({ data }: { data: DataRequestDetail }) {
             <span className="text-muted-foreground">{t("noMemberships")}</span>
           ) : (
             <ul className="flex flex-col gap-0.5 text-muted-foreground">
-              {member.memberships.map((membership) => (
-                <li key={`${membership.group}-${membership.from}`}>
-                  {membership.until
-                    ? t("membershipEnded", {
-                        group: membership.group,
-                        from: f.mediumDate(membership.from),
-                        until: f.mediumDate(membership.until),
-                      })
-                    : t("membershipCurrent", {
-                        group: membership.group,
-                        from: f.mediumDate(membership.from),
-                      })}
-                </li>
-              ))}
+              {member.memberships.map((membership) => {
+                const group = groupOfMembership(membership)
+
+                return (
+                  <li key={`${group}-${membership.from}`}>
+                    {membership.until
+                      ? t("membershipEnded", {
+                          group,
+                          from: f.mediumDate(membership.from),
+                          until: f.mediumDate(membership.until),
+                        })
+                      : t("membershipCurrent", { group, from: f.mediumDate(membership.from) })}
+                  </li>
+                )
+              })}
             </ul>
           )}
         </div>

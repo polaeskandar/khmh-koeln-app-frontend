@@ -24,6 +24,7 @@ import { useTranslations } from "next-intl"
 import { cn } from "cn"
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { oneOf } from "@/lib/one-of"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -258,8 +259,10 @@ export function DataTableTabs<V extends string>({
   onValueChange: (value: V) => void
   tabs: { value: V; label: string }[]
 }) {
+  const values = tabs.map((tab) => tab.value)
+
   return (
-    <Tabs value={value} onValueChange={(next) => onValueChange(next as V)}>
+    <Tabs value={value} onValueChange={(next) => onValueChange(oneOf(values, next) ?? value)}>
       <TabsList>
         {tabs.map((tab) => (
           <TabsTrigger key={tab.value} value={tab.value}>

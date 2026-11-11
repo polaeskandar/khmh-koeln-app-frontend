@@ -25,6 +25,7 @@ import { useDebounced } from "@/hooks/use-debounced"
 import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import type { LessonStatus } from "@/lib/api/types/learning"
+import { oneOf } from "@/lib/one-of"
 import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
@@ -213,7 +214,7 @@ function Lessons({ stage }: { stage: Stage }) {
         <p className="text-sm text-muted-foreground">{t("lessons.list.onlyServants")}</p>
       ) : null}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <Tabs value={tab} onValueChange={(value) => setTab(value as LessonTab)}>
+        <Tabs value={tab} onValueChange={(value) => setTab(oneOf(tabs, value) ?? tab)}>
           <TabsList>
             {tabs.map((key) => (
               <TabsTrigger key={key} value={key}>

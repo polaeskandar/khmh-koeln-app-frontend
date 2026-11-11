@@ -1,7 +1,7 @@
 import { queryOptions } from "@tanstack/react-query"
 
 import { api, dataOf, type Schemas } from "@/lib/api/client"
-import type { LocalDate, Uuid } from "@/lib/api/types/common"
+import type { Uuid } from "@/lib/api/types/common"
 import { DATA_REQUESTS_KEY } from "@/lib/api/query-keys"
 
 export type RequestKind = Schemas["RequestKind"]
@@ -41,41 +41,10 @@ export const mentionLabelOf = (where: string): MentionLabel | null =>
 
 export type DataRequestDetail = Schemas["DataRequestDetailResponse"]
 
-const textOf = (value: unknown) => (typeof value === "string" ? value : null)
+export type MembershipRow = Schemas["MembershipRow"]
 
-export type MemberRecord = {
-  firstName: string
-  lastName: string
-  displayName: string | null
-  memberships: { group: string; from: LocalDate; until: LocalDate | null }[]
-}
-
-export function memberRecordOf(member: NonNullable<DataRequestDetail["member"]>): MemberRecord {
-  const rows = Array.isArray(member.memberships) ? member.memberships : []
-
-  return {
-    firstName: textOf(member.firstName) ?? "",
-    lastName: textOf(member.lastName) ?? "",
-    displayName: textOf(member.displayName),
-    memberships: rows.map((row) => ({
-      group: textOf(row.stage) ?? textOf(row.service) ?? "",
-      from: textOf(row.from) ?? "",
-      until: textOf(row.until),
-    })),
-  }
-}
-
-export type AccountRecord = { name: string; email: string; roles: string[] }
-
-export function accountRecordOf(account: NonNullable<DataRequestDetail["account"]>): AccountRecord {
-  const roles = account.roles
-
-  return {
-    name: textOf(account.name) ?? "",
-    email: textOf(account.email) ?? "",
-    roles: Array.isArray(roles) ? roles : [],
-  }
-}
+export const groupOfMembership = (membership: MembershipRow) =>
+  membership.stage ?? membership.service ?? ""
 
 export const dataRequestQuery = (id: Uuid) =>
   queryOptions({

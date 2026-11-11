@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query"
 
-import { api, dataOf, type Schemas } from "@/lib/api/client"
+import { api, dataOf, type QueryParams, type Schemas } from "@/lib/api/client"
 import {
   AGENDA_KEY,
   ATTENDANCE_HISTORY_KEY,
@@ -28,7 +28,7 @@ export const serviceSchedulesQuery = (serviceId: Uuid) =>
 
 export type Agenda = Schemas["AgendaResponse"]
 
-export type AgendaFilter = { from?: LocalDate; to?: LocalDate; serviceId?: Uuid; scheduleId?: Uuid }
+export type AgendaFilter = QueryParams<"/agenda">
 
 export const agendaQuery = (filter: AgendaFilter) =>
   queryOptions({

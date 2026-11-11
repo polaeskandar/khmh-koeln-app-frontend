@@ -19,6 +19,7 @@ import {
 import { FieldLabel } from "@/components/ui/field"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useInBrowser } from "@/hooks/use-in-browser"
+import { oneOf } from "@/lib/one-of"
 
 const THEMES = [
   { value: "light", icon: Sun },
@@ -28,14 +29,16 @@ const THEMES = [
 
 type Theme = (typeof THEMES)[number]["value"]
 
+const THEME_VALUES = THEMES.map((option) => option.value)
+
 function useChosenTheme(): { theme: Theme; setTheme: (theme: string) => void } {
   const { theme, setTheme } = useTheme()
 
   const mounted = useInBrowser()
 
-  const known = THEMES.some((t) => t.value === theme)
+  const known = oneOf(THEME_VALUES, theme)
 
-  return { theme: mounted && known ? (theme as Theme) : "system", setTheme }
+  return { theme: mounted && known ? known : "system", setTheme }
 }
 
 function ThemeChoices() {
