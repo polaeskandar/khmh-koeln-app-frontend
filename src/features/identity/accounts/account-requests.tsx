@@ -82,7 +82,7 @@ function DeclineButton({ request }: { request: AccountRequest }) {
   const refetch = useRefetch()
 
   const decline = useApiMutation(declineRequest, {
-    successMessage: t("toast.accountDeclined", { name: request.account.displayName }),
+    successMessage: t("accountRequests.toast.declined", { name: request.account.displayName }),
     invalidate: ACCOUNT_REQUEST_QUERIES,
   })
 

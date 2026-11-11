@@ -159,7 +159,7 @@ function RecordRequestDialog({ today, onClose }: { today: LocalDate; onClose: ()
   const [note, setNote] = useState("")
 
   const record = useApiMutation(recordDataRequest, {
-    successMessage: t("toast.dataRequestRecorded"),
+    successMessage: t("privacy.toast.recorded"),
     invalidate: DATA_REQUEST_QUERIES,
     onSuccess: (saved) => {
       onClose()

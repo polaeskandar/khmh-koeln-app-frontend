@@ -25,7 +25,7 @@ export function DeleteRoleDialog({
   const t = useTranslations()
 
   const remove = useApiMutation(deleteRoleRequest, {
-    successMessage: t("toast.roleDeleted", { name: role.name }),
+    successMessage: t("roles.toast.deleted", { name: role.name }),
     invalidate: ROLE_QUERIES,
     onSuccess: onDeleted,
   })
@@ -34,9 +34,9 @@ export function DeleteRoleDialog({
     <ConfirmDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={t("settings.roles.deleteTitle", { name: isolate(role.name) })}
-      description={t("settings.roles.deleteDescription", { count: holders })}
-      confirmLabel={t("settings.roles.deleteConfirm")}
+      title={t("roles.list.deleteTitle", { name: isolate(role.name) })}
+      description={t("roles.list.deleteDescription", { count: holders })}
+      confirmLabel={t("roles.list.deleteConfirm")}
       tone="destructive"
       onConfirm={async () => (await remove.execute(role.id)).ok}
     />

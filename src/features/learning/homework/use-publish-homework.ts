@@ -13,14 +13,14 @@ import { HOMEWORK_QUERIES, publishHomeworkRequest } from "./api"
 type Target = { id: Uuid; title: string; publishedAt: Instant | null }
 
 export function usePublishHomework(message?: string) {
-  const t = useTranslations("toast")
+  const t = useTranslations("homework.toast")
   const refetch = useRefetch()
   const published = useRef(new Set<string>())
 
   const mutation = useApiMutation(
     async ({ id, title }: Target) => ({ ...(await publishHomeworkRequest(id)), title }),
     {
-      successMessage: (published) => message ?? t("homeworkPublished", { title: published.title }),
+      successMessage: (published) => message ?? t("published", { title: published.title }),
     }
   )
 

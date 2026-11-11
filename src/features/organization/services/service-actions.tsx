@@ -106,7 +106,7 @@ export function ServiceActionsMenu({ service }: { service: Service }) {
           t("services.archive.kept"),
         ]}
         confirmLabel={t("common.archive")}
-        successMessage={t("toast.serviceArchived", { name: service.name })}
+        successMessage={t("services.toast.archived", { name: service.name })}
         request={() => archiveServiceRequest(service.id)}
       />
       <StructureChangeDialog

@@ -129,16 +129,14 @@ server-rendered at build time; the screen itself is one client component in `src
 
 ```tsx
 import type { Metadata } from "next"
-import { getTranslations } from "next-intl/server"
 
 import { ServiceDetailsPage } from "@/features/organization/services/service-details-page"
-import { pageLocale } from "@/i18n/page"
+import { pageLocale, pageTitle } from "@/i18n/page"
 
 export async function generateMetadata({
   params,
 }: PageProps<"/[locale]/services/view">): Promise<Metadata> {
-  const t = await getTranslations({ locale: await pageLocale(params), namespace: "services" })
-  return { title: t("title") }
+  return { title: await pageTitle(params, "service") }
 }
 
 export default async function Page({ params }: PageProps<"/[locale]/services/view">) {
@@ -148,4 +146,5 @@ export default async function Page({ params }: PageProps<"/[locale]/services/vie
 ```
 
 `pageLocale(params)` reads the language and calls `setRequestLocale`, which next-intl needs before any of its
-server functions run.
+server functions run. `pageTitle(params, "service")` reads the page's title from the `pages` namespace of the
+catalogs, where every page has one key named after its builder above.

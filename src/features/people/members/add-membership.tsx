@@ -27,7 +27,7 @@ export function AddMembership({ row }: { row: PersonRow }) {
   const [chosen, setChosen] = useState("")
 
   const join = useApiMutation(addMembershipRequest, {
-    successMessage: t("toast.membershipAdded"),
+    successMessage: t("members.toast.membershipAdded"),
     invalidate: MEMBERSHIP_QUERIES,
     awaitRefetch: true,
     onSuccess: () => setChosen(""),

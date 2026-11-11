@@ -36,7 +36,8 @@ type Homework = Pick<HomeworkItem, "id" | "title" | "status" | "publishedAt" | "
 type Change = HomeworkTransition | "delete"
 
 function useChangeHomework(homework: Homework, onDeleted?: () => void) {
-  const t = useTranslations("toast")
+  const t = useTranslations("homework.toast")
+  const shared = useTranslations("toast")
   const title = homework.title
 
   return useApiMutation(
@@ -47,14 +48,14 @@ function useChangeHomework(homework: Homework, onDeleted?: () => void) {
     {
       successMessage: ({ change, status }) =>
         change === "unpublish"
-          ? t("homeworkUnpublished", { title })
+          ? t("unpublished", { title })
           : change === "archive"
-            ? t("homeworkArchived", { title })
+            ? t("archived", { title })
             : change === "restore"
               ? status === "published"
-                ? t("homeworkRestoredPublished", { title })
-                : t("homeworkRestoredDraft", { title })
-              : t("deletedTitle", { title }),
+                ? t("restoredPublished", { title })
+                : t("restoredDraft", { title })
+              : shared("deletedTitle", { title }),
       invalidate: HOMEWORK_QUERIES,
       onSuccess: ({ change }) => {
         if (change === "delete") {

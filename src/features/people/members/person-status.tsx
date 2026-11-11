@@ -46,14 +46,14 @@ export function StatusAction({
     })
 
   const deactivate = useApiMutation(deactivatePersonRequest, {
-    successMessage: (next) => t("toast.personInactive", { name: preferredName(next) }),
+    successMessage: (next) => t("members.toast.personInactive", { name: preferredName(next) }),
     invalidate: MEMBERSHIP_QUERIES,
     awaitRefetch: true,
     onSuccess: changed,
   })
 
   const reactivate = useApiMutation(reactivatePersonRequest, {
-    successMessage: (next) => t("toast.personReactivated", { name: preferredName(next) }),
+    successMessage: (next) => t("members.toast.personReactivated", { name: preferredName(next) }),
     invalidate: MEMBERSHIP_QUERIES,
     awaitRefetch: true,
     onSuccess: changed,

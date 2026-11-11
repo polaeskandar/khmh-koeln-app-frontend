@@ -14,7 +14,7 @@ import { RoleForm } from "./role-form"
 import { RoleEditorFrame, NoRoles } from "./role-editor"
 
 function ExistingRole({ id }: { id: string }) {
-  const t = useTranslations("roleEditor")
+  const t = useTranslations("roles.editor")
   const query = useQuery(roleQuery(id))
 
   return (

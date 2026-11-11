@@ -338,55 +338,130 @@
     "archived": "{name} archiviert.",
     "restored": "{name} wiederhergestellt.",
     "deleted": "{name} gelöscht.",
-    "serviceArchived": "{name} archiviert. Für den Dienst werden keine neuen Termine mehr angelegt.",
-    "scheduleCreated": "Regeltermin angelegt.{created, plural, =0 {} one { Für heute und morgen wurde # Termin angelegt.} other { Für heute und morgen wurden # Termine angelegt.}}",
-    "scheduleSaved": "Regeltermin gespeichert. Ab jetzt angelegte Termine übernehmen die neuen Angaben.{created, plural, =0 {} one { Für heute und morgen wurde # Termin angelegt.} other { Für heute und morgen wurden # Termine angelegt.}}",
-    "scheduleActivated": "Regeltermin aktiviert.{created, plural, =0 {} one { Für heute und morgen wurde # Termin angelegt.} other { Für heute und morgen wurden # Termine angelegt.}}",
-    "scheduleDeactivated": "Regeltermin deaktiviert. Es werden keine neuen Termine angelegt; vorhandene bleiben.",
-    "scheduleDeleted": "Regeltermin gelöscht.",
-    "attendanceClosed": "Anwesenheit abgeschlossen.",
-    "sessionCanceled": "Termin abgesagt. Der Regeltermin und seine anderen Termine bleiben unverändert.",
-    "dateCanceled": "Dieser Termin ist abgesagt. Der Regeltermin und seine anderen Termine bleiben unverändert.",
-    "personReactivated": "{name} wieder aktiviert.",
-    "personInactive": "{name} als inaktiv markiert.",
-    "membershipAdded": "Hinzugefügt.",
-    "membershipEnded": "Entfernt. Die bisherige Anwesenheit bleibt erhalten.",
-    "membershipMoved": "Verschoben. Die bisherige Anwesenheit bleibt bei der alten Stufe.",
-    "roleAssigned": "Rolle vergeben.",
-    "roleRemoved": "Rolle entfernt.",
-    "lessonDraftSaved": "Entwurf gespeichert: „{title}“.",
-    "lessonSavedReady": "Gespeichert. Die Lektion ist bereit zum Unterrichten.",
-    "lessonTaught": "Als gehalten markiert.",
-    "lessonMarkedReady": "Als bereit markiert.",
-    "lessonBackToDraft": "Zurück zum Entwurf.",
     "archivedTitle": "„{title}“ archiviert.",
     "restoredTitle": "„{title}“ wiederhergestellt.",
-    "deletedTitle": "„{title}“ gelöscht.",
-    "homeworkPublishedNew": "Veröffentlicht. Eltern und Mitglieder der Klasse sehen sie jetzt.",
-    "homeworkDraftSaved": "Als Entwurf gespeichert. Eltern und Mitglieder sehen sie noch nicht.",
-    "homeworkSavedPublished": "Gespeichert. Eltern und Mitglieder sehen die neue Fassung.",
-    "homeworkSavedDraft": "Als Entwurf gespeichert.",
-    "homeworkPublished": "„{title}“ veröffentlicht. Eltern und Mitglieder der Klasse sehen sie jetzt.",
-    "homeworkUnpublished": "„{title}“ ist wieder ein Entwurf und für Eltern und Mitglieder verborgen.",
-    "homeworkArchived": "„{title}“ archiviert. Gemeldete Erledigungen bleiben erhalten.",
-    "homeworkRestoredPublished": "„{title}“ wiederhergestellt. Eltern und Mitglieder der Klasse sehen sie wieder.",
-    "homeworkRestoredDraft": "„{title}“ als Entwurf wiederhergestellt.",
-    "accessGiven": "Zugang erteilt. Der Elternteil sieht die veröffentlichten Hausaufgaben dieses Kindes.",
-    "approved": "Freigegeben.",
-    "accessRemoved": "Zugang entfernt.",
-    "accountApproved": "{name} kann sich jetzt anmelden.",
-    "accountDeclined": "Abgelehnt. Die Registrierung von {name} wurde gelöscht.",
-    "dataRequestRecorded": "Anfrage erfasst. Die Antwort ist in einem Monat fällig.",
-    "memberUnlinked": "Verknüpfung für {name} entfernt.",
-    "roleCreated": "Rolle „{name}“ angelegt.",
-    "roleSaved": "Rolle gespeichert.",
-    "roleDeleted": "Rolle „{name}“ gelöscht.",
-    "groupAssigned": "{name} dient jetzt in {where}.",
-    "groupRemoved": "{name} dient nicht mehr in {where}."
+    "deletedTitle": "„{title}“ gelöscht."
   },
   "roles": {
     "summary": {
       "none": "Noch keine Rolle"
+    },
+    "editor": {
+      "titleNew": "Neue Rolle",
+      "descriptionNew": "Benennen Sie die Rolle und wählen Sie, was sie erlaubt. Danach vergeben Sie sie an Konten.",
+      "roles": "Rollen",
+      "details": "Rolle",
+      "name": "Name",
+      "nameHint": "Zum Beispiel: Gemeindebüro, Anwesenheitshilfe.",
+      "description": "Was die Rolle erlaubt, wo sie gilt und wer sie hat.",
+      "permissions": "Was sie erlaubt",
+      "permissionsHint": "Wer Anlegen, Ändern oder Löschen ankreuzt, kreuzt auch Sehen an.",
+      "chosen": "{count, number} von {total, number} gewählt",
+      "readOnlyNote": "Sie können diese Rolle sehen, aber Ihre Rollen erlauben nicht, sie zu ändern.",
+      "create": "Rolle anlegen",
+      "save": "Änderungen speichern",
+      "deleteRole": "Rolle löschen",
+      "holdersTitle": "Wer diese Rolle hat",
+      "holdersNone": "Noch niemand. Vergeben Sie die Rolle unter <link>Mitarbeiterkonten und Rollen</link>.",
+      "holdersNew": "Nach dem Anlegen vergeben Sie die Rolle unter <link>Mitarbeiterkonten und Rollen</link>.",
+      "disabledAccount": "deaktiviert",
+      "applyCount": "{count, plural, =0 {Noch hat niemand diese Rolle.} one {Änderungen gelten sofort für # Konto.} other {Änderungen gelten sofort für # Konten.}}",
+      "sensitive": "Sensibel",
+      "sensitiveHint": "Erlaubt Einblick in die persönlichen Daten aller oder die Entscheidung, wer was darf. Nur für Personen, denen Sie wie einem Administrator vertrauen.",
+      "noAccess": "Sie können keine Rollen sehen",
+      "noAccessHint": "Dafür braucht es eine Rolle mit „Rollen: Sehen“; zum Anlegen „Rollen: Anlegen“.",
+      "nameTaken": "Eine Rolle namens „{name}“ gibt es bereits.",
+      "area": "Bereich",
+      "cell": "{resource}: {action}",
+      "opensNothing": "Konten mit nur dieser Rolle können weder die Mitarbeiter-App noch den Elternbereich öffnen. Kreuzen Sie Dienste: Sehen an, damit sie in die Mitarbeiter-App kommen.",
+      "locksOut": "Sonst kann niemand Rollen ändern. Ohne „Rollen: Ändern“ hier könnte niemand mehr Rollen reparieren, deshalb würde diese Änderung abgelehnt.",
+      "added": "Angelegt {when}",
+      "changed": "Zuletzt geändert {when}",
+      "scope": "Wo sie gilt",
+      "scopeChurch": "Überall in der Gemeinde",
+      "scopeChurchHint": "In jedem Dienst und jeder Stufe. Für die Verwaltung, das Gemeindebüro und Eltern.",
+      "scopeAssigned": "Nur in den zugeordneten Gruppen des Kontos",
+      "scopeAssignedHint": "In den Diensten und Stufen, denen das Konto unter Mitarbeiterkonten und Rollen zugeordnet ist. Für Diener und Dienstleitungen."
+    },
+    "list": {
+      "title": "Rollen",
+      "description": "Was jede Rolle erlaubt. Vergeben Sie Rollen unter Mitarbeiterkonten und Rollen.",
+      "newRole": "Neue Rolle",
+      "role": "Rolle",
+      "accounts": "Konten",
+      "permissionCount": "{count, number} von {total, number} Berechtigungen",
+      "holders": "{count, plural, =0 {Niemand} one {# Konto} other {# Konten}}",
+      "actionsFor": "Aktionen für {role}",
+      "edit": "Bearbeiten",
+      "view": "Ansehen",
+      "delete": "Löschen",
+      "deleteTitle": "Rolle „{name}“ löschen?",
+      "deleteDescription": "{count, plural, =0 {Niemand hat sie.} one {# Konto hat sie und verliert sofort, was sie erlaubt.} other {# Konten haben sie und verlieren sofort, was sie erlaubt.}}",
+      "deleteConfirm": "Rolle löschen",
+      "readOnly": "Ihre Rollen erlauben Ihnen, Rollen zu sehen, aber nicht zu ändern.",
+      "allows": "Erlaubt",
+      "global": "Manche Rollen gelten überall in der Gemeinde, andere nur in den Diensten und Stufen, denen ein Konto zugeordnet ist. Welche Kinder Eltern sehen, ergibt sich weiter aus dem Elternzugang; Mitglieder sehen ihre eigenen Gruppen ohne Rolle.",
+      "scope": {
+        "church": "Überall",
+        "assignedGroups": "In zugeordneten Gruppen"
+      }
+    },
+    "permissions": {
+      "actions": {
+        "read": "Sehen",
+        "create": "Anlegen",
+        "update": "Ändern",
+        "delete": "Löschen"
+      },
+      "resources": {
+        "services": {
+          "name": "Dienste",
+          "description": "Sehen: die Mitarbeiter-App mit allen Diensten, Stufen und Terminen öffnen. Anlegen: Dienste gründen. Ändern: sie bearbeiten. Löschen: sie archivieren, wiederherstellen und löschen."
+        },
+        "stages": {
+          "name": "Stufen",
+          "description": "Anlegen, Ändern, Löschen: die Stufen eines Dienstes anlegen, umbenennen, ordnen, archivieren und löschen. Wer Dienste sieht, sieht auch die Stufen."
+        },
+        "sessions": {
+          "name": "Termine",
+          "description": "Anlegen: Terminpläne und einzelne Termine planen. Ändern: Termine bearbeiten, verschieben, absagen und wieder öffnen. Löschen: Terminpläne löschen. Wer Dienste sieht, sieht auch die Termine."
+        },
+        "attendance": {
+          "name": "Anwesenheit",
+          "description": "Sehen: Anwesenheitslisten und Verlauf. Anlegen: Anwesenheit erfassen (Termin öffnen, Anwesende markieren, schließen). Löschen: eine versehentliche Markierung entfernen. Ändern wird noch nicht verwendet."
+        },
+        "members": {
+          "name": "Mitglieder",
+          "description": "Sehen: die Mitgliederliste und die Angaben zu Personen. Anlegen: Personen hinzufügen. Ändern: Personen bearbeiten, Stufen zuordnen und verschieben. Löschen: Personen aus Stufen nehmen."
+        },
+        "lessons": {
+          "name": "Lektionen",
+          "description": "Sehen: Lektionen. Anlegen: Lektionen vorbereiten. Ändern: sie bearbeiten und abschließen. Löschen: sie archivieren und löschen."
+        },
+        "homework": {
+          "name": "Hausaufgaben",
+          "description": "Sehen: Hausaufgaben und wer sie als erledigt gemeldet hat. Anlegen: Hausaufgaben geben. Ändern: sie bearbeiten, veröffentlichen und zurücknehmen. Löschen: sie archivieren und löschen."
+        },
+        "parentPortal": {
+          "name": "Elternbereich",
+          "description": "Sehen: den Elternbereich öffnen, für die Kinder, für die das Konto Elternzugang hat. Anlegen, Ändern und Löschen werden noch nicht verwendet."
+        },
+        "users": {
+          "name": "Konten",
+          "description": "Sehen: Konten, Kontoanfragen, Elternzugang und Mitgliedskonten. Anlegen: Kontoanfragen freigeben und ablehnen. Ändern: Rollen vergeben und entziehen, Elternzugang und Mitgliederverknüpfungen. Löschen: Datenschutzanfragen und Löschungen."
+        },
+        "roles": {
+          "name": "Rollen",
+          "description": "Sehen: die Rollen und was sie erlauben. Anlegen, Ändern, Löschen: Rollen anlegen, ändern und löschen."
+        }
+      }
+    },
+    "toast": {
+      "assigned": "Rolle vergeben.",
+      "removed": "Rolle entfernt.",
+      "created": "Rolle „{name}“ angelegt.",
+      "saved": "Rolle gespeichert.",
+      "deleted": "Rolle „{name}“ gelöscht."
     }
   },
   "dashboard": {
@@ -478,12 +553,6 @@
       },
       "empty": "Noch keine Stufen. {name} trifft sich als eine Gruppe, bis Sie welche hinzufügen.",
       "archived": "Archivierte Stufen"
-    },
-    "overview": {
-      "members": "Mitglieder ({count, number})",
-      "empty": "Noch keine Mitglieder",
-      "emptyDescription": "Fügen Sie die Kinder oder Personen dieser Stufe hinzu, um ihre Liste aufzubauen.",
-      "since": "seit {date}"
     }
   },
   "history": {
@@ -640,6 +709,13 @@
       "changeBody": "Nur die Diener von {stage} und die Dienstleitung können Lektionen dieser Stufe ändern.",
       "archivedTitle": "Diese Lektion ist archiviert",
       "archivedBody": "Stellen Sie sie zuerst wieder her, um sie zu ändern."
+    },
+    "toast": {
+      "draftSaved": "Entwurf gespeichert: „{title}“.",
+      "savedReady": "Gespeichert. Die Lektion ist bereit zum Unterrichten.",
+      "taught": "Als gehalten markiert.",
+      "markedReady": "Als bereit markiert.",
+      "backToDraft": "Zurück zum Entwurf."
     }
   },
   "settings": {
@@ -690,7 +766,11 @@
       "remove": "Entfernen",
       "removeTitle": "Zugang von {parent} zu {child} entfernen?",
       "removeDescription": "Der Elternteil sieht dieses Kind nicht mehr im Elternbereich. Gemeldete Erledigungen bleiben im Verlauf erhalten.",
-      "removeAccess": "Zugang entfernen"
+      "removeAccess": "Zugang entfernen",
+      "toast": {
+        "given": "Zugang erteilt. Der Elternteil sieht die veröffentlichten Hausaufgaben dieses Kindes.",
+        "removed": "Zugang entfernt."
+      }
     },
     "members": {
       "title": "Mitgliedskonten",
@@ -712,29 +792,9 @@
       "removeDescription": "Das Konto zeigt die Gruppen, Treffen und Hausaufgaben des Mitglieds nicht mehr.",
       "removeKept": "Mit dem Konto gemeldete Erledigungen bleiben im Verlauf erhalten.",
       "removeAgain": "Ein Konto ohne weitere Rolle kommt zurück zu den Kontoanfragen: Sie können es mit dem richtigen Eintrag verknüpfen oder ablehnen.",
-      "removeConfirm": "Verknüpfung entfernen"
-    },
-    "roles": {
-      "title": "Rollen",
-      "description": "Was jede Rolle erlaubt. Vergeben Sie Rollen unter Mitarbeiterkonten und Rollen.",
-      "newRole": "Neue Rolle",
-      "role": "Rolle",
-      "accounts": "Konten",
-      "permissionCount": "{count, number} von {total, number} Berechtigungen",
-      "holders": "{count, plural, =0 {Niemand} one {# Konto} other {# Konten}}",
-      "actionsFor": "Aktionen für {role}",
-      "edit": "Bearbeiten",
-      "view": "Ansehen",
-      "delete": "Löschen",
-      "deleteTitle": "Rolle „{name}“ löschen?",
-      "deleteDescription": "{count, plural, =0 {Niemand hat sie.} one {# Konto hat sie und verliert sofort, was sie erlaubt.} other {# Konten haben sie und verlieren sofort, was sie erlaubt.}}",
-      "deleteConfirm": "Rolle löschen",
-      "readOnly": "Ihre Rollen erlauben Ihnen, Rollen zu sehen, aber nicht zu ändern.",
-      "allows": "Erlaubt",
-      "global": "Manche Rollen gelten überall in der Gemeinde, andere nur in den Diensten und Stufen, denen ein Konto zugeordnet ist. Welche Kinder Eltern sehen, ergibt sich weiter aus dem Elternzugang; Mitglieder sehen ihre eigenen Gruppen ohne Rolle.",
-      "scope": {
-        "church": "Überall",
-        "assignedGroups": "In zugeordneten Gruppen"
+      "removeConfirm": "Verknüpfung entfernen",
+      "toast": {
+        "unlinked": "Verknüpfung für {name} entfernt."
       }
     }
   },
@@ -813,7 +873,6 @@
       "servantsCanStillOpen": "Die Diener dieser Gruppe können sie noch öffnen, um festzuhalten, wer da war."
     },
     "summary": {
-      "metaTitle": "Zusammenfassung der Anwesenheit",
       "continue": "Anwesenheit weiter erfassen",
       "ofRoster": "von {total, number} auf der Liste anwesend",
       "present": "anwesend",
@@ -895,7 +954,6 @@
       "confirm": "Wieder öffnen"
     },
     "stage": {
-      "metaTitle": "Anwesenheit der Stufe",
       "title": "Letzte Termine",
       "description": "Die aktuellen Mitglieder im Vergleich zu den letzten abgeschlossenen Terminen. Ein gefülltes Kästchen bedeutet „als anwesend markiert“, ein leeres „nicht als anwesend markiert“. Striche stehen für Termine, bevor jemand dazukam.",
       "empty": "Noch keine abgeschlossenen Termine.",
@@ -913,6 +971,9 @@
         "notInStage": "noch nicht in der Stufe"
       },
       "footnote": "Die Zahlen enthalten auch Personen, die gekommen sind, aber nicht auf der Liste stehen. Abwesenheit wird nicht erfasst: Ein leeres Kästchen bedeutet nur, dass niemand die Person als anwesend markiert hat."
+    },
+    "toast": {
+      "closed": "Anwesenheit abgeschlossen."
     }
   },
   "members": {
@@ -987,12 +1048,24 @@
       }
     },
     "noAccess": "Sie können die Mitgliederliste nicht sehen",
-    "noAccessHint": "Dafür braucht es eine Rolle mit „Mitglieder: Sehen“."
+    "noAccessHint": "Dafür braucht es eine Rolle mit „Mitglieder: Sehen“.",
+    "toast": {
+      "personReactivated": "{name} wieder aktiviert.",
+      "personInactive": "{name} als inaktiv markiert.",
+      "membershipAdded": "Hinzugefügt.",
+      "membershipEnded": "Entfernt. Die bisherige Anwesenheit bleibt erhalten.",
+      "membershipMoved": "Verschoben. Die bisherige Anwesenheit bleibt bei der alten Stufe."
+    },
+    "stageRoster": {
+      "members": "Mitglieder ({count, number})",
+      "empty": "Noch keine Mitglieder",
+      "emptyDescription": "Fügen Sie die Kinder oder Personen dieser Stufe hinzu, um ihre Liste aufzubauen.",
+      "since": "seit {date}"
+    }
   },
   "homework": {
     "title": "Hausaufgaben",
     "newHomework": "Neue Hausaufgabe",
-    "editHomework": "Hausaufgabe bearbeiten",
     "notYet": "Noch nicht",
     "childrenWithoutAccount": "{count, plural, one {# Person} other {# Personen}} ohne Konto",
     "hiddenFromParents": "Für Eltern und Mitglieder verborgen",
@@ -1121,6 +1194,17 @@
       "visible": "Sichtbar für {count, plural, one {# Mitglied} other {# Mitglieder}} von {stage} – über die Eltern oder im eigenen Konto. Änderungen erscheinen sofort{completions, plural, =0 {} one {; die bereits gemeldete Erledigung bleibt erhalten} other {; die # bereits gemeldeten Erledigungen bleiben erhalten}}.",
       "hiddenUntilPublished": "Nach der Veröffentlichung ist sie für {count, plural, one {# Mitglied} other {# Mitglieder}} von {stage} sichtbar – über die Eltern oder im eigenen Konto. Bis dahin bleibt sie verborgen.",
       "saveDraft": "Entwurf speichern"
+    },
+    "toast": {
+      "publishedNew": "Veröffentlicht. Eltern und Mitglieder der Klasse sehen sie jetzt.",
+      "draftSaved": "Als Entwurf gespeichert. Eltern und Mitglieder sehen sie noch nicht.",
+      "savedPublished": "Gespeichert. Eltern und Mitglieder sehen die neue Fassung.",
+      "savedDraft": "Als Entwurf gespeichert.",
+      "published": "„{title}“ veröffentlicht. Eltern und Mitglieder der Klasse sehen sie jetzt.",
+      "unpublished": "„{title}“ ist wieder ein Entwurf und für Eltern und Mitglieder verborgen.",
+      "archived": "„{title}“ archiviert. Gemeldete Erledigungen bleiben erhalten.",
+      "restoredPublished": "„{title}“ wiederhergestellt. Eltern und Mitglieder der Klasse sehen sie wieder.",
+      "restoredDraft": "„{title}“ als Entwurf wiederhergestellt."
     }
   },
   "services": {
@@ -1217,6 +1301,9 @@
           "chooseAccount": "Konto wählen"
         }
       }
+    },
+    "toast": {
+      "archived": "{name} archiviert. Für den Dienst werden keine neuen Termine mehr angelegt."
     }
   },
   "parent": {
@@ -1377,7 +1464,6 @@
       "day": "{date}: {count, plural, =0 {keine Treffen} one {# Treffen} other {# Treffen}}"
     },
     "schedules": {
-      "pageTitle": "Regeltermine",
       "description": "Regeltermine beschreiben Treffen, die sich wiederholen. Aus jedem werden die Termine automatisch am Vortag angelegt.",
       "statusNav": "Status der Regeltermine",
       "active": "Aktiv ({count, number})",
@@ -1397,7 +1483,6 @@
       "sessionsSoFar": "Bisher {count, plural, one {# Termin} other {# Termine}}"
     },
     "schedule": {
-      "pageTitle": "Regeltermin",
       "when": "{pattern}, {time}",
       "archived": "{name} ist archiviert.",
       "inactiveNote": "Dieser Regeltermin ist inaktiv: Aus ihm werden keine neuen Termine angelegt. Seine bisherigen Termine bleiben im Verlauf.",
@@ -1476,7 +1561,6 @@
       "create": "Regeltermin anlegen"
     },
     "session": {
-      "pageTitle": "Termin",
       "crumb": "{group}, {date}",
       "viewAttendance": "Anwesenheit ansehen",
       "canceled": "Dieser Termin wurde abgesagt.",
@@ -1503,6 +1587,15 @@
       "cancelDate": "Diesen Termin absagen",
       "cancelDateDescription": "Der Termin wird jetzt angelegt und als abgesagt markiert, damit für dieses Datum nichts mehr erzeugt wird. Der Regeltermin und seine anderen Termine bleiben, wie sie sind.",
       "keepDate": "Termin beibehalten"
+    },
+    "toast": {
+      "scheduleCreated": "Regeltermin angelegt.{created, plural, =0 {} one { Für heute und morgen wurde # Termin angelegt.} other { Für heute und morgen wurden # Termine angelegt.}}",
+      "scheduleSaved": "Regeltermin gespeichert. Ab jetzt angelegte Termine übernehmen die neuen Angaben.{created, plural, =0 {} one { Für heute und morgen wurde # Termin angelegt.} other { Für heute und morgen wurden # Termine angelegt.}}",
+      "scheduleActivated": "Regeltermin aktiviert.{created, plural, =0 {} one { Für heute und morgen wurde # Termin angelegt.} other { Für heute und morgen wurden # Termine angelegt.}}",
+      "scheduleDeactivated": "Regeltermin deaktiviert. Es werden keine neuen Termine angelegt; vorhandene bleiben.",
+      "scheduleDeleted": "Regeltermin gelöscht.",
+      "sessionCanceled": "Termin abgesagt. Der Regeltermin und seine anderen Termine bleiben unverändert.",
+      "dateCanceled": "Dieser Termin ist abgesagt. Der Regeltermin und seine anderen Termine bleiben unverändert."
     }
   },
   "auth": {
@@ -1722,7 +1815,11 @@
       "tell": "Sagen Sie es der Person persönlich oder per E-Mail.",
       "confirm": "Ablehnen und löschen"
     },
-    "asMember": "Mitglied"
+    "asMember": "Mitglied",
+    "toast": {
+      "approved": "{name} kann sich jetzt anmelden.",
+      "declined": "Abgelehnt. Die Registrierung von {name} wurde gelöscht."
+    }
   },
   "privacy": {
     "subject": {
@@ -1912,6 +2009,9 @@
       "savedTitle": "Ihre Daten sind heruntergeladen",
       "savedText": "Die Datei liegt in Ihren Downloads. Dieser Link funktioniert jetzt nicht mehr; für eine weitere Kopie wenden Sie sich an das Gemeindebüro.",
       "linkInvalid": "Dieser Link ist ungültig, wurde schon benutzt oder ist abgelaufen. Bitten Sie das Gemeindebüro um einen neuen."
+    },
+    "toast": {
+      "recorded": "Anfrage erfasst. Die Antwort ist in einem Monat fällig."
     }
   },
   "member": {
@@ -1976,93 +2076,6 @@
       }
     }
   },
-  "roleEditor": {
-    "titleNew": "Neue Rolle",
-    "descriptionNew": "Benennen Sie die Rolle und wählen Sie, was sie erlaubt. Danach vergeben Sie sie an Konten.",
-    "roles": "Rollen",
-    "details": "Rolle",
-    "name": "Name",
-    "nameHint": "Zum Beispiel: Gemeindebüro, Anwesenheitshilfe.",
-    "description": "Was die Rolle erlaubt, wo sie gilt und wer sie hat.",
-    "permissions": "Was sie erlaubt",
-    "permissionsHint": "Wer Anlegen, Ändern oder Löschen ankreuzt, kreuzt auch Sehen an.",
-    "chosen": "{count, number} von {total, number} gewählt",
-    "readOnlyNote": "Sie können diese Rolle sehen, aber Ihre Rollen erlauben nicht, sie zu ändern.",
-    "create": "Rolle anlegen",
-    "save": "Änderungen speichern",
-    "deleteRole": "Rolle löschen",
-    "holdersTitle": "Wer diese Rolle hat",
-    "holdersNone": "Noch niemand. Vergeben Sie die Rolle unter <link>Mitarbeiterkonten und Rollen</link>.",
-    "holdersNew": "Nach dem Anlegen vergeben Sie die Rolle unter <link>Mitarbeiterkonten und Rollen</link>.",
-    "disabledAccount": "deaktiviert",
-    "applyCount": "{count, plural, =0 {Noch hat niemand diese Rolle.} one {Änderungen gelten sofort für # Konto.} other {Änderungen gelten sofort für # Konten.}}",
-    "sensitive": "Sensibel",
-    "sensitiveHint": "Erlaubt Einblick in die persönlichen Daten aller oder die Entscheidung, wer was darf. Nur für Personen, denen Sie wie einem Administrator vertrauen.",
-    "noAccess": "Sie können keine Rollen sehen",
-    "noAccessHint": "Dafür braucht es eine Rolle mit „Rollen: Sehen“; zum Anlegen „Rollen: Anlegen“.",
-    "nameTaken": "Eine Rolle namens „{name}“ gibt es bereits.",
-    "area": "Bereich",
-    "cell": "{resource}: {action}",
-    "opensNothing": "Konten mit nur dieser Rolle können weder die Mitarbeiter-App noch den Elternbereich öffnen. Kreuzen Sie Dienste: Sehen an, damit sie in die Mitarbeiter-App kommen.",
-    "locksOut": "Sonst kann niemand Rollen ändern. Ohne „Rollen: Ändern“ hier könnte niemand mehr Rollen reparieren, deshalb würde diese Änderung abgelehnt.",
-    "added": "Angelegt {when}",
-    "changed": "Zuletzt geändert {when}",
-    "scope": "Wo sie gilt",
-    "scopeChurch": "Überall in der Gemeinde",
-    "scopeChurchHint": "In jedem Dienst und jeder Stufe. Für die Verwaltung, das Gemeindebüro und Eltern.",
-    "scopeAssigned": "Nur in den zugeordneten Gruppen des Kontos",
-    "scopeAssignedHint": "In den Diensten und Stufen, denen das Konto unter Mitarbeiterkonten und Rollen zugeordnet ist. Für Diener und Dienstleitungen."
-  },
-  "permissions": {
-    "actions": {
-      "read": "Sehen",
-      "create": "Anlegen",
-      "update": "Ändern",
-      "delete": "Löschen"
-    },
-    "resources": {
-      "services": {
-        "name": "Dienste",
-        "description": "Sehen: die Mitarbeiter-App mit allen Diensten, Stufen und Terminen öffnen. Anlegen: Dienste gründen. Ändern: sie bearbeiten. Löschen: sie archivieren, wiederherstellen und löschen."
-      },
-      "stages": {
-        "name": "Stufen",
-        "description": "Anlegen, Ändern, Löschen: die Stufen eines Dienstes anlegen, umbenennen, ordnen, archivieren und löschen. Wer Dienste sieht, sieht auch die Stufen."
-      },
-      "sessions": {
-        "name": "Termine",
-        "description": "Anlegen: Terminpläne und einzelne Termine planen. Ändern: Termine bearbeiten, verschieben, absagen und wieder öffnen. Löschen: Terminpläne löschen. Wer Dienste sieht, sieht auch die Termine."
-      },
-      "attendance": {
-        "name": "Anwesenheit",
-        "description": "Sehen: Anwesenheitslisten und Verlauf. Anlegen: Anwesenheit erfassen (Termin öffnen, Anwesende markieren, schließen). Löschen: eine versehentliche Markierung entfernen. Ändern wird noch nicht verwendet."
-      },
-      "members": {
-        "name": "Mitglieder",
-        "description": "Sehen: die Mitgliederliste und die Angaben zu Personen. Anlegen: Personen hinzufügen. Ändern: Personen bearbeiten, Stufen zuordnen und verschieben. Löschen: Personen aus Stufen nehmen."
-      },
-      "lessons": {
-        "name": "Lektionen",
-        "description": "Sehen: Lektionen. Anlegen: Lektionen vorbereiten. Ändern: sie bearbeiten und abschließen. Löschen: sie archivieren und löschen."
-      },
-      "homework": {
-        "name": "Hausaufgaben",
-        "description": "Sehen: Hausaufgaben und wer sie als erledigt gemeldet hat. Anlegen: Hausaufgaben geben. Ändern: sie bearbeiten, veröffentlichen und zurücknehmen. Löschen: sie archivieren und löschen."
-      },
-      "parentPortal": {
-        "name": "Elternbereich",
-        "description": "Sehen: den Elternbereich öffnen, für die Kinder, für die das Konto Elternzugang hat. Anlegen, Ändern und Löschen werden noch nicht verwendet."
-      },
-      "users": {
-        "name": "Konten",
-        "description": "Sehen: Konten, Kontoanfragen, Elternzugang und Mitgliedskonten. Anlegen: Kontoanfragen freigeben und ablehnen. Ändern: Rollen vergeben und entziehen, Elternzugang und Mitgliederverknüpfungen. Löschen: Datenschutzanfragen und Löschungen."
-      },
-      "roles": {
-        "name": "Rollen",
-        "description": "Sehen: die Rollen und was sie erlauben. Anlegen, Ändern, Löschen: Rollen anlegen, ändern und löschen."
-      }
-    }
-  },
   "assignments": {
     "notAssigned": {
       "title": "Sie sind noch keiner Gruppe zugeordnet",
@@ -2081,6 +2094,59 @@
     "dialog": {
       "title": "{name} einer Gruppe zuordnen",
       "description": "Rollen, die nur in zugeordneten Gruppen gelten, etwa Diener und Dienstleitung, gelten in den Gruppen, denen ein Konto zugeordnet ist."
+    },
+    "toast": {
+      "assigned": "{name} dient jetzt in {where}.",
+      "removed": "{name} dient nicht mehr in {where}."
     }
+  },
+  "pages": {
+    "confirmEmail": "E-Mail-Adresse bestätigen",
+    "dataCopy": "Ihre Daten herunterladen",
+    "forgotPassword": "Passwort vergessen?",
+    "privacy": "Datenschutzhinweise",
+    "registered": "Vielen Dank für Ihre Registrierung",
+    "register": "Konto anlegen",
+    "setPassword": "Neues Passwort wählen",
+    "signInErasureScheduled": "Ihr Konto wird gelöscht",
+    "signIn": "Anmelden",
+    "signInPending": "Ihr Konto wartet auf Freigabe",
+    "signInUnconfirmed": "Bestätigen Sie zuerst Ihre E-Mail-Adresse",
+    "account": "Ihr Konto",
+    "attendance": "Anwesenheit",
+    "attendanceSummary": "Zusammenfassung der Anwesenheit",
+    "takeAttendance": "Anwesenheit erfassen",
+    "editHomework": "Hausaufgabe bearbeiten",
+    "newHomework": "Neue Hausaufgabe",
+    "homework": "Hausaufgaben",
+    "editLesson": "Lektion bearbeiten",
+    "newLesson": "Neue Lektion",
+    "lesson": "Lektion",
+    "meetings": "Termine",
+    "schedules": "Regeltermine",
+    "schedule": "Regeltermin",
+    "session": "Termin",
+    "members": "Mitglieder",
+    "services": "Dienste",
+    "serviceStages": "Stufen",
+    "service": "Dienste",
+    "dataRequests": "Datenschutzanfragen",
+    "dataRequest": "Datenschutzanfragen",
+    "settings": "Einstellungen",
+    "newRole": "Neue Rolle",
+    "role": "Rollen",
+    "stageAttendance": "Anwesenheit der Stufe",
+    "stageHomework": "Hausaufgaben",
+    "stageLessons": "Lektionen",
+    "stage": "Stufe",
+    "memberAccount": "Konto",
+    "memberHomework": "Hausaufgaben",
+    "memberHomeworkTask": "Hausaufgaben",
+    "memberHome": "Start",
+    "parentAccount": "Konto",
+    "parentChildren": "Meine Kinder",
+    "parentHomework": "Hausaufgaben",
+    "parentHomeworkTask": "Hausaufgaben",
+    "parentHome": "Start"
   }
 }

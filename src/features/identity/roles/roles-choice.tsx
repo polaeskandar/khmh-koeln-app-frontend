@@ -57,7 +57,7 @@ export function RolesChoice({
                   {resources.length > 0 ? (
                     <span className="text-xs text-muted-foreground">
                       {resources
-                        .map((resource) => t(`permissions.resources.${resource}.name`))
+                        .map((resource) => t(`roles.permissions.resources.${resource}.name`))
                         .join(f.separator)}
                     </span>
                   ) : null}

@@ -9,7 +9,7 @@ import { RoleForm } from "./role-form"
 import { RoleEditorFrame, NoRoles } from "./role-editor"
 
 export function NewRolePage() {
-  const t = useTranslations("roleEditor")
+  const t = useTranslations("roles.editor")
   const can = useCan()
 
   if (!can("create", "roles")) {

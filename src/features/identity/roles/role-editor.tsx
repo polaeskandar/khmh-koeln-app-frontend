@@ -24,7 +24,7 @@ export function RoleEditorFrame({
       <Topbar
         crumbs={[
           { label: t("nav.settings"), href: routes.settings() },
-          { label: t("roleEditor.roles"), href: `${routes.settings()}#roles` },
+          { label: t("roles.editor.roles"), href: `${routes.settings()}#roles` },
           { label: title },
         ]}
       />
@@ -37,7 +37,7 @@ export function RoleEditorFrame({
 }
 
 export function NoRoles() {
-  const t = useTranslations("roleEditor")
+  const t = useTranslations("roles.editor")
 
   return (
     <PageBody>

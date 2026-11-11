@@ -35,7 +35,7 @@ function RoleMenu({ role }: { role: RoleRow }) {
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={t("settings.roles.actionsFor", { role: role.name })}
+            aria-label={t("roles.list.actionsFor", { role: role.name })}
           >
             <Ellipsis />
           </Button>
@@ -43,12 +43,12 @@ function RoleMenu({ role }: { role: RoleRow }) {
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
             <Link href={routes.role(role.id)}>
-              {can("update", "roles") ? t("settings.roles.edit") : t("settings.roles.view")}
+              {can("update", "roles") ? t("roles.list.edit") : t("roles.list.view")}
             </Link>
           </DropdownMenuItem>
           {can("delete", "roles") ? (
             <DropdownMenuItem variant="destructive" onSelect={() => setDeleting(true)}>
-              {t("settings.roles.delete")}
+              {t("roles.list.delete")}
             </DropdownMenuItem>
           ) : null}
         </DropdownMenuContent>
@@ -75,13 +75,13 @@ function RolesTable({ roles }: { roles: RoleRow[] }) {
         <thead className="bg-muted/40">
           <tr className="border-b text-xs font-semibold tracking-wider text-muted-foreground uppercase">
             <th scope="col" className="px-3 py-2 text-start">
-              {t("settings.roles.role")}
+              {t("roles.list.role")}
             </th>
             <th scope="col" className="px-3 py-2 text-start">
-              {t("settings.roles.allows")}
+              {t("roles.list.allows")}
             </th>
             <th scope="col" className="px-3 py-2 text-start">
-              {t("settings.roles.accounts")}
+              {t("roles.list.accounts")}
             </th>
             {menu ? <th scope="col" className="w-12 px-3 py-2" /> : null}
           </tr>
@@ -90,7 +90,7 @@ function RolesTable({ roles }: { roles: RoleRow[] }) {
           {roles.map((role) => {
             const resources = RESOURCES.filter((resource) =>
               role.permissions.some((permission) => permission.resource === resource)
-            ).map((resource) => t(`permissions.resources.${resource}.name`))
+            ).map((resource) => t(`roles.permissions.resources.${resource}.name`))
 
             return (
               <tr key={role.id} className="border-b last:border-b-0">
@@ -103,14 +103,14 @@ function RolesTable({ roles }: { roles: RoleRow[] }) {
                       <bdi>{role.name}</bdi>
                     </Link>
                     <span className="text-xs text-muted-foreground">
-                      {t(`settings.roles.scope.${role.scope}`)}
+                      {t(`roles.list.scope.${role.scope}`)}
                     </span>
                   </span>
                 </td>
                 <td className="px-3 py-3">
                   <span className="flex flex-col gap-0.5">
                     <span className="tabular-nums">
-                      {t("settings.roles.permissionCount", {
+                      {t("roles.list.permissionCount", {
                         count: role.permissions.length,
                         total: PERMISSION_COUNT,
                       })}
@@ -121,7 +121,7 @@ function RolesTable({ roles }: { roles: RoleRow[] }) {
                   </span>
                 </td>
                 <td className="px-3 py-3 text-muted-foreground">
-                  {t("settings.roles.holders", { count: role.holderCount })}
+                  {t("roles.list.holders", { count: role.holderCount })}
                 </td>
                 {menu ? (
                   <td className="px-3 py-3 text-end">
@@ -138,7 +138,7 @@ function RolesTable({ roles }: { roles: RoleRow[] }) {
 }
 
 export function RolesOverview() {
-  const t = useTranslations("settings.roles")
+  const t = useTranslations("roles.list")
   const can = useCan()
   const query = useQuery(rolesQuery)
   const readOnly = !can("create", "roles") && !can("update", "roles") && !can("delete", "roles")

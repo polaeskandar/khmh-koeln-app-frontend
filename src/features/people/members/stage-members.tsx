@@ -26,7 +26,7 @@ import { groupAt } from "@/lib/permissions"
 import type { Stage } from "@/features/organization/stages/api"
 
 function EmptyRoster({ stage }: { stage: Stage }) {
-  const t = useTranslations("stages.overview")
+  const t = useTranslations("members.stageRoster")
   const can = useCanIn(groupAt(stage.service, stage))
   const addable = !stage.archived && !stage.service.archived && can("create", "members")
 
@@ -46,7 +46,7 @@ function EmptyRoster({ stage }: { stage: Stage }) {
 }
 
 function MemberRows({ stage, list }: { stage: Stage; list: PeoplePage }) {
-  const t = useTranslations("stages.overview")
+  const t = useTranslations("members.stageRoster")
   const f = useFormat()
 
   if (list.total === 0) {
@@ -123,7 +123,7 @@ function Pager({ list, onPage }: { list: PeoplePage; onPage: (page: number) => v
 }
 
 export function StageMembers({ stage }: { stage: Stage }) {
-  const t = useTranslations("stages.overview")
+  const t = useTranslations("members.stageRoster")
   const [page, setPage] = useState(1)
 
   const query = useQuery({

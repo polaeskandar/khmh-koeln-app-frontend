@@ -217,9 +217,10 @@ under it once per language (`generateStaticParams` with `en`, `de`, `ar`, and `d
 `setRequestLocale` and wraps the page in `NextIntlClientProvider`. `src/i18n/request.ts` takes the language
 from that segment only, never from cookies or headers, and sets the time zone to Europe/Berlin.
 
-**Adding a page:** create `app/[locale]/<path>/page.tsx`; read `locale` from `params`, call
-`setRequestLocale(locale)` before any next-intl call, and translate metadata with
-`getTranslations({ locale, namespace })`. Link with `Link`, `useRouter` and `usePathname` from
+**Adding a page:** create `app/[locale]/<path>/page.tsx`, call `pageLocale(params)` from `src/i18n/page.ts`
+(it calls `setRequestLocale`, which next-intl needs before any of its calls), and give it a title in the `pages`
+namespace, named after its builder in `src/lib/routes.ts` (`pages.services`), read with
+`pageTitle(params, "services")`. Link with `Link`, `useRouter` and `usePathname` from
 `@/i18n/navigation`, which keep the language in the path; ESLint rejects `next/link` and those functions (and
 `redirect`) from `next/navigation`. Paths end in a slash (`trailingSlash`), so every page is a directory with an
 `index.html`.

@@ -38,11 +38,11 @@ import {
 
 const STATUS_TOAST: Record<
   LessonStatus,
-  "toast.lessonBackToDraft" | "toast.lessonMarkedReady" | "toast.lessonTaught"
+  "lessons.toast.backToDraft" | "lessons.toast.markedReady" | "lessons.toast.taught"
 > = {
-  draft: "toast.lessonBackToDraft",
-  ready: "toast.lessonMarkedReady",
-  completed: "toast.lessonTaught",
+  draft: "lessons.toast.backToDraft",
+  ready: "lessons.toast.markedReady",
+  completed: "lessons.toast.taught",
 }
 
 function useLessonChange<A extends unknown[], T>(

@@ -1,15 +1,12 @@
 import type { Metadata } from "next"
-import { getTranslations } from "next-intl/server"
 
 import { RegisterPage } from "@/features/identity/auth/register-page"
-import { pageLocale } from "@/i18n/page"
+import { pageLocale, pageTitle } from "@/i18n/page"
 
 export async function generateMetadata({
   params,
 }: PageProps<"/[locale]/register">): Promise<Metadata> {
-  const t = await getTranslations({ locale: await pageLocale(params), namespace: "auth.register" })
-
-  return { title: t("title") }
+  return { title: await pageTitle(params, "register") }
 }
 
 export default async function Page({ params }: PageProps<"/[locale]/register">) {

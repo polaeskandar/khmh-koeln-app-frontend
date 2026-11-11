@@ -1,4 +1,5 @@
-import { setRequestLocale } from "next-intl/server"
+import type { Messages } from "next-intl"
+import { getTranslations, setRequestLocale } from "next-intl/server"
 
 import { DEFAULT_LOCALE, isLocale, type Locale } from "./config"
 
@@ -8,4 +9,13 @@ export async function pageLocale(params: Promise<{ locale: string }>): Promise<L
   setRequestLocale(checked)
 
   return checked
+}
+
+export async function pageTitle(
+  params: Promise<{ locale: string }>,
+  page: keyof Messages["pages"]
+): Promise<string> {
+  const t = await getTranslations({ locale: await pageLocale(params), namespace: "pages" })
+
+  return t(page)
 }

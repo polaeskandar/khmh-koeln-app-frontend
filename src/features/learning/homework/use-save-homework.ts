@@ -34,12 +34,12 @@ export function useSaveHomework({
   homework?: HomeworkDetail
   fromLesson: Uuid | null
 }) {
-  const t = useTranslations("toast")
+  const t = useTranslations("homework.toast")
   const router = useRouter()
   const [savedId, setSavedId] = useState<Uuid | null>(homework?.id ?? null)
   const [version, setVersion] = useState(homework?.version ?? 0)
   const [step, setStep] = useState<SaveStep>("save")
-  const publisher = usePublishHomework(t("homeworkPublishedNew"))
+  const publisher = usePublishHomework(t("publishedNew"))
   const lessonPage = fromLesson ? routes.lesson(fromLesson) : null
 
   const mutation = useApiMutation(
@@ -68,10 +68,10 @@ export function useSaveHomework({
     if (next === "save") {
       toast.success(
         saved.data.status === "published"
-          ? t("homeworkSavedPublished")
+          ? t("savedPublished")
           : homework
-            ? t("homeworkSavedDraft")
-            : t("homeworkDraftSaved")
+            ? t("savedDraft")
+            : t("draftSaved")
       )
 
       router.push(afterSave(saved.data.status))
