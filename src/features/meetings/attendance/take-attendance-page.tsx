@@ -25,6 +25,7 @@ import { AttendanceBoard } from "./attendance-board"
 import { CloseDialog } from "./close-dialog"
 import { CorrectionDialog } from "./correction-dialog"
 import { applyWrites, useMarkWrites } from "./mark-writes"
+import { isDue } from "./next-step"
 import { OpenAttendanceButton } from "./open-attendance-button"
 import { SheetState } from "./sheet-state"
 import { VisitorSearch } from "./visitor-search"
@@ -127,7 +128,7 @@ function NotOpen({ sheet }: { sheet: AttendanceSheet }) {
   const can = useCanIn(meetingGroup(sheet.session))
   const records = can("create", "attendance")
   const { session, today } = sheet
-  const due = session.date <= today
+  const due = isDue(session, today)
   const past = session.date < today
   const onTheDay = records ? t("openWhenStarts") : t("servantsOpen")
   const afterTheDay = records ? t("openNow") : t("servantsCanStillOpen")

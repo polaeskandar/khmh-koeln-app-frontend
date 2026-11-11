@@ -26,6 +26,7 @@ import type { SessionView } from "./api"
 import { meetingGroup } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
+import { attendanceStepOf } from "@/features/meetings/attendance/next-step"
 import { OpenAttendanceButton } from "@/features/meetings/attendance/open-attendance-button"
 
 import { type SessionDetailResponse, meetingSessionQuery } from "./api"
@@ -35,9 +36,9 @@ function AttendanceAction({ session, today }: { session: SessionView; today: Loc
   const t = useTranslations()
   const router = useRouter()
   const can = useCanIn(meetingGroup(session))
-  const records = can("create", "attendance")
+  const step = attendanceStepOf(session, today, can)
 
-  if (session.status === "active" && records) {
+  if (step === "take") {
     return (
       <Button asChild>
         <Link href={routes.takeAttendance(session.id)}>
@@ -48,7 +49,7 @@ function AttendanceAction({ session, today }: { session: SessionView; today: Loc
     )
   }
 
-  if (session.status === "scheduled" && session.date <= today && records) {
+  if (step === "open") {
     return (
       <OpenAttendanceButton
         sessionId={session.id}
@@ -57,7 +58,7 @@ function AttendanceAction({ session, today }: { session: SessionView; today: Loc
     )
   }
 
-  if (session.status === "completed" && can("read", "attendance")) {
+  if (step === "view") {
     return (
       <Button variant="outline" asChild>
         <Link href={routes.attendanceSummary(session.id)}>
@@ -68,6 +69,29 @@ function AttendanceAction({ session, today }: { session: SessionView; today: Loc
   }
 
   return null
+}
+
+function useAttendanceNote(session: SessionView, today: LocalDate): string | null {
+  const t = useTranslations("meetings.session")
+  const f = useFormat()
+
+  if (session.status === "canceled") {
+    return t("noAttendance")
+  }
+
+  if (session.status !== "scheduled") {
+    return null
+  }
+
+  if (session.date < today) {
+    return t("notTaken")
+  }
+
+  if (session.date === today) {
+    return t("notOpenYet")
+  }
+
+  return t("takenOn", { date: f.longDate(session.date) })
 }
 
 function SessionDetail({
@@ -83,15 +107,7 @@ function SessionDetail({
   const can = useCanIn(meetingGroup(session))
   const canceled = session.status === "canceled"
 
-  const attendanceNote = canceled
-    ? t("meetings.session.noAttendance")
-    : session.status !== "scheduled"
-      ? null
-      : session.date < today
-        ? t("meetings.session.notTaken")
-        : session.date === today
-          ? t("meetings.session.notOpenYet")
-          : t("meetings.session.takenOn", { date: f.longDate(session.date) })
+  const attendanceNote = useAttendanceNote(session, today)
 
   return (
     <>
