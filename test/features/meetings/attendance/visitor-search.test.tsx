@@ -1,7 +1,7 @@
-import { screen, waitFor, within } from "@testing-library/react"
+import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { http, HttpResponse } from "msw"
-import { expect, test, vi } from "vitest"
+import { delay, http, HttpResponse } from "msw"
+import { afterEach, expect, test, vi } from "vitest"
 
 import type { DirectoryEntry } from "@/features/people/members/api"
 import type { Locale } from "@/i18n/config"
@@ -20,6 +20,10 @@ import { address } from "@test/support/navigation"
 import { renderWithProviders } from "@test/support/providers"
 
 import { TakeAttendancePage } from "@/features/meetings/attendance/take-attendance-page"
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 const youth = {
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7e8f11",
@@ -67,7 +71,7 @@ function open(
       request.signal.addEventListener("abort", () => aborted.push(q))
 
       if (q === "slow") {
-        await new Promise((resolve) => setTimeout(resolve, 2000))
+        await delay("infinite")
       }
 
       found = results(q)
@@ -196,11 +200,13 @@ test("under ar the no-match sentence keeps a Latin query intact", async () => {
   await waitFor(() => expect(document.body.textContent).toContain("⁨zz top⁩"))
 })
 
-test("offline sends no request", async () => {
+test("offline sends no request, even after the debounce", async () => {
+  vi.useFakeTimers({ shouldAdvanceTime: true })
   vi.spyOn(navigator, "onLine", "get").mockReturnValue(false)
-  const { queries } = open(() => [youthMina])
+  open(() => [youthMina])
   await userEvent.type(await searchBox(), "mina")
-  await new Promise((resolve) => setTimeout(resolve, 400))
-  expect(queries).toEqual([])
+  const fetch = vi.spyOn(globalThis, "fetch")
+  await act(() => vi.advanceTimersByTimeAsync(500))
+  expect(fetch).not.toHaveBeenCalled()
   expect(addSomeone().getByText(/No connection/)).toBeInTheDocument()
 })

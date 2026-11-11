@@ -111,7 +111,7 @@ const lifecycleItems = async () => (await menuItems()).filter((i) => lifecycle.i
 test("a never-published draft can be archived or deleted", async () => {
   openList(homework("draft"))
   expect(await menuItems()).toEqual(["Edit", "Publish", "Archive", "Delete draft"])
-  expect(screen.getByRole("menu").querySelector("[data-slot$=separator]")).not.toBeNull()
+  expect(within(screen.getByRole("menu")).getByRole("separator")).toBeInTheDocument()
 })
 
 test("published homework without reports can go back to draft or be archived", async () => {

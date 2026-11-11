@@ -1,3 +1,4 @@
+import { screen } from "@testing-library/react"
 import { describe, expect, test } from "vitest"
 
 import { renderWithProviders } from "@test/support/providers"
@@ -8,11 +9,15 @@ describe("CompletionMeter", () => {
   test("4 of 14 reads as reported and fills 29%", () => {
     const { container } = renderWithProviders(<CompletionMeter completed={4} assigned={14} />)
     expect(container.textContent).toBe("4 of 14 reported done")
-    expect((container.querySelector("[aria-hidden] > span") as HTMLElement).style.width).toBe("29%")
+
+    expect(screen.getByRole("progressbar", { name: "4 of 14 reported done" })).toHaveAttribute(
+      "aria-valuenow",
+      "29"
+    )
   })
 
   test("nothing assigned leaves the bar empty", () => {
-    const { container } = renderWithProviders(<CompletionMeter completed={0} assigned={0} />)
-    expect((container.querySelector("[aria-hidden] > span") as HTMLElement).style.width).toBe("0%")
+    renderWithProviders(<CompletionMeter completed={0} assigned={0} />)
+    expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "0")
   })
 })

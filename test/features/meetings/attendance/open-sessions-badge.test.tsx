@@ -1,4 +1,4 @@
-import { act, screen, within } from "@testing-library/react"
+import { act, screen, waitFor, within } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
 import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
@@ -80,13 +80,18 @@ test("the phone's Take attendance button shows the count and is described by it"
 })
 
 test.each([
-  ["zero open", () => HttpResponse.json(overview(0))],
-  ["an error", () => problem(500, "internal")],
-  ["a pending request", () => new Promise<Response>(() => {})],
-])("%s shows no badge and no toast", async (_, answer) => {
-  open(answer)
-  await screen.findByRole("link", { name: "Take attendance" })
-  await act(() => new Promise((resolve) => setTimeout(resolve, 50)))
+  ["zero open", () => HttpResponse.json(overview(0)), "No meetings to take attendance for today"],
+  ["an error", () => problem(500, "internal"), "This couldn’t be loaded."],
+])("%s shows no badge and no toast", async (_, answer, pageShows) => {
+  open(answer, { page: true })
+  expect(await screen.findByText(pageShows)).toBeInTheDocument()
+  expect(screen.queryByText(/open$/)).not.toBeInTheDocument()
+  expect(toast.error).not.toHaveBeenCalled()
+})
+
+test("a pending request shows no badge and no toast", async () => {
+  const page = open(() => new Promise<Response>(() => {}))
+  await waitFor(() => expect(page.reads()).toBe(1))
   expect(screen.queryByText(/open$/)).not.toBeInTheDocument()
   expect(toast.error).not.toHaveBeenCalled()
 })

@@ -20,6 +20,7 @@ import { SchedulesPage } from "@/features/meetings/meetings/schedules-page"
 
 beforeEach(() => {
   vi.spyOn(toast, "success")
+  vi.spyOn(toast, "error")
 })
 
 const sundaySchool = services.items[0]
@@ -246,7 +247,11 @@ describe("saving", () => {
       problem(409, "meetings.serviceArchivedRestoreFirst", { params: { name: "Sunday School" } })
 
     await userEvent.click(dialog.getByRole("button", { name: "Create schedule" }))
-    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith("Sunday School is archived. Restore it first.")
+    )
+
     expect(screen.getByRole("dialog")).toBeInTheDocument()
   })
 
