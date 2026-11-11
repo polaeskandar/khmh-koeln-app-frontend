@@ -6,7 +6,7 @@ import ar from "../../messages/ar.json"
 import de from "../../messages/de.json"
 
 function Close() {
-  const t = useTranslations("common")
+  const t = useTranslations("ui")
 
   return <button type="button">{t("close")}</button>
 }

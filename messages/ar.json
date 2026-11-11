@@ -42,7 +42,6 @@
     "delete": "حذف",
     "archive": "أرشفة",
     "restore": "استعادة",
-    "close": "إغلاق",
     "moreActions": "إجراءات أخرى",
     "actionsFor": "إجراءات {name}",
     "clearSearch": "مسح البحث",

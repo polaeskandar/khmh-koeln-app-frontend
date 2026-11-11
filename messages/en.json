@@ -42,7 +42,6 @@
     "delete": "Delete",
     "archive": "Archive",
     "restore": "Restore",
-    "close": "Close",
     "moreActions": "More actions",
     "actionsFor": "Actions for {name}",
     "clearSearch": "Clear search",

@@ -10,8 +10,8 @@ import { useOnline } from "@/hooks/use-online"
 import { isolate } from "@/lib/bidi"
 
 import type { AttendanceSheet } from "./api"
-import { PersonRow } from "./attendance-board"
 import type { Visitor } from "./mark-writes"
+import { PersonRow } from "./person-row"
 
 const MIN_LETTERS = 2
 const MAX_RESULTS = 8
