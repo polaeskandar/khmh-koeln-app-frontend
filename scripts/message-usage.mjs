@@ -12,23 +12,26 @@ const DYNAMIC_KEYS = [
   "attendance.stage.cellSr.*",
   "dashboard.greeting.*",
   "errors.recurrence.*",
-  "history.*",
+  "history.(created|opened|closed|reopened|canceled|edited)",
   "homework.completion.*",
   "homework.table.*",
   "homework.table.empty.*.text",
   "homework.table.empty.*.title",
   "lessons.list.*",
   "lessons.status.*",
+  "nav.(dashboard|services|meetings|attendance|members|settings)",
   "parent.home.greeting.*",
   "permissions.actions.*",
   "permissions.resources.*.description",
   "permissions.resources.*.name",
   "privacy.channel.*",
   "privacy.kind.*",
+  "privacy.mention.*",
+  "privacy.status.*",
   "roleEditor.*Hint",
   "services.table.tabs.*",
   "settings.roles.scope.*",
-  "status.*",
+  "status.(scheduled|active|planned)",
 ]
 
 function leafKeys(messages, prefix = "") {
@@ -45,13 +48,28 @@ async function sourceFiles(directory) {
     .map((entry) => join(entry.parentPath, entry.name))
 }
 
+function propertyPath(node) {
+  return ts.isPropertyAccessExpression(node.expression)
+    ? `${propertyPath(node.expression)}.${node.name.text}`
+    : node.name.text
+}
+
 function literalsOf(file, text) {
   const literals = new Set()
-  const source = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, false)
+  const source = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true)
+  const readsCatalog = /from "[./]*messages\/\w+\.json"/.test(text)
 
   function visit(node) {
     if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
       literals.add(node.text)
+    }
+
+    if (
+      readsCatalog &&
+      ts.isPropertyAccessExpression(node) &&
+      !ts.isPropertyAccessExpression(node.parent)
+    ) {
+      literals.add(propertyPath(node))
     }
 
     ts.forEachChild(node, visit)
