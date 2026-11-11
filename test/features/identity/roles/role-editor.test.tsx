@@ -297,3 +297,25 @@ test("an unknown role shows not found", async () => {
   open(<RolePage />)
   expect(await screen.findByText("This page doesn’t exist")).toBeInTheDocument()
 })
+
+test("deleting the role from the editor asks first, then returns to the roles list", async () => {
+  address.set(`id=${SERVANT_ID}`)
+  const deleted: string[] = []
+  open(<RolePage />)
+
+  server.use(
+    http.delete(apiUrl("/roles/:id"), ({ params }) => {
+      deleted.push(String(params.id))
+
+      return new HttpResponse(null, { status: 204 })
+    })
+  )
+
+  await userEvent.click(await screen.findByRole("button", { name: "Delete role" }))
+  const dialog = within(await screen.findByRole("alertdialog"))
+  await userEvent.click(dialog.getByRole("button", { name: "Delete role" }))
+
+  await waitFor(() => expect(router.push).toHaveBeenCalledWith("/settings/#roles"))
+  expect(deleted).toEqual([SERVANT_ID])
+  expect(toast.success).toHaveBeenCalledWith("Role “Servant” deleted.")
+})

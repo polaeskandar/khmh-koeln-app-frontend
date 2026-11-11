@@ -6,8 +6,6 @@ import { ROLES_KEY, ME_KEY, STAFF_ACCOUNTS_KEY } from "@/lib/api/query-keys"
 
 export type Role = Schemas["RoleRowResponse"]
 
-export type RoleRow = Role
-
 export const rolesQuery = queryOptions({
   queryKey: [...ROLES_KEY, "list"],
   queryFn: ({ signal }) => dataOf(api.GET("/roles", { signal })),

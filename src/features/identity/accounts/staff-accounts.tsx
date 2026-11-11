@@ -5,23 +5,11 @@ import { KeyRound, Plus, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
-import { FormDialog } from "@/components/form-dialog"
 import { ConfirmDialog } from "@/components/confirm-dialog"
-import { SelectField } from "@/components/form-fields"
 import { Section } from "@/components/page-header"
 import { QueryErrorState, QueryState } from "@/components/page-states"
 import { StatusBadge } from "@/components/status"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { NativeSelectOption } from "@/components/ui/native-select"
-import { Spinner } from "@/components/ui/spinner"
 import { useCan, useCanAssign } from "@/features/identity/auth/session"
 import type { GroupOption } from "@/features/organization/assignments/api"
 import {
@@ -29,144 +17,20 @@ import {
   AssignmentChip,
   useAssignableGroups,
 } from "@/features/organization/assignments/group-choice"
-import { useFormat } from "@/i18n/format"
-import { Link } from "@/i18n/navigation"
-import { isStale, useRefetch } from "@/lib/api/refetch"
-import type { Problem } from "@/lib/api/translate-problem"
 import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { groupAt } from "@/lib/permissions"
-import { routes } from "@/lib/routes"
 
 import {
-  giveRoleRequest,
-  type PasswordLink,
   passwordLinkRequest,
   removeRoleRequest,
   type StaffAccount,
-  STAFF_ACCOUNT_QUERIES,
   staffAccountsQuery,
 } from "./api"
+import { GiveRoleDialog } from "./give-role-dialog"
+import { PasswordLinkDialog } from "./password-link-dialog"
 import { type Role, rolesQuery, ROLE_QUERIES } from "@/features/identity/roles/api"
-
-function GiveRoleDialog({
-  account,
-  roles,
-  onClose,
-}: {
-  account: StaffAccount
-  roles: Role[]
-  onClose: () => void
-}) {
-  const t = useTranslations()
-  const refetch = useRefetch()
-  const [roleId, setRoleId] = useState("")
-
-  const give = useApiMutation((id: string) => giveRoleRequest(account.id, id), {
-    successMessage: t("toast.roleAssigned"),
-    invalidate: ROLE_QUERIES,
-    onSuccess: onClose,
-  })
-
-  async function submit() {
-    const result = await give.execute(roleId)
-
-    if (!result.ok && isStale(result.problem, [409])) {
-      void refetch(STAFF_ACCOUNT_QUERIES)
-      onClose()
-    }
-  }
-
-  return (
-    <FormDialog
-      title={t("settings.users.assign.title", { name: isolate(account.displayName) })}
-      description={t("settings.users.assign.description")}
-      pending={give.pending}
-      problem={give.problem}
-      submitLabel={t("settings.users.assign.submit")}
-      submitDisabled={!roleId}
-      onSubmit={submit}
-      onClose={onClose}
-    >
-      <SelectField
-        label={t("settings.users.assign.role")}
-        value={roleId}
-        error={give.fieldErrors.roleId}
-        description={t.rich("settings.users.assign.roleHint", {
-          link: (chunks) => (
-            <Link href={`${routes.settings()}#roles`} className="underline underline-offset-4">
-              {chunks}
-            </Link>
-          ),
-        })}
-        onChange={(event) => setRoleId(event.target.value)}
-      >
-        <NativeSelectOption value="" disabled>
-          {t("settings.users.assign.choose")}
-        </NativeSelectOption>
-        {roles.map((role) => (
-          <NativeSelectOption key={role.id} value={role.id}>
-            {role.name}
-          </NativeSelectOption>
-        ))}
-      </SelectField>
-    </FormDialog>
-  )
-}
-
-function PasswordLinkDialog({
-  account,
-  today,
-  link,
-  pending,
-  problem,
-  onClose,
-}: {
-  account: StaffAccount
-  today: LocalDate
-  link: PasswordLink | undefined
-  pending: boolean
-  problem: Problem | null
-  onClose: () => void
-}) {
-  const t = useTranslations()
-  const f = useFormat()
-
-  return (
-    <Dialog open onOpenChange={(open) => !open && !pending && onClose()}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {t("settings.users.passwordLink.title", { name: isolate(account.displayName) })}
-          </DialogTitle>
-          <DialogDescription>
-            {t("settings.users.passwordLink.description", {
-              name: isolate(account.displayName),
-            })}
-          </DialogDescription>
-        </DialogHeader>
-        {problem ? (
-          <Alert variant="destructive">
-            <AlertDescription>{problem.message}</AlertDescription>
-          </Alert>
-        ) : link ? (
-          <p className="text-sm text-muted-foreground" role="status">
-            {t("settings.users.passwordLink.sent", { email: account.email })}{" "}
-            {t("settings.users.passwordLink.expires", {
-              when: f.atLabel(link.expiresAt, today),
-            })}
-          </p>
-        ) : (
-          <p className="flex items-center gap-2 text-sm text-muted-foreground" role="status">
-            <Spinner />
-            {t("settings.users.passwordLink.creating")}
-          </p>
-        )}
-      </DialogContent>
-    </Dialog>
-  )
-}
 
 function RoleChip({
   account,
@@ -219,6 +83,89 @@ function RoleChip({
   )
 }
 
+function AccountRoles({
+  account,
+  canChange,
+  canAdd,
+  onAdd,
+}: {
+  account: StaffAccount
+  canChange: boolean
+  canAdd: boolean
+  onAdd: () => void
+}) {
+  const t = useTranslations()
+
+  return (
+    <ul className="flex flex-wrap items-center gap-1.5">
+      {account.roles.length === 0 ? (
+        <li className="text-xs text-muted-foreground">{t("roles.summary.none")}</li>
+      ) : (
+        account.roles.map((role) => (
+          <RoleChip key={role.id} account={account} role={role} canChange={canChange} />
+        ))
+      )}
+      {canAdd ? (
+        <li>
+          <Button variant="ghost" size="xs" onClick={onAdd}>
+            <Plus data-icon="inline-start" />
+            {t("settings.users.addRole")}
+          </Button>
+        </li>
+      ) : null}
+    </ul>
+  )
+}
+
+function AccountGroups({
+  account,
+  needsGroups,
+  canAdd,
+  onAdd,
+}: {
+  account: StaffAccount
+  needsGroups: boolean
+  canAdd: boolean
+  onAdd: () => void
+}) {
+  const t = useTranslations("settings.users")
+  const canAssign = useCanAssign()
+  const open = !account.disabled
+
+  if (account.assignments.length === 0 && !(open && (needsGroups || canAdd))) {
+    return null
+  }
+
+  return (
+    <ul className="flex flex-wrap items-center gap-1.5">
+      {account.assignments.map((assignment) => (
+        <AssignmentChip
+          key={assignment.id}
+          account={account}
+          assignment={assignment}
+          removable={canAssign(groupAt(assignment.service, assignment.stage))}
+        />
+      ))}
+      {account.assignments.length === 0 && needsGroups && open ? (
+        <li className="text-xs text-muted-foreground">{t("noGroups")}</li>
+      ) : null}
+      {canAdd && open ? (
+        <li>
+          <Button
+            variant="ghost"
+            size="xs"
+            aria-label={t("addGroupLabel", { name: account.displayName })}
+            onClick={onAdd}
+          >
+            <Plus data-icon="inline-start" />
+            {t("addGroup")}
+          </Button>
+        </li>
+      ) : null}
+    </ul>
+  )
+}
+
 function AccountRow({
   account,
   roles,
@@ -235,7 +182,6 @@ function AccountRow({
   today: LocalDate
 }) {
   const t = useTranslations()
-  const canAssign = useCanAssign()
   const [dialog, setDialog] = useState<"role" | "group" | "link" | null>(null)
   const passwordLink = useApiMutation(passwordLinkRequest, { toastOnError: false })
   const left = roles.filter((role) => !account.roles.some((had) => had.id === role.id))
@@ -249,8 +195,6 @@ function AccountRow({
     (held) => roles.find((role) => role.id === held.id)?.scope === "assignedGroups"
   )
 
-  const offersGroups = !account.disabled && (needsGroups || groups.length > 0)
-
   return (
     <li className="flex flex-col gap-3 py-4 md:flex-row md:items-start md:justify-between">
       <span className="flex min-w-0 flex-col gap-1.5">
@@ -263,51 +207,18 @@ function AccountRow({
         <span dir="ltr" className="text-start text-xs text-muted-foreground">
           {account.email}
         </span>
-        <ul className="flex flex-wrap items-center gap-1.5">
-          {account.roles.length === 0 ? (
-            <li className="text-xs text-muted-foreground">{t("roles.summary.none")}</li>
-          ) : (
-            account.roles.map((role) => (
-              <RoleChip key={role.id} account={account} role={role} canChange={changeRoles} />
-            ))
-          )}
-          {changeRoles && left.length > 0 ? (
-            <li>
-              <Button variant="ghost" size="xs" onClick={() => setDialog("role")}>
-                <Plus data-icon="inline-start" />
-                {t("settings.users.addRole")}
-              </Button>
-            </li>
-          ) : null}
-        </ul>
-        {account.assignments.length > 0 || offersGroups ? (
-          <ul className="flex flex-wrap items-center gap-1.5">
-            {account.assignments.map((assignment) => (
-              <AssignmentChip
-                key={assignment.id}
-                account={account}
-                assignment={assignment}
-                removable={canAssign(groupAt(assignment.service, assignment.stage))}
-              />
-            ))}
-            {account.assignments.length === 0 && needsGroups && !account.disabled ? (
-              <li className="text-xs text-muted-foreground">{t("settings.users.noGroups")}</li>
-            ) : null}
-            {groups.length > 0 && !account.disabled ? (
-              <li>
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  aria-label={t("settings.users.addGroupLabel", { name: account.displayName })}
-                  onClick={() => setDialog("group")}
-                >
-                  <Plus data-icon="inline-start" />
-                  {t("settings.users.addGroup")}
-                </Button>
-              </li>
-            ) : null}
-          </ul>
-        ) : null}
+        <AccountRoles
+          account={account}
+          canChange={changeRoles}
+          canAdd={changeRoles && left.length > 0}
+          onAdd={() => setDialog("role")}
+        />
+        <AccountGroups
+          account={account}
+          needsGroups={needsGroups}
+          canAdd={groups.length > 0}
+          onAdd={() => setDialog("group")}
+        />
       </span>
       {sendLinks ? (
         <Button
