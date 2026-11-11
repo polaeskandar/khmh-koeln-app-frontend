@@ -20,7 +20,23 @@ import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 
-type Controlled = { open?: boolean; onOpenChange?: (open: boolean) => void }
+type Opening =
+  | { open: boolean; onOpenChange: (open: boolean) => void; trigger?: ReactNode }
+  | { trigger: ReactNode; open?: never; onOpenChange?: never }
+
+type Texts = {
+  title: string
+  description?: ReactNode
+  confirmLabel: string
+  dismissLabel?: string
+  tone?: "default" | "destructive"
+}
+
+function useDialogOpen(open: boolean | undefined, onOpenChange?: (open: boolean) => void) {
+  const [innerOpen, setInnerOpen] = useState(false)
+
+  return [open ?? innerOpen, onOpenChange ?? setInnerOpen] as const
+}
 
 async function whilePending(setPending: (pending: boolean) => void, run: () => Promise<boolean>) {
   setPending(true)
@@ -41,30 +57,28 @@ export function ConfirmDialog({
   consequences,
   note,
   confirmLabel,
+  dismissLabel,
   tone = "default",
   onConfirm,
-  open: controlledOpen,
+  open: openProp,
   onOpenChange,
-}: Controlled & {
-  trigger?: ReactNode
-  title: string
-  description?: ReactNode
-  consequences?: ReactNode[]
-  note?: ReactNode
-  confirmLabel: string
-  tone?: "default" | "destructive"
-  onConfirm: () => Promise<boolean>
-}) {
+  children,
+}: Opening &
+  Texts & {
+    consequences?: ReactNode[]
+    note?: ReactNode
+    onConfirm: () => Promise<boolean>
+    children?: ReactNode
+  }) {
   const t = useTranslations("common")
-  const [innerOpen, setInnerOpen] = useState(false)
+  const { onCloseAutoFocus } = useDialogMount()
   const [pending, setPending] = useState(false)
-  const open = controlledOpen ?? innerOpen
-  const setOpen = onOpenChange ?? setInnerOpen
+  const [open, setOpen] = useDialogOpen(openProp, onOpenChange)
 
   return (
     <AlertDialog open={open} onOpenChange={(next) => !pending && setOpen(next)}>
       {trigger ? <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger> : null}
-      <AlertDialogContent>
+      <AlertDialogContent onCloseAutoFocus={onCloseAutoFocus}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           {description ? <AlertDialogDescription>{description}</AlertDialogDescription> : null}
@@ -82,8 +96,9 @@ export function ConfirmDialog({
           </ul>
         ) : null}
         {note ? <p className="text-sm text-muted-foreground">{note}</p> : null}
+        {children}
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={pending}>{t("cancel")}</AlertDialogCancel>
+          <AlertDialogCancel disabled={pending}>{dismissLabel ?? t("cancel")}</AlertDialogCancel>
           <Button
             variant={tone === "destructive" ? "destructive" : "default"}
             disabled={pending}
@@ -111,87 +126,57 @@ export function ReasonDialog({
   placeholder,
   confirmLabel,
   dismissLabel,
-  tone = "default",
+  tone,
   onConfirm,
-  open: controlledOpen,
+  open: openProp,
   onOpenChange,
   children,
-}: Controlled & {
-  trigger?: ReactNode
-  title: string
-  description?: ReactNode
-  reasonLabel?: string
-  reasonHint?: string
-  placeholder?: string
-  confirmLabel: string
-  dismissLabel?: string
-  tone?: "default" | "destructive"
-  onConfirm: (reason: string | null) => Promise<boolean>
-  children?: ReactNode
-}) {
+}: Opening &
+  Texts & {
+    reasonLabel?: string
+    reasonHint?: string
+    placeholder?: string
+    onConfirm: (reason: string | null) => Promise<boolean>
+    children?: ReactNode
+  }) {
   const t = useTranslations("common")
-  const { onCloseAutoFocus } = useDialogMount()
-  const [innerOpen, setInnerOpen] = useState(false)
-  const [pending, setPending] = useState(false)
   const [reason, setReason] = useState("")
-  const open = controlledOpen ?? innerOpen
+  const [open, setOpen] = useDialogOpen(openProp, onOpenChange)
 
-  const setOpen = (next: boolean) => {
-    if (pending) {
-      return
-    }
-
+  function changeOpen(next: boolean) {
     if (!next) {
       setReason("")
     }
 
-    ;(onOpenChange ?? setInnerOpen)(next)
+    setOpen(next)
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      {trigger ? <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger> : null}
-      <AlertDialogContent onCloseAutoFocus={onCloseAutoFocus}>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          {description ? <AlertDialogDescription>{description}</AlertDialogDescription> : null}
-        </AlertDialogHeader>
-        {children}
-        <FormField label={reasonLabel ?? t("reason")} description={reasonHint} optional>
-          {(control) => (
-            <Textarea
-              {...control}
-              value={reason}
-              maxLength={200}
-              placeholder={placeholder}
-              onChange={(e) => setReason(e.target.value)}
-              className="min-h-20"
-            />
-          )}
-        </FormField>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={pending}>{dismissLabel ?? t("cancel")}</AlertDialogCancel>
-          <Button
-            variant={tone === "destructive" ? "destructive" : "default"}
-            disabled={pending}
-            onClick={async () => {
-              const close = await whilePending(setPending, () =>
-                onConfirm(reason.trim() === "" ? null : reason.trim())
-              )
-
-              if (close) {
-                setReason("")
-
-                ;(onOpenChange ?? setInnerOpen)(false)
-              }
-            }}
-          >
-            {pending ? <Spinner data-icon="inline-start" /> : null}
-            {confirmLabel}
-          </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <ConfirmDialog
+      open={open}
+      onOpenChange={changeOpen}
+      trigger={trigger}
+      title={title}
+      description={description}
+      confirmLabel={confirmLabel}
+      dismissLabel={dismissLabel}
+      tone={tone}
+      onConfirm={() => onConfirm(reason.trim() === "" ? null : reason.trim())}
+    >
+      {children}
+      <FormField label={reasonLabel ?? t("reason")} description={reasonHint} optional>
+        {(control) => (
+          <Textarea
+            {...control}
+            value={reason}
+            maxLength={200}
+            placeholder={placeholder}
+            onChange={(e) => setReason(e.target.value)}
+            className="min-h-20"
+          />
+        )}
+      </FormField>
+    </ConfirmDialog>
   )
 }
 
