@@ -1836,7 +1836,6 @@
       "mentionsDescription": "Freitexte aus den Gruppen der Person, in denen der Vorname vorkommt. Prüfen Sie diese: Manche betreffen vielleicht jemand anderen mit demselben Namen.",
       "noMentions": "Keine Notiz erwähnt den Namen.",
       "mentionWhere": "{where} · {group} · {date}",
-      "copy": "Was die Kopie enthält",
       "outcome": "Ergebnis",
       "erasedOn": "Gelöscht {when}",
       "sentOn": "Kopie verschickt {when}",

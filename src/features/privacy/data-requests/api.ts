@@ -46,6 +46,9 @@ export type MembershipRow = Schemas["MembershipRow"]
 export const groupOfMembership = (membership: MembershipRow) =>
   membership.stage ?? membership.service ?? ""
 
+export const subjectGone = (detail: DataRequestDetail) =>
+  detail.member === null && detail.account === null
+
 export const dataRequestQuery = (id: Uuid) =>
   queryOptions({
     queryKey: [...DATA_REQUESTS_KEY, "detail", id],

@@ -1836,7 +1836,6 @@
       "mentionsDescription": "Free text where the first name appears, in the groups they belonged to. Check them: they may be about someone else with the same name.",
       "noMentions": "No notes mention their name.",
       "mentionWhere": "{where} · {group} · {date}",
-      "copy": "What the copy contains",
       "outcome": "Outcome",
       "erasedOn": "Erased {when}",
       "sentOn": "Copy sent {when}",
