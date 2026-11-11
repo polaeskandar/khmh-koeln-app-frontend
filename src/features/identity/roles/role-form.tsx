@@ -18,7 +18,6 @@ import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { useFormat } from "@/i18n/format"
 import { Link, useRouter } from "@/i18n/navigation"
-import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { nameKey } from "@/lib/domain/names"
 import { oneOf } from "@/lib/one-of"
@@ -26,14 +25,7 @@ import type { Action, Resource, RoleScope } from "./api"
 import { PERMISSION_COUNT } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import {
-  createRoleRequest,
-  type RoleDetails,
-  type RoleRequest,
-  rolesQuery,
-  ROLE_QUERIES,
-  updateRoleRequest,
-} from "./api"
+import { type RoleDetails, type RoleRequest, rolesQuery } from "./api"
 import { DeleteRoleDialog } from "./delete-role-dialog"
 import { PermissionGrid, permissionKey, permissionsOf } from "./permission-grid"
 
@@ -146,36 +138,48 @@ function Holders({ role }: { role: RoleDetails | null }) {
   )
 }
 
-function useSaveRole(role: RoleDetails | null, name: string) {
-  const t = useTranslations("roles.toast")
-  const router = useRouter()
-
-  return useApiMutation(
-    (input: RoleRequest) => (role ? updateRoleRequest(role.id, input) : createRoleRequest(input)),
-    {
-      successMessage: role ? t("saved") : t("created", { name: name.trim() }),
-      invalidate: ROLE_QUERIES,
-      onSuccess: role ? undefined : (saved) => router.push(routes.role(saved.id)),
-    }
-  )
+const BLANK_ROLE: Pick<RoleDetails, "name" | "scope" | "permissions"> = {
+  name: "",
+  scope: "church",
+  permissions: [],
 }
 
-export function RoleForm({ role }: { role: RoleDetails | null }) {
+export function useRoleDraft(role: RoleDetails | null) {
+  const start = role ?? BLANK_ROLE
+  const [name, setName] = useState(start.name)
+
+  const [chosen, setChosen] = useState(
+    () => new Set(start.permissions.map((p) => permissionKey(p.resource, p.action)))
+  )
+
+  const [scope, setScope] = useState<RoleScope>(start.scope)
+
+  return { name, setName, chosen, setChosen, scope, setScope }
+}
+
+type SaveRole = {
+  execute: (input: RoleRequest) => Promise<{ ok: boolean }>
+  pending: boolean
+  problem: unknown
+  fieldErrors: Record<string, string>
+}
+
+export function RoleForm({
+  role,
+  draft,
+  save,
+}: {
+  role: RoleDetails | null
+  draft: ReturnType<typeof useRoleDraft>
+  save: SaveRole
+}) {
   const t = useTranslations()
   const router = useRouter()
   const can = useCan()
   const others = useQuery(rolesQuery)
-  const [name, setName] = useState(role?.name ?? "")
-
-  const [chosen, setChosen] = useState(
-    () => new Set((role?.permissions ?? []).map((p) => permissionKey(p.resource, p.action)))
-  )
-
-  const [scope, setScope] = useState<RoleScope>(role?.scope ?? "church")
+  const { name, setName, chosen, setChosen, scope, setScope } = draft
   const [deleting, setDeleting] = useState(false)
   const editable = role ? can("update", "roles") : can("create", "roles")
-
-  const save = useSaveRole(role, name)
 
   const taken = (others.data?.items ?? []).find(
     (other) => other.id !== role?.id && nameKey(other.name) === nameKey(name)
