@@ -66,7 +66,7 @@ export const within =
 export const canInAny = (can: Can, action: Action, resource: Resource, groups: Group[]) =>
   groups.length === 0 ? can(action, resource) : groups.some((group) => can(action, resource, group))
 
-export const covers = (assignments: AssignedGroup[], group: Group) =>
+const covers = (assignments: AssignedGroup[], group: Group) =>
   assignments.some(
     (assignment) =>
       assignment.service.id === group.serviceId &&

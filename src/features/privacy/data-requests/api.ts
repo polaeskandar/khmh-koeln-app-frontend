@@ -3,8 +3,6 @@ import type { LocalDate, Uuid } from "@/lib/api/types/common"
 import { DATA_REQUESTS_KEY, GUARDIAN_LINKS_KEY } from "@/lib/api/query-keys"
 
 export type RequestKind = Schemas["RequestKind"]
-export type RequestChannel = Schemas["RequestChannel"]
-export type RequestStatus = Schemas["RequestStatus"]
 
 export type DataRequestRow = Schemas["DataRequestRowResponse"]
 
@@ -20,8 +18,6 @@ export type NewDataRequest = Schemas["RecordDataRequestRequest"]
 export const recordDataRequest = (input: NewDataRequest) =>
   dataOf(api.POST("/data-requests", { body: input }))
 
-export type AccountChoice = Schemas["ParentAccessListResponse"]["accounts"][number]
-
 export const accountChoicesQuery = {
   queryKey: GUARDIAN_LINKS_KEY,
   queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/guardian-links", { signal })),
@@ -30,8 +26,6 @@ export const accountChoicesQuery = {
 export type ErasureReview = Schemas["ErasureReviewResponse"]
 
 export type Counts = ErasureReview["erase"]
-
-export type Mention = Schemas["Mention"]
 
 const MENTION_LABELS = {
   sessionNote: "sessionNote",

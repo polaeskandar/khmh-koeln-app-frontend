@@ -7,7 +7,7 @@ import { renderWithProviders } from "@test/support/providers"
 import { MemberAvatar } from "@/components/member-avatar"
 import { RosterCells } from "@/components/roster-cells"
 import { ServiceSwatch, ServiceTag } from "@/components/service-tag"
-import { MovedBadge, OneOffBadge, SessionStatusBadge } from "@/components/status"
+import { OneOffBadge, SessionStatusBadge } from "@/components/status"
 
 describe("SessionStatusBadge", () => {
   test.each([
@@ -30,17 +30,11 @@ describe("SessionStatusBadge", () => {
     expect(container.querySelector(".animate-live")).not.toBeNull()
   })
 
-  test("moved and one-off badges carry an icon too", () => {
-    const { container } = renderWithProviders(
-      <>
-        <MovedBadge />
-        <OneOffBadge />
-      </>
-    )
+  test("the one-off badge carries an icon too", () => {
+    const { container } = renderWithProviders(<OneOffBadge />)
 
-    expect(screen.getByText("Moved")).toBeInTheDocument()
     expect(screen.getByText("One-off")).toBeInTheDocument()
-    expect(container.querySelectorAll("svg")).toHaveLength(2)
+    expect(container.querySelectorAll("svg")).toHaveLength(1)
   })
 })
 

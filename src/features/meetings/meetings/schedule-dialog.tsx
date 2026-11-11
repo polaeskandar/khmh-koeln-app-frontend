@@ -147,12 +147,12 @@ type Preview =
 
 const LOCAL_DATE = /^\d{4}-\d{2}-\d{2}$/
 
-export const INTERVALS: Record<Draft["frequency"], number[]> = {
+const INTERVALS: Record<Draft["frequency"], number[]> = {
   weekly: [1, 2, 3, 4],
   monthly: [1, 2, 3, 6],
 }
 
-export function previewOf(d: Draft, today: LocalDate): Preview {
+function previewOf(d: Draft, today: LocalDate): Preview {
   if (!LOCAL_DATE.test(d.startsOn) || Number.isNaN(Date.parse(d.startsOn))) {
     return { error: "startsOn", dates: [], recurrence: null }
   }
@@ -630,7 +630,7 @@ function ScheduleForm({
   )
 }
 
-export function ScheduleDialog({
+function ScheduleDialog({
   today,
   schedule,
   fixedServiceId,

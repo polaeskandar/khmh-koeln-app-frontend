@@ -95,14 +95,15 @@ production; off unless set, the page says to ask the church office.
 layout"), so the screens for an endpoint sit under the context of its controller. Each context has one folder
 per resource:
 
-| Context        | Folders                                      |
-| -------------- | -------------------------------------------- |
-| `identity`     | `auth`, `account`, `accounts`, `roles`       |
-| `organization` | `services`, `stages`, `assignments`          |
-| `people`       | `members`, `guardians`, `children`, `groups` |
-| `meetings`     | `meetings`, `attendance`, `dashboard`        |
-| `learning`     | `lessons`, `homework`                        |
-| `privacy`      | `data-requests`, `notice`, `own-data`        |
+| Context        | Folders                                            |
+| -------------- | -------------------------------------------------- |
+| `identity`     | `auth`, `account`, `accounts`, `roles`             |
+| `organization` | `services`, `stages`, `assignments`                |
+| `people`       | `members`, `guardians`, `children`, `groups`       |
+| `meetings`     | `meetings`, `attendance`, `dashboard`              |
+| `learning`     | `lessons`, `homework`                              |
+| `privacy`      | `data-requests`, `data-copy`, `notice`, `own-data` |
+| `portals`      | `parent`, `member` (no backend context, see below) |
 
 A file sits in the context whose endpoints it calls, as in the backend's `Interface/Api/<Area>`: the parent and
 member portals' homework is in `learning/homework`, a parent's children in `people/children`, a member's groups
@@ -118,7 +119,7 @@ the portal account menu and the language switch); the warning becomes an error o
 ### Data access
 
 - **One `api.ts` per feature** (`src/features/<context>/<resource>/api.ts`) holds its response types, query options and
-  calls; screens never build URLs or call `apiRequest()` themselves.
+  calls; screens never build URLs or call `api` themselves.
 - **Permissions** come from `GET /me` only: read models carry no permission flags (the backend's
   `docs/api.md`, "What the viewer may do"). Screens offer an action when `useCan()` from
   `src/features/identity/auth/session.tsx` grants it, together with the item's own state (archived, status) as
@@ -199,9 +200,9 @@ from that segment only, never from cookies or headers, and sets the time zone to
 
 **Adding a page:** create `app/[locale]/<path>/page.tsx`; read `locale` from `params`, call
 `setRequestLocale(locale)` before any next-intl call, and translate metadata with
-`getTranslations({ locale, namespace })`. Link with `Link`, `useRouter`, `usePathname` and `redirect` from
-`@/i18n/navigation`, which keep the language in the path; ESLint rejects `next/link` and those functions
-from `next/navigation`. Paths end in a slash (`trailingSlash`), so every page is a directory with an
+`getTranslations({ locale, namespace })`. Link with `Link`, `useRouter` and `usePathname` from
+`@/i18n/navigation`, which keep the language in the path; ESLint rejects `next/link` and those functions (and
+`redirect`) from `next/navigation`. Paths end in a slash (`trailingSlash`), so every page is a directory with an
 `index.html`.
 
 The decisions behind this:

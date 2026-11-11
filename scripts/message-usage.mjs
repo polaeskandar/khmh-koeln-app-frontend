@@ -6,7 +6,7 @@ import ts from "typescript"
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url))
 
-export const DYNAMIC_KEYS = [
+const DYNAMIC_KEYS = [
   "accountRequests.approve.ageCheck.*",
   "attendance.stage.cell.*",
   "attendance.stage.cellSr.*",

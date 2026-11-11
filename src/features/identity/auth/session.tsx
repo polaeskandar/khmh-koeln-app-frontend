@@ -25,7 +25,7 @@ import { routes } from "@/lib/routes"
 import { onLanguageSaveFailed } from "./account-language"
 import { areasOf, type Me, meQuery, signOutRequest } from "./api"
 
-export type Session =
+type Session =
   | { status: "unknown" }
   | { status: "anonymous" }
   | { status: "ended" }

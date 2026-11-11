@@ -60,7 +60,7 @@ export const services: ServiceList = {
   ],
 }
 
-export const insight = (
+const insight = (
   serviceId: string,
   extra: Partial<Omit<ServiceInsight, "serviceId">> = {}
 ): ServiceInsight => ({
@@ -77,5 +77,3 @@ export const insightsOf = (
 ): ServiceInsightList => ({
   items: rows.map((row) => insight(row.id, extra[row.id])),
 })
-
-export const serviceInsights: ServiceInsightList = insightsOf(services.items)

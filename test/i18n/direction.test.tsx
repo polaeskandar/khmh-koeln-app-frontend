@@ -12,17 +12,16 @@ import {
 import { isolate } from "@/lib/bidi"
 import { renderWithProviders, testProviders } from "@test/support/providers"
 
-import { useInlineEnd, useInlineStart } from "@/i18n/direction"
+import { useInlineEnd } from "@/i18n/direction"
 
 describe("physical sides follow the language", () => {
   test.each([
-    ["en", "right", "left"],
-    ["de", "right", "left"],
-    ["ar", "left", "right"],
-  ] as const)("in %s lines end on the %s", (locale, end, start) => {
+    ["en", "right"],
+    ["de", "right"],
+    ["ar", "left"],
+  ] as const)("in %s lines end on the %s", (locale, end) => {
     const { wrapper } = testProviders({ locale })
     expect(renderHook(() => useInlineEnd(), { wrapper }).result.current).toBe(end)
-    expect(renderHook(() => useInlineStart(), { wrapper }).result.current).toBe(start)
   })
 })
 

@@ -4,7 +4,6 @@ import type { Recurrence } from "@/lib/api/types/common"
 
 import cases from "@/lib/domain/recurrence-cases.json"
 import {
-  nextOccurrence,
   occurrencesBetween,
   RecurrenceError,
   type RecurrenceProblem,
@@ -64,11 +63,5 @@ describe("every other Monday from Sun 8 Nov 2026", () => {
       "2026-12-28",
       "2027-01-11",
     ])
-  })
-
-  test("has no next date after it ends", () => {
-    const ended = { ...everyOtherMonday, span: { startsOn: "2026-11-08", endsOn: "2026-12-20" } }
-    expect(nextOccurrence(ended, "2026-12-15")).toBeNull()
-    expect(nextOccurrence(ended, "2026-12-01")).toBe("2026-12-14")
   })
 })

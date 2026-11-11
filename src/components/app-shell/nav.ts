@@ -11,7 +11,7 @@ import {
 import type { Can } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-export type NavKey = "dashboard" | "services" | "meetings" | "attendance" | "members" | "settings"
+type NavKey = "dashboard" | "services" | "meetings" | "attendance" | "members" | "settings"
 
 export type NavItem = {
   href: string

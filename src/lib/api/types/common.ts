@@ -4,8 +4,7 @@ export type LocalDate = string
 export type LocalTime = string
 export type Instant = string
 
-export const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const
-export type IsoWeekday = (typeof ISO_WEEKDAYS)[number]
+export type IsoWeekday = 1 | 2 | 3 | 4 | 5 | 6 | 7
 export type MonthWeek = 1 | 2 | 3 | 4 | -1
 export type Frequency = Schemas["Frequency"]
 
@@ -19,7 +18,6 @@ export type Recurrence = {
 
 export type ServiceRef = Schemas["ServiceReference"]
 export type StageRef = Schemas["StageReference"]
-export type AccountRef = Schemas["AccountReference"] | null
 export type PersonRef = Schemas["PersonReference"]
 export type LessonRef = Schemas["LessonOnDate"]
 export type Counts = Schemas["AttendanceCounts"]

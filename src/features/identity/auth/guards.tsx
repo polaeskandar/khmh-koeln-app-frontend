@@ -31,7 +31,7 @@ import { useCan, useSession, useUnassigned } from "./session"
 
 type Areas = ReturnType<typeof areasOf>
 
-export function SessionSplash() {
+function SessionSplash() {
   return (
     <main aria-busy="true" className="flex min-h-svh flex-1 items-center justify-center">
       <KhmkMark className="size-12" />
@@ -39,7 +39,7 @@ export function SessionSplash() {
   )
 }
 
-export function NoRole() {
+function NoRole() {
   const t = useTranslations("auth.noRole")
   const { signOut, signingOut } = useSession()
 

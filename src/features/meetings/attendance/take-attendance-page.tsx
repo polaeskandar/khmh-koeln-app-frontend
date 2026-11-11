@@ -60,7 +60,7 @@ export function BoardFrame({ board, children }: { board: Board; children: ReactN
           }
           actionsClassName="hidden md:flex"
         >
-          <SessionWhen item={session} today={board.today} className="mt-1" />
+          <SessionWhen item={session} className="mt-1" />
         </PageHeader>
         {children}
       </PageBody>

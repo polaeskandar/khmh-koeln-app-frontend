@@ -4,7 +4,7 @@ import { join } from "node:path"
 import type { Locale } from "@/i18n/config"
 import { parsePrivacyNotice } from "@/lib/privacy"
 
-export const privacyNoticeFile = (locale: Locale) =>
+const privacyNoticeFile = (locale: Locale) =>
   join(process.cwd(), "src/content/privacy", `${locale}.md`)
 
 export const readPrivacyNotice = (locale: Locale) =>

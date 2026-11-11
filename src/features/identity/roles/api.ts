@@ -11,8 +11,6 @@ export const rolesQuery = {
   queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/roles", { signal })),
 }
 
-export const roleListQuery = rolesQuery
-
 export const parentPortalOnly = (role: Role) =>
   role.permissions.length > 0 && role.permissions.every((p) => p.resource === "parentPortal")
 

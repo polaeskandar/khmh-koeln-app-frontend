@@ -120,7 +120,7 @@ function SessionDetail({ data, actions }: { data: MeetingSession; actions?: Reac
             </>
           }
         >
-          <SessionWhen item={session} today={today} className="mt-1" />
+          <SessionWhen item={session} className="mt-1" />
         </PageHeader>
         {canceled ? (
           <p role="status" className="border border-destructive/30 bg-destructive/5 p-4 text-sm">

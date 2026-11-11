@@ -15,7 +15,7 @@ import type { AttendanceBoard, Mark, Placement } from "./api"
 
 export type Visitor = { person: PersonRef; placements: Placement[] }
 
-export type Write = {
+type Write = {
   present: boolean
   status: "pending" | "confirmed"
   mark: Mark | null
@@ -150,7 +150,7 @@ const REFETCH_CODES = new Set([
 const retryable = (error: unknown) =>
   !(error instanceof ApiError) || error.status === 0 || error.status >= 500
 
-export async function withRetries<T>(write: (signal: AbortSignal) => Promise<T>): Promise<T> {
+async function withRetries<T>(write: (signal: AbortSignal) => Promise<T>): Promise<T> {
   for (let attempt = 1; ; attempt++) {
     try {
       return await write(AbortSignal.timeout(TIMEOUT_MS))

@@ -92,7 +92,7 @@ function wallClock(epochMs: number, timeZone: string): WallClock {
   }
 }
 
-export function offsetMinutes(epochMs: number, timeZone: string = CHURCH_TIME_ZONE): number {
+function offsetMinutes(epochMs: number, timeZone: string = CHURCH_TIME_ZONE): number {
   const wall = wallClock(epochMs, timeZone)
   const [y, m, d] = parseDate(wall.date)
   const [hh, mm] = wall.time.split(":").map(Number)
@@ -138,18 +138,6 @@ export function toInstant(epochMs: number, timeZone: string = CHURCH_TIME_ZONE):
   return `${wall.date}T${wall.time}:${String(wall.seconds).padStart(2, "0")}${sign}${hh}:${mm}`
 }
 
-export function localInstant(
-  date: LocalDate,
-  time: LocalTime,
-  timeZone: string = CHURCH_TIME_ZONE
-): Instant {
-  return toInstant(zonedInstant(date, time, timeZone), timeZone)
-}
-
-export function epochOf(instant: Instant): number {
-  return Date.parse(instant)
-}
-
 export function localDateOf(
   instant: Instant | number,
   timeZone: string = CHURCH_TIME_ZONE
@@ -173,12 +161,4 @@ export function isValidLocalDate(value: string): value is LocalDate {
   const probe = new Date(Date.UTC(y, m - 1, d))
 
   return probe.getUTCFullYear() === y && probe.getUTCMonth() === m - 1 && probe.getUTCDate() === d
-}
-
-export function isValidLocalTime(value: string): value is LocalTime {
-  return /^([01]\d|2[0-3]):[0-5]\d$/.test(value)
-}
-
-export function compareTime(a: LocalTime, b: LocalTime): number {
-  return a.localeCompare(b)
 }

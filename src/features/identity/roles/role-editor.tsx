@@ -45,7 +45,7 @@ import {
   deleteRoleRequest,
   type RoleDetail,
   type RoleInput,
-  roleListQuery,
+  rolesQuery,
   roleQuery,
   updateRoleRequest,
   ROLE_QUERIES,
@@ -251,7 +251,7 @@ function RoleForm({ role }: { role: RoleDetail | null }) {
   const t = useTranslations()
   const router = useRouter()
   const can = useCan()
-  const others = useQuery(roleListQuery)
+  const others = useQuery(rolesQuery)
   const [name, setName] = useState(role?.name ?? "")
   const [chosen, setChosen] = useState(() => new Set((role?.permissions ?? []).map(key)))
   const [scope, setScope] = useState<RoleScope>(role?.scope ?? "church")

@@ -1,5 +1,3 @@
-import { useQuery } from "@tanstack/react-query"
-
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { LocalDate, Uuid } from "@/lib/api/types/common"
 import type { LessonStatus } from "@/lib/api/types/learning"
@@ -24,8 +22,6 @@ export const lessonQuery = (id: Uuid) => ({
   queryFn: ({ signal }: { signal: AbortSignal }) =>
     dataOf(api.GET("/lessons/{id}", { params: { path: { id } }, signal })),
 })
-
-export const useLesson = (id: Uuid) => useQuery(lessonQuery(id))
 
 export const stageLessonsQuery = (stage: Uuid, tab: LessonTab = "upcoming", q = "") => ({
   queryKey: ["lessons", "list", { stage, tab, q }] as const,

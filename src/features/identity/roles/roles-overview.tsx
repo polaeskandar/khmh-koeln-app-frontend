@@ -23,7 +23,7 @@ import { isolate } from "@/lib/bidi"
 import { PERMISSION_COUNT, RESOURCES } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import { deleteRoleRequest, type RoleRow, roleListQuery, ROLE_QUERIES } from "./api"
+import { deleteRoleRequest, type RoleRow, rolesQuery, ROLE_QUERIES } from "./api"
 
 function RoleMenu({ role }: { role: RoleRow }) {
   const t = useTranslations()
@@ -150,7 +150,7 @@ function RolesTable({ roles }: { roles: RoleRow[] }) {
 export function RolesOverview() {
   const t = useTranslations("settings.roles")
   const can = useCan()
-  const query = useQuery(roleListQuery)
+  const query = useQuery(rolesQuery)
   const readOnly = !can("create", "roles") && !can("update", "roles") && !can("delete", "roles")
 
   return (

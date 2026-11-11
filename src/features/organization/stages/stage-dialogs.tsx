@@ -161,7 +161,7 @@ function StageForm({
   )
 }
 
-export function StageFormDialog({
+function StageFormDialog({
   service,
   stage,
   open,

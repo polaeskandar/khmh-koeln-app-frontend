@@ -1,17 +1,6 @@
-import type { HomeworkFlags, HomeworkRow, StageHomework } from "@/features/learning/homework/api"
+import type { HomeworkRow, StageHomework } from "@/features/learning/homework/api"
 
 import { goodSamaritan, lessonStage } from "@test/support/fixtures/lessons"
-
-export const homeworkFlags = (can: Partial<HomeworkFlags> = {}): HomeworkFlags => ({
-  edit: false,
-  publish: false,
-  viewProgress: false,
-  unpublish: false,
-  archive: false,
-  restore: false,
-  delete: false,
-  ...can,
-})
 
 export const homeworkRow = (overrides: Partial<HomeworkRow> = {}): HomeworkRow => ({
   id: "0192f3a4-7b1c-7d2e-8f3a-4b5c6d7ea001",

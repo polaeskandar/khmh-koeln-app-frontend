@@ -57,7 +57,7 @@ export function useOwnCompletion(): TaskCompletion {
 const FOCUS_RING =
   "outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
 
-export function TaskCard({
+function TaskCard({
   task,
   today,
   href,

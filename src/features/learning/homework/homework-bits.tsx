@@ -11,12 +11,7 @@ import type { Format } from "@/lib/format"
 
 type HomeworkT = ReturnType<typeof useTranslations<"homework">>
 
-export function dueLabel(
-  t: HomeworkT,
-  f: Format,
-  dueDate: LocalDate | null,
-  today: LocalDate
-): string {
+function dueLabel(t: HomeworkT, f: Format, dueDate: LocalDate | null, today: LocalDate): string {
   if (!dueDate) {
     return t("due.none")
   }

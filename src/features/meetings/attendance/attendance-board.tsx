@@ -35,7 +35,7 @@ export type BoardActions = {
   saving?: boolean
 }
 
-export const placementText = (placements: Placement[]) =>
+const placementText = (placements: Placement[]) =>
   placements
     .map((p) => (p.stage ? `${p.service.name} · ${p.stage.name}` : p.service.name))
     .join(", ")

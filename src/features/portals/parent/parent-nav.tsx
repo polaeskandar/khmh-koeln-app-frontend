@@ -3,11 +3,8 @@
 import { House, NotebookPen, UserRound, UsersRound } from "lucide-react"
 import { useTranslations } from "next-intl"
 
-import { isPortalActive, type PortalNavItem } from "@/components/portal/portal-nav"
+import type { PortalNavItem } from "@/components/portal/portal-nav"
 import { routes } from "@/lib/routes"
-
-export const isParentActive = (href: string, pathname: string | null | undefined) =>
-  isPortalActive(href, routes.parentHome(), pathname)
 
 export function useParentNav(): PortalNavItem[] {
   const t = useTranslations("parent.nav")

@@ -68,7 +68,7 @@ function isRequestedWeekOfMonth(date: LocalDate, monthWeek: MonthWeek): boolean 
     : Math.ceil(dayOfMonth / 7) === monthWeek
 }
 
-export function occursOn(r: Recurrence, date: LocalDate): boolean {
+function occursOn(r: Recurrence, date: LocalDate): boolean {
   const { startsOn, endsOn } = r.span
 
   if (date < startsOn || (endsOn !== null && date > endsOn)) {
@@ -102,22 +102,6 @@ export function occurrencesBetween(r: Recurrence, from: LocalDate, to: LocalDate
   }
 
   return out
-}
-
-const HORIZON_DAYS = 400
-
-export function nextOccurrence(r: Recurrence, onOrAfter: LocalDate): LocalDate | null {
-  for (let d = onOrAfter, i = 0; i < HORIZON_DAYS; d = addDays(d, 1), i++) {
-    if (r.span.endsOn !== null && d > r.span.endsOn) {
-      return null
-    }
-
-    if (occursOn(r, d)) {
-      return d
-    }
-  }
-
-  return null
 }
 
 const MONTH_WEEKS: MonthWeek[] = [1, 2, 3, 4, -1]

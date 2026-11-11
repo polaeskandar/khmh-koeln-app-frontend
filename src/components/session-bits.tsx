@@ -53,7 +53,7 @@ type Counted = Pick<SessionView, "status" | "rosterMode" | "cancelReason" | "dat
   counts: NonNullable<SessionView["counts"]>
 }
 
-export function sessionLines(t: SessionT, f: Format) {
+function sessionLines(t: SessionT, f: Format) {
   return {
     present(s: Counted): string {
       const c = s.counts
@@ -116,13 +116,9 @@ const counted = (s: SessionView): s is SessionView & Counted =>
 
 export function SessionWhen({
   item,
-  today,
-  withDate = false,
   className,
 }: {
-  item: Pick<SessionView, "date" | "startTime" | "endTime" | "location">
-  today: LocalDate
-  withDate?: boolean
+  item: Pick<SessionView, "startTime" | "endTime" | "location">
   className?: string
 }) {
   const f = useFormat()
@@ -136,7 +132,6 @@ export function SessionWhen({
     >
       <span className="inline-flex items-center gap-1.5 tabular-nums">
         <Clock className="size-3.5" aria-hidden="true" />
-        {withDate ? `${f.relativeDay(item.date, today)}${f.separator}` : ""}
         {f.timeRange(item.startTime, item.endTime)}
       </span>
       {item.location ? (
@@ -151,14 +146,14 @@ export function SessionWhen({
   )
 }
 
-export function SessionBadges({ item, soft }: { item: Badged; soft?: boolean }) {
+export function SessionBadges({ item }: { item: Badged }) {
   if (item.kind === "planned") {
-    return <SessionStatusBadge status="planned" soft={soft} />
+    return <SessionStatusBadge status="planned" />
   }
 
   return (
     <span className="flex flex-wrap items-center gap-1.5">
-      <SessionStatusBadge status={item.status} soft={soft} />
+      <SessionStatusBadge status={item.status} />
       {item.scheduleId === null ? <OneOffBadge /> : null}
     </span>
   )
@@ -212,7 +207,7 @@ export function SessionCardView({
         <p dir="auto" className="truncate text-sm text-muted-foreground">
           {session.title}
         </p>
-        <SessionWhen item={session} today={today} />
+        <SessionWhen item={session} />
       </div>
       {!counted(session) ? (
         canceled && session.cancelReason ? (
@@ -255,14 +250,12 @@ export function AgendaRow({
   today,
   trailing,
   href = agendaHref(item),
-  compact = false,
   className,
 }: {
   item: AgendaItem
   today: LocalDate
   trailing?: React.ReactNode
   href?: string | null
-  compact?: boolean
   className?: string
 }) {
   const f = useFormat()
@@ -295,7 +288,7 @@ export function AgendaRow({
 
   const content = (
     <>
-      <div className={cn("shrink-0 text-center leading-none", compact ? "w-11" : "w-14")}>
+      <div className="w-14 shrink-0 text-center leading-none">
         <div className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase">
           {f.todayOrWeekday(item.date, today)}
         </div>
@@ -304,38 +297,22 @@ export function AgendaRow({
         </div>
         <div className="mt-1 text-[11px] text-muted-foreground">{f.monthShort(item.date)}</div>
       </div>
-      {compact ? (
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="flex min-w-0 items-center gap-2">
           {name}
-          <span className="truncate text-sm text-muted-foreground tabular-nums">
-            {f.timeRange(item.startTime, item.endTime)}
-            {item.location ? ` · ${item.location}` : ""}
-          </span>
-          <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            {trailing ?? <SessionBadges item={item} />}
-            {detail}
+          <span dir="auto" className="hidden truncate text-sm text-muted-foreground sm:inline">
+            · {item.title}
           </span>
         </div>
-      ) : (
-        <>
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <div className="flex min-w-0 items-center gap-2">
-              {name}
-              <span dir="auto" className="hidden truncate text-sm text-muted-foreground sm:inline">
-                · {item.title}
-              </span>
-            </div>
-            <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-              <ServiceTag service={item.service} className="text-xs" />
-              <SessionWhen item={item} today={today} />
-            </div>
-          </div>
-          <div className="flex shrink-0 flex-col items-end gap-1 text-end">
-            {trailing ?? <SessionBadges item={item} />}
-            {detail}
-          </div>
-        </>
-      )}
+        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+          <ServiceTag service={item.service} className="text-xs" />
+          <SessionWhen item={item} />
+        </div>
+      </div>
+      <div className="flex shrink-0 flex-col items-end gap-1 text-end">
+        {trailing ?? <SessionBadges item={item} />}
+        {detail}
+      </div>
     </>
   )
 

@@ -5,7 +5,7 @@ import { type ReactNode, useState } from "react"
 
 import { ApiError } from "./problem"
 
-export function shouldRetry(failureCount: number, error: unknown) {
+function shouldRetry(failureCount: number, error: unknown) {
   return (
     failureCount < 2 && error instanceof ApiError && (error.status === 0 || error.status >= 500)
   )

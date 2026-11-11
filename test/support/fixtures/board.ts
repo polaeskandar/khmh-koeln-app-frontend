@@ -30,7 +30,7 @@ const mark = (n: number, time: string): Mark => ({
   recordedAt: `2026-11-08T${time}:00+01:00`,
 })
 
-export const boardSession = (
+const boardSession = (
   view: SessionView,
   state: Partial<Pick<BoardSession, "openedAt" | "closedAt" | "closedBy">> = {}
 ): BoardSession => ({ ...view, openedAt: null, closedAt: null, closedBy: null, ...state })
@@ -56,7 +56,7 @@ export const rosterPeople = NAMES.map(([first, last, display], i) =>
   person(i + 1, first, last, display)
 )
 
-export const visitor = person(99, "Theo", "Mansour")
+const visitor = person(99, "Theo", "Mansour")
 
 export const thirdClassBoard = (): AttendanceSheet => ({
   today: "2026-11-08",

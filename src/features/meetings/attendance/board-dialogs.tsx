@@ -83,7 +83,7 @@ export function CloseDialog({
   )
 }
 
-export function marksOf(board: AttendanceBoard): { person: PersonRef; mark: Mark }[] {
+function marksOf(board: AttendanceBoard): { person: PersonRef; mark: Mark }[] {
   return [...board.roster, ...board.notOnRoster]
     .flatMap((row) => (row.mark?.id ? [{ person: row.person, mark: row.mark }] : []))
     .sort((a, b) => b.mark.recordedAt.localeCompare(a.mark.recordedAt))

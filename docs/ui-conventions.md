@@ -9,7 +9,7 @@ A screen's main data comes from one query, rendered through `QueryState` (`src/c
 
 | State         | Shows                                                                                                               |
 | ------------- | ------------------------------------------------------------------------------------------------------------------- |
-| First load    | The page's skeleton (`PageLoading`, or `ParentPageLoading` in the parent portal)                                    |
+| First load    | The page's skeleton (`PageLoading`)                                                                                 |
 | Data          | The screen; it stays visible while the query refetches, even if that refetch fails                                  |
 | 404           | `NotFoundState`, the same for a missing, deleted or malformed id (`RecordPage` catches the last before any request) |
 | 403           | `NoAccess`: the role doesn't allow it                                                                               |

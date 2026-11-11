@@ -1,6 +1,6 @@
 type Person = { firstName: string; lastName: string; displayName: string | null }
 
-export function cleanName(value: string): string {
+function cleanName(value: string): string {
   return value.replace(/\s+/gu, " ").trim()
 }
 
