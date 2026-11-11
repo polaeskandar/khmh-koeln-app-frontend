@@ -1,10 +1,10 @@
 "use client"
 
-import { useQueryClient } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
 import { useRef } from "react"
 
 import { useSubmitOnce } from "@/hooks/use-submit-once"
+import { useRefetch } from "@/lib/api/refetch"
 import type { Instant, Uuid } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
@@ -14,7 +14,7 @@ type Target = { id: Uuid; title: string; publishedAt: Instant | null }
 
 export function usePublishHomework(message?: string) {
   const t = useTranslations("toast")
-  const queryClient = useQueryClient()
+  const refetch = useRefetch()
   const published = useRef(new Set<string>())
 
   const mutation = useApiMutation(
@@ -31,9 +31,7 @@ export function usePublishHomework(message?: string) {
       published.current.add(attempt)
     }
 
-    await Promise.all(
-      HOMEWORK_QUERIES.map((queryKey) => queryClient.invalidateQueries({ queryKey }))
-    )
+    await refetch(HOMEWORK_QUERIES)
 
     return result
   })

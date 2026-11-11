@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { KeyRound, Plus, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useEffect, useState } from "react"
@@ -33,6 +33,7 @@ import { useFormat } from "@/i18n/format"
 import { Link } from "@/i18n/navigation"
 import { ApiError } from "@/lib/api/problem"
 import { describeProblem } from "@/lib/api/translate-problem"
+import { isStale, useRefetch } from "@/lib/api/refetch"
 import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { useProblemTranslator } from "@/lib/api/use-problem-translator"
@@ -46,10 +47,10 @@ import {
   passwordLinkRequest,
   removeRoleRequest,
   type StaffAccount,
+  STAFF_ACCOUNT_QUERIES,
   staffAccountsQuery,
 } from "./api"
 import { type Role, rolesQuery, ROLE_QUERIES } from "@/features/identity/roles/api"
-import { STAFF_ACCOUNTS_KEY } from "@/lib/api/query-keys"
 
 function GiveRoleDialog({
   account,
@@ -61,7 +62,7 @@ function GiveRoleDialog({
   onOpenChange: (open: boolean) => void
 }) {
   const t = useTranslations()
-  const queryClient = useQueryClient()
+  const refetch = useRefetch()
   const [roleId, setRoleId] = useState("")
 
   const give = useApiMutation((id: string) => giveRoleRequest(account.id, id), {
@@ -73,8 +74,8 @@ function GiveRoleDialog({
   async function submit() {
     const result = await give.execute(roleId)
 
-    if (!result.ok && result.problem.status === 409) {
-      void queryClient.invalidateQueries({ queryKey: STAFF_ACCOUNTS_KEY })
+    if (!result.ok && isStale(result.problem, [409])) {
+      void refetch(STAFF_ACCOUNT_QUERIES)
       onOpenChange(false)
     }
   }

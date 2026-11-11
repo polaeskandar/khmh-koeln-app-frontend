@@ -3,6 +3,7 @@ import { expect, test } from "vitest"
 import {
   ACCOUNT_REQUEST_QUERIES,
   MEMBER_ACCOUNT_QUERIES,
+  STAFF_ACCOUNT_QUERIES,
   STAFF_APPROVAL_QUERIES,
 } from "@/features/identity/accounts/api"
 import { refetchedBy } from "@test/support/queries"
@@ -28,4 +29,8 @@ test("a member account change refetches the member accounts and the requests", (
     "memberCandidates",
     "memberAccounts",
   ])
+})
+
+test("a staff account changed meanwhile refetches the staff accounts", () => {
+  expect(refetchedBy(STAFF_ACCOUNT_QUERIES)).toEqual(["staffAccounts"])
 })

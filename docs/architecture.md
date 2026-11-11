@@ -151,6 +151,11 @@ the portal account menu and the language switch); the warning becomes an error o
   retried. With `awaitRefetch`, `pending` lasts until the invalidated queries have been fetched again, for
   a screen that shows the changed data next to the button (the person sheet), so it never offers an
   action on data it has just changed.
+- **Changed meanwhile:** a refusal that means the screen shows outdated data (a 409, a 404, or a code such as
+  `accounts.alreadyApproved`) refetches it, and a dialog about it closes. `isStale(problem, [409])` from
+  `src/lib/api/refetch.ts` says whether a problem is one of the given statuses or codes, and `useRefetch()`
+  returns `refetch(LIST)`, which invalidates a change list from an `api.ts`; each screen passes the statuses or
+  codes it treats that way.
 - **Problems in words:** `translateProblem()` shows `errors.<code>` with the problem's `params`, or the text
   for its status when the catalog has no such code; `fieldErrorsOf()` does the same per field. A 422 with
   field errors shows them on the fields, without a toast; a 401 `auth.unauthenticated` ends the session

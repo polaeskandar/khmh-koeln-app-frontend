@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
@@ -15,6 +15,7 @@ import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty"
 import { initialsOf } from "@/features/identity/auth/role-summary"
 import { LOCALE_NAMES } from "@/i18n/config"
 import { useFormat } from "@/i18n/format"
+import { useRefetch } from "@/lib/api/refetch"
 import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
@@ -24,7 +25,6 @@ import {
   declineRequest,
   ACCOUNT_REQUEST_QUERIES,
 } from "./api"
-import { ACCOUNT_REQUESTS_KEY } from "@/lib/api/query-keys"
 
 const KIND = { parent: "asParent", servant: "asServant", member: "asMember" } as const
 
@@ -79,7 +79,7 @@ function RequestRow({
 function DeclineButton({ request }: { request: AccountRequest }) {
   const t = useTranslations()
   const [open, setOpen] = useState(false)
-  const queryClient = useQueryClient()
+  const refetch = useRefetch()
 
   const decline = useApiMutation(declineRequest, {
     successMessage: t("toast.accountDeclined", { name: request.account.displayName }),
@@ -100,7 +100,7 @@ function DeclineButton({ request }: { request: AccountRequest }) {
         const result = await decline.execute(request.account.id)
 
         if (!result.ok) {
-          void queryClient.invalidateQueries({ queryKey: ACCOUNT_REQUESTS_KEY })
+          void refetch(ACCOUNT_REQUEST_QUERIES)
         }
 
         return true

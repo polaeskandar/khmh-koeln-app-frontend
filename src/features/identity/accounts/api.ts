@@ -73,6 +73,8 @@ export const passwordLinkRequest = (account: Uuid) =>
 
 export const ACCOUNT_REQUEST_QUERIES = [ACCOUNT_REQUESTS_KEY]
 
+export const STAFF_ACCOUNT_QUERIES = [STAFF_ACCOUNTS_KEY]
+
 export const STAFF_APPROVAL_QUERIES = [
   ACCOUNT_REQUESTS_KEY,
   STAFF_ACCOUNTS_KEY,

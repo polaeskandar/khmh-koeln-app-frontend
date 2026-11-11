@@ -10,6 +10,8 @@ export const erasureRequestQuery = queryOptions({
   queryFn: ({ signal }) => dataOf(api.GET("/me/erasure-request", { signal })),
 })
 
+export const ERASURE_REQUEST_QUERIES = [erasureRequestQuery.queryKey]
+
 export const requestErasureRequest = (body: Schemas["OwnErasureRequestRequest"]) =>
   dataOf(api.POST("/me/erasure-request", { body }))
 

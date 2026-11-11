@@ -22,7 +22,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { cn } from "cn"
 import { GripVertical } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -37,13 +37,13 @@ import { type ServiceStages, serviceStagesQuery } from "@/features/organization/
 import { useInBrowser } from "@/hooks/use-in-browser"
 import { Link } from "@/i18n/navigation"
 import { useFormat } from "@/i18n/format"
+import { useRefetch } from "@/lib/api/refetch"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { groupAt } from "@/lib/permissions"
 import { routes } from "@/lib/routes"
 
-import { reorderStagesRequest } from "./api"
+import { reorderStagesRequest, STAGE_ORDER_QUERIES } from "./api"
 import { AddStageButton, RestoreStageButton, StageActionsMenu } from "./stage-dialogs"
-import { SERVICES_KEY } from "@/lib/api/query-keys"
 
 type StageItem = ServiceStages["stages"][number]
 
@@ -130,7 +130,7 @@ function SortableRow({
 function Manager({ data }: { data: ServiceStages }) {
   const t = useTranslations()
   const f = useFormat()
-  const queryClient = useQueryClient()
+  const refetch = useRefetch()
   const { service } = data
 
   const stages = useMemo(
@@ -172,7 +172,7 @@ function Manager({ data }: { data: ServiceStages }) {
       setSyncedKey("")
     }
 
-    void queryClient.invalidateQueries({ queryKey: SERVICES_KEY })
+    void refetch(STAGE_ORDER_QUERIES)
   }
 
   const move = (id: string, direction: -1 | 1) => {

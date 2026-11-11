@@ -1,6 +1,6 @@
 "use client"
 
-import { useIsMutating, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useIsMutating, useQuery } from "@tanstack/react-query"
 import { cn } from "cn"
 import { CircleAlert, Layers, Plus, Search, X } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -32,11 +32,13 @@ import { Spinner } from "@/components/ui/spinner"
 import { QueryErrorState } from "@/components/page-states"
 import { useDebounced } from "@/hooks/use-debounced"
 import { useFormat } from "@/i18n/format"
+import { isStale, useRefetch } from "@/lib/api/refetch"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { isolate } from "@/lib/bidi"
 import { fold, fullName, preferredName } from "@/lib/domain/names"
 
 import {
+  ACCOUNT_REQUEST_QUERIES,
   type AccountRequest,
   type AgeCheck,
   approveRequest,
@@ -60,9 +62,8 @@ import {
   useAssignableGroups,
 } from "@/features/organization/assignments/group-choice"
 import type { Group } from "@/lib/permissions"
-import { ACCOUNT_REQUESTS_KEY } from "@/lib/api/query-keys"
 
-const CLOSE_AND_REFETCH = new Set(["accounts.alreadyApproved", "notFound.user"])
+const CHANGED_MEANWHILE = ["accounts.alreadyApproved", "notFound.user"]
 
 const sameGroup = (a: Group, b: Group) => a.serviceId === b.serviceId && a.stageId === b.stageId
 
@@ -146,7 +147,7 @@ function GroupsChoice({
 function Approval({ request, onDone }: { request: AccountRequest; onDone: () => void }) {
   const t = useTranslations()
   const f = useFormat()
-  const queryClient = useQueryClient()
+  const refetch = useRefetch()
   const roles = useQuery(rolesQuery)
   const parent = request.registeredAs === "parent"
   const [children, setChildren] = useState<DirectoryPerson[]>([])
@@ -182,9 +183,9 @@ function Approval({ request, onDone }: { request: AccountRequest; onDone: () => 
         : { as: "servant", roleIds, assignments: offered }
     )
 
-    if (!result.ok && result.problem.code && CLOSE_AND_REFETCH.has(result.problem.code)) {
+    if (!result.ok && isStale(result.problem, CHANGED_MEANWHILE)) {
       toast.error(result.problem.message)
-      void queryClient.invalidateQueries({ queryKey: ACCOUNT_REQUESTS_KEY })
+      void refetch(ACCOUNT_REQUEST_QUERIES)
       onDone()
     }
   }
@@ -198,7 +199,7 @@ function Approval({ request, onDone }: { request: AccountRequest; onDone: () => 
   const generalError =
     approve.problem &&
     Object.keys(errors).length === 0 &&
-    !CLOSE_AND_REFETCH.has(approve.problem.code ?? "")
+    !isStale(approve.problem, CHANGED_MEANWHILE)
       ? approve.problem.message
       : null
 
@@ -274,7 +275,7 @@ function namesOf(displayName: string) {
 function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: () => void }) {
   const t = useTranslations()
   const f = useFormat()
-  const queryClient = useQueryClient()
+  const refetch = useRefetch()
   const id = useId()
   const name = request.account.displayName
   const [text, setText] = useState(name)
@@ -322,7 +323,7 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
   const generalError =
     approve.problem &&
     Object.keys(errors).length === 0 &&
-    !CLOSE_AND_REFETCH.has(approve.problem.code ?? "")
+    !isStale(approve.problem, CHANGED_MEANWHILE)
       ? approve.problem.message
       : null
 
@@ -372,9 +373,9 @@ function MemberApproval({ request, onDone }: { request: AccountRequest; onDone: 
       },
     })
 
-    if (!result.ok && result.problem.code && CLOSE_AND_REFETCH.has(result.problem.code)) {
+    if (!result.ok && isStale(result.problem, CHANGED_MEANWHILE)) {
       toast.error(result.problem.message)
-      void queryClient.invalidateQueries({ queryKey: ACCOUNT_REQUESTS_KEY })
+      void refetch(ACCOUNT_REQUEST_QUERIES)
       onDone()
     }
   }

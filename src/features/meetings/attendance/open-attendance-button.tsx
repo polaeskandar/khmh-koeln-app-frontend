@@ -1,21 +1,21 @@
 "use client"
 
-import { useQueryClient } from "@tanstack/react-query"
 import { LockOpen } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
+import { isStale, useRefetch } from "@/lib/api/refetch"
 import type { Uuid } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
 import { SESSION_STATUS_QUERIES, openAttendanceRequest } from "./api"
 
-const REFETCH_CODES = new Set([
+const CHANGED_MEANWHILE = [
   "meetings.opensOnTheDay",
   "meetings.sessionCanceled",
   "meetings.attendanceClosed",
-])
+]
 
 export function OpenAttendanceButton({
   session,
@@ -25,10 +25,7 @@ export function OpenAttendanceButton({
   onOpened?: () => void
 }) {
   const t = useTranslations("attendance")
-  const queryClient = useQueryClient()
-
-  const refetch = () =>
-    SESSION_STATUS_QUERIES.forEach((queryKey) => void queryClient.invalidateQueries({ queryKey }))
+  const refetch = useRefetch()
 
   const open = useApiMutation(openAttendanceRequest, {
     invalidate: SESSION_STATUS_QUERIES,
@@ -41,8 +38,8 @@ export function OpenAttendanceButton({
       onClick={async () => {
         const result = await open.execute(session)
 
-        if (!result.ok && result.problem.code && REFETCH_CODES.has(result.problem.code)) {
-          refetch()
+        if (!result.ok && isStale(result.problem, CHANGED_MEANWHILE)) {
+          void refetch(SESSION_STATUS_QUERIES)
         }
       }}
     >
