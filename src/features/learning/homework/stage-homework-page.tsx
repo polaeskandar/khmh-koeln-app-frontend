@@ -29,14 +29,14 @@ type Tab = "published" | "draft" | "archived"
 const TABS: Tab[] = ["published", "draft", "archived"]
 const TAB_LABEL = { published: "published", draft: "drafts", archived: "archived" } as const
 
-function defaultTab(data: HomeworkList): Tab {
-  return data.tabs.published === 0 && data.tabs.draft > 0 ? "draft" : "published"
+function defaultTab(list: HomeworkList): Tab {
+  return list.tabs.published === 0 && list.tabs.draft > 0 ? "draft" : "published"
 }
 
-function Rows({ data, tab, group }: { data: HomeworkList; tab: Tab; group: Group }) {
+function Rows({ list, tab, group }: { list: HomeworkList; tab: Tab; group: Group }) {
   const t = useTranslations("homework")
   const f = useFormat()
-  const rows = data.items.filter((row) => row.status === tab)
+  const rows = list.items.filter((row) => row.status === tab)
 
   if (rows.length === 0) {
     return (
@@ -87,12 +87,12 @@ function Rows({ data, tab, group }: { data: HomeworkList; tab: Tab; group: Group
                   </Link>
                   <span className="text-xs text-muted-foreground">
                     <span dir="auto">{row.lesson.title}</span> ·{" "}
-                    {f.relativeDay(row.lesson.teachingDate, data.today)}
+                    {f.relativeDay(row.lesson.teachingDate, list.today)}
                   </span>
                 </span>
               </td>
               <td className="px-3 py-3">
-                <DueLine dueDate={row.dueDate} today={data.today} />
+                <DueLine dueDate={row.dueDate} today={list.today} />
               </td>
               <td className="px-3 py-3">
                 <HomeworkStatusBadge status={row.status} />
@@ -118,7 +118,7 @@ function Rows({ data, tab, group }: { data: HomeworkList; tab: Tab; group: Group
                 <HomeworkActions
                   homework={row}
                   group={group}
-                  stageArchived={data.archived}
+                  stageArchived={list.archived}
                   place="list"
                 />
               </td>
@@ -141,9 +141,9 @@ function Homework({ stage }: { stage: Stage }) {
 
   return (
     <QueryState query={query}>
-      {(data) => {
-        const tab = oneOf(TABS, requested) ?? defaultTab(data)
-        const creatable = !data.archived && can("create", "homework")
+      {(list) => {
+        const tab = oneOf(TABS, requested) ?? defaultTab(list)
+        const creatable = !list.archived && can("create", "homework")
 
         return (
           <Section
@@ -151,7 +151,7 @@ function Homework({ stage }: { stage: Stage }) {
             title={t("title")}
             description={t("list.description", { stage: stage.name })}
             actions={
-              creatable && data.lessons.length > 0 ? (
+              creatable && list.lessons.length > 0 ? (
                 <Button asChild>
                   <Link href={routes.newHomework(stage.id)}>
                     <Plus data-icon="inline-start" />
@@ -161,7 +161,7 @@ function Homework({ stage }: { stage: Stage }) {
               ) : null
             }
           >
-            {creatable && data.lessons.length === 0 ? (
+            {creatable && list.lessons.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 {t.rich("list.needsLesson", {
                   link: (chunks) => (
@@ -184,12 +184,12 @@ function Homework({ stage }: { stage: Stage }) {
               <TabsList>
                 {TABS.map((key) => (
                   <TabsTrigger key={key} value={key}>
-                    {t(`table.${TAB_LABEL[key]}`, { count: data.tabs[key] })}
+                    {t(`table.${TAB_LABEL[key]}`, { count: list.tabs[key] })}
                   </TabsTrigger>
                 ))}
               </TabsList>
             </Tabs>
-            <Rows data={data} tab={tab} group={group} />
+            <Rows list={list} tab={tab} group={group} />
           </Section>
         )
       }}

@@ -116,10 +116,12 @@ export type LessonFlags = Record<
   boolean
 >
 
+export type EverPublished = "yes" | "no" | "unknown"
+
 export function lessonFlagsFor(
   can: Can,
   { archived, today, lesson }: LessonDetail,
-  everPublished: boolean | null
+  everPublished: EverPublished
 ): LessonFlags {
   const update = can("update", "lessons") && !archived
   const open = !archived && lesson.archivedAt === null
@@ -131,7 +133,7 @@ export function lessonFlagsFor(
     addHomework: can("create", "homework") && open,
     archive: manage,
     restore: update && lesson.archivedAt !== null,
-    delete: update && lesson.status === "draft" && everPublished === false,
+    delete: update && lesson.status === "draft" && everPublished === "no",
   }
 }
 

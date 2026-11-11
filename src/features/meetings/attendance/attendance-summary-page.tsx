@@ -60,12 +60,12 @@ function People({ people }: { people: { person: PersonReference; at?: Instant }[
   )
 }
 
-function ReopenButton({ board }: { board: AttendanceSheet }) {
+function ReopenButton({ sheet }: { sheet: AttendanceSheet }) {
   const t = useTranslations("attendance.reopen")
   const router = useRouter()
   const refetch = useRefetch()
   const [open, setOpen] = useState(false)
-  const id = board.session.id
+  const id = sheet.session.id
 
   const reopen = useApiMutation(reopenAttendanceRequest, {
     toastOnError: false,
@@ -84,7 +84,7 @@ function ReopenButton({ board }: { board: AttendanceSheet }) {
         }
       }}
       trigger={<Button>{t("button")}</Button>}
-      title={t("title", { group: groupOf(board.session) })}
+      title={t("title", { group: groupOf(sheet.session) })}
       description={t("description")}
       reasonHint={t("hint")}
       placeholder={t("placeholder")}
@@ -109,13 +109,13 @@ function ReopenButton({ board }: { board: AttendanceSheet }) {
   )
 }
 
-function Corrections({ board }: { board: AttendanceSheet }) {
+function Corrections({ sheet }: { sheet: AttendanceSheet }) {
   const t = useTranslations("attendance.summary")
   const f = useFormat()
 
   return (
     <ul className="flex flex-col gap-2 text-sm">
-      {board.corrections.map((correction) => {
+      {sheet.corrections.map((correction) => {
         const { recorded, removed } = correction
 
         if (!recorded.at || !removed.at) {
@@ -125,7 +125,7 @@ function Corrections({ board }: { board: AttendanceSheet }) {
         const values = {
           name: preferredName(correction.person),
           time: f.instantTime(recorded.at),
-          when: f.atLabel(removed.at, board.today),
+          when: f.atLabel(removed.at, sheet.today),
           person: (chunks: ReactNode) => <span className="text-foreground">{chunks}</span>,
         }
 
@@ -148,28 +148,28 @@ function Corrections({ board }: { board: AttendanceSheet }) {
   )
 }
 
-function Summary({ board }: { board: AttendanceSheet }) {
+function Summary({ sheet }: { sheet: AttendanceSheet }) {
   const t = useTranslations("attendance.summary")
   const f = useFormat()
   const lines = useSessionLines()
-  const { session, counts } = board
+  const { session, counts } = sheet
   const expected = session.rosterMode === "expected" && counts.rosterSize !== null
 
   const present = expected
-    ? board.roster.flatMap((row) =>
+    ? sheet.roster.flatMap((row) =>
         row.mark ? [{ person: row.person, at: row.mark.recordedAt }] : []
       )
-    : board.notOnRoster.map((row) => ({ person: row.person, at: row.mark.recordedAt }))
+    : sheet.notOnRoster.map((row) => ({ person: row.person, at: row.mark.recordedAt }))
 
-  const notMarked = board.roster.filter((row) => !row.mark).map((row) => ({ person: row.person }))
+  const notMarked = sheet.roster.filter((row) => !row.mark).map((row) => ({ person: row.person }))
 
   const closed = session.closedAt
     ? session.closedBy
       ? t("closedAtBy", {
-          when: f.atLabel(session.closedAt, board.today),
+          when: f.atLabel(session.closedAt, sheet.today),
           name: session.closedBy.name,
         })
-      : t("closedAt", { when: f.atLabel(session.closedAt, board.today) })
+      : t("closedAt", { when: f.atLabel(session.closedAt, sheet.today) })
     : null
 
   return (
@@ -207,14 +207,14 @@ function Summary({ board }: { board: AttendanceSheet }) {
               <People people={present} />
             )}
           </Section>
-          {expected && board.notOnRoster.length > 0 ? (
+          {expected && sheet.notOnRoster.length > 0 ? (
             <Section
               id="extra"
-              title={t("extraTitle", { count: board.notOnRoster.length })}
+              title={t("extraTitle", { count: sheet.notOnRoster.length })}
               description={t("extraDescription")}
             >
               <People
-                people={board.notOnRoster.map((row) => ({
+                people={sheet.notOnRoster.map((row) => ({
                   person: row.person,
                   at: row.mark.recordedAt,
                 }))}
@@ -234,16 +234,16 @@ function Summary({ board }: { board: AttendanceSheet }) {
               )}
             </Section>
           ) : null}
-          {board.corrections.length > 0 ? (
+          {sheet.corrections.length > 0 ? (
             <Section id="corrections" title={t("corrections")}>
-              <Corrections board={board} />
+              <Corrections sheet={sheet} />
             </Section>
           ) : null}
         </div>
         <Section id="history" title={t("history")}>
           <HistoryTimeline
-            entries={board.history}
-            today={board.today}
+            entries={sheet.history}
+            today={sheet.today}
             oneOff={session.scheduleId === null}
           />
         </Section>
@@ -252,15 +252,15 @@ function Summary({ board }: { board: AttendanceSheet }) {
   )
 }
 
-function SummaryActions({ board }: { board: AttendanceSheet }) {
+function SummaryActions({ sheet }: { sheet: AttendanceSheet }) {
   const t = useTranslations("attendance.summary")
-  const can = useCanIn(meetingGroup(board.session))
-  const { session } = board
+  const can = useCanIn(meetingGroup(sheet.session))
+  const { session } = sheet
 
   return (
     <div className="flex flex-wrap gap-2">
       {session.status === "completed" && can("update", "sessions") ? (
-        <ReopenButton board={board} />
+        <ReopenButton sheet={sheet} />
       ) : null}
       {session.status === "active" && can("create", "attendance") ? (
         <Button asChild>
@@ -274,13 +274,13 @@ function SummaryActions({ board }: { board: AttendanceSheet }) {
 function LoadedSummary({ id }: { id: string }) {
   return (
     <SheetState id={id} notFound={<RecordNotFound area="attendance" />}>
-      {(board) =>
-        board.session.status === "scheduled" || board.session.status === "canceled" ? (
+      {(sheet) =>
+        sheet.session.status === "scheduled" || sheet.session.status === "canceled" ? (
           <Redirect to={routes.takeAttendance(id)} />
         ) : (
-          <BoardFrame board={board}>
-            <SummaryActions board={board} />
-            <Summary board={board} />
+          <BoardFrame sheet={sheet}>
+            <SummaryActions sheet={sheet} />
+            <Summary sheet={sheet} />
           </BoardFrame>
         )
       }

@@ -18,30 +18,30 @@ const MAX_RESULTS = 8
 const DEBOUNCE_MS = 250
 
 export function VisitorSearch({
-  board,
-  query,
+  sheet,
+  searchText,
   pending,
   onMark,
 }: {
-  board: AttendanceSheet
-  query: string
+  sheet: AttendanceSheet
+  searchText: string
   pending: ReadonlySet<string>
   onMark: (visitor: Visitor) => void
 }) {
   const t = useTranslations()
   const online = useOnline()
-  const q = useDebounced(query, DEBOUNCE_MS)
-  const ready = q.length >= MIN_LETTERS && query.length >= MIN_LETTERS
+  const q = useDebounced(searchText, DEBOUNCE_MS)
+  const ready = q.length >= MIN_LETTERS && searchText.length >= MIN_LETTERS
   const results = useQuery({ ...directoryQuery(q), enabled: ready && online })
-  const expected = board.session.rosterMode === "expected"
-  const listed = new Set([...board.roster, ...board.notOnRoster].map((row) => row.person.id))
+  const expected = sheet.session.rosterMode === "expected"
+  const listed = new Set([...sheet.roster, ...sheet.notOnRoster].map((row) => row.person.id))
 
   const found = (results.data?.items ?? [])
     .filter((person) => !listed.has(person.id) && !pending.has(person.id))
     .slice(0, MAX_RESULTS)
 
   const content = () => {
-    if (query.length < MIN_LETTERS) {
+    if (searchText.length < MIN_LETTERS) {
       return <p className="text-sm text-muted-foreground">{t("attendance.board.typeTwoLetters")}</p>
     }
 

@@ -17,20 +17,20 @@ import {
 } from "./api"
 
 export function CloseDialog({
-  board,
+  sheet,
   open,
   onOpenChange,
 }: {
-  board: AttendanceSheet
+  sheet: AttendanceSheet
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
   const t = useTranslations()
   const router = useRouter()
   const refetch = useRefetch()
-  const { session, counts } = board
+  const { session, counts } = sheet
   const expected = session.rosterMode === "expected"
-  const rosterSize = board.roster.length
+  const rosterSize = sheet.roster.length
   const notMarked = rosterSize - counts.rosterPresent
 
   const close = useApiMutation(closeAttendanceRequest, {

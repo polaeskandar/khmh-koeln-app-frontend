@@ -23,21 +23,21 @@ export const passesFilter = (filter: Filter, mark: MarkReference | null) =>
   filter === "all" || (filter === "present" ? mark !== null : mark === null)
 
 export function BoardSearch({
-  board,
-  query,
-  onQueryChange,
+  sheet,
+  searchText,
+  onSearchTextChange,
   filter,
   onFilterChange,
 }: {
-  board: AttendanceSheet
-  query: string
-  onQueryChange: (query: string) => void
+  sheet: AttendanceSheet
+  searchText: string
+  onSearchTextChange: (searchText: string) => void
   filter: Filter
   onFilterChange: (filter: Filter) => void
 }) {
   const t = useTranslations("attendance.board")
   const tc = useTranslations("common")
-  const { expected, rosterSize, notMarked } = tallyOf(board)
+  const { expected, rosterSize, notMarked } = tallyOf(sheet)
 
   return (
     <div className="sticky top-14 z-10 -mx-4 flex flex-col gap-3 border-b bg-background/95 px-4 py-3 backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:p-0">
@@ -48,15 +48,15 @@ export function BoardSearch({
         <InputGroupInput
           aria-label={t("find")}
           placeholder={expected ? t("findOnRoster") : t("find")}
-          value={query}
-          onChange={(event) => onQueryChange(event.target.value)}
+          value={searchText}
+          onChange={(event) => onSearchTextChange(event.target.value)}
         />
-        {query ? (
+        {searchText ? (
           <InputGroupAddon align="inline-end">
             <InputGroupButton
               size="icon-xs"
               aria-label={tc("clearSearch")}
-              onClick={() => onQueryChange("")}
+              onClick={() => onSearchTextChange("")}
             >
               <X />
             </InputGroupButton>
@@ -72,7 +72,7 @@ export function BoardSearch({
             <TabsTrigger value="all">{t("tabAll", { count: rosterSize })}</TabsTrigger>
             <TabsTrigger value="open">{t("tabOpen", { count: notMarked })}</TabsTrigger>
             <TabsTrigger value="present">
-              {t("tabPresent", { count: board.counts.rosterPresent })}
+              {t("tabPresent", { count: sheet.counts.rosterPresent })}
             </TabsTrigger>
           </TabsList>
         </Tabs>

@@ -19,11 +19,11 @@ import { SharedWithParents, TeachingPlan } from "./lesson-content"
 import { LessonHomework } from "./lesson-homework"
 import { LessonTeam } from "./lesson-team"
 
-function LessonView({ data }: { data: LessonDetail }) {
+function LessonView({ detail }: { detail: LessonDetail }) {
   const t = useTranslations()
   const f = useFormat()
-  const { lesson, stage, service, today } = data
-  const flags = useLessonFlags(data)
+  const { lesson, stage, service, today } = detail
+  const flags = useLessonFlags(detail)
   const crumbs = useStageCrumbs({ ...stage, service }, "lessons", [{ label: lesson.title }])
 
   return (
@@ -34,7 +34,7 @@ function LessonView({ data }: { data: LessonDetail }) {
           meta={<LessonStatusBadge status={lesson.status} archived={!!lesson.archivedAt} />}
           title={lesson.title}
           description={lesson.summary ? <span dir="auto">{lesson.summary}</span> : null}
-          actions={<LessonActions data={data} flags={flags} />}
+          actions={<LessonActions detail={detail} flags={flags} />}
         >
           <MeetingLine meeting={lesson.meeting} today={today} />
           {flags.manage && lesson.status === "ready" && lesson.teachingDate > today ? (
@@ -46,10 +46,10 @@ function LessonView({ data }: { data: LessonDetail }) {
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,340px)]">
           <div className="flex min-w-0 flex-col gap-6">
             <TeachingPlan lesson={lesson} />
-            <LessonHomework data={data} canAdd={flags.addHomework} />
+            <LessonHomework detail={detail} canAdd={flags.addHomework} />
           </div>
           <aside className="flex min-w-0 flex-col gap-6">
-            <SharedWithParents data={data} />
+            <SharedWithParents detail={detail} />
             <LessonTeam lesson={lesson} />
           </aside>
         </div>
@@ -63,7 +63,7 @@ function LoadedLesson({ id }: { id: string }) {
 
   return (
     <QueryState query={query} notFound={<RecordNotFound area="services" />}>
-      {(data) => <LessonView data={data} />}
+      {(detail) => <LessonView detail={detail} />}
     </QueryState>
   )
 }

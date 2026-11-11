@@ -15,33 +15,33 @@ import { BoardSearch, type Filter, passesFilter } from "./board-search"
 import { type BoardActions, PersonRow } from "./person-row"
 
 export function AttendanceBoard({
-  board,
+  sheet,
   actions = {},
   below,
 }: {
-  board: AttendanceSheet
+  sheet: AttendanceSheet
   actions?: BoardActions
-  below?: (query: string) => ReactNode
+  below?: (searchText: string) => ReactNode
 }) {
   const t = useTranslations("attendance.board")
-  const can = useCanIn(meetingGroup(board.session))
-  const [query, setQuery] = useState("")
+  const can = useCanIn(meetingGroup(sheet.session))
+  const [searchText, setSearchText] = useState("")
   const [filter, setFilter] = useState<Filter>("all")
   const canRecord = can("create", "attendance")
   const canRemove = can("delete", "attendance")
-  const { expected } = tallyOf(board)
-  const q = query.trim()
+  const { expected } = tallyOf(sheet)
+  const q = searchText.trim()
   const shown = (person: PersonReference) => q === "" || matchesQuery(person, q)
-  const roster = board.roster.filter((row) => shown(row.person) && passesFilter(filter, row.mark))
-  const others = board.notOnRoster.filter((row) => shown(row.person) && filter !== "open")
+  const roster = sheet.roster.filter((row) => shown(row.person) && passesFilter(filter, row.mark))
+  const others = sheet.notOnRoster.filter((row) => shown(row.person) && filter !== "open")
 
   return (
     <div className="grid gap-8 pb-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)] lg:pb-0">
       <div className="flex min-w-0 flex-col gap-4">
         <BoardSearch
-          board={board}
-          query={query}
-          onQueryChange={setQuery}
+          sheet={sheet}
+          searchText={searchText}
+          onSearchTextChange={setSearchText}
           filter={filter}
           onFilterChange={setFilter}
         />
@@ -97,12 +97,12 @@ export function AttendanceBoard({
       </div>
 
       <aside className="hidden min-w-0 flex-col gap-5 self-start lg:sticky lg:top-20 lg:flex">
-        <CounterPanel board={board} canRecord={canRecord} actions={actions} />
-        <RecentlyMarked board={board} onCorrect={canRemove ? actions.onCorrect : undefined} />
-        <Corrections board={board} />
+        <CounterPanel sheet={sheet} canRecord={canRecord} actions={actions} />
+        <RecentlyMarked sheet={sheet} onCorrect={canRemove ? actions.onCorrect : undefined} />
+        <Corrections sheet={sheet} />
       </aside>
 
-      <MobileCounterBar board={board} canRecord={canRecord} actions={actions} />
+      <MobileCounterBar sheet={sheet} canRecord={canRecord} actions={actions} />
     </div>
   )
 }

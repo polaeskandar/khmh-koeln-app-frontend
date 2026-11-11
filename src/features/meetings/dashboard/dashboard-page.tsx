@@ -222,7 +222,7 @@ function DashboardView({ upcoming }: { upcoming: Upcoming }) {
   const t = useTranslations()
   const f = useFormat()
   const { session } = useSession()
-  const today = useTodaySessions()
+  const todaySessions = useTodaySessions()
   const unassigned = useUnassigned()
 
   const firstName =
@@ -237,16 +237,16 @@ function DashboardView({ upcoming }: { upcoming: Upcoming }) {
             <span>
               {f.longDate(upcoming.today)} · {f.copticDate(upcoming.today)}
             </span>
-            {today.sessions ? (
+            {todaySessions.sessions ? (
               <span>
-                <Summary sessions={today.sessions} today={upcoming.today} />
+                <Summary sessions={todaySessions.sessions} today={upcoming.today} />
               </span>
             ) : null}
           </span>
         }
       />
       {unassigned ? <NotAssigned /> : null}
-      {today.shown ? (
+      {todaySessions.shown ? (
         <Section
           id="today"
           title={t("dashboard.today.title")}
@@ -257,9 +257,11 @@ function DashboardView({ upcoming }: { upcoming: Upcoming }) {
             </Link>
           }
         >
-          <QueryState query={today.overview} loading={<Skeleton className="h-32 w-full" />}>
+          <QueryState query={todaySessions.overview} loading={<Skeleton className="h-32 w-full" />}>
             {() =>
-              today.sessions ? <Today sessions={today.sessions} upcoming={upcoming} /> : null
+              todaySessions.sessions ? (
+                <Today sessions={todaySessions.sessions} upcoming={upcoming} />
+              ) : null
             }
           </QueryState>
         </Section>

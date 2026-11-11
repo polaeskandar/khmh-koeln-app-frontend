@@ -110,9 +110,9 @@ export function TeachingPlan({ lesson }: { lesson: Lesson }) {
   )
 }
 
-export function SharedWithParents({ data }: { data: LessonDetail }) {
+export function SharedWithParents({ detail }: { detail: LessonDetail }) {
   const t = useTranslations()
-  const { lesson, homework } = data
+  const { lesson, homework } = detail
 
   return (
     <LessonPanel title={t("lessons.detail.sharedWithParents")} who="parents">
