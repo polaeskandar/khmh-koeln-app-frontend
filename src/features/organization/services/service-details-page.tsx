@@ -41,7 +41,7 @@ import { AddStageButton } from "@/features/organization/stages/stage-dialog"
 
 import { trendText } from "./service-cells"
 import { ServiceActionsMenu } from "./service-actions"
-import { ServiceDialog } from "./service-dialog"
+import { EditServiceDialog } from "./service-dialog"
 import { ServiceServants } from "./service-servants"
 
 function EditButton({ service }: { service: Service }) {
@@ -55,7 +55,7 @@ function EditButton({ service }: { service: Service }) {
         {t("edit")}
       </Button>
       <DialogMount open={open}>
-        <ServiceDialog service={service} onClose={() => setOpen(false)} />
+        <EditServiceDialog service={service} onClose={() => setOpen(false)} />
       </DialogMount>
     </>
   )

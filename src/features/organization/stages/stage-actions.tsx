@@ -29,7 +29,7 @@ import { StructureChangeDialog } from "@/features/organization/services/structur
 
 import { archiveStageRequest, deleteStageRequest, restoreStageRequest } from "./api"
 
-import { StageDialog, type EditableStage } from "./stage-dialog"
+import { EditStageDialog, type EditableStage } from "./stage-dialog"
 
 type Move = { up: boolean; down: boolean; onMove: (direction: -1 | 1) => void }
 
@@ -91,7 +91,7 @@ export function StageActionsMenu({
         </DropdownMenuContent>
       </DropdownMenu>
       <DialogMount open={open === "edit"}>
-        <StageDialog service={service} stage={stage} onClose={() => setOpen(null)} />
+        <EditStageDialog stage={stage} onClose={() => setOpen(null)} />
       </DialogMount>
       <StructureChangeDialog
         open={open === "archive"}
