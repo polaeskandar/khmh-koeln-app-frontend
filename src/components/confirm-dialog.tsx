@@ -14,6 +14,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { useDialogMount } from "@/components/dialog-mount"
 import { FormField } from "@/components/form-fields"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
@@ -129,6 +130,7 @@ export function ReasonDialog({
   children?: ReactNode
 }) {
   const t = useTranslations("common")
+  const { onCloseAutoFocus } = useDialogMount()
   const [innerOpen, setInnerOpen] = useState(false)
   const [pending, setPending] = useState(false)
   const [reason, setReason] = useState("")
@@ -149,7 +151,7 @@ export function ReasonDialog({
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       {trigger ? <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger> : null}
-      <AlertDialogContent>
+      <AlertDialogContent onCloseAutoFocus={onCloseAutoFocus}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           {description ? <AlertDialogDescription>{description}</AlertDialogDescription> : null}
@@ -190,5 +192,21 @@ export function ReasonDialog({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  )
+}
+
+export function ReasonProblem({
+  mutation,
+}: {
+  mutation: { problem: { message: string } | null; fieldErrors: Record<string, string> }
+}) {
+  if (!mutation.problem) {
+    return null
+  }
+
+  return (
+    <p role="alert" className="text-sm text-destructive">
+      {mutation.fieldErrors.reason ?? mutation.problem.message}
+    </p>
   )
 }

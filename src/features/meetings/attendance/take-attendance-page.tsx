@@ -6,6 +6,7 @@ import { type ReactNode, useState } from "react"
 import { RecordNotFound } from "@/features/portals/staff/record-not-found"
 import { Redirect } from "./redirect"
 import { Topbar } from "@/features/portals/staff/topbar"
+import { DialogMount } from "@/components/dialog-mount"
 import { PageBody, PageHeader } from "@/components/page-header"
 import { RecordPage } from "@/components/record-page"
 import { ServiceTag } from "@/components/service-tag"
@@ -113,11 +114,13 @@ function ActiveBoard({ sheet, boardAt }: { sheet: AttendanceSheet; boardAt: numb
         open={dialog === "close"}
         onOpenChange={(open) => setDialog(open ? "close" : null)}
       />
-      <CorrectionDialog
-        sheet={shown}
-        open={dialog === "correct"}
-        onOpenChange={(open) => setDialog(open ? "correct" : null)}
-      />
+      <DialogMount open={dialog === "correct"}>
+        <CorrectionDialog
+          sheet={shown}
+          open={dialog === "correct"}
+          onOpenChange={(open) => setDialog(open ? "correct" : null)}
+        />
+      </DialogMount>
     </>
   )
 }

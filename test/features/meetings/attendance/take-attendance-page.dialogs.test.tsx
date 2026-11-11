@@ -242,6 +242,27 @@ describe("recently marked and corrections", () => {
     )
   })
 
+  test("a reopened correction dialog starts again from the newest mark, with an empty note", async () => {
+    open(boardWithRecent())
+    const opener = await screen.findByRole("button", { name: "Correct a mistake with a note" })
+    await userEvent.click(opener)
+    let dialog = within(screen.getByRole("alertdialog"))
+
+    await userEvent.selectOptions(
+      dialog.getByRole("combobox", { name: "Person" }),
+      "Mina Hanna · 12:01"
+    )
+
+    await userEvent.type(dialog.getByRole("textbox"), "Wrong name")
+    await userEvent.click(dialog.getByRole("button", { name: "Cancel" }))
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull())
+    await userEvent.click(opener)
+    dialog = within(screen.getByRole("alertdialog"))
+    const select = dialog.getByRole("combobox", { name: "Person" }) as HTMLSelectElement
+    expect(select.selectedOptions[0].textContent).toBe("Theo Mansour · 12:30")
+    expect(dialog.getByRole("textbox")).toHaveValue("")
+  })
+
   test("a newer mark arriving while the dialog is open keeps the chosen person", () => {
     const board = boardWithRecent()
 

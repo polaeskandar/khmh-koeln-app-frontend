@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
-import { ReasonDialog } from "@/components/confirm-dialog"
+import { ReasonDialog, ReasonProblem } from "@/components/confirm-dialog"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { useFormat } from "@/i18n/format"
 import type { PersonReference } from "@/features/people/members/api"
@@ -40,12 +40,7 @@ export function CorrectionDialog({
   const f = useFormat()
   const refetch = useRefetch()
   const marks = marksOf(sheet)
-  const [chosen, setChosen] = useState<string | null>(null)
-
-  if (open && chosen === null && marks[0]) {
-    setChosen(marks[0].person.id)
-  }
-
+  const [chosen, setChosen] = useState(() => marks[0]?.person.id ?? null)
   const personId = chosen ?? marks[0]?.person.id ?? ""
 
   const remove = useApiMutation(removeMarkRequest, {
@@ -56,14 +51,7 @@ export function CorrectionDialog({
   return (
     <ReasonDialog
       open={open}
-      onOpenChange={(next) => {
-        onOpenChange(next)
-
-        if (!next) {
-          setChosen(null)
-          remove.reset()
-        }
-      }}
+      onOpenChange={onOpenChange}
       title={t("correct.title")}
       description={t("correct.description")}
       reasonLabel={t("correct.note")}
@@ -92,11 +80,7 @@ export function CorrectionDialog({
           </NativeSelectOption>
         ))}
       </NativeSelect>
-      {remove.problem ? (
-        <p role="alert" className="text-sm text-destructive">
-          {remove.fieldErrors.reason ?? remove.problem.message}
-        </p>
-      ) : null}
+      <ReasonProblem mutation={remove} />
     </ReasonDialog>
   )
 }

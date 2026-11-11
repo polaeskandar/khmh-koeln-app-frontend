@@ -1,17 +1,16 @@
 "use client"
 
-import { CircleAlert, Info } from "lucide-react"
+import { Info } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { type ReactNode, useState } from "react"
 
-import { ReasonDialog } from "@/components/confirm-dialog"
+import { ReasonDialog, ReasonProblem } from "@/components/confirm-dialog"
 import { HistoryTimeline } from "@/features/meetings/meetings/history-timeline"
 import { MemberAvatar } from "@/components/member-avatar"
 import { Section } from "@/components/page-header"
 import { RecordPage } from "@/components/record-page"
 import { RosterCells } from "./roster-cells"
 import { useSessionLines } from "@/features/meetings/meetings/session-lines"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { RecordNotFound } from "@/features/portals/staff/record-not-found"
 import { Redirect } from "./redirect"
@@ -99,12 +98,7 @@ function ReopenButton({ sheet }: { sheet: AttendanceSheet }) {
         return result.ok
       }}
     >
-      {reopen.problem ? (
-        <Alert variant="destructive" role="alert">
-          <CircleAlert />
-          <AlertDescription>{reopen.fieldErrors.reason ?? reopen.problem.message}</AlertDescription>
-        </Alert>
-      ) : null}
+      <ReasonProblem mutation={reopen} />
     </ReasonDialog>
   )
 }
