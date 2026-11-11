@@ -28,6 +28,7 @@ import { groupOf } from "@/features/meetings/meetings/session-lines"
 import type { SessionView } from "@/features/meetings/meetings/api"
 import { addDays, localTimeOf } from "@/lib/domain/time"
 import { routes } from "@/lib/routes"
+import { isDue } from "@/features/meetings/attendance/next-step"
 
 import { type Upcoming, upcomingQuery } from "./api"
 import { groupUpcoming, type UpcomingEntry } from "./group-upcoming"
@@ -53,9 +54,7 @@ function Summary({ sessions, today }: { sessions: SessionView[]; today: LocalDat
 
   const open = sessions.filter((session) => session.status === "active").length
 
-  const notOpened = sessions.filter(
-    (session) => session.status === "scheduled" && session.date <= today
-  ).length
+  const notOpened = sessions.filter((session) => isDue(session, today)).length
 
   const parts = [
     open > 0 ? t("open", { count: open }) : null,

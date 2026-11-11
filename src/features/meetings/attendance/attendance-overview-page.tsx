@@ -27,15 +27,16 @@ import {
   attendanceOverviewQuery,
   withCounts,
 } from "./api"
+import { attendanceStepOf } from "./next-step"
 
 type Counted = (session: SessionView) => CountedSession
 
 export function CardAction({ session, today }: { session: SessionView; today: LocalDate }) {
   const t = useTranslations("attendance")
   const can = useCanIn(meetingGroup(session))
-  const records = can("create", "attendance")
+  const step = attendanceStepOf(session, today, can)
 
-  if (session.status === "active" && records) {
+  if (step === "take") {
     return (
       <Button size="sm" asChild>
         <Link href={routes.takeAttendance(session.id)}>
@@ -46,7 +47,7 @@ export function CardAction({ session, today }: { session: SessionView; today: Lo
     )
   }
 
-  if (session.status === "scheduled" && session.date <= today && records) {
+  if (step === "open") {
     return (
       <Button size="sm" variant="outline" asChild>
         <Link href={routes.takeAttendance(session.id)}>{t("open")}</Link>
@@ -54,7 +55,7 @@ export function CardAction({ session, today }: { session: SessionView; today: Lo
     )
   }
 
-  if (session.status === "completed" && can("read", "attendance")) {
+  if (step === "view") {
     return (
       <Button size="sm" variant="outline" asChild>
         <Link href={routes.attendanceSummary(session.id)}>{t("view")}</Link>
