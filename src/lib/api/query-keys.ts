@@ -14,6 +14,7 @@ export const SCHEDULES_KEY = ["schedules"] as const
 export const AGENDA_KEY = ["agenda"] as const
 export const SESSIONS_KEY = ["sessions"] as const
 export const ATTENDANCE_KEY = ["attendance"] as const
+export const ATTENDANCE_HISTORY_KEY = [...STAGES_KEY, "attendance-history"] as const
 export const DASHBOARD_KEY = ["dashboard"] as const
 export const LESSONS_KEY = ["lessons"] as const
 export const HOMEWORK_KEY = ["homework"] as const
