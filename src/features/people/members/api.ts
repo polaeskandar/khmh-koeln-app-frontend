@@ -1,3 +1,5 @@
+import { queryOptions } from "@tanstack/react-query"
+
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { Uuid } from "@/lib/api/types/common"
 import { PEOPLE_KEY, SERVICES_KEY, STAGES_KEY } from "@/lib/api/query-keys"
@@ -16,35 +18,37 @@ export type PeopleFilter = {
   page?: number
 }
 
-export const peopleQuery = (filter: PeopleFilter) => ({
-  queryKey: [...PEOPLE_KEY, "list", filter] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/people", { params: { query: filter }, signal })),
-})
+export const peopleQuery = (filter: PeopleFilter) =>
+  queryOptions({
+    queryKey: [...PEOPLE_KEY, "list", filter],
+    queryFn: ({ signal }) => dataOf(api.GET("/people", { params: { query: filter }, signal })),
+  })
 
 const SEARCH_LIMIT = 100
 
 const nameSearch = (person: PersonRow["person"]) =>
   `${person.firstName} ${person.lastName}`.slice(0, SEARCH_LIMIT).trim()
 
-export const personRowQuery = (person: PersonRow["person"], version: number) => ({
-  queryKey: [...PEOPLE_KEY, "detail", { id: person.id, version }] as const,
-  queryFn: async ({ signal }: { signal: AbortSignal }) => {
-    const list = await dataOf(
-      api.GET("/people", { params: { query: { status: "all", q: nameSearch(person) } }, signal })
-    )
+export const personRowQuery = (person: PersonRow["person"], version: number) =>
+  queryOptions({
+    queryKey: [...PEOPLE_KEY, "detail", { id: person.id, version }],
+    queryFn: async ({ signal }) => {
+      const list = await dataOf(
+        api.GET("/people", { params: { query: { status: "all", q: nameSearch(person) } }, signal })
+      )
 
-    return list.items.find((row) => row.person.id === person.id) ?? null
-  },
-})
+      return list.items.find((row) => row.person.id === person.id) ?? null
+    },
+  })
 
 export type DirectoryPerson = Schemas["DirectoryEntry"]
 
-export const directoryQuery = (q: string) => ({
-  queryKey: [...PEOPLE_KEY, "directory", q] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/people/directory", { params: { query: { q } }, signal })),
-})
+export const directoryQuery = (q: string) =>
+  queryOptions({
+    queryKey: [...PEOPLE_KEY, "directory", q],
+    queryFn: ({ signal }) =>
+      dataOf(api.GET("/people/directory", { params: { query: { q } }, signal })),
+  })
 
 export const MEMBERSHIP_QUERIES = [PEOPLE_KEY, SERVICES_KEY, STAGES_KEY]
 
@@ -72,11 +76,6 @@ export type PersonNames = { firstName: string; lastName: string; displayName: st
 
 export const renamePersonRequest = (person: Uuid, names: PersonNames) =>
   dataOf(api.PUT("/people/{id}", { params: { path: { id: person } }, body: names }))
-
-export const joinRequest = (person: Uuid, placement: { serviceId: Uuid; stageId: Uuid | null }) =>
-  dataOf(
-    api.POST("/people/{id}/memberships", { params: { path: { id: person } }, body: placement })
-  )
 
 export const endMembershipRequest = (membership: Uuid) =>
   dataOf(api.POST("/memberships/{id}/end", { params: { path: { id: membership } }, body: {} }))

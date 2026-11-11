@@ -1,5 +1,6 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import { Info, Link2Off } from "lucide-react"
 import { useTranslations } from "next-intl"
 
@@ -13,9 +14,9 @@ import { ApiError } from "@/lib/api/problem"
 import { localTimeOf } from "@/lib/domain/time"
 import { routes } from "@/lib/routes"
 
-import { type MemberTask, useMemberHomework } from "@/features/learning/homework/api"
-import { useMemberGroups } from "@/features/people/groups/api"
-import { useMemberMeetings } from "@/features/meetings/meetings/api"
+import { type MemberTask, memberHomeworkQuery } from "@/features/learning/homework/api"
+import { memberGroupsQuery } from "@/features/people/groups/api"
+import { memberMeetingsQuery } from "@/features/meetings/meetings/api"
 import { GroupCard } from "@/features/people/groups/group-card"
 import { MeetingList } from "@/features/meetings/meetings/member-meetings"
 
@@ -32,8 +33,8 @@ function partOfDay(): "morning" | "afternoon" | "evening" {
 
 function Homework({ which }: { which: "todo" | "done" }) {
   const t = useTranslations("member.home")
-  const toDo = useMemberHomework("todo")
-  const done = useMemberHomework("done")
+  const toDo = useQuery(memberHomeworkQuery("todo"))
+  const done = useQuery(memberHomeworkQuery("done"))
   const completion = useOwnCompletion()
   const own = which === "todo" ? toDo : done
 
@@ -75,7 +76,7 @@ function Homework({ which }: { which: "todo" | "done" }) {
 
 function Meetings() {
   const t = useTranslations("member.home")
-  const query = useMemberMeetings()
+  const query = useQuery(memberMeetingsQuery)
 
   return (
     <Section id="next-meetings" title={t("nextMeetings")} description={t("nextMeetingsHint")}>
@@ -88,7 +89,7 @@ function Meetings() {
 
 function Groups() {
   const t = useTranslations("member.home")
-  const query = useMemberGroups()
+  const query = useQuery(memberGroupsQuery)
 
   return (
     <aside className="flex min-w-0 flex-col gap-4" aria-labelledby="your-groups">
@@ -132,7 +133,7 @@ export function MemberHome() {
   const t = useTranslations("parent.home")
   const f = useFormat()
   const { session } = useSession()
-  const groups = useMemberGroups()
+  const groups = useQuery(memberGroupsQuery)
 
   if (session.status !== "authenticated") {
     return <ListSkeleton />

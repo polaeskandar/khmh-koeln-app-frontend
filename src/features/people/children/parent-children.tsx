@@ -1,5 +1,6 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import { ChevronRight } from "lucide-react"
 import { useTranslations } from "next-intl"
 
@@ -8,7 +9,7 @@ import { QueryState } from "@/components/page-states"
 import { Link } from "@/i18n/navigation"
 import { routes } from "@/lib/routes"
 
-import { type ChildSummary, useParentChildren } from "./api"
+import { type ChildSummary, parentChildrenQuery } from "./api"
 import { ListSkeleton } from "@/features/learning/homework/task-list"
 
 function ChildCard({ child }: { child: ChildSummary }) {
@@ -64,7 +65,7 @@ function ChildCard({ child }: { child: ChildSummary }) {
 
 export function ParentChildren() {
   const t = useTranslations("parent")
-  const query = useParentChildren()
+  const query = useQuery(parentChildrenQuery)
 
   return (
     <div className="flex flex-col gap-8">

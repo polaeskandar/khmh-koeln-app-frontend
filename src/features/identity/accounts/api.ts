@@ -1,3 +1,5 @@
+import { queryOptions } from "@tanstack/react-query"
+
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { Uuid } from "@/lib/api/types/common"
 import {
@@ -10,11 +12,10 @@ import {
 
 export type AccountRequest = Schemas["AccountRequestListResponse"]["items"][number]
 
-export const accountRequestsQuery = {
-  queryKey: [...ACCOUNT_REQUESTS_KEY, "list"] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/account-requests", { signal })),
-}
+export const accountRequestsQuery = queryOptions({
+  queryKey: [...ACCOUNT_REQUESTS_KEY, "list"],
+  queryFn: ({ signal }) => dataOf(api.GET("/account-requests", { signal })),
+})
 
 export const declineRequest = (account: Uuid) =>
   dataOf(
@@ -23,10 +24,10 @@ export const declineRequest = (account: Uuid) =>
 
 export type StaffAccount = Schemas["StaffAccountResponse"]
 
-export const staffAccountsQuery = {
+export const staffAccountsQuery = queryOptions({
   queryKey: STAFF_ACCOUNTS_KEY,
-  queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/staff-accounts", { signal })),
-}
+  queryFn: ({ signal }) => dataOf(api.GET("/staff-accounts", { signal })),
+})
 
 export type AgeCheck = Schemas["AgeCheck"]
 
@@ -42,18 +43,19 @@ export const approveRequest = (account: Uuid, approval: Approval) =>
 
 export type MemberCandidate = Schemas["MemberCandidateResponse"]
 
-export const memberCandidatesQuery = (q: string) => ({
-  queryKey: [...ACCOUNT_REQUESTS_KEY, "memberCandidates", q] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/account-requests/member-candidates", { params: { query: { q } }, signal })),
-})
+export const memberCandidatesQuery = (q: string) =>
+  queryOptions({
+    queryKey: [...ACCOUNT_REQUESTS_KEY, "memberCandidates", q],
+    queryFn: ({ signal }) =>
+      dataOf(api.GET("/account-requests/member-candidates", { params: { query: { q } }, signal })),
+  })
 
 export type MemberAccount = Schemas["MemberAccountItemResponse"]
 
-export const memberAccountsQuery = {
+export const memberAccountsQuery = queryOptions({
   queryKey: MEMBER_ACCOUNTS_KEY,
-  queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/member-accounts", { signal })),
-}
+  queryFn: ({ signal }) => dataOf(api.GET("/member-accounts", { signal })),
+})
 
 export const unlinkMemberRequest = (account: Uuid) =>
   dataOf(api.POST("/member-accounts/{id}/unlink", { params: { path: { id: account } }, body: {} }))

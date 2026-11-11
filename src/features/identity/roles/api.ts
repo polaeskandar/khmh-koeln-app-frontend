@@ -1,3 +1,5 @@
+import { queryOptions } from "@tanstack/react-query"
+
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { Uuid } from "@/lib/api/types/common"
 import { ROLES_KEY, ME_KEY, STAFF_ACCOUNTS_KEY } from "@/lib/api/query-keys"
@@ -6,10 +8,10 @@ export type Role = Schemas["RoleRowResponse"]
 
 export type RoleRow = Role
 
-export const rolesQuery = {
-  queryKey: [...ROLES_KEY, "list"] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/roles", { signal })),
-}
+export const rolesQuery = queryOptions({
+  queryKey: [...ROLES_KEY, "list"],
+  queryFn: ({ signal }) => dataOf(api.GET("/roles", { signal })),
+})
 
 export const parentPortalOnly = (role: Role) =>
   role.permissions.length > 0 && role.permissions.every((p) => p.resource === "parentPortal")
@@ -19,11 +21,11 @@ export const deleteRoleRequest = (role: Uuid) =>
 
 export type RoleDetail = Schemas["RoleDetailsResponse"]
 
-export const roleQuery = (id: Uuid) => ({
-  queryKey: [...ROLES_KEY, "detail", id] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/roles/{id}", { params: { path: { id } }, signal })),
-})
+export const roleQuery = (id: Uuid) =>
+  queryOptions({
+    queryKey: [...ROLES_KEY, "detail", id],
+    queryFn: ({ signal }) => dataOf(api.GET("/roles/{id}", { params: { path: { id } }, signal })),
+  })
 
 export type RoleInput = Schemas["RoleRequest"]
 

@@ -15,7 +15,7 @@ import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { carryFragment } from "@/i18n/use-switch-locale"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
-import { downloadDataCopy } from "./api"
+import { downloadDataCopyRequest } from "./api"
 
 function StateIcon({ icon: Icon, tone }: { icon: typeof FileDown; tone: string }) {
   return (
@@ -36,7 +36,7 @@ function DataCopyFlow() {
   const [token] = useState(tokenInAddress)
   const [outcome, setOutcome] = useState<"saved" | "invalid" | null>(null)
   const [alert, setAlert] = useState<string | null>(null)
-  const download = useApiMutation(downloadDataCopy, { toastOnError: false })
+  const download = useApiMutation(downloadDataCopyRequest, { toastOnError: false })
 
   useEffect(forgetAddressFragment, [])
 

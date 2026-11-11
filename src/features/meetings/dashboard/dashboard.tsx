@@ -31,8 +31,10 @@ import { groupOf, type SessionView } from "@/lib/api/types/meetings"
 import { addDays, localTimeOf } from "@/lib/domain/time"
 import { routes } from "@/lib/routes"
 
-import { DASHBOARD_REFRESH, type Upcoming, useUpcoming } from "./api"
+import { type Upcoming, upcomingQuery } from "./api"
 import { groupUpcoming, type UpcomingEntry } from "./group-upcoming"
+
+const LIVE = { refetchInterval: 60_000, refetchOnWindowFocus: true }
 
 function partOfDay(): "morning" | "afternoon" | "evening" {
   const hour = Number(localTimeOf(Date.now()).slice(0, 2))
@@ -203,7 +205,7 @@ function useTodaySessions() {
 
   const overview = useQuery({
     ...attendanceOverviewQuery,
-    ...DASHBOARD_REFRESH,
+    ...LIVE,
     enabled: can("read", "attendance"),
   })
 
@@ -270,7 +272,7 @@ function DashboardView({ upcoming }: { upcoming: Upcoming }) {
 
 export function Dashboard() {
   const t = useTranslations("nav")
-  const query = useUpcoming()
+  const query = useQuery({ ...upcomingQuery, ...LIVE })
 
   return (
     <>

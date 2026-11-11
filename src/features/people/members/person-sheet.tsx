@@ -42,9 +42,9 @@ import { fullName, initials, preferredName } from "@/lib/domain/names"
 import { canInAny, groupAt } from "@/lib/permissions"
 
 import {
+  addMembershipRequest,
   deactivatePersonRequest,
   endMembershipRequest,
-  joinRequest,
   MEMBERSHIP_QUERIES,
   type PersonNames,
   type PersonRow,
@@ -321,7 +321,7 @@ function AddTo({ person }: { person: PersonRow }) {
 
   const [chosen, setChosen] = useState("")
 
-  const join = useApiMutation(joinRequest, {
+  const join = useApiMutation(addMembershipRequest, {
     successMessage: t("toast.membershipAdded"),
     invalidate: MEMBERSHIP_QUERIES,
     awaitRefetch: true,

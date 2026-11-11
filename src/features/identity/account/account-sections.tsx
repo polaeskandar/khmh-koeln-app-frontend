@@ -20,7 +20,7 @@ import { FieldGroup, FieldLabel } from "@/components/ui/field"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Spinner } from "@/components/ui/spinner"
 import { AppearanceFields } from "@/components/theme-switch"
-import type { Me } from "@/features/identity/auth/api"
+import { type Me, MIN_PASSWORD_LENGTH } from "@/features/identity/auth/api"
 import { PasswordField } from "@/features/identity/auth/password-field"
 import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
@@ -28,7 +28,7 @@ import { isLocale, LOCALE_NAMES, LOCALES } from "@/i18n/config"
 import { useSwitchLocale } from "@/i18n/use-switch-locale"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 
-import { changePasswordRequest, MIN_PASSWORD_LENGTH } from "./api"
+import { changePasswordRequest } from "./api"
 
 export function AccountDetails({ me }: { me: Me }) {
   const t = useTranslations("account")

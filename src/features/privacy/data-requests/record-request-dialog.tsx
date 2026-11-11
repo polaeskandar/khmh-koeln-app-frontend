@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Spinner } from "@/components/ui/spinner"
+import { guardianLinksQuery } from "@/features/people/guardians/api"
 import { peopleQuery } from "@/features/people/members/api"
 import { useDebounced } from "@/hooks/use-debounced"
 import { useRouter } from "@/i18n/navigation"
@@ -37,7 +38,6 @@ import { fold, preferredName } from "@/lib/domain/names"
 import { routes } from "@/lib/routes"
 
 import {
-  accountChoicesQuery,
   type NewDataRequest,
   recordDataRequest,
   type RequestKind,
@@ -92,7 +92,7 @@ function SubjectSearch({
     enabled: about === "member" && q.length >= 2,
   })
 
-  const accounts = useQuery({ ...accountChoicesQuery, enabled: about === "account" })
+  const accounts = useQuery({ ...guardianLinksQuery, enabled: about === "account" })
 
   const matches =
     about === "member"

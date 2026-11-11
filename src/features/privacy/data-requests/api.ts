@@ -1,6 +1,8 @@
+import { queryOptions } from "@tanstack/react-query"
+
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { LocalDate, Uuid } from "@/lib/api/types/common"
-import { DATA_REQUESTS_KEY, GUARDIAN_LINKS_KEY } from "@/lib/api/query-keys"
+import { DATA_REQUESTS_KEY } from "@/lib/api/query-keys"
 
 export type RequestKind = Schemas["RequestKind"]
 
@@ -8,20 +10,15 @@ export type DataRequestRow = Schemas["DataRequestRowResponse"]
 
 export type DataRequests = Schemas["DataRequestListResponse"]
 
-export const dataRequestsQuery = {
-  queryKey: [...DATA_REQUESTS_KEY, "list"] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/data-requests", { signal })),
-}
+export const dataRequestsQuery = queryOptions({
+  queryKey: [...DATA_REQUESTS_KEY, "list"],
+  queryFn: ({ signal }) => dataOf(api.GET("/data-requests", { signal })),
+})
 
 export type NewDataRequest = Schemas["RecordDataRequestRequest"]
 
 export const recordDataRequest = (input: NewDataRequest) =>
   dataOf(api.POST("/data-requests", { body: input }))
-
-export const accountChoicesQuery = {
-  queryKey: GUARDIAN_LINKS_KEY,
-  queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/guardian-links", { signal })),
-}
 
 export type ErasureReview = Schemas["ErasureReviewResponse"]
 
@@ -80,17 +77,19 @@ export function accountRecordOf(account: NonNullable<DataRequestDetail["account"
   }
 }
 
-export const dataRequestQuery = (id: Uuid) => ({
-  queryKey: [...DATA_REQUESTS_KEY, "detail", id] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/data-requests/{id}", { params: { path: { id } }, signal })),
-})
+export const dataRequestQuery = (id: Uuid) =>
+  queryOptions({
+    queryKey: [...DATA_REQUESTS_KEY, "detail", id],
+    queryFn: ({ signal }) =>
+      dataOf(api.GET("/data-requests/{id}", { params: { path: { id } }, signal })),
+  })
 
-export const erasureReviewQuery = (id: Uuid) => ({
-  queryKey: [...DATA_REQUESTS_KEY, "erasure", id] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/data-requests/{id}/erasure", { params: { path: { id } }, signal })),
-})
+export const erasureReviewQuery = (id: Uuid) =>
+  queryOptions({
+    queryKey: [...DATA_REQUESTS_KEY, "erasure", id],
+    queryFn: ({ signal }) =>
+      dataOf(api.GET("/data-requests/{id}/erasure", { params: { path: { id } }, signal })),
+  })
 
 export const eraseRequest = (id: Uuid, clearNotes: boolean) =>
   dataOf(api.POST("/data-requests/{id}/erase", { params: { path: { id } }, body: { clearNotes } }))
@@ -99,7 +98,7 @@ export type CopyLink = Schemas["CopyLinkResponse"]
 
 export type CopyLinkStatus = Schemas["CopyLinkStatus"]
 
-export const createCopyLink = (id: Uuid) =>
+export const createCopyLinkRequest = (id: Uuid) =>
   dataOf(api.POST("/data-requests/{id}/copy-link", { params: { path: { id } }, body: {} }))
 
 export const DATA_REQUEST_QUERIES = [DATA_REQUESTS_KEY]

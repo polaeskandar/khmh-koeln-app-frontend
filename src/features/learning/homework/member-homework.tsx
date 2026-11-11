@@ -1,5 +1,6 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import { useTranslations } from "next-intl"
 
 import { QueryState } from "@/components/page-states"
@@ -8,13 +9,13 @@ import { ListSkeleton, TaskList, useOwnCompletion } from "./task-list"
 import { ApiError } from "@/lib/api/problem"
 import { routes } from "@/lib/routes"
 
-import { type MemberTask, useMemberHomework } from "./api"
+import { type MemberTask, memberHomeworkQuery } from "./api"
 
 const taskHref = (task: MemberTask) => routes.memberHomeworkTask(task.id)
 
 function Tasks({ state }: { state: TaskState }) {
   const t = useTranslations("member.homework")
-  const query = useMemberHomework(state)
+  const query = useQuery(memberHomeworkQuery(state))
   const completion = useOwnCompletion()
 
   if (query.error instanceof ApiError && query.error.status === 403) {
@@ -39,7 +40,7 @@ function Tasks({ state }: { state: TaskState }) {
 
 export function MemberHomework() {
   const t = useTranslations("member")
-  const toDo = useMemberHomework("todo")
+  const toDo = useQuery(memberHomeworkQuery("todo"))
   const unlinked = toDo.error instanceof ApiError && toDo.error.status === 403
 
   return (

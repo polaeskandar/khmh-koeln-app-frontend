@@ -1,3 +1,5 @@
+import { queryOptions } from "@tanstack/react-query"
+
 import { api, dataOf, type Schemas } from "@/lib/api/client"
 import type { Uuid } from "@/lib/api/types/common"
 import { GUARDIAN_LINKS_KEY } from "@/lib/api/query-keys"
@@ -6,10 +8,10 @@ export type GuardianLink = Schemas["ParentAccessItemResponse"]
 
 export type GuardianLinks = Schemas["ParentAccessListResponse"]
 
-export const guardianLinksQuery = {
+export const guardianLinksQuery = queryOptions({
   queryKey: GUARDIAN_LINKS_KEY,
-  queryFn: ({ signal }: { signal: AbortSignal }) => dataOf(api.GET("/guardian-links", { signal })),
-}
+  queryFn: ({ signal }) => dataOf(api.GET("/guardian-links", { signal })),
+})
 
 export type NewGuardianLink = Schemas["ParentAccessRequest"]
 

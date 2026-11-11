@@ -1,9 +1,8 @@
 import type { QueryClient } from "@tanstack/react-query"
 
 import type { Locale } from "@/i18n/config"
-import { api, dataOf } from "@/lib/api/client"
 
-import { type Me, meQuery } from "./api"
+import { meQuery, saveLanguageRequest } from "./api"
 
 export const LANGUAGE_APPLIED_KEY = ["session", "languageApplied"] as const
 
@@ -19,7 +18,7 @@ function failed(language: Locale, error: unknown) {
 }
 
 const accountOf = (queryClient: QueryClient) =>
-  queryClient.getQueryData<Me>(meQuery.queryKey)?.account.id
+  queryClient.getQueryData(meQuery.queryKey)?.account.id
 
 export function saveAccountLanguage(queryClient: QueryClient, language: Locale) {
   const account = accountOf(queryClient)
@@ -28,7 +27,7 @@ export function saveAccountLanguage(queryClient: QueryClient, language: Locale) 
     return
   }
 
-  dataOf(api.PUT("/me/language", { body: { language } })).then(
+  saveLanguageRequest(language).then(
     (me) => {
       if (accountOf(queryClient) === account) {
         queryClient.setQueryData(meQuery.queryKey, me)

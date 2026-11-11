@@ -1,11 +1,6 @@
-import type {
-  ServiceInsight,
-  serviceInsightsQuery,
-  ServiceList,
-  ServiceRow,
-} from "@/features/organization/services/api"
+import type { ServiceInsight, ServiceList, ServiceRow } from "@/features/organization/services/api"
 
-export type ServiceInsightList = Awaited<ReturnType<(typeof serviceInsightsQuery)["queryFn"]>>
+export type ServiceInsightList = { items: ServiceInsight[] }
 
 let n = 0
 function service(

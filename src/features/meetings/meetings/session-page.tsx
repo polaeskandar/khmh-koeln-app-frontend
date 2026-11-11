@@ -1,5 +1,6 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import { ClipboardCheck, Repeat } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { ReactNode } from "react"
@@ -24,7 +25,7 @@ import { routes } from "@/lib/routes"
 
 import { OpenAttendanceButton } from "@/features/meetings/attendance/open-attendance-button"
 
-import { type MeetingSession, useMeetingSession } from "./api"
+import { type MeetingSession, meetingSessionQuery } from "./api"
 import { SessionManageMenu } from "./session-dialogs"
 
 function AttendanceAction({ session, today }: { session: SessionView; today: LocalDate }) {
@@ -180,7 +181,7 @@ function NotFoundPage() {
 }
 
 function LoadedSession({ id, actions }: { id: string; actions?: ReactNode }) {
-  const query = useMeetingSession(id)
+  const query = useQuery(meetingSessionQuery(id))
 
   return (
     <QueryState query={query} notFound={<NotFoundPage />}>

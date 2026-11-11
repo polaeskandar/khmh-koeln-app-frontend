@@ -120,6 +120,11 @@ the portal account menu and the language switch); the warning becomes an error o
 
 - **One `api.ts` per feature** (`src/features/<context>/<resource>/api.ts`) holds its response types, query options and
   calls; screens never build URLs or call `api` themselves.
+- **Queries** are TanStack's `queryOptions()`: a constant for a query without parameters (`rolesQuery`), a
+  function for one with them (`roleQuery(roleId)`). Screens pass them to `useQuery`, adding only options of their
+  own (`enabled`, `placeholderData`, a refresh interval); a `use…` hook wraps one only to add behaviour
+  (`useChildHomework`, `useAttendanceCounts`). The key carries the data type, so a cache read or write is typed
+  without a generic: `queryClient.getQueryData(meQuery.queryKey)`.
 - **Permissions** come from `GET /me` only: read models carry no permission flags (the backend's
   `docs/api.md`, "What the viewer may do"). Screens offer an action when `useCan()` from
   `src/features/identity/auth/session.tsx` grants it, together with the item's own state (archived, status) as

@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query"
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
@@ -13,12 +14,12 @@ import { renderWithProviders } from "@test/support/providers"
 import type { Me } from "@/features/identity/auth/api"
 import type { AttendanceSheet } from "@/features/meetings/attendance/api"
 import { AttendanceSummaryPage } from "@/features/meetings/attendance/attendance-summary"
-import { useAgenda } from "@/features/meetings/meetings/api"
+import { agendaQuery } from "@/features/meetings/meetings/api"
 
 const reads = { agenda: 0 }
 
 function Agenda() {
-  useAgenda({ from: "2026-11-01", to: "2026-11-30" })
+  useQuery(agendaQuery({ from: "2026-11-01", to: "2026-11-30" }))
 
   return null
 }

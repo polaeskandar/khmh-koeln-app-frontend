@@ -26,20 +26,11 @@ import { useSession } from "@/features/identity/auth/session"
 import { useFocusFirstInvalid } from "@/hooks/use-focus-first-invalid"
 import { useSubmitOnce } from "@/hooks/use-submit-once"
 import { useFormat } from "@/i18n/format"
-import { api, apiDownload, dataOf, type Schemas } from "@/lib/api/client"
 import type { LocalDate } from "@/lib/api/types/common"
 import { useApiMutation } from "@/lib/api/use-api-mutation"
 import { routes } from "@/lib/routes"
-import { ME_KEY } from "@/lib/api/query-keys"
 
-const erasureRequestQuery = {
-  queryKey: [...ME_KEY, "erasure-request"] as const,
-  queryFn: ({ signal }: { signal: AbortSignal }) =>
-    dataOf(api.GET("/me/erasure-request", { signal })),
-}
-
-const requestErasure = (body: Schemas["OwnErasureRequestRequest"]) =>
-  dataOf(api.POST("/me/erasure-request", { body }))
+import { downloadOwnDataRequest, erasureRequestQuery, requestErasureRequest } from "./api"
 
 function DeleteAccountForm({
   parent,
@@ -55,7 +46,7 @@ function DeleteAccountForm({
   const [password, setPassword] = useState("")
   const [note, setNote] = useState("")
 
-  const erase = useApiMutation(requestErasure, {
+  const erase = useApiMutation(requestErasureRequest, {
     onSuccess: (scheduled) => {
       rememberErasureScheduled(scheduled.erasesOn)
       endSession(routes.signInErasureScheduled())
@@ -168,9 +159,7 @@ export function OwnData({ today }: { today: LocalDate }) {
   const f = useFormat()
   const erasure = useQuery(erasureRequestQuery)
 
-  const download = useApiMutation(() =>
-    apiDownload(api.GET("/me/personal-data", { parseAs: "blob" }), "khmk-my-data.json")
-  )
+  const download = useApiMutation(downloadOwnDataRequest)
 
   const requested = erasure.data?.erasureRequested ?? null
 

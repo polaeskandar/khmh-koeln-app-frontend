@@ -31,7 +31,7 @@ import {
   type CopyLink,
   type CopyLinkStatus,
   type Counts,
-  createCopyLink,
+  createCopyLinkRequest,
   type DataRequestDetail,
   dataRequestQuery,
   eraseRequest,
@@ -323,7 +323,7 @@ function CopyLinkSection({ data }: { data: DataRequestDetail }) {
   const open = request.status === "open"
   const gone = data.member === null && data.account === null
 
-  const create = useApiMutation(() => createCopyLink(request.id), {
+  const create = useApiMutation(() => createCopyLinkRequest(request.id), {
     onSuccess: setCreated,
     invalidate: DATA_REQUEST_QUERIES,
   })
