@@ -1,6 +1,6 @@
 "use client"
 
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { CirclePause, MapPin, Repeat, UsersRound } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { ReactNode } from "react"

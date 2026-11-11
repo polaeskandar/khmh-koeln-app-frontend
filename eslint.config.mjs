@@ -17,6 +17,7 @@ const restrictedImports = [
     importNames: ["useRouter", "usePathname", "redirect"],
     message: "Use the locale-aware version from @/i18n/navigation.",
   },
+  { name: "cn", message: "Import cn from @/lib/utils, the utils alias in components.json." },
 ]
 
 const localeFormatting = [
@@ -122,6 +123,15 @@ const eslintConfig = defineConfig([
     },
   },
   { files: ["src/lib/api/**"], rules: { "no-restricted-globals": "off" } },
+  {
+    files: ["src/lib/utils.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        { paths: restrictedImports.filter((path) => path.name !== "cn") },
+      ],
+    },
+  },
   ...(rawHtmlFiles.length > 0
     ? [{ files: rawHtmlFiles, rules: { "react/no-danger": "off" } }]
     : []),

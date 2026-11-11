@@ -1,6 +1,6 @@
 "use client"
 
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { Ban, CheckCheck, CircleAlert, Clock, Hourglass, Undo2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 

@@ -1,4 +1,4 @@
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
 const CROSS =
   "M4 1h1v3h3v1h-3v3h-1v-3h-3v-1h3z" + "M3 0h3v1h-3z M3 8h3v1h-3z M0 3h1v3h-1z M8 3h1v3h-1z"

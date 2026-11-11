@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
 import { Badge } from "@/components/ui/badge"
 

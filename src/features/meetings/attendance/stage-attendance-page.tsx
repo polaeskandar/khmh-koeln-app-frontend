@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 
 import { Section } from "@/components/page-header"

@@ -2,7 +2,7 @@
 
 import { type ReactNode, useState } from "react"
 import { useTranslations } from "next-intl"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
 import {
   AlertDialog,

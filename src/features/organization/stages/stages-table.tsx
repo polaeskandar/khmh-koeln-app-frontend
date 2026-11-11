@@ -17,7 +17,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { GripVertical } from "lucide-react"
 import { useTranslations } from "next-intl"
 

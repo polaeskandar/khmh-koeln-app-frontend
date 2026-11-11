@@ -1,6 +1,6 @@
 "use client"
 
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { Clock, MapPin } from "lucide-react"
 
 import { useFormat } from "@/i18n/format"

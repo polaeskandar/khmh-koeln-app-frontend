@@ -1,4 +1,4 @@
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import type { ReactNode } from "react"
 
 import type { Schemas } from "@/lib/api/client"

@@ -1,6 +1,6 @@
 "use client"
 
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { CalendarX2, Clock, MapPin } from "lucide-react"
 import { useTranslations } from "next-intl"
 

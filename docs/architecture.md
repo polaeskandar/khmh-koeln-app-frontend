@@ -281,6 +281,11 @@ and emerald, Oxanium for text and Geist for headings, square corners. One deviat
 instead of the preset's Phosphor, because the premium shadcnblocks import `lucide-react` directly. Fonts come
 through `next/font`, which puts them into the build, so the apps don't load them from the internet.
 
+`cn` comes from `@/lib/utils`, the `utils` alias in `components.json`. `shadcn add` writes its components with
+that import and installs its own `lib/utils.ts` where the alias points to no file, so the file stays: it
+re-exports `cn` from the `cn` package. ESLint rejects importing the package anywhere else, the vendored
+components in `src/components/ui` included.
+
 ### TypeScript 5.9
 
 `create-next-app` installs TypeScript 5.9. TypeScript 7 is out, but typescript-eslint, which

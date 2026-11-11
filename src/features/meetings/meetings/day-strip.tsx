@@ -1,6 +1,6 @@
 "use client"
 
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 
 import { toneOf } from "@/components/service-tag"
